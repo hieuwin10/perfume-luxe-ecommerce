@@ -1,0 +1,65 @@
+@model Perfume.Infrastructure.Identity.AppUser
+@{
+    ViewData["Title"] = "Tài Khoản Của Tôi";
+    var roles = ViewBag.Roles as IList<string> ?? new List<string>();
+}
+
+<div style="max-width: 900px; margin: 40px auto; padding: 0 20px;">
+    <div class="luxury-card" style="padding: 32px; margin-bottom: 24px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px;">
+            <div style="display: flex; align-items: center; gap: 18px;">
+                <div style="width: 72px; height: 72px; border-radius: 50%; background: var(--gold-gradient); display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 800; color: #000; box-shadow: 0 4px 15px rgba(212,175,55,0.3);">
+                    @((Model.FullName.Length > 0 ? Model.FullName.Substring(0, 1) : "U").ToUpper())
+                </div>
+                <div>
+                    <h2 style="margin: 0 0 6px; font-size: 1.5rem; color: var(--text-primary);">@Model.FullName</h2>
+                    <p style="margin: 0 0 6px; color: var(--text-muted); font-size: 0.9rem;"><i class="fa-solid fa-envelope" style="margin-right: 6px;"></i>@Model.Email</p>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        @foreach (var r in roles)
+                        {
+                            <span class="@(r == "Admin" ? "role-badge-admin" : r == "StoreManager" ? "role-badge-manager" : "role-badge-customer")">@r</span>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                @if (roles.Contains("Admin") || roles.Contains("StoreManager"))
+                {
+                    <a href="/admin/admindashboard" class="btn-luxe" style="font-size: 0.85rem; padding: 10px 18px;">
+                        <i class="fa-solid fa-gauge-high" style="margin-right: 6px;"></i> Quản trị Admin
+                    </a>
+                }
+                <form method="post" action="/account/logout" style="margin: 0;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn-luxe-outline" style="font-size: 0.85rem; padding: 9px 16px; color: #f87171; border-color: rgba(239,68,68,0.4);">
+                        <i class="fa-solid fa-right-from-bracket" style="margin-right: 6px;"></i> Đăng Xuất
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px;">
+        <div class="luxury-card" style="padding: 24px;">
+            <div style="color: var(--gold-primary); font-size: 1.3rem; margin-bottom: 10px;"><i class="fa-solid fa-gem"></i></div>
+            <h4 style="margin: 0 0 6px; font-size: 1.1rem; color: var(--text-primary);">Hạng Thành Viên</h4>
+            <div style="font-size: 1.4rem; font-weight: 700; color: var(--gold-primary); margin-bottom: 6px;">@Model.Tier</div>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">Điểm thưởng tích lũy: <strong style="color: var(--text-primary);">@Model.LoyaltyPoints</strong> pts</p>
+        </div>
+
+        <div class="luxury-card" style="padding: 24px;">
+            <div style="color: var(--gold-primary); font-size: 1.3rem; margin-bottom: 10px;"><i class="fa-solid fa-calendar-check"></i></div>
+            <h4 style="margin: 0 0 6px; font-size: 1.1rem; color: var(--text-primary);">Ngày Gia Nhập</h4>
+            <div style="font-size: 1.2rem; font-weight: 600; color: var(--text-primary); margin-bottom: 6px;">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</div>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">Tài khoản chính thức của Haute Parfumerie</p>
+        </div>
+
+        <div class="luxury-card" style="padding: 24px;">
+            <div style="color: var(--gold-primary); font-size: 1.3rem; margin-bottom: 10px;"><i class="fa-solid fa-bag-shopping"></i></div>
+            <h4 style="margin: 0 0 6px; font-size: 1.1rem; color: var(--text-primary);">Lịch Sử Mua Hàng</h4>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 14px;">Theo dõi và kiểm tra trạng thái đơn hàng</p>
+            <a href="/cart" class="btn-luxe-outline" style="font-size: 0.8rem; padding: 6px 14px;">Xem Giỏ Hàng</a>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,81 @@
+@model List<(Perfume.Infrastructure.Identity.AppUser User, IList<string> Roles)>
+@{
+    ViewData["Title"] = "Quản Lý Người Dùng & Phân Quyền";
+    Layout = "_AdminLayout";
+}
+
+<div style="max-width: 1400px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <div>
+            <h1 style="font-size: 1.6rem; font-weight: 800; margin: 0 0 6px; color: var(--text-primary);">
+                <i class="fa-solid fa-users-gear text-gold-gradient" style="margin-right: 8px;"></i> Quản Lý Tài Khoản & Phân Quyền (RBAC)
+            </h1>
+            <p style="color: var(--text-muted); margin: 0; font-size: 0.88rem;">Hệ thống hỗ trợ 3 cấp bậc quyền: <strong>Admin</strong> (Toàn quyền), <strong>StoreManager</strong> (Cửa hàng trưởng), và <strong>Customer</strong> (Khách hàng)</p>
+        </div>
+        <span style="background: rgba(212,175,55,0.15); border: 1px solid var(--gold-primary); color: var(--gold-primary); padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
+            Tổng: @Model.Count tài khoản
+        </span>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div style="background: rgba(42,157,143,0.15); border: 1px solid #2A9D8F; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; color: #2A9D8F; font-size: 0.9rem;">
+            <i class="fa-solid fa-circle-check" style="margin-right: 6px;"></i> @TempData["Success"]
+        </div>
+    }
+
+    <div class="luxury-card" style="padding: 0; overflow: hidden;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem;">
+            <thead>
+                <tr style="background: var(--bg-surface-elevated); border-bottom: 1px solid var(--border-card); color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">
+                    <th style="padding: 14px 20px;">Họ Tên & Email</th>
+                    <th style="padding: 14px 20px;">Vai Trò Hiện Tại</th>
+                    <th style="padding: 14px 20px;">Thay Đổi Vai Trò</th>
+                    <th style="padding: 14px 20px;">Ngày Đăng Ký</th>
+                    <th style="padding: 14px 20px; text-align: right;">Hành Động</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr style="border-bottom: 1px solid var(--border-subtle); transition: background 0.15s;">
+                        <td style="padding: 14px 20px;">
+                            <div style="font-weight: 600; color: var(--text-primary);">@item.User.FullName</div>
+                            <div style="font-size: 0.78rem; color: var(--text-muted);">@item.User.Email</div>
+                        </td>
+                        <td style="padding: 14px 20px;">
+                            @foreach (var r in item.Roles)
+                            {
+                                <span class="@(r == "Admin" ? "role-badge-admin" : r == "StoreManager" ? "role-badge-manager" : "role-badge-customer")">@r</span>
+                            }
+                        </td>
+                        <td style="padding: 14px 20px;">
+                            <form method="post" action="/admin/admindashboard/changeuserrole" style="display: flex; gap: 8px; align-items: center; margin: 0;">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="userId" value="@item.User.Id" />
+                                <select name="newRole" style="padding: 6px 10px; background: var(--bg-input, rgba(255,255,255,0.06)); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.82rem; outline: none;">
+                                    <option value="Customer" selected="@(item.Roles.Contains("Customer"))">Customer (Khách Hàng)</option>
+                                    <option value="StoreManager" selected="@(item.Roles.Contains("StoreManager"))">StoreManager (Cửa Hàng Trưởng)</option>
+                                    <option value="Admin" selected="@(item.Roles.Contains("Admin"))">Admin (Quản Trị Viên)</option>
+                                </select>
+                                <button type="submit" class="btn-luxe" style="padding: 6px 12px; font-size: 0.78rem;">Lưu</button>
+                            </form>
+                        </td>
+                        <td style="padding: 14px 20px; color: var(--text-muted); font-size: 0.82rem;">
+                            @item.User.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                        </td>
+                        <td style="padding: 14px 20px; text-align: right;">
+                            <form method="post" action="/admin/admindashboard/deleteuser" style="display: inline; margin: 0;" onsubmit="return confirm('Bạn có chắc muốn xóa tài khoản này?');">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="userId" value="@item.User.Id" />
+                                <button type="submit" style="background: none; border: none; color: #f87171; cursor: pointer; padding: 4px 8px; border-radius: 4px;" title="Xóa">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

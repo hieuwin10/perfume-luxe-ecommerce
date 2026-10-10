@@ -1,0 +1,86 @@
+@model List<Perfume.Domain.Entities.Order>
+@{
+    ViewData["Title"] = "Quản Lý Đơn Hàng";
+    Layout = "_AdminLayout";
+    int currentPage = ViewBag.Page ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+    int total = ViewBag.Total ?? 0;
+}
+
+<div style="max-width: 1400px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <div>
+            <h1 style="font-size: 1.6rem; font-weight: 800; margin: 0 0 6px; color: var(--text-primary);">
+                <i class="fa-solid fa-boxes-stacked text-gold-gradient" style="margin-right: 8px;"></i> Quản Lý Đơn Hàng
+            </h1>
+            <p style="color: var(--text-muted); margin: 0; font-size: 0.88rem;">Theo dõi tiến độ xử lý và doanh thu từ các đơn hàng</p>
+        </div>
+        <span style="background: rgba(42,157,143,0.15); border: 1px solid #2A9D8F; color: #2A9D8F; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
+            Tổng: @total đơn hàng
+        </span>
+    </div>
+
+    <div class="luxury-card" style="padding: 0; overflow: hidden;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem;">
+            <thead>
+                <tr style="background: var(--bg-surface-elevated); border-bottom: 1px solid var(--border-card); color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">
+                    <th style="padding: 14px 20px;">Mã Đơn</th>
+                    <th style="padding: 14px 20px;">Khách Hàng</th>
+                    <th style="padding: 14px 20px;">Số Điện Thoại / Địa Chỉ</th>
+                    <th style="padding: 14px 20px;">Trạng Thái</th>
+                    <th style="padding: 14px 20px;">Tổng Tiền</th>
+                    <th style="padding: 14px 20px;">Thời Gian</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Count == 0)
+                {
+                    <tr>
+                        <td colspan="6" style="padding: 40px; text-align: center; color: var(--text-muted);">
+                            Chưa có đơn hàng nào được ghi nhận.
+                        </td>
+                    </tr>
+                }
+                @foreach (var o in Model)
+                {
+                    <tr style="border-bottom: 1px solid var(--border-subtle); transition: background 0.15s;">
+                        <td style="padding: 14px 20px; font-weight: 700; color: var(--gold-primary);">
+                            @o.OrderCode
+                        </td>
+                        <td style="padding: 14px 20px; color: var(--text-primary); font-weight: 600;">
+                            @o.CustomerName
+                        </td>
+                        <td style="padding: 14px 20px; color: var(--text-secondary); font-size: 0.82rem;">
+                            <div><i class="fa-solid fa-phone" style="margin-right: 4px; font-size: 0.75rem;"></i>@o.CustomerPhone</div>
+                            <div style="color: var(--text-muted);"><i class="fa-solid fa-location-dot" style="margin-right: 4px; font-size: 0.75rem;"></i>@o.ShippingAddress</div>
+                        </td>
+                        <td style="padding: 14px 20px;">
+                            <span style="padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; background: rgba(212,175,55,0.15); color: var(--gold-primary); border: 1px solid rgba(212,175,55,0.3);">
+                                @o.OrderStatus
+                            </span>
+                        </td>
+                        <td style="padding: 14px 20px; font-weight: 700; color: var(--gold-primary); font-size: 0.95rem;">
+                            @o.TotalAmount.ToString("N0") ₫
+                        </td>
+                        <td style="padding: 14px 20px; color: var(--text-muted); font-size: 0.82rem;">
+                            @o.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (totalPages > 1)
+    {
+        <div style="display: flex; justify-content: center; gap: 8px; margin-top: 24px;">
+            @for (int i = 1; i <= totalPages; i++)
+            {
+                <a href="/admin/admindashboard/orders?page=@i"
+                   style="padding: 8px 14px; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 600; @(i == currentPage ? "background: var(--gold-primary); color: #000;" : "background: var(--bg-surface-elevated); color: var(--text-secondary); border: 1px solid var(--border-card);")">
+                    @i
+                </a>
+            }
+        </div>
+    }
+</div>

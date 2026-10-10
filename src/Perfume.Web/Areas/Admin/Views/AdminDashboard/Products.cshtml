@@ -1,0 +1,96 @@
+@model List<Perfume.Domain.Entities.Product>
+@{
+    ViewData["Title"] = "Quản Lý Sản Phẩm";
+    Layout = "_AdminLayout";
+    int currentPage = ViewBag.Page ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+    int total = ViewBag.Total ?? 0;
+    string? search = ViewBag.Search;
+}
+
+<div style="max-width: 1400px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
+        <div>
+            <h1 style="font-size: 1.6rem; font-weight: 800; margin: 0 0 6px; color: var(--text-primary);">
+                <i class="fa-solid fa-bottle-droplet text-gold-gradient" style="margin-right: 8px;"></i> Quản Lý Sản Phẩm Nước Hoa
+            </h1>
+            <p style="color: var(--text-muted); margin: 0; font-size: 0.88rem;">Tổng số: <strong>@total</strong> sản phẩm trong danh mục</p>
+        </div>
+
+        <!-- Search box -->
+        <form method="get" action="/admin/admindashboard/products" style="display: flex; gap: 8px; margin: 0;">
+            <input type="text" name="search" value="@search" placeholder="Tìm kiếm sản phẩm, thương hiệu..." 
+                   style="padding: 8px 14px; background: var(--bg-input, rgba(255,255,255,0.06)); border: 1px solid var(--border-card); border-radius: 8px; color: var(--text-primary); font-size: 0.88rem; width: 260px; outline: none;" />
+            <button type="submit" class="btn-luxe" style="padding: 8px 16px; font-size: 0.85rem;">Tìm</button>
+        </form>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div style="background: rgba(42,157,143,0.15); border: 1px solid #2A9D8F; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; color: #2A9D8F; font-size: 0.9rem;">
+            <i class="fa-solid fa-circle-check" style="margin-right: 6px;"></i> @TempData["Success"]
+        </div>
+    }
+
+    <div class="luxury-card" style="padding: 0; overflow: hidden;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem;">
+            <thead>
+                <tr style="background: var(--bg-surface-elevated); border-bottom: 1px solid var(--border-card); color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">
+                    <th style="padding: 14px 20px;">ID</th>
+                    <th style="padding: 14px 20px;">Tên Sản Phẩm</th>
+                    <th style="padding: 14px 20px;">Thương Hiệu</th>
+                    <th style="padding: 14px 20px;">Danh Mục</th>
+                    <th style="padding: 14px 20px;">Giá Bán</th>
+                    <th style="padding: 14px 20px;">Lượt Xem</th>
+                    <th style="padding: 14px 20px; text-align: right;">Hành Động</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in Model)
+                {
+                    <tr style="border-bottom: 1px solid var(--border-subtle); transition: background 0.15s;">
+                        <td style="padding: 14px 20px; color: var(--text-muted);">#@p.Id</td>
+                        <td style="padding: 14px 20px;">
+                            <div style="font-weight: 600; color: var(--text-primary);">@p.Name</div>
+                            <div style="font-size: 0.75rem; color: var(--gold-primary);">@p.Concentration &bull; @p.Gender</div>
+                        </td>
+                        <td style="padding: 14px 20px; color: var(--text-secondary);">@(p.Brand?.Name ?? "—")</td>
+                        <td style="padding: 14px 20px; color: var(--text-secondary);">@(p.Category?.Name ?? "—")</td>
+                        <td style="padding: 14px 20px; font-weight: 700; color: var(--gold-primary);">
+                            @p.BasePrice.ToString("N0") ₫
+                        </td>
+                        <td style="padding: 14px 20px; color: var(--text-muted);">
+                            <i class="fa-solid fa-eye" style="margin-right: 4px;"></i> @p.ViewCount
+                        </td>
+                        <td style="padding: 14px 20px; text-align: right;">
+                            <a href="/catalog/product/@p.Slug" target="_blank" style="color: var(--gold-primary); margin-right: 12px;" title="Xem sản phẩm ngoài web">
+                                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                            </a>
+                            <form method="post" action="/admin/admindashboard/deleteproduct" style="display: inline; margin: 0;" onsubmit="return confirm('Bạn có chắc muốn xóa sản phẩm này?');">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@p.Id" />
+                                <button type="submit" style="background: none; border: none; color: #f87171; cursor: pointer; padding: 4px;" title="Xóa">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    @if (totalPages > 1)
+    {
+        <div style="display: flex; justify-content: center; gap: 8px; margin-top: 24px;">
+            @for (int i = 1; i <= totalPages; i++)
+            {
+                <a href="/admin/admindashboard/products?page=@i&search=@search"
+                   style="padding: 8px 14px; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 600; @(i == currentPage ? "background: var(--gold-primary); color: #000;" : "background: var(--bg-surface-elevated); color: var(--text-secondary); border: 1px solid var(--border-card);")">
+                    @i
+                </a>
+            }
+        </div>
+    }
+</div>

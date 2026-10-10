@@ -1,13 +1,25 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Perfume.Infrastructure;
 using Perfume.Infrastructure.Data;
+using Perfume.Infrastructure.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // 1. Add Infrastructure Services (EF Core, Identity, Redis, Dapper DB Console)
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
-// 2. Add MVC and Web API
+// 2. Configure Identity Cookie Paths
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/account/login";
+    options.LogoutPath = "/account/logout";
+    options.AccessDeniedPath = "/account/accessdenied";
+    options.SlidingExpiration = true;
+    options.ExpireTimeSpan = TimeSpan.FromDays(30);
+});
+
+// 3. Add MVC and Web API
 builder.Services.AddControllersWithViews();
 
 // 3. Add Distributed Memory Cache & Session for Cart
@@ -31,6 +43,43 @@ using (var scope = app.Services.CreateScope())
         var db = services.GetRequiredService<PerfumeDbContext>();
         await db.Database.EnsureCreatedAsync();
         logger.LogInformation(">>> Cơ sở dữ liệu SQL Server đã được kiểm tra & tạo bảng thành công! <<<");
+
+        // Seed Roles & Default Users
+        var roleManager = services.GetRequiredService<RoleManager<AppRole>>();
+        var userManager = services.GetRequiredService<UserManager<AppUser>>();
+        string[] roles = ["Admin", "StoreManager", "Customer"];
+
+        foreach (var role in roles)
+        {
+            if (!await roleManager.RoleExistsAsync(role))
+                await roleManager.CreateAsync(new AppRole { Name = role, Description = role });
+        }
+
+        // Admin account
+        if (await userManager.FindByEmailAsync("admin@perfumeluxe.com") == null)
+        {
+            var admin = new AppUser { UserName = "admin@perfumeluxe.com", Email = "admin@perfumeluxe.com", FullName = "Super Admin", EmailConfirmed = true };
+            var r = await userManager.CreateAsync(admin, "Admin@2026!");
+            if (r.Succeeded) await userManager.AddToRoleAsync(admin, "Admin");
+        }
+
+        // Store Manager account
+        if (await userManager.FindByEmailAsync("manager@perfumeluxe.com") == null)
+        {
+            var mgr = new AppUser { UserName = "manager@perfumeluxe.com", Email = "manager@perfumeluxe.com", FullName = "Cửa Hàng Trưởng", EmailConfirmed = true };
+            var r = await userManager.CreateAsync(mgr, "Manager@2026!");
+            if (r.Succeeded) await userManager.AddToRoleAsync(mgr, "StoreManager");
+        }
+
+        // Demo Customer account
+        if (await userManager.FindByEmailAsync("khachhang@gmail.com") == null)
+        {
+            var cust = new AppUser { UserName = "khachhang@gmail.com", Email = "khachhang@gmail.com", FullName = "Khách Hàng Demo", EmailConfirmed = true };
+            var r = await userManager.CreateAsync(cust, "Customer@2026!");
+            if (r.Succeeded) await userManager.AddToRoleAsync(cust, "Customer");
+        }
+
+        logger.LogInformation(">>> Roles & tài khoản mặc định đã được kiểm tra & tạo thành công! <<<");
     }
     catch (Exception ex)
     {

@@ -1,3 +1,6 @@
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<Perfume.Infrastructure.Identity.AppUser> SignInManager
+@inject UserManager<Perfume.Infrastructure.Identity.AppUser> UserManager
 <!DOCTYPE html>
 <html lang="vi" data-theme="dark">
 <head>
@@ -47,11 +50,19 @@
                     <li><a href="/bo-suu-tap?gender=Women" class="nav-link">Nước Hoa Nữ</a></li>
                     <li><a href="/catalog/quiz" class="nav-link" style="color: var(--gold-primary);"><i class="fa-solid fa-wand-magic-sparkles" style="margin-right: 4px;"></i> Trắc Nghiệm Mùi</a></li>
                     <li><a href="/blog" class="nav-link">Cẩm Nang</a></li>
-                    <li>
-                        <a href="/admin/databaseconsole" class="nav-link" style="background: rgba(212, 175, 55, 0.12); padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border-subtle); color: var(--gold-primary); font-size: 0.82rem;">
-                            <i class="fa-solid fa-database" style="margin-right: 4px;"></i> Quản Lý CSDL (Admin)
-                        </a>
-                    </li>
+
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        // Show Admin/Manager links in nav
+                        if (User.IsInRole("Admin") || User.IsInRole("StoreManager"))
+                        {
+                        <li>
+                            <a href="/admin/admindashboard" class="nav-link" style="background: rgba(212,175,55,0.12); padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border-subtle); color: var(--gold-primary); font-size: 0.82rem;">
+                                <i class="fa-solid fa-gauge-high" style="margin-right: 4px;"></i> Dashboard
+                            </a>
+                        </li>
+                        }
+                    }
                 </ul>
             </nav>
 
@@ -66,6 +77,51 @@
                     <i class="fa-solid fa-bag-shopping"></i>
                     <span class="badge-count" id="headerCartCount">0</span>
                 </button>
+
+                <!-- User Account Button -->
+                @if (SignInManager.IsSignedIn(User))
+                {
+                    var currentUser = await UserManager.GetUserAsync(User);
+                    <div class="user-avatar-dropdown" id="userDropdown">
+                        <button type="button" id="userAvatarBtn" class="icon-btn" title="Tài khoản của bạn" style="width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, var(--gold-primary), #8B6914); font-weight: 700; font-size: 0.85rem; color: #000;">
+                            @((currentUser?.FullName ?? "U").Substring(0, 1).ToUpper())
+                        </button>
+                        <div class="user-dropdown-menu" id="userDropdownMenu">
+                            <div style="padding: 14px 16px; border-bottom: 1px solid var(--border-card);">
+                                <div style="font-weight: 700; font-size: 0.92rem; color: var(--text-primary); margin-bottom: 2px;">@currentUser?.FullName</div>
+                                <div style="font-size: 0.78rem; color: var(--text-muted);">@currentUser?.Email</div>
+                                @if (User.IsInRole("Admin")) { <span class="role-badge-admin">Admin</span> }
+                                else if (User.IsInRole("StoreManager")) { <span class="role-badge-manager">Cửa hàng trưởng</span> }
+                                else { <span class="role-badge-customer">Khách hàng</span> }
+                            </div>
+                            <a href="/account/profile" class="dropdown-item-luxe">
+                                <i class="fa-solid fa-user-circle"></i> Tài Khoản Của Tôi
+                            </a>
+                            @if (User.IsInRole("Admin") || User.IsInRole("StoreManager"))
+                            {
+                                <a href="/admin/admindashboard" class="dropdown-item-luxe">
+                                    <i class="fa-solid fa-gauge-high"></i> Admin Dashboard
+                                </a>
+                                <a href="/admin/databaseconsole" class="dropdown-item-luxe">
+                                    <i class="fa-solid fa-database"></i> Quản Lý CSDL
+                                </a>
+                            }
+                            <div style="border-top: 1px solid var(--border-card); margin: 4px 0;"></div>
+                            <form method="post" action="/account/logout" style="margin: 0;">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="dropdown-item-luxe" style="width: 100%; text-align: left; background: none; border: none; cursor: pointer; color: #f87171;">
+                                    <i class="fa-solid fa-right-from-bracket"></i> Đăng Xuất
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <a href="/account/login" class="icon-btn" title="Đăng nhập" style="width: 38px; height: 38px;">
+                        <i class="fa-solid fa-user"></i>
+                    </a>
+                }
             </div>
         </div>
     </header>
@@ -310,6 +366,32 @@
 
         // Initialize cart count on load
         refreshCartState();
+    </script>
+
+    <script>
+        // User avatar dropdown toggle
+        const userDropdown = document.getElementById('userDropdown');
+        const userAvatarBtn = document.getElementById('userAvatarBtn');
+
+        if (userAvatarBtn && userDropdown) {
+            userAvatarBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                userDropdown.classList.toggle('open');
+            });
+            document.addEventListener('click', (e) => {
+                if (!userDropdown.contains(e.target)) {
+                    userDropdown.classList.remove('open');
+                }
+            });
+        }
+
+        // Show TempData success toast
+        @if (TempData["Success"] != null)
+        {
+            <text>
+            setTimeout(() => showToast('@Html.Raw(TempData["Success"])', 'success'), 300);
+            </text>
+        }
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)

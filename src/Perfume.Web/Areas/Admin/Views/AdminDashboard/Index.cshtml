@@ -1,0 +1,143 @@
+@model Perfume.Web.Areas.Admin.Controllers.AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    Layout = "_AdminLayout";
+}
+
+<div style="max-width: 1400px; margin: 0 auto;">
+    <!-- Welcome Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; flex-wrap: wrap; gap: 14px;">
+        <div>
+            <h1 style="font-size: 1.8rem; font-weight: 800; margin: 0 0 6px; color: var(--text-primary);">
+                <i class="fa-solid fa-gauge-high text-gold-gradient" style="margin-right: 8px;"></i> Bảng Điều Khiển Quản Trị
+            </h1>
+            <p style="color: var(--text-muted); margin: 0; font-size: 0.9rem;">Hệ thống quản lý thời gian thực Haute Parfumerie & Database</p>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <a href="/admin/admindashboard/erd" class="btn-luxe-outline" style="font-size: 0.85rem; padding: 8px 16px;">
+                <i class="fa-solid fa-diagram-project" style="margin-right: 6px;"></i> Xem Sơ Đồ ERD
+            </a>
+            <a href="/admin/databaseconsole" class="btn-luxe" style="font-size: 0.85rem; padding: 8px 16px;">
+                <i class="fa-solid fa-terminal" style="margin-right: 6px;"></i> Mở DB Console
+            </a>
+        </div>
+    </div>
+
+    <!-- Metric Cards Grid -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-bottom: 32px;">
+        <div class="luxury-card" style="padding: 22px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                    <span style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted);">Sản Phẩm</span>
+                    <div style="font-size: 2rem; font-weight: 800; color: var(--gold-primary); margin-top: 4px;">@Model.TotalProducts</div>
+                </div>
+                <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(212,175,55,0.12); display: flex; align-items: center; justify-content: center; color: var(--gold-primary); font-size: 1.2rem;">
+                    <i class="fa-solid fa-bottle-droplet"></i>
+                </div>
+            </div>
+            <a href="/admin/admindashboard/products" style="font-size: 0.8rem; color: var(--gold-primary); text-decoration: none; display: inline-block; margin-top: 10px;">Quản lý kho hàng &rarr;</a>
+        </div>
+
+        <div class="luxury-card" style="padding: 22px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                    <span style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted);">Đơn Hàng</span>
+                    <div style="font-size: 2rem; font-weight: 800; color: #2A9D8F; margin-top: 4px;">@Model.TotalOrders</div>
+                </div>
+                <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(42,157,143,0.12); display: flex; align-items: center; justify-content: center; color: #2A9D8F; font-size: 1.2rem;">
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                </div>
+            </div>
+            <a href="/admin/admindashboard/orders" style="font-size: 0.8rem; color: #2A9D8F; text-decoration: none; display: inline-block; margin-top: 10px;">Danh sách đơn hàng &rarr;</a>
+        </div>
+
+        <div class="luxury-card" style="padding: 22px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                    <span style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted);">Người Dùng</span>
+                    <div style="font-size: 2rem; font-weight: 800; color: #818cf8; margin-top: 4px;">@Model.TotalUsers</div>
+                </div>
+                <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(99,102,241,0.12); display: flex; align-items: center; justify-content: center; color: #818cf8; font-size: 1.2rem;">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+            </div>
+            @if (User.IsInRole("Admin"))
+            {
+                <a href="/admin/admindashboard/users" style="font-size: 0.8rem; color: #818cf8; text-decoration: none; display: inline-block; margin-top: 10px;">Phân quyền Admin &rarr;</a>
+            }
+            else
+            {
+                <span style="font-size: 0.8rem; color: var(--text-muted); display: inline-block; margin-top: 10px;">Admin duy trì</span>
+            }
+        </div>
+
+        <div class="luxury-card" style="padding: 22px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                    <span style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted);">Thương Hiệu & Danh Mục</span>
+                    <div style="font-size: 2rem; font-weight: 800; color: #e879f9; margin-top: 4px;">@Model.TotalBrands / @Model.TotalCategories</div>
+                </div>
+                <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(232,121,249,0.12); display: flex; align-items: center; justify-content: center; color: #e879f9; font-size: 1.2rem;">
+                    <i class="fa-solid fa-tags"></i>
+                </div>
+            </div>
+            <a href="/admin/databaseconsole" style="font-size: 0.8rem; color: #e879f9; text-decoration: none; display: inline-block; margin-top: 10px;">Bảng Catalog &rarr;</a>
+        </div>
+    </div>
+
+    <!-- Recent Tables & Activity Row -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 24px; margin-bottom: 32px;">
+        <!-- Database Tables Quick Access -->
+        <div class="luxury-card" style="padding: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+                <h3 style="font-size: 1.15rem; margin: 0; color: var(--text-primary);">
+                    <i class="fa-solid fa-database text-gold-gradient" style="margin-right: 8px;"></i> Toàn Bộ Bảng Trong Database (@Model.Tables.Count)
+                </h3>
+                <a href="/admin/databaseconsole" style="font-size: 0.82rem; color: var(--gold-primary);">Xem Console &rarr;</a>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                @foreach (var table in Model.Tables)
+                {
+                    <a href="/admin/databaseconsole?selectedTable=@table.TableName" 
+                       style="padding: 6px 12px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; font-size: 0.8rem; color: var(--text-secondary); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;"
+                       onmouseover="this.style.borderColor='var(--gold-primary)'; this.style.color='var(--gold-primary)';"
+                       onmouseout="this.style.borderColor='var(--border-card)'; this.style.color='var(--text-secondary)';">
+                        <i class="fa-solid fa-table" style="font-size: 0.75rem; color: var(--gold-primary);"></i>
+                        <span>@table.TableName</span>
+                        <span style="font-size: 0.7rem; color: var(--gold-primary); background: rgba(212,175,55,0.12); padding: 1px 5px; border-radius: 10px;">@table.RowCount</span>
+                    </a>
+                }
+            </div>
+        </div>
+
+        <!-- Recent Registered Users -->
+        <div class="luxury-card" style="padding: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+                <h3 style="font-size: 1.15rem; margin: 0; color: var(--text-primary);">
+                    <i class="fa-solid fa-user-plus" style="color: #818cf8; margin-right: 8px;"></i> Người Dùng Đăng Ký Gần Đây
+                </h3>
+                @if (User.IsInRole("Admin"))
+                {
+                    <a href="/admin/admindashboard/users" style="font-size: 0.82rem; color: #818cf8;">Tất cả người dùng &rarr;</a>
+                }
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                @foreach (var u in Model.RecentUsers)
+                {
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: var(--bg-surface-elevated); border-radius: 8px; border: 1px solid var(--border-subtle);">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--gold-gradient); display: flex; align-items: center; justify-content: center; font-weight: 700; color: #000; font-size: 0.8rem;">
+                                @((u.FullName.Length > 0 ? u.FullName.Substring(0, 1) : "U").ToUpper())
+                            </div>
+                            <div>
+                                <div style="font-size: 0.88rem; font-weight: 600; color: var(--text-primary);">@u.FullName</div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted);">@u.Email</div>
+                            </div>
+                        </div>
+                        <span style="font-size: 0.75rem; color: var(--text-muted);">@u.CreatedAt.ToString("dd/MM HH:mm")</span>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
