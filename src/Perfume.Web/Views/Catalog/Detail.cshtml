@@ -213,6 +213,48 @@
     </section>
 </div>
 
+<section class="luxury-card" style="padding:28px;margin:0 auto 60px;max-width:1100px">
+    <h2>Đánh giá từ khách hàng</h2>
+    @if (TempData["ReviewSuccess"] != null) { <p style="color:#2a9d8f">@TempData["ReviewSuccess"]</p> }
+    @if (TempData["ReviewError"] != null) { <p style="color:#f87171">@TempData["ReviewError"]</p> }
+    @if (User.IsInRole("Customer"))
+    {
+        <form method="post" action="/reviews/create" enctype="multipart/form-data" style="display:grid;gap:12px;margin:18px 0">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="productId" value="@Model.Id" />
+            <label>Số sao<select name="rating" required><option value="5">5 sao</option><option value="4">4 sao</option><option value="3">3 sao</option><option value="2">2 sao</option><option value="1">1 sao</option></select></label>
+            <label>Nội dung<textarea name="comment" maxlength="2000" required></textarea></label>
+            <label>Ảnh sản phẩm đã mua (tối đa 3 ảnh, mỗi ảnh 5 MB)<input type="file" name="images" accept="image/jpeg,image/png,image/webp" multiple /></label>
+            <button class="btn-luxe" type="submit">Gửi đánh giá</button>
+        </form>
+    }
+    else if (User.Identity?.IsAuthenticated != true)
+    {
+        <p><a href="/account/login">Đăng nhập với tài khoản khách hàng</a> để gửi đánh giá sau khi nhận sản phẩm.</p>
+    }
+    @{
+        var approvedReviews = ViewBag.ApprovedReviews as List<Perfume.Domain.Entities.Review> ?? new();
+    }
+    @if (approvedReviews.Count == 0) { <p>Chưa có đánh giá được công khai.</p> }
+    @foreach (var review in approvedReviews)
+    {
+        <article style="border-top:1px solid var(--border-card);padding:16px 0">
+            <strong>@review.UserName</strong> · @review.Rating/5 <small>@review.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy")</small>
+            <p>@review.Comment</p>
+            @if (!string.IsNullOrWhiteSpace(review.ImageUrls))
+            {
+                var names = System.Text.Json.JsonSerializer.Deserialize<List<string>>(review.ImageUrls) ?? new();
+                <div style="display:flex;gap:10px;flex-wrap:wrap">
+                @foreach (var name in names)
+                {
+                    <img src="@Url.Action("Photo", "Reviews", new { reviewId = review.Id, fileName = name })" alt="Ảnh đánh giá" loading="lazy" style="width:110px;height:110px;object-fit:cover;border-radius:8px" />
+                }
+                </div>
+            }
+        </article>
+    }
+</section>
+
 <!-- GOOGLE STRUCTURED DATA (JSON-LD) FOR SEO -->
 <script type="application/ld+json">
 {
