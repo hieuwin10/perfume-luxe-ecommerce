@@ -1,0 +1,86 @@
+@model BlogPost
+@{
+    ViewData["Title"] = Model.MetaTitle ?? Model.Title;
+    ViewData["MetaDescription"] = Model.MetaDescription ?? Model.Summary;
+    ViewData["OgImage"] = Model.ThumbnailUrl;
+    var recent = ViewBag.RecentPosts as List<BlogPost> ?? new List<BlogPost>();
+}
+
+<div style="max-width: 900px; margin: 40px auto; padding: 0 24px;">
+    <!-- Breadcrumb -->
+    <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 20px;">
+        <a href="/">Trang Chủ</a> &bull; <a href="/blog">Cẩm Nang</a> &bull; <span style="color: var(--gold-primary);">@Model.Title</span>
+    </div>
+
+    <!-- Article Header -->
+    <header style="margin-bottom: 30px; text-align: center;">
+        <span style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--gold-primary); font-weight: 700;">
+            @(Model.Category?.Name ?? "Kiến Thức Nước Hoa")
+        </span>
+        <h1 style="font-size: 2.6rem; margin: 12px 0 16px; line-height: 1.25;">@Model.Title</h1>
+        <div style="display: flex; gap: 16px; justify-content: center; font-size: 0.85rem; color: var(--text-muted);">
+            <span><i class="fa-solid fa-user-pen" style="margin-right: 4px;"></i>@Model.AuthorName</span>
+            <span>&bull;</span>
+            <span><i class="fa-solid fa-calendar-days" style="margin-right: 4px;"></i>@Model.CreatedAt.ToString("dd/MM/yyyy")</span>
+            <span>&bull;</span>
+            <span><i class="fa-solid fa-eye" style="margin-right: 4px;"></i>@Model.ViewCount lượt xem</span>
+        </div>
+    </header>
+
+    <!-- Featured Image -->
+    @if (!string.IsNullOrEmpty(Model.ThumbnailUrl))
+    {
+        <div style="border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 40px; box-shadow: var(--shadow-luxury);">
+            <img src="@Model.ThumbnailUrl" alt="@Model.Title" style="width: 100%; max-height: 480px; object-fit: cover;" />
+        </div>
+    }
+
+    <!-- Article Content -->
+    <article style="background: var(--bg-surface); border: 1px solid var(--border-card); border-radius: var(--radius-md); padding: 40px; font-size: 1.05rem; line-height: 1.9; color: var(--text-primary); margin-bottom: 60px;">
+        @Html.Raw(Model.Content)
+    </article>
+
+    <!-- Related Articles -->
+    @if (recent.Any())
+    {
+        <div style="border-top: 1px solid var(--border-subtle); padding-top: 40px;">
+            <h3 style="font-size: 1.4rem; margin-bottom: 24px; color: var(--gold-primary);">Bài Viết Khác Có Thể Bạn Quan Tâm</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                @foreach (var r in recent)
+                {
+                    <div style="background: var(--bg-surface); border: 1px solid var(--border-card); border-radius: var(--radius-sm); padding: 16px;">
+                        <h4 style="font-size: 1.05rem; margin-bottom: 8px;">
+                            <a href="/blog/@r.Slug">@r.Title</a>
+                        </h4>
+                        <span style="font-size: 0.75rem; color: var(--gold-primary);">Đọc tiếp &raquo;</span>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+<!-- GOOGLE STRUCTURED DATA JSON-LD FOR ARTICLE SEO -->
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@type": "BlogPosting",
+  "headline": "@Model.Title",
+  "image": ["@(Model.ThumbnailUrl ?? "")"],
+  "datePublished": "@Model.CreatedAt.ToString("O")",
+  "dateModified": "@((Model.UpdatedAt ?? Model.CreatedAt).ToString("O"))",
+  "author": {
+    "@@type": "Person",
+    "name": "@Model.AuthorName"
+  },
+  "publisher": {
+    "@@type": "Organization",
+    "name": "PERFUME LUXE",
+    "logo": {
+      "@@type": "ImageObject",
+      "url": "@($"{Context.Request.Scheme}://{Context.Request.Host}/images/logo.png")"
+    }
+  },
+  "description": "@(Model.MetaDescription ?? Model.Summary)"
+}
+</script>

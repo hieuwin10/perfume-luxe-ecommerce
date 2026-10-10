@@ -1,0 +1,109 @@
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<Perfume.Infrastructure.Identity.AppUser> SignInManager
+@inject UserManager<Perfume.Infrastructure.Identity.AppUser> UserManager
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@(ViewData["Title"] ?? "Admin Console") | PERFUME LUXE</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/luxury-perfume.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="dark-theme">
+    <!-- Admin Console Navigation -->
+    <header style="background: #111116; border-bottom: 1px solid rgba(212, 175, 55, 0.2); padding: 10px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1000; flex-wrap: wrap; gap: 12px;">
+        <div style="display: flex; align-items: center; gap: 20px;">
+            <a href="/admin/admindashboard" style="display: flex; align-items: center; gap: 10px; text-decoration: none;">
+                <div style="width: 34px; height: 34px; border-radius: 6px; background: var(--gold-gradient); display: flex; align-items: center; justify-content: center; color: #000; font-weight: 800; font-size: 1.1rem;">
+                    <i class="fa-solid fa-crown"></i>
+                </div>
+                <div>
+                    <span style="font-weight: 700; letter-spacing: 0.05em; font-size: 1.05rem; color: #FFF;">PERFUME LUXE ADMIN</span>
+                    <span style="font-size: 0.7rem; color: var(--gold-primary); display: block; line-height: 1;">Enterprise Management Suite</span>
+                </div>
+            </a>
+
+            <nav style="display: flex; gap: 8px; margin-left: 10px; flex-wrap: wrap;">
+                <a href="/admin/admindashboard" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
+                    <i class="fa-solid fa-gauge-high" style="margin-right: 4px;"></i> Tổng Quan
+                </a>
+                <a href="/admin/admindashboard/products" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
+                    <i class="fa-solid fa-bottle-droplet" style="margin-right: 4px;"></i> Sản Phẩm
+                </a>
+                <a href="/admin/admindashboard/orders" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
+                    <i class="fa-solid fa-boxes-stacked" style="margin-right: 4px;"></i> Đơn Hàng
+                </a>
+                @if (User.IsInRole("Admin"))
+                {
+                    <a href="/admin/admindashboard/users" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
+                        <i class="fa-solid fa-users-gear" style="margin-right: 4px;"></i> Phân Quyền
+                    </a>
+                }
+                <a href="/admin/admindashboard/erd" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; color: var(--gold-primary);">
+                    <i class="fa-solid fa-diagram-project" style="margin-right: 4px;"></i> Sơ Đồ ERD
+                </a>
+                <a href="/admin/databaseconsole" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.25);">
+                    <i class="fa-solid fa-database" style="margin-right: 4px;"></i> DB Console (AWS)
+                </a>
+            </nav>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 14px;">
+            @if (SignInManager.IsSignedIn(User))
+            {
+                var currentUser = await UserManager.GetUserAsync(User);
+                <div style="display: flex; align-items: center; gap: 8px; font-size: 0.82rem;">
+                    <span style="color: var(--text-secondary);">@currentUser?.FullName</span>
+                    @if (User.IsInRole("Admin")) { <span class="role-badge-admin">Admin</span> }
+                    else if (User.IsInRole("StoreManager")) { <span class="role-badge-manager">Cửa Hàng Trưởng</span> }
+                </div>
+            }
+
+            <!-- Dark / Light theme toggle -->
+            <button type="button" class="icon-btn" id="themeToggleBtnAdmin" style="width: 34px; height: 34px;" title="Chuyển theme">
+                <i class="fa-solid fa-moon" id="themeIconAdmin"></i>
+            </button>
+
+            <!-- Storefront Link -->
+            <a href="/" class="btn-luxe-outline" style="padding: 6px 12px; font-size: 0.78rem;">
+                <i class="fa-solid fa-store" style="margin-right: 4px;"></i> Cửa Hàng
+            </a>
+
+            <!-- Logout -->
+            <form method="post" action="/account/logout" style="margin: 0;">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="icon-btn" title="Đăng Xuất" style="width: 34px; height: 34px; color: #f87171;">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
+            </form>
+        </div>
+    </header>
+
+    <main style="padding: 24px;">
+        @RenderBody()
+    </main>
+
+    <script>
+        (function() {
+            const saved = localStorage.getItem('perfume_luxe_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', saved);
+            document.body.className = saved === 'dark' ? 'dark-theme' : 'light-theme';
+            const icon = document.getElementById('themeIconAdmin');
+            if (icon) icon.className = saved === 'dark' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+        })();
+
+        document.getElementById('themeToggleBtnAdmin')?.addEventListener('click', function() {
+            const cur = document.documentElement.getAttribute('data-theme') || 'dark';
+            const next = cur === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('perfume_luxe_theme', next);
+            document.documentElement.setAttribute('data-theme', next);
+            document.body.className = next === 'dark' ? 'dark-theme' : 'light-theme';
+            const icon = document.getElementById('themeIconAdmin');
+            if (icon) icon.className = next === 'dark' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+        });
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

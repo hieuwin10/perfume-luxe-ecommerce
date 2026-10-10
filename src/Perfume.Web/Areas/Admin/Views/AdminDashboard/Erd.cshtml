@@ -1,0 +1,305 @@
+@model IList<Perfume.Application.Interfaces.TableInfo>
+@{
+    ViewData["Title"] = "Sơ Đồ ERD Cơ Sở Dữ Liệu";
+    Layout = "_AdminLayout";
+}
+
+<div style="max-width: 1400px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 14px;">
+        <div>
+            <h1 style="font-size: 1.6rem; font-weight: 800; margin: 0 0 6px; color: var(--text-primary);">
+                <i class="fa-solid fa-diagram-project text-gold-gradient" style="margin-right: 8px;"></i> Sơ Đồ Quan Hệ Thực Thể (Database ERD Diagram)
+            </h1>
+            <p style="color: var(--text-muted); margin: 0; font-size: 0.88rem;">
+                Mô hình trực quan quan hệ giữa các bảng trong <strong>PerfumeDb</strong> (Khóa chính PK, Khóa ngoại FK, Quan hệ 1-N)
+            </p>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+            <button type="button" class="btn-luxe" onclick="switchView('visual')" id="btnVisualView" style="font-size: 0.85rem; padding: 8px 16px;">
+                <i class="fa-solid fa-project-diagram" style="margin-right: 6px;"></i> Sơ Đồ Trực Quan (Mermaid)
+            </button>
+            <button type="button" class="btn-luxe-outline" onclick="switchView('matrix')" id="btnMatrixView" style="font-size: 0.85rem; padding: 8px 16px;">
+                <i class="fa-solid fa-table-cells-large" style="margin-right: 6px;"></i> Danh Sách Bảng & Khóa Ngoại
+            </button>
+            <a href="/admin/databaseconsole" class="btn-luxe-outline" style="font-size: 0.85rem; padding: 8px 16px;">
+                <i class="fa-solid fa-terminal" style="margin-right: 6px;"></i> Truy Vấn SQL
+            </a>
+        </div>
+    </div>
+
+    <!-- MERMAID DIAGRAM CONTAINER -->
+    <div id="visualViewContainer" class="luxury-card" style="padding: 24px; margin-bottom: 30px; overflow-x: auto; background: #0f1015; border: 1px solid rgba(212,175,55,0.25);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--border-card); padding-bottom: 12px;">
+            <span style="font-size: 0.85rem; color: var(--text-muted);">
+                <i class="fa-solid fa-circle-info" style="color: var(--gold-primary); margin-right: 6px;"></i> Sơ đồ quan hệ thực thể tự động tạo từ kiến trúc thực thể Clean Architecture EF Core
+            </span>
+            <div style="display: flex; gap: 8px;">
+                <button onclick="zoomMermaid(0.1)" class="icon-btn" style="width: 32px; height: 32px;" title="Phóng to"><i class="fa-solid fa-plus"></i></button>
+                <button onclick="zoomMermaid(-0.1)" class="icon-btn" style="width: 32px; height: 32px;" title="Thu nhỏ"><i class="fa-solid fa-minus"></i></button>
+                <button onclick="resetZoom()" class="icon-btn" style="width: 32px; height: 32px;" title="Về mặc định"><i class="fa-solid fa-rotate-left"></i></button>
+            </div>
+        </div>
+
+        <div id="mermaidWrapper" style="transform-origin: top center; transition: transform 0.2s; min-height: 500px; display: flex; justify-content: center;">
+            <pre class="mermaid" style="background: transparent; border: none; font-size: 0.95rem;">
+erDiagram
+    BRANDS ||--o{ PRODUCTS : "produces (1:N)"
+    CATEGORIES ||--o{ PRODUCTS : "classifies (1:N)"
+    FRAGRANCE_FAMILIES ||--o{ PRODUCTS : "scent_type (1:N)"
+
+    PRODUCTS ||--|{ PRODUCT_VARIANTS : "has_volumes (1:N)"
+    PRODUCTS ||--o{ PRODUCT_IMAGES : "has_photos (1:N)"
+    PRODUCTS ||--o{ PRODUCT_FRAGRANCE_NOTES : "composed_of (1:N)"
+    FRAGRANCE_NOTES ||--o{ PRODUCT_FRAGRANCE_NOTES : "referenced_in (1:N)"
+    PRODUCTS ||--o{ REVIEWS : "receives (1:N)"
+
+    ORDERS ||--|{ ORDER_ITEMS : "contains (1:N)"
+    PRODUCTS ||--o{ ORDER_ITEMS : "ordered_as (1:N)"
+    PRODUCT_VARIANTS ||--o{ ORDER_ITEMS : "variant_ordered (1:N)"
+    USERS ||--o{ ORDERS : "places (1:N)"
+
+    USERS ||--o{ USER_ROLES : "assigned (1:N)"
+    ROLES ||--o{ USER_ROLES : "grants (1:N)"
+
+    BLOG_CATEGORIES ||--o{ BLOG_POSTS : "categorizes (1:N)"
+
+    BRANDS {
+        int Id PK
+        string Name
+        string Slug
+        string Country
+        string LogoUrl
+    }
+
+    CATEGORIES {
+        int Id PK
+        string Name
+        string Slug
+        string Description
+    }
+
+    FRAGRANCE_FAMILIES {
+        int Id PK
+        string Name
+        string Slug
+    }
+
+    PRODUCTS {
+        int Id PK
+        int BrandId FK
+        int CategoryId FK
+        int FragranceFamilyId FK
+        string Name
+        string Slug
+        decimal BasePrice
+        int ViewCount
+        string Gender
+        string Concentration
+    }
+
+    PRODUCT_VARIANTS {
+        int Id PK
+        int ProductId FK
+        int VolumeMl
+        string Sku
+        decimal Price
+        int StockQuantity
+    }
+
+    FRAGRANCE_NOTES {
+        int Id PK
+        string Name
+        string Slug
+        int NoteType
+    }
+
+    PRODUCT_FRAGRANCE_NOTES {
+        int Id PK
+        int ProductId FK
+        int FragranceNoteId FK
+        int NoteLevel
+    }
+
+    ORDERS {
+        int Id PK
+        string OrderCode
+        string CustomerName
+        string CustomerEmail
+        decimal TotalAmount
+        string Status
+    }
+
+    ORDER_ITEMS {
+        int Id PK
+        int OrderId FK
+        int ProductId FK
+        int VariantId FK
+        int Quantity
+        decimal UnitPrice
+    }
+
+    USERS {
+        string Id PK
+        string FullName
+        string Email
+        int Tier
+        int LoyaltyPoints
+    }
+
+    ROLES {
+        string Id PK
+        string Name
+    }
+
+    USER_ROLES {
+        string UserId FK
+        string RoleId FK
+    }
+            </pre>
+        </div>
+    </div>
+
+    <!-- SCHEMA MATRIX VIEW -->
+    <div id="matrixViewContainer" style="display: none;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
+            <!-- Catalog Group -->
+            <div class="luxury-card" style="padding: 24px;">
+                <h3 style="font-size: 1.1rem; color: var(--gold-primary); margin: 0 0 16px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-bottle-droplet"></i> Phân Hệ Danh Mục & Sản Phẩm (Catalog)
+                </h3>
+                <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; font-size: 0.88rem;">
+                    <li style="background: var(--bg-surface-elevated); padding: 12px; border-radius: 8px; border: 1px solid var(--border-card);">
+                        <strong>Products (Sản phẩm)</strong>
+                        <div style="color: var(--text-muted); font-size: 0.78rem; margin-top: 4px;">
+                            FKs: <code style="color: var(--gold-primary);">BrandId &rarr; Brands</code> | <code style="color: var(--gold-primary);">CategoryId &rarr; Categories</code> | <code style="color: var(--gold-primary);">FragranceFamilyId &rarr; FragranceFamilies</code>
+                        </div>
+                    </li>
+                    <li style="background: var(--bg-surface-elevated); padding: 12px; border-radius: 8px; border: 1px solid var(--border-card);">
+                        <strong>ProductVariants (Dung tích 10ml, 50ml, 100ml)</strong>
+                        <div style="color: var(--text-muted); font-size: 0.78rem; margin-top: 4px;">
+                            FKs: <code style="color: var(--gold-primary);">ProductId &rarr; Products</code> (Quan hệ 1 - N)
+                        </div>
+                    </li>
+                    <li style="background: var(--bg-surface-elevated); padding: 12px; border-radius: 8px; border: 1px solid var(--border-card);">
+                        <strong>ProductFragranceNotes (3 tầng hương)</strong>
+                        <div style="color: var(--text-muted); font-size: 0.78rem; margin-top: 4px;">
+                            FKs: <code style="color: var(--gold-primary);">ProductId &rarr; Products</code> | <code style="color: var(--gold-primary);">FragranceNoteId &rarr; FragranceNotes</code>
+                        </div>
+                    </li>
+                    <li style="background: var(--bg-surface-elevated); padding: 12px; border-radius: 8px; border: 1px solid var(--border-card);">
+                        <strong>Images (Ảnh Gallery sản phẩm)</strong>
+                        <div style="color: var(--text-muted); font-size: 0.78rem; margin-top: 4px;">
+                            FKs: <code style="color: var(--gold-primary);">ProductId &rarr; Products</code>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Ecommerce Group -->
+            <div class="luxury-card" style="padding: 24px;">
+                <h3 style="font-size: 1.1rem; color: #2A9D8F; margin: 0 0 16px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-cart-shopping"></i> Phân Hệ Bán Hàng & Đơn Hàng (Orders)
+                </h3>
+                <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; font-size: 0.88rem;">
+                    <li style="background: var(--bg-surface-elevated); padding: 12px; border-radius: 8px; border: 1px solid var(--border-card);">
+                        <strong>Orders (Đơn hàng)</strong>
+                        <div style="color: var(--text-muted); font-size: 0.78rem; margin-top: 4px;">
+                            Chứa mã đơn, người nhận, thông tin giao hàng, tổng tiền
+                        </div>
+                    </li>
+                    <li style="background: var(--bg-surface-elevated); padding: 12px; border-radius: 8px; border: 1px solid var(--border-card);">
+                        <strong>OrderItems (Chi tiết sản phẩm đặt)</strong>
+                        <div style="color: var(--text-muted); font-size: 0.78rem; margin-top: 4px;">
+                            FKs: <code style="color: #2A9D8F;">OrderId &rarr; Orders</code> | <code style="color: #2A9D8F;">ProductId &rarr; Products</code> | <code style="color: #2A9D8F;">VariantId &rarr; ProductVariants</code>
+                        </div>
+                    </li>
+                    <li style="background: var(--bg-surface-elevated); padding: 12px; border-radius: 8px; border: 1px solid var(--border-card);">
+                        <strong>Vouchers (Mã giảm giá khuyến mại)</strong>
+                        <div style="color: var(--text-muted); font-size: 0.78rem; margin-top: 4px;">
+                            Mã giảm, phần trăm/tiền mặt, điều kiện áp dụng
+                        </div>
+                    </li>
+                    <li style="background: var(--bg-surface-elevated); padding: 12px; border-radius: 8px; border: 1px solid var(--border-card);">
+                        <strong>Reviews (Đánh giá & sao)</strong>
+                        <div style="color: var(--text-muted); font-size: 0.78rem; margin-top: 4px;">
+                            FKs: <code style="color: #2A9D8F;">ProductId &rarr; Products</code>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Identity Group -->
+            <div class="luxury-card" style="padding: 24px;">
+                <h3 style="font-size: 1.1rem; color: #818cf8; margin: 0 0 16px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-shield-halved"></i> Phân Hệ Định Danh & Quyền Hạn (Identity)
+                </h3>
+                <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; font-size: 0.88rem;">
+                    <li style="background: var(--bg-surface-elevated); padding: 12px; border-radius: 8px; border: 1px solid var(--border-card);">
+                        <strong>Users (Tài khoản)</strong>
+                        <div style="color: var(--text-muted); font-size: 0.78rem; margin-top: 4px;">
+                            AppUser kế thừa IdentityUser, lưu FullName, Hạng thành viên, LoyaltyPoints
+                        </div>
+                    </li>
+                    <li style="background: var(--bg-surface-elevated); padding: 12px; border-radius: 8px; border: 1px solid var(--border-card);">
+                        <strong>Roles (Vai trò)</strong>
+                        <div style="color: var(--text-muted); font-size: 0.78rem; margin-top: 4px;">
+                            3 vai trò chính thống: <code style="color: #f87171;">Admin</code> | <code style="color: var(--gold-primary);">StoreManager</code> | <code style="color: #818cf8;">Customer</code>
+                        </div>
+                    </li>
+                    <li style="background: var(--bg-surface-elevated); padding: 12px; border-radius: 8px; border: 1px solid var(--border-card);">
+                        <strong>UserRoles (Quan hệ gán quyền N - N)</strong>
+                        <div style="color: var(--text-muted); font-size: 0.78rem; margin-top: 4px;">
+                            FKs: <code style="color: #818cf8;">UserId &rarr; Users</code> | <code style="color: #818cf8;">RoleId &rarr; Roles</code>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'dark',
+            er: {
+                useMaxWidth: false
+            }
+        });
+
+        let currentScale = 1.0;
+        function zoomMermaid(delta) {
+            currentScale = Math.max(0.4, Math.min(2.5, currentScale + delta));
+            const wrapper = document.getElementById('mermaidWrapper');
+            if (wrapper) wrapper.style.transform = `scale(${currentScale})`;
+        }
+
+        function resetZoom() {
+            currentScale = 1.0;
+            const wrapper = document.getElementById('mermaidWrapper');
+            if (wrapper) wrapper.style.transform = `scale(1)`;
+        }
+
+        function switchView(view) {
+            const visual = document.getElementById('visualViewContainer');
+            const matrix = document.getElementById('matrixViewContainer');
+            const btnVisual = document.getElementById('btnVisualView');
+            const btnMatrix = document.getElementById('btnMatrixView');
+
+            if (view === 'visual') {
+                visual.style.display = 'block';
+                matrix.style.display = 'none';
+                btnVisual.className = 'btn-luxe';
+                btnMatrix.className = 'btn-luxe-outline';
+            } else {
+                visual.style.display = 'none';
+                matrix.style.display = 'block';
+                btnVisual.className = 'btn-luxe-outline';
+                btnMatrix.className = 'btn-luxe';
+            }
+        }
+    </script>
+}

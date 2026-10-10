@@ -1,0 +1,751 @@
+/* ==========================================================================
+   PERFUME LUXE - HAUTE PARFUMERIE DESIGN SYSTEM
+   Bản quyền thiết kế giao diện Nước hoa Cao Cấp (Dark / Light Hybrid)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+
+:root {
+    /* Brand Color Palette - Luxury Champagne & Gold */
+    --gold-primary: #D4AF37;
+    --gold-light: #F3E5AB;
+    --gold-dark: #997A15;
+    --gold-gradient: linear-gradient(135deg, #ECC86E 0%, #D4AF37 50%, #997A15 100%);
+    --gold-shimmer: linear-gradient(90deg, rgba(212, 175, 55, 0.1) 0%, rgba(212, 175, 55, 0.4) 50%, rgba(212, 175, 55, 0.1) 100%);
+
+    /* Typography */
+    --font-heading: 'Cormorant Garamond', Georgia, serif;
+    --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+
+    /* Radius & Transitions */
+    --radius-sm: 6px;
+    --radius-md: 12px;
+    --radius-lg: 20px;
+    --radius-full: 9999px;
+    --transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* --------------------------------------------------------------------------
+   DARK THEME (Mặc định cho trải nghiệm Hoàng gia Huyền bí)
+   -------------------------------------------------------------------------- */
+[data-theme="dark"], body.dark-theme {
+    --bg-main: #0B0B0E;
+    --bg-surface: #141419;
+    --bg-surface-elevated: #1D1D24;
+    --bg-glass: rgba(20, 20, 25, 0.85);
+    
+    --text-primary: #F8F7F5;
+    --text-secondary: #A0A0AB;
+    --text-muted: #656573;
+    
+    --border-subtle: rgba(212, 175, 55, 0.15);
+    --border-focus: rgba(212, 175, 55, 0.5);
+    --border-card: rgba(255, 255, 255, 0.08);
+
+    --shadow-subtle: 0 4px 20px rgba(0, 0, 0, 0.4);
+    --shadow-luxury: 0 12px 40px rgba(0, 0, 0, 0.6), 0 0 15px rgba(212, 175, 55, 0.15);
+    --glow-gold: 0 0 25px rgba(212, 175, 55, 0.25);
+}
+
+/* --------------------------------------------------------------------------
+   LIGHT THEME (Phong cách Ngọc trai & Vàng đồng thanh lịch Pháp)
+   -------------------------------------------------------------------------- */
+[data-theme="light"], body.light-theme {
+    --bg-main: #FAF8F5;
+    --bg-surface: #FFFFFF;
+    --bg-surface-elevated: #F3EFEA;
+    --bg-glass: rgba(255, 255, 255, 0.9);
+    
+    --text-primary: #18181B;
+    --text-secondary: #52525B;
+    --text-muted: #8E8E98;
+    
+    --border-subtle: rgba(212, 175, 55, 0.25);
+    --border-focus: #D4AF37;
+    --border-card: rgba(0, 0, 0, 0.06);
+
+    --shadow-subtle: 0 4px 20px rgba(0, 0, 0, 0.04);
+    --shadow-luxury: 0 12px 35px rgba(184, 134, 11, 0.08), 0 2px 10px rgba(0, 0, 0, 0.03);
+    --glow-gold: 0 0 20px rgba(212, 175, 55, 0.2);
+}
+
+/* --------------------------------------------------------------------------
+   BASE STYLES
+   -------------------------------------------------------------------------- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    line-height: 1.6;
+    overflow-x: hidden;
+    transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+h1, h2, h3, h4, .font-serif {
+    font-family: var(--font-heading);
+    letter-spacing: 0.02em;
+    font-weight: 500;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+/* Gold Gradient Text */
+.text-gold-gradient {
+    background: var(--gold-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Buttons */
+.btn-luxe {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 28px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-radius: var(--radius-full);
+    border: none;
+    cursor: pointer;
+    background: var(--gold-gradient);
+    color: #0B0B0E !important;
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.25);
+    transition: var(--transition);
+}
+
+.btn-luxe:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(212, 175, 55, 0.45);
+}
+
+.btn-luxe-outline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 26px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--gold-primary);
+    background: transparent;
+    color: var(--gold-primary) !important;
+    transition: var(--transition);
+}
+
+.btn-luxe-outline:hover {
+    background: rgba(212, 175, 55, 0.1);
+    transform: translateY(-2px);
+    border-color: var(--gold-light);
+}
+
+/* Header & Navigation */
+.luxe-header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: var(--bg-glass);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border-subtle);
+    transition: var(--transition);
+}
+
+.header-inner {
+    max-width: 1360px;
+    margin: 0 auto;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.brand-logo {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.brand-title {
+    font-size: 1.85rem;
+    font-family: var(--font-heading);
+    letter-spacing: 0.12em;
+    font-weight: 700;
+}
+
+.brand-sub {
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold-primary);
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    list-style: none;
+}
+
+.nav-link {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    position: relative;
+    padding: 6px 0;
+}
+
+.nav-link:hover, .nav-link.active {
+    color: var(--gold-primary);
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0%;
+    height: 2px;
+    background: var(--gold-primary);
+    transition: width 0.3s ease;
+}
+
+.nav-link:hover::after, .nav-link.active::after {
+    width: 100%;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.icon-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--border-card);
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    transition: var(--transition);
+}
+
+.icon-btn:hover {
+    border-color: var(--gold-primary);
+    color: var(--gold-primary);
+    transform: translateY(-2px);
+}
+
+.badge-count {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: var(--gold-primary);
+    color: #0B0B0E;
+    font-size: 0.7rem;
+    font-weight: 700;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Product Card */
+.perfume-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: var(--transition);
+    position: relative;
+}
+
+.perfume-card:hover {
+    transform: translateY(-6px);
+    border-color: var(--border-subtle);
+    box-shadow: var(--shadow-luxury);
+}
+
+.card-img-wrapper {
+    position: relative;
+    width: 100%;
+    padding-top: 110%;
+    overflow: hidden;
+    background: var(--bg-surface-elevated);
+}
+
+.card-img-wrapper img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+}
+
+.perfume-card:hover .card-img-wrapper img {
+    transform: scale(1.06);
+}
+
+.card-badges {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    z-index: 2;
+}
+
+.badge-tag {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.badge-tag.tag-hot {
+    background: #E63946;
+    color: #FFF;
+}
+
+.badge-tag.tag-new {
+    background: var(--gold-primary);
+    color: #0B0B0E;
+}
+
+.card-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.card-brand {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--gold-primary);
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    margin-bottom: 8px;
+    line-height: 1.3;
+}
+
+.card-notes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 14px;
+}
+
+.note-pill {
+    font-size: 0.72rem;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--bg-surface-elevated);
+    color: var(--text-secondary);
+}
+
+.card-footer {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-card);
+}
+
+.card-price {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* Scent Pyramid (Visualizer 3 Tầng Hương) */
+.scent-pyramid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin: 24px 0;
+}
+
+.pyramid-tier {
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: var(--transition);
+}
+
+.pyramid-tier:hover {
+    border-color: var(--gold-primary);
+    box-shadow: var(--glow-gold);
+}
+
+.tier-badge {
+    min-width: 100px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--gold-primary);
+    display: flex;
+    flex-direction: column;
+}
+
+.tier-badge small {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    font-weight: normal;
+}
+
+.tier-notes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.tier-note-item {
+    font-size: 0.85rem;
+    padding: 4px 12px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-full);
+    color: var(--text-primary);
+}
+
+/* Mini Cart Drawer */
+.mini-cart-drawer {
+    position: fixed;
+    top: 0;
+    right: -420px;
+    width: 400px;
+    max-width: 90vw;
+    height: 100vh;
+    background: var(--bg-surface);
+    border-left: 1px solid var(--border-subtle);
+    z-index: 2000;
+    transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    box-shadow: -10px 0 40px rgba(0, 0, 0, 0.5);
+}
+
+.mini-cart-drawer.active {
+    right: 0;
+}
+
+.drawer-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    z-index: 1999;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease;
+}
+
+.drawer-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.drawer-header {
+    padding: 20px;
+    border-bottom: 1px solid var(--border-card);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.drawer-body {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.drawer-footer {
+    padding: 20px;
+    border-top: 1px solid var(--border-card);
+    background: var(--bg-surface-elevated);
+}
+
+/* Database Console Style (AWS Console) */
+.aws-console-wrapper {
+    background: var(--bg-main);
+    min-height: calc(100vh - 80px);
+    padding: 24px;
+}
+
+.console-header-bar {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-md);
+    padding: 16px 24px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.console-grid {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 24px;
+}
+
+@media (max-width: 992px) {
+    .console-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.tables-sidebar {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    height: fit-content;
+}
+
+.table-list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.table-list-item:hover, .table-list-item.active {
+    background: var(--bg-surface-elevated);
+    color: var(--gold-primary);
+    border-left: 3px solid var(--gold-primary);
+}
+
+.console-main-panel {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    overflow-x: auto;
+}
+
+.data-table-custom {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.data-table-custom th {
+    background: var(--bg-surface-elevated);
+    color: var(--text-secondary);
+    padding: 12px 14px;
+    text-align: left;
+    border-bottom: 2px solid var(--border-card);
+    font-weight: 600;
+}
+
+.data-table-custom td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border-card);
+    color: var(--text-primary);
+}
+
+.data-table-custom tr:hover td {
+    background: var(--bg-surface-elevated);
+}
+
+/* Toast Notification */
+.toast-container-luxe {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 3000;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.toast-luxe {
+    background: var(--bg-surface);
+    border: 1px solid var(--gold-primary);
+    color: var(--text-primary);
+    padding: 14px 20px;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-luxury);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.88rem;
+    animation: slideInRight 0.3s ease;
+}
+
+@keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+/* ==========================================================================
+   USER AVATAR DROPDOWN & AUTH
+   ========================================================================== */
+
+.user-avatar-dropdown {
+    position: relative;
+}
+
+.user-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 240px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-md);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(212, 175, 55, 0.08);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px) scale(0.97);
+    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 1000;
+    overflow: hidden;
+}
+
+.user-avatar-dropdown:hover .user-dropdown-menu,
+.user-avatar-dropdown.open .user-dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+
+.dropdown-item-luxe {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+    cursor: pointer;
+}
+
+.dropdown-item-luxe:hover {
+    background: rgba(212, 175, 55, 0.08);
+    color: var(--gold-primary);
+}
+
+.dropdown-item-luxe i {
+    width: 16px;
+    text-align: center;
+    font-size: 0.85rem;
+}
+
+/* Role badges */
+.role-badge-admin,
+.role-badge-manager,
+.role-badge-customer {
+    display: inline-block;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    margin-top: 5px;
+}
+
+.role-badge-admin {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.role-badge-manager {
+    background: rgba(212, 175, 55, 0.15);
+    color: var(--gold-primary);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+.role-badge-customer {
+    background: rgba(99, 102, 241, 0.12);
+    color: #818cf8;
+    border: 1px solid rgba(99, 102, 241, 0.25);
+}
+
+/* bg-input for form fields */
+[data-theme="dark"] { --bg-input: rgba(255, 255, 255, 0.06); }
+[data-theme="light"] { --bg-input: rgba(0, 0, 0, 0.04); }
+
+/* btn-luxe-outline */
+.btn-luxe-outline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 24px;
+    border: 1px solid var(--gold-primary);
+    color: var(--gold-primary);
+    background: transparent;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-luxe-outline:hover {
+    background: rgba(212, 175, 55, 0.1);
+    color: var(--gold-primary);
+}

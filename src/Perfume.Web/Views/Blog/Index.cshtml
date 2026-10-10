@@ -1,0 +1,51 @@
+@model List<BlogPost>
+@{
+    ViewData["Title"] = "Cẩm Nang & Kiến Thức Nước Hoa Cao Cấp";
+    ViewData["MetaDescription"] = "Khám phá thế giới mùi hương: bí quyết chọn nước hoa, giải mã 3 tầng hương và cách lưu hương bền lâu.";
+}
+
+<div style="max-width: 1200px; margin: 40px auto; padding: 0 24px;">
+    <!-- Title & Intro -->
+    <div style="text-align: center; margin-bottom: 50px;">
+        <span style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.25em; color: var(--gold-primary); font-weight: 700;">Haute Parfumerie Journal</span>
+        <h1 style="font-size: 2.8rem; margin: 10px 0 16px;">Cẩm Nang & Nghệ Thuật Nước Hoa</h1>
+        <p style="color: var(--text-secondary); max-width: 650px; margin: 0 auto; font-size: 0.95rem; line-height: 1.7;">
+            Những câu chuyện đằng sau các chai nước hoa kinh điển, cẩm nang phối hương theo mùa và bí quyết lưu hương bất tận.
+        </p>
+    </div>
+
+    @if (Model.Any())
+    {
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 36px;">
+            @foreach (var post in Model)
+            {
+                <div style="background: var(--bg-surface); border: 1px solid var(--border-card); border-radius: var(--radius-md); overflow: hidden; display: flex; flex-direction: column; transition: var(--transition);">
+                    <a href="/blog/@post.Slug" style="display: block; width: 100%; height: 240px; overflow: hidden;">
+                        <img src="@(post.ThumbnailUrl ?? "https://images.unsplash.com/photo-1547887537-6158d64c35b3?auto=format&fit=crop&w=800&q=80")" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease;" alt="@post.Title" />
+                    </a>
+                    <div style="padding: 24px; display: flex; flex-direction: column; flex-grow: 1;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 0.75rem; color: var(--text-muted);">
+                            <span style="color: var(--gold-primary); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600;">@(post.Category?.Name ?? "Kiến Thức")</span>
+                            <span><i class="fa-solid fa-eye" style="margin-right: 4px;"></i>@post.ViewCount lượt đọc</span>
+                        </div>
+                        <h2 style="font-size: 1.35rem; margin-bottom: 12px; line-height: 1.3;">
+                            <a href="/blog/@post.Slug">@post.Title</a>
+                        </h2>
+                        <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.6; margin-bottom: 20px;">
+                            @post.Summary
+                        </p>
+                        <a href="/blog/@post.Slug" class="btn-luxe-outline" style="margin-top: auto; padding: 8px 18px; font-size: 0.8rem; align-self: flex-start;">
+                            Đọc Bài Viết <i class="fa-solid fa-arrow-right" style="margin-left: 6px;"></i>
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div style="text-align: center; padding: 60px; background: var(--bg-surface); border-radius: var(--radius-md);">
+            <p style="color: var(--text-muted);">Chưa có bài viết nào được xuất bản.</p>
+        </div>
+    }
+</div>

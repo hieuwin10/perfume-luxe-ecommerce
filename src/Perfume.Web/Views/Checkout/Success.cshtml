@@ -1,0 +1,51 @@
+@model Order
+@{
+    ViewData["Title"] = $"Đặt Hàng Thành Công - {Model.OrderCode}";
+}
+
+<div style="max-width: 800px; margin: 60px auto; padding: 0 24px; text-align: center;">
+    <div style="width: 80px; height: 80px; border-radius: 50%; background: rgba(212, 175, 55, 0.15); border: 2px solid var(--gold-primary); display: inline-flex; align-items: center; justify-content: center; color: var(--gold-primary); font-size: 2.2rem; margin-bottom: 24px;">
+        <i class="fa-solid fa-crown"></i>
+    </div>
+
+    <span style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.2em; color: var(--gold-primary); font-weight: 700;">Haute Parfumerie Order Confirmed</span>
+    <h1 style="font-size: 2.6rem; margin: 8px 0 16px;">Cảm Ơn Quý Khách Đã Lựa Chọn PERFUME LUXE</h1>
+    <p style="color: var(--text-secondary); font-size: 1rem; max-width: 600px; margin: 0 auto 30px; line-height: 1.6;">
+        Đơn hàng của bạn đã được ghi nhận vào hệ thống. Chuyên viên mùi hương của chúng tôi đang chuẩn bị đóng gói hộp quà và niêm phong bảo đảm để gửi đến bạn.
+    </p>
+
+    <!-- Order Code Badge -->
+    <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 24px; margin-bottom: 36px; display: inline-block; min-width: 320px; box-shadow: var(--shadow-luxury);">
+        <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-bottom: 6px;">Mã Đơn Hàng Của Bạn</span>
+        <strong style="font-size: 1.6rem; font-family: monospace; color: var(--gold-primary); letter-spacing: 0.05em;">@Model.OrderCode</strong>
+        <div style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 8px;">
+            Phương thức: <strong>@Model.PaymentMethod</strong> &bull; Tổng tiền: <strong style="color: var(--gold-primary);">@Model.TotalAmount.ToString("N0")₫</strong>
+        </div>
+    </div>
+
+    <!-- Items Summary -->
+    <div style="background: var(--bg-surface); border: 1px solid var(--border-card); border-radius: var(--radius-md); padding: 24px; margin-bottom: 36px; text-align: left;">
+        <h3 style="font-size: 1.15rem; margin-bottom: 16px; color: var(--gold-primary);">Sản Phẩm Đã Đặt</h3>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+            @foreach (var item in Model.Items)
+            {
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-card); padding-bottom: 10px;">
+                    <div>
+                        <strong style="font-size: 0.95rem;">@item.ProductName</strong>
+                        <span style="font-size: 0.8rem; color: var(--text-muted); display: block;">@item.VariantLabel x @item.Quantity</span>
+                    </div>
+                    <span style="font-weight: 700; color: var(--gold-primary);">@item.TotalPrice.ToString("N0")₫</span>
+                </div>
+            }
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-top: 16px; font-weight: 700; font-size: 1.1rem;">
+            <span>Tổng Thanh Toán:</span>
+            <span style="color: var(--gold-primary);">@Model.TotalAmount.ToString("N0")₫</span>
+        </div>
+    </div>
+
+    <div style="display: flex; gap: 16px; justify-content: center;">
+        <a href="/" class="btn-luxe">Tiếp Tục Mua Sắm</a>
+        <a href="/admin/databaseconsole?table=Orders" class="btn-luxe-outline"><i class="fa-solid fa-database" style="margin-right: 6px;"></i> Xem Trong Admin DB Console</a>
+    </div>
+</div>
