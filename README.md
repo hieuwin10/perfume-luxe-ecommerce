@@ -29,56 +29,42 @@ dotnet/
 * [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
 * [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 
-### Cách 1: Chạy Dịch Vụ Nền Bằng Docker + Chạy Code Bằng Localhost (Dev Nhanh Nhất)
-1. **Khởi động SQL Server và Redis**:
+### Cách 1: Chạy SQL Server, Redis, Mailpit bằng Docker và ứng dụng bằng .NET
+1. Sao chép `.env.example` thành `.env`, đổi giá trị mẫu `MSSQL_SA_PASSWORD` thành mật khẩu mạnh. Nếu dùng lại SQL volume cũ, giữ đúng mật khẩu SA đã khởi tạo volume.
+2. Khởi động dịch vụ nền:
    ```bash
    docker compose -f docker-compose.infra.yml up -d
    ```
-2. **Khởi động Web App với Hot Reload**:
-   ```bash
-   dotnet watch --project src/Perfume.Web run
-   ```
-3. **Truy cập các cổng dịch vụ**:
-   * **Cửa hàng Storefront**: `https://localhost:5001` (hoặc `http://localhost:5000`)
-   * **Bảng Điều Khiển CSDL (AWS-Style DB Console)**: `https://localhost:5001/admin/databaseconsole`
-   * **Quản trị CSDL Web (Adminer)**: `http://localhost:8088`
+3. Cấu hình các biến môi trường cho ứng dụng trước khi chạy: `ConnectionStrings__DefaultConnection` trỏ tới SQL Server tại `localhost,1433`; đặt `Database__BackupPath=/var/opt/mssql/backup`, `Storage__RootPath=src/Perfume.Web/App_Data`, `InitialAdmin__Email` và `InitialAdmin__Password` để tạo Admin lần đầu; đặt `Smtp__Enabled=true`, `Smtp__Host=localhost`, `Smtp__Port=1025`.
+4. Chạy `dotnet watch --project src/Perfume.Web run`.
+5. Truy cập cửa hàng ở cổng ứng dụng, Adminer tại `http://localhost:8088`, Mailpit tại `http://localhost:8025`.
 
-### 🔑 Thông Số Đăng Nhập Quản Trị CSDL (Adminer & SQL Server)
+Adminer dùng máy chủ `localhost` khi truy cập từ máy host, user `sa`, mật khẩu lấy từ file `.env`, database `PerfumeDb`. Không có mật khẩu quản trị mặc định trong source.
 
-Khi truy cập vào `http://localhost:8088`, điền thông tin đăng nhập như sau:
-
-| Trường thông tin | Giá trị điền | Ghi chú |
-| :--- | :--- | :--- |
-| **Hệ thống (System)** | `MS SQL` | Chọn trong danh sách thả xuống |
-| **Máy chủ (Server)** | `sqlserver` | Tên container SQL Server trong mạng Docker |
-| **Tên người dùng (User)** | `sa` | Tài khoản quản trị cấp cao của SQL Server |
-| **Mật khẩu (Password)** | `PerfumePass@2026!` | Mật khẩu thiết lập trong `docker-compose.infra.yml` |
-| **Cơ sở dữ liệu (Database)** | `PerfumeDb` | *(Tùy chọn)* Điền để vào thẳng database của dự án |
-
----
-
-### Cách 2: Chạy Toàn Bộ Hệ Thống Bằng Docker (Full Container)
+### Cách 2: Chạy toàn bộ hệ thống bằng Docker
+Sao chép và cấu hình `.env.example` thành `.env`, sau đó chạy:
 ```bash
 docker compose up --build -d
 ```
-* Storefront & Admin: `http://localhost:5000`
+Cửa hàng: `http://localhost:5000`; Mailpit: `http://localhost:8025`. Mật khẩu SQL và Admin lần đầu phải được đặt trong `.env`; Docker Compose giữ nguyên volume dữ liệu SQL hiện có.
 
 ---
 
 ## 💎 3. Hướng Dẫn Chi Tiết Các Phân Hệ & Tính Năng Nổi Bật
 
 ### 1. Phân Hệ Quản Trị CSDL Trực Quan (AWS-Style DB Console)
-* **Đường dẫn truy cập**: `/admin/databaseconsole`
+* **Đường dẫn truy cập**: `/admin/databaseconsole` (chỉ role Admin)
 * **Các tính năng cốt lõi**:
-  - **1-Click Seeder**: Nạp toàn bộ dữ liệu mẫu (15+ chai nước hoa kinh điển, 8 thương hiệu lớn, kim tự tháp hương và mã giảm giá) chỉ bằng 1 nút bấm trực tiếp từ file [scripts/seed_perfume_data.sql](file:///scripts/seed_perfume_data.sql) mà không cần cấu hình SSMS phức tạp.
+  - **1-Click Seeder**: Nạp toàn bộ dữ liệu mẫu (15+ chai nước hoa kinh điển, 8 thương hiệu lớn, kim tự tháp hương và mã giảm giá) chỉ bằng 1 nút bấm trực tiếp từ file [scripts/seed_perfume_data.sql](scripts/seed_perfume_data.sql) mà không cần cấu hình SSMS phức tạp.
   - **Table Explorer & Health Metrics**: Xem trực quan danh sách bảng, tổng số bản ghi (rows), kích thước dữ liệu (Data & Index size) theo phong cách AWS RDS/DynamoDB Console.
   - **Visual CRUD**:
     + Thêm mới bản ghi bằng popup form tự động ánh xạ kiểu dữ liệu cột.
     + Chỉnh sửa trực tiếp từng trường dữ liệu với nút *Edit*.
     + Xóa an toàn bản ghi với xác nhận cảnh báo.
-  - **SQL Query Runner**: 
-    + Khung soạn thảo lệnh T-SQL tự do (`SELECT`, `JOIN`, `UPDATE`, `GROUP BY`).
-    + Tự động render bảng kết quả linh hoạt và hiển thị thời gian phản hồi thực thi tính bằng mili-giây (ms benchmark).
+  - **SQL Query Runner**:
+    + Chỉ kết nối database ứng dụng `PerfumeDb`; các lệnh đổi database hoặc tham chiếu database khác bị chặn.
+    + Lệnh có thể ghi dữ liệu yêu cầu xác nhận; audit lưu người thao tác, loại hành động, kết quả và mã băm câu lệnh, không lưu nội dung nhạy cảm.
+    + Nâng cấp schema dùng thay đổi cộng thêm và sao lưu trước khi sửa database hiện có.
 
 ### 2. Trắc Nghiệm Mùi Hương Thông Minh (AI Fragrance Finder Quiz)
 * **Đường dẫn truy cập**: `/catalog/quiz`
@@ -94,15 +80,12 @@ docker compose up --build -d
   - **Hương Giữa (Heart Notes)**: Linh hồn của chai nước hoa kéo dài 3-5 giờ (Hoa hồng Damask, Nhài Sambac, Diên vĩ...).
   - **Hương Cuối (Base Notes)**: Tầng hương lưu lại bền bỉ nhất trên da 8-12 giờ (Gỗ đàn hương, Hổ phách, Xạ hương trắng, Vani...).
 
-### 4. Hệ Thống Giỏ Hàng & Thanh Toán Toàn Diện (Cart & Checkout)
+### 4. Giỏ hàng và thanh toán COD (Cart & Checkout)
 * **Mini-Cart trượt (Slide-in Drawer)**: Thêm vào giỏ mượt mà không reload trang, cập nhật số lượng và tổng tiền realtime.
 * **Mã Khuyến Mãi (Vouchers)**:
   - Nhập mã `LUXE10` để được giảm ngay **10%** tổng đơn hàng.
   - Nhập mã `LUXE20` để được giảm ngay **20%** tổng đơn hàng.
-* **Đa Dạng Phương Thức Thanh Toán**:
-  - Thanh toán khi nhận hàng (COD).
-  - Chuyển khoản ngân hàng / Cổng VNPAY QR Code.
-  - Ví điện tử MoMo.
+* Hiện chỉ bật COD. Đơn chỉ chuyển sang đã thanh toán khi cửa hàng xác nhận đã thu tiền; VNPAY và MoMo chưa bật.
 
 ### 5. Giao Diện Chuẩn Haute Parfumerie (Dark & Light Theme)
 * Bảng màu chủ đạo: **Champagne Gold (`#D4AF37`)** phối nền **Velvet Black / Pure White**.
@@ -116,8 +99,12 @@ docker compose up --build -d
 
 ---
 
-## 📌 4. Hướng Dẫn Dành Cho AI / Dev Tiếp Tục Phát Triển (Next Tasks)
-1. Tích hợp thanh toán thật qua SDK VNPAY / MoMo API thực tế.
-2. Thêm hệ thống gửi Email xác nhận đơn hàng qua SMTP (SendGrid / Gmail).
-3. Mở rộng tính năng đánh giá có upload ảnh feedback từ khách hàng.
-4. Triển khai CI/CD qua GitHub Actions lên Cloud (Azure / AWS / VPS).
+## 🛍️ Vai trò và vận hành cửa hàng
+- Admin quản lý hệ thống, vai trò, Database Console và ERD.
+- StoreManager xem thống kê theo ngày, xuất CSV, xử lý đơn hàng, sản phẩm/phiên bản/tồn kho, voucher và duyệt đánh giá.
+- Customer sửa hồ sơ, xem đơn của mình và đánh giá sản phẩm đã mua, giao thành công. Đánh giá và ảnh chỉ công khai sau khi duyệt.
+- Khách vãng lai được duyệt sản phẩm, dùng giỏ hàng, đặt COD và nhận liên kết theo dõi riêng qua email.
+- Email cục bộ được gửi vào Mailpit. Lỗi SMTP không làm mất đơn hàng.
+
+## 📝 Bài viết và SEO
+Trang Blog và các trường SEO hiện có được giữ nguyên. Màn quản lý bài viết, quy trình nháp/xuất bản và phần nâng cấp SEO được để cho giai đoạn sau..

@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Perfume.Application.Interfaces;
 
 namespace Perfume.Web.Areas.Admin.Controllers;
 
 [Area("Admin")]
+[Authorize(Roles = "Admin")]
 public class DashboardController : Controller
 {
     private readonly IDatabaseConsoleService _dbConsole;

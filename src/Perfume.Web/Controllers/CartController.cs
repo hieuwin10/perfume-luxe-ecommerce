@@ -41,7 +41,7 @@ public class CartController : Controller
         return Json(new { items = cart, totalAmount, totalCount });
     }
 
-    [HttpPost]
+    [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> AddToCart([FromBody] AddToCartRequest req)
     {
         var product = await _catalogService.GetProductBySlugAsync(req.ProductSlug);
@@ -81,7 +81,7 @@ public class CartController : Controller
         return Json(new { success = true, items = cart, totalAmount, totalCount });
     }
 
-    [HttpPost]
+    [HttpPost, ValidateAntiForgeryToken]
     public IActionResult UpdateQuantity([FromBody] UpdateCartQuantityRequest req)
     {
         var cart = GetCart();
@@ -104,7 +104,7 @@ public class CartController : Controller
         return Json(new { success = true, items = cart, totalAmount, totalCount });
     }
 
-    [HttpPost]
+    [HttpPost, ValidateAntiForgeryToken]
     public IActionResult RemoveItem([FromBody] RemoveCartItemRequest req)
     {
         var cart = GetCart();

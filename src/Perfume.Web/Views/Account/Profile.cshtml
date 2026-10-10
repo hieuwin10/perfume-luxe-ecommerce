@@ -5,6 +5,7 @@
 }
 
 <div style="max-width: 900px; margin: 40px auto; padding: 0 20px;">
+    @if (TempData["Success"] != null) { <div class="luxury-card" style="padding:12px;margin-bottom:16px">@TempData["Success"]</div> }
     <div class="luxury-card" style="padding: 32px; margin-bottom: 24px;">
         <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px;">
             <div style="display: flex; align-items: center; gap: 18px;">
@@ -24,10 +25,17 @@
             </div>
 
             <div style="display: flex; gap: 10px;">
-                @if (roles.Contains("Admin") || roles.Contains("StoreManager"))
+                <a href="/account/editprofile" class="btn-luxe-outline" style="font-size: 0.85rem; padding: 10px 18px;">Sửa hồ sơ</a>
+                @if (roles.Contains("Admin"))
                 {
                     <a href="/admin/admindashboard" class="btn-luxe" style="font-size: 0.85rem; padding: 10px 18px;">
                         <i class="fa-solid fa-gauge-high" style="margin-right: 6px;"></i> Quản trị Admin
+                    </a>
+                }
+                else if (roles.Contains("StoreManager"))
+                {
+                    <a href="/admin/storemanager" class="btn-luxe" style="font-size: 0.85rem; padding: 10px 18px;">
+                        <i class="fa-solid fa-chart-line" style="margin-right: 6px;"></i> Quản lý cửa hàng
                     </a>
                 }
                 <form method="post" action="/account/logout" style="margin: 0;">
@@ -59,7 +67,7 @@
             <div style="color: var(--gold-primary); font-size: 1.3rem; margin-bottom: 10px;"><i class="fa-solid fa-bag-shopping"></i></div>
             <h4 style="margin: 0 0 6px; font-size: 1.1rem; color: var(--text-primary);">Lịch Sử Mua Hàng</h4>
             <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 14px;">Theo dõi và kiểm tra trạng thái đơn hàng</p>
-            <a href="/cart" class="btn-luxe-outline" style="font-size: 0.8rem; padding: 6px 14px;">Xem Giỏ Hàng</a>
+            <a href="/account/myorders" class="btn-luxe-outline" style="font-size: 0.8rem; padding: 6px 14px;">Xem đơn hàng</a>
         </div>
     </div>
 </div>

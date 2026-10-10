@@ -49,6 +49,20 @@ erDiagram
     FRAGRANCE_FAMILIES ||--o{ PRODUCTS : "scent_type (1:N)"
 
     PRODUCTS ||--|{ PRODUCT_VARIANTS : "has_volumes (1:N)"
+    DATABASE_AUDIT_LOGS {
+        int Id PK
+        string ActorUserId
+        string Action
+        string Target
+        string CommandHash
+        bool Succeeded
+        int RowsAffected
+        datetime CreatedAt
+    }
+    PERFUME_SCHEMA_VERSIONS {
+        string Version PK
+        datetime AppliedAt
+    }
     PRODUCTS ||--o{ PRODUCT_IMAGES : "has_photos (1:N)"
     PRODUCTS ||--o{ PRODUCT_FRAGRANCE_NOTES : "composed_of (1:N)"
     FRAGRANCE_NOTES ||--o{ PRODUCT_FRAGRANCE_NOTES : "referenced_in (1:N)"

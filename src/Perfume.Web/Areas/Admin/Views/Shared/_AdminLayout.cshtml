@@ -15,7 +15,7 @@
     <!-- Admin Console Navigation -->
     <header style="background: #111116; border-bottom: 1px solid rgba(212, 175, 55, 0.2); padding: 10px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1000; flex-wrap: wrap; gap: 12px;">
         <div style="display: flex; align-items: center; gap: 20px;">
-            <a href="/admin/admindashboard" style="display: flex; align-items: center; gap: 10px; text-decoration: none;">
+            <a href="@(User.IsInRole("Admin") ? "/admin/admindashboard" : "/admin/storemanager")" style="display: flex; align-items: center; gap: 10px; text-decoration: none;">
                 <div style="width: 34px; height: 34px; border-radius: 6px; background: var(--gold-gradient); display: flex; align-items: center; justify-content: center; color: #000; font-weight: 800; font-size: 1.1rem;">
                     <i class="fa-solid fa-crown"></i>
                 </div>
@@ -26,8 +26,14 @@
             </a>
 
             <nav style="display: flex; gap: 8px; margin-left: 10px; flex-wrap: wrap;">
-                <a href="/admin/admindashboard" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
-                    <i class="fa-solid fa-gauge-high" style="margin-right: 4px;"></i> Tổng Quan
+                @if (User.IsInRole("Admin"))
+                {
+                    <a href="/admin/admindashboard" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
+                        <i class="fa-solid fa-gauge-high" style="margin-right: 4px;"></i> Tổng Quan
+                    </a>
+                }
+                <a href="/admin/storemanager" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
+                    <i class="fa-solid fa-chart-line" style="margin-right: 4px;"></i> Thống Kê
                 </a>
                 <a href="/admin/admindashboard/products" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
                     <i class="fa-solid fa-bottle-droplet" style="margin-right: 4px;"></i> Sản Phẩm
@@ -41,12 +47,21 @@
                         <i class="fa-solid fa-users-gear" style="margin-right: 4px;"></i> Phân Quyền
                     </a>
                 }
-                <a href="/admin/admindashboard/erd" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; color: var(--gold-primary);">
-                    <i class="fa-solid fa-diagram-project" style="margin-right: 4px;"></i> Sơ Đồ ERD
+                <a href="/admin/storemanager/vouchers" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
+                    <i class="fa-solid fa-ticket" style="margin-right: 4px;"></i> Voucher
                 </a>
-                <a href="/admin/databaseconsole" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.25);">
-                    <i class="fa-solid fa-database" style="margin-right: 4px;"></i> DB Console (AWS)
+                <a href="/admin/storemanager/reviews" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
+                    <i class="fa-solid fa-star" style="margin-right: 4px;"></i> Đánh Giá
                 </a>
+                @if (User.IsInRole("Admin"))
+                {
+                    <a href="/admin/admindashboard/erd" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; color: var(--gold-primary);">
+                        <i class="fa-solid fa-diagram-project" style="margin-right: 4px;"></i> Sơ Đồ ERD
+                    </a>
+                    <a href="/admin/databaseconsole" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.25);">
+                        <i class="fa-solid fa-database" style="margin-right: 4px;"></i> DB Console
+                    </a>
+                }
             </nav>
         </div>
 

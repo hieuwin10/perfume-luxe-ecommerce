@@ -24,6 +24,7 @@
         </div>
     }
 
+    @if (TempData["Error"] != null) { <div class="luxury-card" style="padding:12px;margin-bottom:12px;color:#f87171">@TempData["Error"]</div> }
     <div class="luxury-card" style="padding: 0; overflow: hidden;">
         <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem;">
             <thead>

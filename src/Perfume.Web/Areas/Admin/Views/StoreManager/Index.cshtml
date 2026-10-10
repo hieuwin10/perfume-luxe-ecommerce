@@ -1,0 +1,46 @@
+@model Perfume.Web.Areas.Admin.Controllers.StoreManagerDashboardViewModel
+@{
+    ViewData["Title"] = "Thống kê cửa hàng";
+    Layout = "_AdminLayout";
+}
+<div style="max-width:1400px;margin:0 auto">
+    @if (TempData["Error"] != null) { <p style="color:#f87171">@TempData["Error"]</p> }
+    @if (TempData["Success"] != null) { <p style="color:#2a9d8f">@TempData["Success"]</p> }
+    <h1><i class="fa-solid fa-chart-line text-gold-gradient"></i> Thống kê cửa hàng</h1>
+    <form method="get" style="display:flex;gap:12px;align-items:end;margin:18px 0">
+        <label>Từ ngày<input type="date" name="from" value="@Model.From.ToString("yyyy-MM-dd")" /></label>
+        <label>Đến ngày<input type="date" name="to" value="@Model.To.ToString("yyyy-MM-dd")" /></label>
+        <button class="btn-luxe" type="submit">Lọc</button>
+        <a class="btn-luxe-outline" href="@Url.Action("ExportCsv", new { from = Model.From.ToString("yyyy-MM-dd"), to = Model.To.ToString("yyyy-MM-dd") })">Xuất CSV</a>
+    </form>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin:20px 0">
+        <div class="luxury-card" style="padding:20px">Doanh thu đã thu<h2>@Model.Revenue.ToString("N0") ₫</h2><small>Chỉ đơn đã giao và COD đã xác nhận thu</small></div>
+        <div class="luxury-card" style="padding:20px">Đơn đã giao và đã thu<h2>@Model.PaidOrders</h2></div>
+        <div class="luxury-card" style="padding:20px">Giá trị đơn trung bình<h2>@Model.AverageOrderValue.ToString("N0") ₫</h2></div>
+        <div class="luxury-card" style="padding:20px">Tổng đơn trong kỳ<h2>@Model.OrderCount</h2><small>Chờ: @Model.PendingOrders · Hủy: @Model.CancelledOrders</small></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px">
+        <section class="luxury-card" style="padding:20px">
+            <h2>Trạng thái đơn hàng</h2>
+            @foreach (var row in Model.StatusCounts) { <p>@row.Key <strong>@row.Value</strong></p> }
+            <a href="/admin/admindashboard/orders">Xử lý đơn hàng →</a>
+        </section>
+        <section class="luxury-card" style="padding:20px">
+            <h2>Sản phẩm bán chạy</h2>
+            @if (Model.TopProducts.Count == 0) { <p>Chưa có đơn đã giao và thu tiền trong khoảng này.</p> }
+            @foreach (var item in Model.TopProducts) { <p>@item.Name — @item.Quantity chai, @item.Revenue.ToString("N0") ₫</p> }
+        </section>
+        <section class="luxury-card" style="padding:20px">
+            <h2>Cảnh báo tồn kho (≤ 5)</h2>
+            @if (Model.LowStock.Count == 0) { <p>Chưa có phiên bản tồn thấp.</p> }
+            @foreach (var item in Model.LowStock) { <p>@item.Product?.Name / @item.VolumeLabel — <strong>@item.StockQuantity</strong></p> }
+            <a href="/admin/admindashboard/products">Quản lý sản phẩm và kho →</a>
+        </section>
+        <section class="luxury-card" style="padding:20px">
+            <h2>Voucher trong các đơn đã thu</h2>
+            @if (Model.VoucherStats.Count == 0) { <p>Chưa ghi nhận sử dụng voucher đã thanh toán.</p> }
+            @foreach (var item in Model.VoucherStats) { <p>@item.Code — @item.Orders đơn, @item.Revenue.ToString("N0") ₫</p> }
+            <a href="/admin/storemanager/vouchers">Quản lý voucher →</a>
+        </section>
+    </div>
+</div>

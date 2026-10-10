@@ -37,6 +37,7 @@ public class QueryResult
     public string? ErrorMessage { get; set; }
     public long ElapsedMilliseconds { get; set; }
     public int RowsAffected { get; set; }
+    public bool Truncated { get; set; }
     public List<string> ColumnNames { get; set; } = new();
     public List<Dictionary<string, object?>> Rows { get; set; } = new();
 }

@@ -23,6 +23,10 @@
             <div style="font-size: 1.8rem; font-weight: 700; color: #52B788;"><i class="fa-solid fa-hard-drive" style="margin-right: 8px;"></i>@totalSpace MB</div>
         </div>
         <div style="background: var(--bg-surface); border: 1px solid var(--border-card); border-radius: var(--radius-md); padding: 18px 20px;">
+            <div style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 6px;">Kết Nối Database</div>
+            <div style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary); margin-top: 6px;"><i class="fa-solid fa-plug" style="margin-right: 6px;"></i>@(ViewBag.ConnectionStatus ?? "Chưa xác định")</div>
+        </div>
+        <div style="background: var(--bg-surface); border: 1px solid var(--border-card); border-radius: var(--radius-md); padding: 18px 20px;">
             <div style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 6px;">Hệ Quản Trị</div>
             <div style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary); margin-top: 6px;"><i class="fa-brands fa-microsoft" style="color: #00A4EF; margin-right: 6px;"></i>SQL Server 2022</div>
         </div>
@@ -135,7 +139,7 @@
                                                 <button type="button" onclick="openEditRowModal('@Model.TableName', '@pkCol', '@pkVal')" style="background: none; border: none; color: var(--gold-primary); cursor: pointer; padding: 4px 6px;" title="Chỉnh sửa">
                                                     <i class="fa-solid fa-pen-to-square"></i>
                                                 </button>
-                                                <form asp-action="DeleteRow" asp-route-table="@Model.TableName" asp-route-pkCol="@pkCol" asp-route-pkVal="@pkVal" method="post" style="display: inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa bản ghi này?');">
+                                                <form asp-action="DeleteRow" asp-route-table="@Model.TableName" asp-route-pkCol="@pkCol" asp-route-pkVal="@pkVal" method="post" style="display: inline;" onsubmit="if(!confirm('Xác nhận xóa vĩnh viễn bản ghi này?')) return false; this.insertAdjacentHTML('beforeend','<input type=&quot;hidden&quot; name=&quot;confirmed&quot; value=&quot;true&quot; />');">
                                                     @Html.AntiForgeryToken()
                                                     <button type="submit" style="background: none; border: none; color: #E63946; cursor: pointer; padding: 4px 6px;" title="Xóa">
                                                         <i class="fa-solid fa-trash-can"></i>
@@ -323,7 +327,7 @@
             <button type="button" onclick="closeRowModal()" style="background: none; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer;"><i class="fa-solid fa-xmark"></i></button>
         </div>
 
-        <form id="rowForm" method="post" asp-action="SaveRow">
+        <form id="rowForm" method="post" asp-action="SaveRow" onsubmit="if(!confirm('Xác nhận ghi thay đổi vào database?')) return false; this.insertAdjacentHTML('beforeend','<input type=&quot;hidden&quot; name=&quot;confirmed&quot; value=&quot;true&quot; />');">
             @Html.AntiForgeryToken()
             <input type="hidden" name="table" id="rowFormTable" value="@activeTable" />
             <input type="hidden" name="pkCol" id="rowFormPkCol" value="" />
@@ -462,51 +466,78 @@
             const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
             const timing = document.getElementById('queryTimingInfo');
             const wrapper = document.getElementById('queryResultsWrapper');
-
             timing.innerText = 'Đang thực thi...';
-
+            const send = confirmed => fetch('/admin/databaseconsole/executequery', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': token },
+                body: JSON.stringify({ sql, confirmed })
+            });
             try {
-                const res = await fetch('/admin/databaseconsole/executequery', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': token },
-                    body: JSON.stringify({ sql })
-                });
-                const data = await res.json();
-
+                let response = await send(false);
+                let data = await response.json();
+                if (data.confirmationRequired && confirm(data.errorMessage + '\\n\\nTiếp tục thực thi?')) {
+                    response = await send(true);
+                    data = await response.json();
+                }
                 if (!data.success) {
-                    timing.innerText = `Lỗi (${data.elapsedMilliseconds} ms)`;
-                    wrapper.innerHTML = `<div style="color: #E63946; padding: 16px;"><i class="fa-solid fa-triangle-exclamation"></i> Lỗi: ${data.errorMessage}</div>`;
+                    timing.innerText = 'Không thực thi';
+                    wrapper.textContent = data.errorMessage || 'Truy vấn thất bại.';
                     return;
                 }
-
-                timing.innerText = `Thành công trong ${data.elapsedMilliseconds} ms &bull; ${data.rowsAffected} dòng ảnh hưởng/kết quả`;
-
+                timing.innerText = 'Thành công trong ' + data.elapsedMilliseconds + ' ms • ' + data.rowsAffected + ' dòng';
                 if (!data.columnNames || data.columnNames.length === 0) {
-                    wrapper.innerHTML = `<div style="color: #52B788; padding: 16px;"><i class="fa-solid fa-circle-check"></i> Câu lệnh đã chạy thành công. Không có tập kết quả trả về.</div>`;
+                    wrapper.textContent = 'Câu lệnh đã chạy thành công. Không có tập kết quả.';
                     return;
                 }
-
-                let html = '<table class="data-table-custom"><thead><tr>';
-                data.columnNames.forEach(col => {
-                    html += `<th>${col}</th>`;
-                });
-                html += '</tr></thead><tbody>';
-
-                data.rows.forEach(r => {
-                    html += '<tr>';
+                const table = document.createElement('table');
+                table.className = 'data-table-custom';
+                const head = table.createTHead().insertRow();
+                data.columnNames.forEach(col => { const th = document.createElement('th'); th.textContent = col; head.appendChild(th); });
+                const body = table.createTBody();
+                data.rows.forEach(row => {
+                    const tr = body.insertRow();
                     data.columnNames.forEach(col => {
-                        const val = r[col.toLowerCase()] ?? r[col];
-                        html += `<td>${val === null ? '<span style="color:var(--text-muted); font-style:italic;">NULL</span>' : val}</td>`;
+                        const cell = tr.insertCell();
+                        const val = row[col.toLowerCase()] ?? row[col];
+                        cell.textContent = val == null ? 'NULL' : String(val);
                     });
-                    html += '</tr>';
                 });
-                html += '</tbody></table>';
-
-                wrapper.innerHTML = html;
+                wrapper.replaceChildren(table);
+                if (data.truncated) {
+                    const note = document.createElement('p');
+                    note.textContent = 'Đã giới hạn kết quả ở 200 dòng.';
+                    wrapper.appendChild(note);
+                }
             } catch (err) {
                 timing.innerText = 'Lỗi kết nối';
-                wrapper.innerHTML = `<div style="color: #E63946; padding: 16px;">${err.message}</div>`;
+                wrapper.textContent = err.message;
             }
+        }
+
+        async function executeCustomScript() {
+            const script = document.getElementById('customScriptInput').value;
+            if (!script.trim() || !confirm('Chạy script SQL trên PerfumeDb? Các thay đổi sẽ được ghi audit.')) return;
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+            const box = document.getElementById('seedStatusBox');
+            box.style.display = 'block';
+            box.textContent = 'Đang chạy script...';
+            try {
+                let res = await fetch('/admin/databaseconsole/executescript', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': token },
+                    body: JSON.stringify({ script, confirmed: false })
+                });
+                let data = await res.json();
+                if (data.confirmationRequired && confirm(data.errorMessage + '\\n\\nTiếp tục?')) {
+                    res = await fetch('/admin/databaseconsole/executescript', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': token },
+                        body: JSON.stringify({ script, confirmed: true })
+                    });
+                    data = await res.json();
+                }
+                box.textContent = data.success ? 'Script hoàn tất, ' + data.rowsAffected + ' dòng ảnh hưởng.' : (data.errorMessage || 'Script thất bại.');
+            } catch (err) { box.textContent = 'Lỗi mạng: ' + err.message; }
         }
 
         function clearQueryInput() {
@@ -514,41 +545,22 @@
         }
 
         async function executeDefaultSeed() {
+            if (!confirm('Nạp dữ liệu mẫu vào PerfumeDb? Script có thể ghi nhiều bản ghi.')) return;
             const btn = document.getElementById('btnExecuteSeed');
             const box = document.getElementById('seedStatusBox');
             const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
-
             btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang nạp dữ liệu từ file SQL...';
             box.style.display = 'block';
-            box.innerHTML = '<div style="color: var(--gold-primary);"><i class="fa-solid fa-spinner fa-spin"></i> Đang đọc và thực thi scripts/seed_perfume_data.sql...</div>';
-
+            box.textContent = 'Đang nạp dữ liệu...';
             try {
-                const res = await fetch('/admin/databaseconsole/loaddefaultseedscript', {
-                    method: 'POST',
-                    headers: { 'RequestVerificationToken': token }
+                const res = await fetch('/admin/databaseconsole/loaddefaultseedscript?confirmed=true', {
+                    method: 'POST', headers: { 'RequestVerificationToken': token }
                 });
                 const data = await res.json();
-
-                if (data.success) {
-                    box.innerHTML = `
-                        <div style="background: rgba(82, 183, 136, 0.15); border: 1px solid rgba(82, 183, 136, 0.4); color: #52B788; padding: 16px; border-radius: var(--radius-sm);">
-                            <h4 style="margin-bottom: 4px;"><i class="fa-solid fa-circle-check"></i> Nạp Dữ Liệu Thành Công Rực Rỡ!</h4>
-                            <p style="font-size: 0.85rem;">Thời gian: ${data.elapsed} ms &bull; Đã nạp thành công bộ sưu tập nước hoa, thương hiệu, nốt hương và vouchers.</p>
-                            <a href="/admin/databaseconsole" class="btn-luxe" style="display: inline-block; margin-top: 10px; padding: 8px 18px; font-size: 0.8rem;">Làm Mới Bảng Dữ Liệu</a>
-                        </div>`;
-                } else {
-                    box.innerHTML = `
-                        <div style="background: rgba(230, 57, 70, 0.15); border: 1px solid rgba(230, 57, 70, 0.4); color: #E63946; padding: 16px; border-radius: var(--radius-sm);">
-                            <i class="fa-solid fa-triangle-exclamation"></i> Lỗi: ${data.errorMessage}
-                        </div>`;
-                }
-            } catch (err) {
-                box.innerHTML = `<div style="color: #E63946;">Lỗi mạng: ${err.message}</div>`;
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-bolt"></i> Nạp Ngay Bộ Dữ Liệu Nước Hoa Mẫu';
-            }
+                box.textContent = data.success ? 'Nạp xong (' + data.rowsAffected + ' dòng).' : (data.errorMessage || 'Nạp dữ liệu thất bại.');
+            } catch (err) { box.textContent = 'Lỗi mạng: ' + err.message; }
+            finally { btn.disabled = false; }
         }
+
     </script>
 }

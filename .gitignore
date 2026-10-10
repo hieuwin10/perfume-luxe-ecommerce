@@ -7,3 +7,9 @@ obj/
 .idea/
 *.log
 docker_data/
+.env
+.env.*
+!.env.example
+backups/
+src/Perfume.Web/App_Data/**
+!src/Perfume.Web/App_Data/.gitkeep

@@ -27,6 +27,7 @@
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body class="dark-theme">
+    <div hidden aria-hidden="true">@Html.AntiForgeryToken()</div>
     <!-- Top Announcement Bar -->
     <div style="background: var(--bg-surface-elevated); border-bottom: 1px solid var(--border-card); font-size: 0.78rem; padding: 6px 16px; text-align: center; color: var(--text-secondary); display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap;">
         <div><i class="fa-solid fa-crown text-gold-gradient" style="margin-right: 6px;"></i> Cam kết 100% Nước Hoa Chính Hãng Nhập Khẩu</div>
@@ -53,14 +54,13 @@
 
                     @if (SignInManager.IsSignedIn(User))
                     {
-                        // Show Admin/Manager links in nav
-                        if (User.IsInRole("Admin") || User.IsInRole("StoreManager"))
+                        @if (User.IsInRole("Admin"))
                         {
-                        <li>
-                            <a href="/admin/admindashboard" class="nav-link" style="background: rgba(212,175,55,0.12); padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border-subtle); color: var(--gold-primary); font-size: 0.82rem;">
-                                <i class="fa-solid fa-gauge-high" style="margin-right: 4px;"></i> Dashboard
-                            </a>
-                        </li>
+                            <li><a href="/admin/admindashboard" class="nav-link" style="background: rgba(212,175,55,0.12); padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border-subtle); color: var(--gold-primary); font-size: 0.82rem;"><i class="fa-solid fa-gauge-high" style="margin-right: 4px;"></i> Quản trị</a></li>
+                        }
+                        else if (User.IsInRole("StoreManager"))
+                        {
+                            <li><a href="/admin/storemanager" class="nav-link" style="background: rgba(212,175,55,0.12); padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border-subtle); color: var(--gold-primary); font-size: 0.82rem;"><i class="fa-solid fa-chart-line" style="margin-right: 4px;"></i> Quản lý cửa hàng</a></li>
                         }
                     }
                 </ul>
@@ -97,14 +97,15 @@
                             <a href="/account/profile" class="dropdown-item-luxe">
                                 <i class="fa-solid fa-user-circle"></i> Tài Khoản Của Tôi
                             </a>
-                            @if (User.IsInRole("Admin") || User.IsInRole("StoreManager"))
+                            <a href="/account/myorders" class="dropdown-item-luxe"><i class="fa-solid fa-box"></i> Đơn hàng của tôi</a>
+                            @if (User.IsInRole("Admin"))
                             {
-                                <a href="/admin/admindashboard" class="dropdown-item-luxe">
-                                    <i class="fa-solid fa-gauge-high"></i> Admin Dashboard
-                                </a>
-                                <a href="/admin/databaseconsole" class="dropdown-item-luxe">
-                                    <i class="fa-solid fa-database"></i> Quản Lý CSDL
-                                </a>
+                                <a href="/admin/admindashboard" class="dropdown-item-luxe"><i class="fa-solid fa-gauge-high"></i> Admin Dashboard</a>
+                                <a href="/admin/databaseconsole" class="dropdown-item-luxe"><i class="fa-solid fa-database"></i> Database Console</a>
+                            }
+                            else if (User.IsInRole("StoreManager"))
+                            {
+                                <a href="/admin/storemanager" class="dropdown-item-luxe"><i class="fa-solid fa-chart-line"></i> Thống kê cửa hàng</a>
                             }
                             <div style="border-top: 1px solid var(--border-card); margin: 4px 0;"></div>
                             <form method="post" action="/account/logout" style="margin: 0;">
@@ -273,6 +274,11 @@
         closeCartBtn?.addEventListener('click', closeCart);
         cartOverlay?.addEventListener('click', closeCart);
 
+        function antiForgeryHeaders() {
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+            return token ? { 'RequestVerificationToken': token } : {};
+        }
+
         async function refreshCartState() {
             try {
                 const res = await fetch('/Cart/GetCartState');
@@ -319,7 +325,7 @@
             try {
                 const res = await fetch('/Cart/AddToCart', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json', ...antiForgeryHeaders() },
                     body: JSON.stringify({ productSlug: slug, variantId: variantId, quantity: quantity })
                 });
                 const data = await res.json();
@@ -336,7 +342,7 @@
             try {
                 const res = await fetch('/Cart/RemoveItem', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json', ...antiForgeryHeaders() },
                     body: JSON.stringify({ productId, variantId })
                 });
                 refreshCartState();

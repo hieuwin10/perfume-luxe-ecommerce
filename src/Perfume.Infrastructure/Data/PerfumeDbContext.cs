@@ -26,6 +26,7 @@ public class PerfumeDbContext : IdentityDbContext<AppUser, AppRole, string>
     public DbSet<OrderItem> OrderItems => Set<OrderItem>();
     public DbSet<Voucher> Vouchers => Set<Voucher>();
     public DbSet<Review> Reviews => Set<Review>();
+    public DbSet<DatabaseAuditLog> DatabaseAuditLogs => Set<DatabaseAuditLog>();
     public DbSet<BlogCategory> BlogCategories => Set<BlogCategory>();
     public DbSet<BlogPost> BlogPosts => Set<BlogPost>();
     public DbSet<UserLoyalty> UserLoyalties => Set<UserLoyalty>();

@@ -5,15 +5,29 @@ services:
       dockerfile: Dockerfile
     container_name: perfume_web_app
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=PerfumeDb;User Id=sa;Password=PerfumePass@2026!;TrustServerCertificate=True;
-      - ConnectionStrings__Redis=redis:6379
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: "Server=sqlserver,1433;Database=PerfumeDb;User Id=sa;Password=${MSSQL_SA_PASSWORD:?Set MSSQL_SA_PASSWORD in .env};TrustServerCertificate=True;"
+      ConnectionStrings__Redis: redis:6379
+      Database__BackupPath: /var/opt/mssql/backup
+      Storage__RootPath: /app/App_Data
+      InitialAdmin__Email: ${INITIAL_ADMIN_EMAIL:-}
+      InitialAdmin__Password: ${INITIAL_ADMIN_PASSWORD:-}
+      Smtp__Enabled: "true"
+      Smtp__Host: mailpit
+      Smtp__Port: 1025
+      Smtp__EnableSsl: "false"
+      Smtp__FromEmail: noreply@perfumeluxe.local
+      Smtp__FromName: PERFUME LUXE
     ports:
       - "5000:8080"
+    volumes:
+      - app_data:/app/App_Data
     depends_on:
       sqlserver:
         condition: service_healthy
       redis:
+        condition: service_started
+      mailpit:
         condition: service_started
     restart: unless-stopped
 
@@ -21,15 +35,16 @@ services:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: perfume_sqlserver
     environment:
-      - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=PerfumePass@2026!
-      - MSSQL_PID=Developer
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:?Set MSSQL_SA_PASSWORD in .env}
+      MSSQL_PID: Developer
     ports:
       - "1433:1433"
     volumes:
       - sqlserver_data:/var/opt/mssql
+      - sqlserver_backups:/var/opt/mssql/backup
     healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'PerfumePass@2026!' -C -Q 'SELECT 1' || /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'PerfumePass@2026!' -Q 'SELECT 1'"]
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$${MSSQL_SA_PASSWORD}\" -C -Q 'SELECT 1' || /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P \"$${MSSQL_SA_PASSWORD}\" -Q 'SELECT 1'"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -45,6 +60,16 @@ services:
       - redis_data:/data
     restart: unless-stopped
 
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: perfume_mailpit
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    restart: unless-stopped
+
 volumes:
   sqlserver_data:
+  sqlserver_backups:
   redis_data:
+  app_data:

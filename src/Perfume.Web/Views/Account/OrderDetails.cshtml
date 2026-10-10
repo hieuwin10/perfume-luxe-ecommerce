@@ -1,0 +1,21 @@
+@model Perfume.Domain.Entities.Order
+@{
+    ViewData["Title"] = $"Đơn hàng {Model.OrderCode}";
+}
+<div style="max-width:900px;margin:40px auto;padding:0 20px">
+    <h1>Đơn hàng @Model.OrderCode</h1>
+    <section class="luxury-card" style="padding:24px">
+        <p>Trạng thái: <strong>@Model.OrderStatus</strong> · Thanh toán: <strong>@Model.PaymentStatus</strong> (@Model.PaymentMethod)</p>
+        <p>Người nhận: @Model.CustomerName · @Model.CustomerPhone</p>
+        <p>Địa chỉ: @Model.ShippingAddress @Model.City</p>
+        @foreach (var item in Model.Items)
+        {
+            <div style="display:flex;justify-content:space-between;border-top:1px solid var(--border-card);padding:12px 0">
+                <span>@item.ProductName — @item.VariantLabel × @item.Quantity</span><strong>@((item.UnitPrice * item.Quantity).ToString("N0")) ₫</strong>
+            </div>
+        }
+        <p>Tạm tính @Model.SubTotal.ToString("N0") ₫ · Giảm @Model.DiscountAmount.ToString("N0") ₫ · Phí giao @Model.ShippingFee.ToString("N0") ₫</p>
+        <h2>Tổng: @Model.TotalAmount.ToString("N0") ₫</h2>
+    </section>
+    <p><a href="/account/myorders">← Trở về đơn hàng</a></p>
+</div>

@@ -1,0 +1,44 @@
+@model List<Perfume.Domain.Entities.Voucher>
+@{
+    ViewData["Title"] = "Voucher";
+    Layout = "_AdminLayout";
+}
+<div style="max-width:1250px;margin:auto">
+    <h1>Quản lý voucher</h1>
+    @if (TempData["Error"] != null) { <p style="color:#f87171">@TempData["Error"]</p> }
+    @if (TempData["Success"] != null) { <p style="color:#2a9d8f">@TempData["Success"]</p> }
+    <h2>Tạo voucher</h2>
+    <form method="post" action="/admin/storemanager/savevoucher" class="luxury-card" style="padding:18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">
+        @Html.AntiForgeryToken()
+        <label>Mã<input name="code" required maxlength="40" /></label>
+        <label>Mô tả<input name="description" maxlength="250" /></label>
+        <label>Giảm %<input name="discountPercent" type="number" min="0" max="100" step="0.01" /></label>
+        <label>Giảm tiền<input name="discountAmount" type="number" min="0" step="1000" /></label>
+        <label>Đơn tối thiểu<input name="minOrderAmount" type="number" min="0" value="0" /></label>
+        <label>Giảm tối đa<input name="maxDiscountAmount" type="number" min="0" /></label>
+        <label>Số lượt<input name="usageLimit" type="number" min="1" value="100" required /></label>
+        <label>Bắt đầu (UTC)<input name="validFrom" type="datetime-local" required /></label>
+        <label>Kết thúc (UTC)<input name="validTo" type="datetime-local" required /></label>
+        <label><input name="isActive" type="checkbox" value="true" checked /> Đang hoạt động</label>
+        <button class="btn-luxe" type="submit">Tạo voucher</button>
+    </form>
+    <h2 style="margin-top:28px">Voucher hiện có</h2>
+    @foreach (var v in Model)
+    {
+        <form method="post" action="/admin/storemanager/savevoucher" class="luxury-card" style="padding:18px;margin:12px 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" value="@v.Id" />
+            <label>Mã<input name="code" value="@v.Code" required maxlength="40" /></label>
+            <label>Mô tả<input name="description" value="@v.Description" maxlength="250" /></label>
+            <label>Giảm %<input name="discountPercent" type="number" min="0" max="100" step="0.01" value="@v.DiscountPercent" /></label>
+            <label>Giảm tiền<input name="discountAmount" type="number" min="0" step="1000" value="@v.DiscountAmount" /></label>
+            <label>Đơn tối thiểu<input name="minOrderAmount" type="number" min="0" value="@v.MinOrderAmount" /></label>
+            <label>Giảm tối đa<input name="maxDiscountAmount" type="number" min="0" value="@v.MaxDiscountAmount" /></label>
+            <label>Lượt dùng<input name="usageLimit" type="number" min="@v.UsedCount" value="@v.UsageLimit" required /> Đã dùng @v.UsedCount</label>
+            <label>Bắt đầu UTC<input name="validFrom" type="datetime-local" value="@v.ValidFrom.ToString("yyyy-MM-ddTHH:mm")" required /></label>
+            <label>Kết thúc UTC<input name="validTo" type="datetime-local" value="@v.ValidTo.ToString("yyyy-MM-ddTHH:mm")" required /></label>
+            <label><input name="isActive" type="checkbox" value="true" checked="@v.IsActive" /> Đang hoạt động</label>
+            <button class="btn-luxe" type="submit">Lưu thay đổi</button>
+        </form>
+    }
+</div>

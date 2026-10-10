@@ -46,6 +46,7 @@
 
     <div style="display: flex; gap: 16px; justify-content: center;">
         <a href="/" class="btn-luxe">Tiếp Tục Mua Sắm</a>
-        <a href="/admin/databaseconsole?table=Orders" class="btn-luxe-outline"><i class="fa-solid fa-database" style="margin-right: 6px;"></i> Xem Trong Admin DB Console</a>
+        @if (ViewBag.IsGuest == true) { <span class="btn-luxe-outline">Hãy lưu liên kết theo dõi an toàn đã gửi vào email</span> }
+        else { <a href="/account/myorders" class="btn-luxe-outline">Xem đơn hàng của tôi</a> }
     </div>
 </div>

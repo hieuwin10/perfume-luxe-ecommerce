@@ -13,18 +13,22 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("DefaultConnection") 
-            ?? "Server=localhost,1433;Database=PerfumeDb;User Id=sa;Password=PerfumePass@2026!;TrustServerCertificate=True;";
+        var connectionString = configuration.GetConnectionString("DefaultConnection");
+        if (string.IsNullOrWhiteSpace(connectionString))
+            throw new InvalidOperationException("ConnectionStrings:DefaultConnection is required. Configure local secrets or environment variables.");
 
         services.AddDbContext<PerfumeDbContext>(options =>
             options.UseSqlServer(connectionString, b => b.MigrationsAssembly(typeof(PerfumeDbContext).Assembly.FullName)));
-
         services.AddIdentity<AppUser, AppRole>(options =>
         {
-            options.Password.RequireDigit = false;
-            options.Password.RequiredLength = 6;
-            options.Password.RequireNonAlphanumeric = false;
-            options.Password.RequireUppercase = false;
+            options.Password.RequireDigit = true;
+            options.Password.RequiredLength = 10;
+            options.Password.RequireNonAlphanumeric = true;
+            options.Password.RequireUppercase = true;
+            options.Password.RequireLowercase = true;
+            options.Lockout.AllowedForNewUsers = true;
+            options.Lockout.MaxFailedAccessAttempts = 5;
+            options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(10);
             options.User.RequireUniqueEmail = true;
         })
         .AddEntityFrameworkStores<PerfumeDbContext>()
@@ -34,7 +38,7 @@ public static class DependencyInjection
         services.AddScoped<IPerfumeCatalogService, PerfumeCatalogService>();
         services.AddScoped<IOrderService, OrderService>();
         services.AddScoped<IBlogService, BlogService>();
-
+        services.AddScoped<IOrderEmailSender, SmtpOrderEmailSender>();
         return services;
     }
 }

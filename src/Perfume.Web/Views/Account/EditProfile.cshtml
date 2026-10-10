@@ -1,0 +1,19 @@
+@model Perfume.Infrastructure.Identity.AppUser
+@{
+    ViewData["Title"] = "Chỉnh sửa hồ sơ";
+}
+<div style="max-width:720px;margin:40px auto;padding:0 20px">
+    <div class="luxury-card" style="padding:28px">
+        <h1>Chỉnh sửa hồ sơ</h1>
+        @if (TempData["Success"] != null) { <p>@TempData["Success"]</p> }
+        <div asp-validation-summary="All" style="color:#f87171"></div>
+        <form method="post" action="/account/editprofile" style="display:grid;gap:16px">
+            @Html.AntiForgeryToken()
+            <label>Họ và tên<input name="fullName" value="@Model.FullName" maxlength="100" required /></label>
+            <label>Email<input value="@Model.Email" readonly /></label>
+            <label>Số điện thoại<input name="phoneNumber" value="@Model.PhoneNumber" maxlength="30" /></label>
+            <label>Địa chỉ<input name="address" value="@Model.Address" maxlength="500" /></label>
+            <button class="btn-luxe" type="submit">Lưu hồ sơ</button>
+        </form>
+    </div>
+</div>

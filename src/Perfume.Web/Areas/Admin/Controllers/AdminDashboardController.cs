@@ -23,6 +23,7 @@ public class AdminDashboardController : Controller
         _userManager = userManager;
     }
 
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Index()
     {
         var vm = new AdminDashboardViewModel
@@ -65,14 +66,37 @@ public class AdminDashboardController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ChangeUserRole(string userId, string newRole)
     {
+        if (newRole is not ("Admin" or "StoreManager" or "Customer"))
+        {
+            TempData["Error"] = "Role được chọn không hợp lệ.";
+            return RedirectToAction(nameof(Users));
+        }
         var user = await _userManager.FindByIdAsync(userId);
         if (user == null) return NotFound();
-
         var currentRoles = await _userManager.GetRolesAsync(user);
-        await _userManager.RemoveFromRolesAsync(user, currentRoles);
-        await _userManager.AddToRoleAsync(user, newRole);
+        if (string.Equals(user.Id, _userManager.GetUserId(User), StringComparison.Ordinal) && newRole != "Admin")
+        {
+            TempData["Error"] = "Không thể tự hạ quyền Admin của tài khoản đang đăng nhập.";
+            return RedirectToAction(nameof(Users));
+        }
+        if (currentRoles.Contains("Admin") && newRole != "Admin" &&
+            (await _userManager.GetUsersInRoleAsync("Admin")).Count <= 1)
+        {
+            TempData["Error"] = "Hệ thống cần giữ lại ít nhất một tài khoản Admin.";
+            return RedirectToAction(nameof(Users));
+        }
 
-        TempData["Success"] = $"Đã đổi role của {user.FullName} sang {newRole}!";
+        await using var transaction = await _db.Database.BeginTransactionAsync();
+        var remove = await _userManager.RemoveFromRolesAsync(user, currentRoles);
+        var add = remove.Succeeded ? await _userManager.AddToRoleAsync(user, newRole) : remove;
+        if (!add.Succeeded)
+        {
+            await transaction.RollbackAsync();
+            TempData["Error"] = string.Join(" ", add.Errors.Select(e => e.Description));
+            return RedirectToAction(nameof(Users));
+        }
+        await transaction.CommitAsync();
+        TempData["Success"] = $"Đã đổi role của {user.FullName} sang {newRole}.";
         return RedirectToAction(nameof(Users));
     }
 
@@ -83,8 +107,20 @@ public class AdminDashboardController : Controller
     {
         var user = await _userManager.FindByIdAsync(userId);
         if (user == null) return NotFound();
+        var roles = await _userManager.GetRolesAsync(user);
+        if (string.Equals(user.Id, _userManager.GetUserId(User), StringComparison.Ordinal) ||
+            (roles.Contains("Admin") && (await _userManager.GetUsersInRoleAsync("Admin")).Count <= 1))
+        {
+            TempData["Error"] = "Không thể tự xóa tài khoản đang đăng nhập hoặc xóa Admin cuối cùng.";
+            return RedirectToAction(nameof(Users));
+        }
         var name = user.FullName;
-        await _userManager.DeleteAsync(user);
+        var result = await _userManager.DeleteAsync(user);
+        if (!result.Succeeded)
+        {
+            TempData["Error"] = string.Join(" ", result.Errors.Select(e => e.Description));
+            return RedirectToAction(nameof(Users));
+        }
         TempData["Success"] = $"Đã xóa tài khoản {name}.";
         return RedirectToAction(nameof(Users));
     }
@@ -93,7 +129,9 @@ public class AdminDashboardController : Controller
     public async Task<IActionResult> Products(int page = 1, string? search = null)
     {
         const int pageSize = 20;
+        page = Math.Max(1, page);
         var query = _db.Products
+            .Include(p => p.Variants)
             .Include(p => p.Brand)
             .Include(p => p.Category)
             .AsQueryable();
@@ -129,6 +167,7 @@ public class AdminDashboardController : Controller
     public async Task<IActionResult> Orders(int page = 1)
     {
         const int pageSize = 20;
+        page = Math.Max(1, page);
         var total = await _db.Orders.CountAsync();
         var orders = await _db.Orders
             .Include(o => o.Items)
@@ -144,6 +183,7 @@ public class AdminDashboardController : Controller
     }
 
     // ─── ERD ──────────────────────────────────────────────────────────────────
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Erd()
     {
         var tables = await _dbConsole.GetAllTablesAsync();

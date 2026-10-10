@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Perfume.Domain.Enums;
 
 namespace Perfume.Application.DTOs;
@@ -115,9 +116,13 @@ public class CartItemDto
 
 public class CheckoutRequestDto
 {
+    [Required, StringLength(120)]
     public string CustomerName { get; set; } = string.Empty;
+    [Required, Phone, StringLength(32)]
     public string CustomerPhone { get; set; } = string.Empty;
+    [Required, EmailAddress, StringLength(254)]
     public string CustomerEmail { get; set; } = string.Empty;
+    [Required, StringLength(500)]
     public string ShippingAddress { get; set; } = string.Empty;
     public string? City { get; set; }
     public string? OrderNotes { get; set; }

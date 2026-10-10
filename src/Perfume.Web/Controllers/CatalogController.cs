@@ -1,16 +1,20 @@
 using Microsoft.AspNetCore.Mvc;
 using Perfume.Application.DTOs;
 using Perfume.Application.Interfaces;
+using Perfume.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Perfume.Web.Controllers;
 
 public class CatalogController : Controller
 {
     private readonly IPerfumeCatalogService _catalogService;
+    private readonly PerfumeDbContext _db;
 
-    public CatalogController(IPerfumeCatalogService catalogService)
+    public CatalogController(IPerfumeCatalogService catalogService, PerfumeDbContext db)
     {
         _catalogService = catalogService;
+        _db = db;
     }
 
     [HttpGet]
@@ -44,6 +48,8 @@ public class CatalogController : Controller
         var relatedFilter = new ProductFilterParams { FamilySlug = product.FamilyName, PageSize = 4 };
         var (relatedItems, _) = await _catalogService.GetProductsAsync(relatedFilter);
         ViewBag.RelatedProducts = relatedItems.Where(p => p.Id != product.Id).Take(4).ToList();
+        ViewBag.ApprovedReviews = await _db.Reviews.Where(r => r.ProductId == product.Id && r.IsApproved)
+            .OrderByDescending(r => r.CreatedAt).Take(50).ToListAsync();
 
         return View(product);
     }

@@ -1,4 +1,5 @@
 @model List<Perfume.Domain.Entities.Order>
+@using Perfume.Domain.Enums
 @{
     ViewData["Title"] = "Quản Lý Đơn Hàng";
     Layout = "_AdminLayout";
@@ -20,7 +21,9 @@
         </span>
     </div>
 
-    <div class="luxury-card" style="padding: 0; overflow: hidden;">
+    @if (TempData["Success"] != null) { <div class="luxury-card" style="padding:12px;margin-bottom:12px">@TempData["Success"]</div> }
+    @if (TempData["Error"] != null) { <div class="luxury-card" style="padding:12px;margin-bottom:12px;color:#f87171">@TempData["Error"]</div> }
+    <div class="luxury-card" style="padding: 0; overflow: auto;">
         <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem;">
             <thead>
                 <tr style="background: var(--bg-surface-elevated); border-bottom: 1px solid var(--border-card); color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">
@@ -30,13 +33,14 @@
                     <th style="padding: 14px 20px;">Trạng Thái</th>
                     <th style="padding: 14px 20px;">Tổng Tiền</th>
                     <th style="padding: 14px 20px;">Thời Gian</th>
+                    <th style="padding: 14px 20px;">Thanh Toán / Thao Tác</th>
                 </tr>
             </thead>
             <tbody>
                 @if (Model.Count == 0)
                 {
                     <tr>
-                        <td colspan="6" style="padding: 40px; text-align: center; color: var(--text-muted);">
+                        <td colspan="7" style="padding: 40px; text-align: center; color: var(--text-muted);">
                             Chưa có đơn hàng nào được ghi nhận.
                         </td>
                     </tr>
@@ -64,6 +68,33 @@
                         </td>
                         <td style="padding: 14px 20px; color: var(--text-muted); font-size: 0.82rem;">
                             @o.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                        </td>
+                        <td style="padding: 12px 16px; min-width: 230px;">
+                            <div style="font-size:.8rem;margin-bottom:6px">@o.PaymentMethod · @o.PaymentStatus</div>
+                            @if (o.OrderStatus == OrderStatus.Pending)
+                            {
+                                <form method="post" action="/admin/storemanager/updateorderstatus" style="display:flex;gap:6px;align-items:center;margin:0 0 6px">
+                                    @Html.AntiForgeryToken()<input type="hidden" name="orderId" value="@o.Id" />
+                                    <select name="status"><option value="@((int)OrderStatus.Confirmed)">Xác nhận</option><option value="@((int)OrderStatus.Cancelled)">Hủy</option></select>
+                                    <button class="btn-luxe" type="submit">Cập nhật</button>
+                                </form>
+                            }
+                            else if (o.OrderStatus == OrderStatus.Confirmed)
+                            {
+                                <form method="post" action="/admin/storemanager/updateorderstatus" style="display:flex;gap:6px;align-items:center;margin:0 0 6px">
+                                    @Html.AntiForgeryToken()<input type="hidden" name="orderId" value="@o.Id" /><input type="hidden" name="status" value="@((int)OrderStatus.Shipping)" />
+                                    <button class="btn-luxe" type="submit">Bàn giao vận chuyển</button>
+                                </form>
+                                <form method="post" action="/admin/storemanager/updateorderstatus" style="margin:0 0 6px">@Html.AntiForgeryToken()<input type="hidden" name="orderId" value="@o.Id" /><input type="hidden" name="status" value="@((int)OrderStatus.Cancelled)" /><button class="btn-luxe-outline" type="submit">Hủy đơn</button></form>
+                            }
+                            else if (o.OrderStatus == OrderStatus.Shipping)
+                            {
+                                <form method="post" action="/admin/storemanager/updateorderstatus" style="margin:0 0 6px">@Html.AntiForgeryToken()<input type="hidden" name="orderId" value="@o.Id" /><input type="hidden" name="status" value="@((int)OrderStatus.Delivered)" /><button class="btn-luxe" type="submit">Xác nhận giao</button></form>
+                            }
+                            @if (o.OrderStatus == OrderStatus.Delivered && o.PaymentMethod == PaymentMethod.COD && o.PaymentStatus != PaymentStatus.Completed)
+                            {
+                                <form method="post" action="/admin/storemanager/confirmcodpayment" style="margin:0">@Html.AntiForgeryToken()<input type="hidden" name="orderId" value="@o.Id" /><button class="btn-luxe" type="submit">Xác nhận đã thu COD</button></form>
+                            }
                         </td>
                     </tr>
                 }

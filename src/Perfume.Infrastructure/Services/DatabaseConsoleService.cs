@@ -14,8 +14,12 @@ public class DatabaseConsoleService : IDatabaseConsoleService
 
     public DatabaseConsoleService(IConfiguration configuration)
     {
-        _connectionString = configuration.GetConnectionString("DefaultConnection") 
+        var configured = configuration.GetConnectionString("DefaultConnection")
             ?? throw new InvalidOperationException("DefaultConnection string not found.");
+        var builder = new SqlConnectionStringBuilder(configured);
+        if (!string.Equals(builder.InitialCatalog, "PerfumeDb", StringComparison.OrdinalIgnoreCase))
+            throw new InvalidOperationException("Database Console chỉ được kết nối với database PerfumeDb.");
+        _connectionString = builder.ConnectionString;
     }
 
     private SqlConnection CreateConnection() => new SqlConnection(_connectionString);
@@ -71,6 +75,8 @@ public class DatabaseConsoleService : IDatabaseConsoleService
 
     public async Task<TableDataResult> GetTableDataAsync(string tableName, int page = 1, int pageSize = 20, string? search = null, string? sortBy = null, bool isAscending = true)
     {
+        page = Math.Clamp(page, 1, 100000);
+        pageSize = Math.Clamp(pageSize, 1, 100);
         var safeTableName = await ValidateTableNameAsync(tableName);
         var columns = await GetTableColumnsAsync(safeTableName);
         
@@ -210,6 +216,7 @@ public class DatabaseConsoleService : IDatabaseConsoleService
 
         try
         {
+            EnsureApplicationDatabaseScope(sql);
             using var db = CreateConnection();
             await db.OpenAsync();
 
@@ -220,13 +227,13 @@ public class DatabaseConsoleService : IDatabaseConsoleService
 
             if (isSelect)
             {
-                using var reader = await db.ExecuteReaderAsync(sql);
+                using var reader = await db.ExecuteReaderAsync(new CommandDefinition(sql, commandTimeout: 30));
                 for (int i = 0; i < reader.FieldCount; i++)
                 {
                     result.ColumnNames.Add(reader.GetName(i));
                 }
 
-                while (await reader.ReadAsync())
+                while (result.Rows.Count < 200 && await reader.ReadAsync())
                 {
                     var row = new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
                     for (int i = 0; i < reader.FieldCount; i++)
@@ -237,10 +244,11 @@ public class DatabaseConsoleService : IDatabaseConsoleService
                     result.Rows.Add(row);
                 }
                 result.RowsAffected = result.Rows.Count;
+                result.Truncated = await reader.ReadAsync();
             }
             else
             {
-                result.RowsAffected = await db.ExecuteAsync(sql);
+                result.RowsAffected = await db.ExecuteAsync(new CommandDefinition(sql, commandTimeout: 30));
             }
 
             result.Success = true;
@@ -266,6 +274,7 @@ public class DatabaseConsoleService : IDatabaseConsoleService
 
         try
         {
+            EnsureApplicationDatabaseScope(scriptContent);
             using var db = CreateConnection();
             await db.OpenAsync();
 
@@ -278,7 +287,7 @@ public class DatabaseConsoleService : IDatabaseConsoleService
                 var trimmed = batch.Trim();
                 if (string.IsNullOrWhiteSpace(trimmed)) continue;
 
-                totalAffected += await db.ExecuteAsync(trimmed);
+                totalAffected += await db.ExecuteAsync(new CommandDefinition(trimmed, commandTimeout: 60));
             }
 
             result.Success = true;
@@ -296,6 +305,15 @@ public class DatabaseConsoleService : IDatabaseConsoleService
         }
 
         return result;
+    }
+
+    private static void EnsureApplicationDatabaseScope(string sql)
+    {
+        var normalized = Regex.Replace(sql, @"--[^\r\n]*|/\*[\s\S]*?\*/|N?'(?:''|[^'])*'", " ", RegexOptions.IgnoreCase);
+        if (Regex.IsMatch(normalized, @"\b(USE|OPENROWSET|OPENDATASOURCE|OPENQUERY|BACKUP|RESTORE|ATTACH|DETACH|EXEC|EXECUTE)\b", RegexOptions.IgnoreCase) ||
+            Regex.IsMatch(normalized, @"(?:\[[^\]]+\]|[A-Za-z_][\w$#]*)\s*\.\s*(?:(?:\[[^\]]+\]|[A-Za-z_][\w$#]*)\s*)?\.\s*(?:\[[^\]]+\]|[A-Za-z_][\w$#]*)", RegexOptions.IgnoreCase) ||
+            Regex.IsMatch(normalized, @"\b(DBCC|SHUTDOWN|KILL|CREATE\s+LOGIN|ALTER\s+LOGIN|DROP\s+LOGIN|CREATE\s+SERVER|ALTER\s+SERVER|DROP\s+SERVER)\b", RegexOptions.IgnoreCase))
+            throw new InvalidOperationException("Database Console chỉ cho phép thao tác trong database PerfumeDb; lệnh đổi database hoặc tham chiếu database khác bị chặn.");
     }
 
     private async Task<string> ValidateTableNameAsync(string tableName)

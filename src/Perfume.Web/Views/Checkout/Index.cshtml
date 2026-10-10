@@ -27,66 +27,14 @@
                     <h3 style="font-size: 1.25rem; margin-bottom: 18px; color: var(--gold-primary);"><i class="fa-solid fa-user" style="margin-right: 8px;"></i> Thông Tin Giao Hàng</h3>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
                         <div>
-                            <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 6px; color: var(--text-secondary);">Họ & Tên *</label>
-                            <input asp-for="CustomerName" required placeholder="Nguyễn Văn A" style="width: 100%; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); color: var(--text-primary); padding: 10px 14px; border-radius: var(--radius-sm); outline: none; font-size: 0.88rem;" />
-                        </div>
-                        <div>
-                            <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 6px; color: var(--text-secondary);">Số Điện Thoại *</label>
-                            <input asp-for="CustomerPhone" required placeholder="0912 345 678" style="width: 100%; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); color: var(--text-primary); padding: 10px 14px; border-radius: var(--radius-sm); outline: none; font-size: 0.88rem;" />
-                        </div>
-                    </div>
-
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
-                        <div>
-                            <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 6px; color: var(--text-secondary);">Email Nhận Hóa Đơn *</label>
-                            <input asp-for="CustomerEmail" type="email" required placeholder="example@gmail.com" style="width: 100%; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); color: var(--text-primary); padding: 10px 14px; border-radius: var(--radius-sm); outline: none; font-size: 0.88rem;" />
-                        </div>
-                        <div>
-                            <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 6px; color: var(--text-secondary);">Tỉnh / Thành Phố</label>
-                            <input asp-for="City" placeholder="TP. Hồ Chí Minh / Hà Nội" style="width: 100%; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); color: var(--text-primary); padding: 10px 14px; border-radius: var(--radius-sm); outline: none; font-size: 0.88rem;" />
-                        </div>
-                    </div>
-
-                    <div style="margin-bottom: 16px;">
-                        <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 6px; color: var(--text-secondary);">Địa Chỉ Nhận Hàng Chi Tiết *</label>
-                        <input asp-for="ShippingAddress" required placeholder="Số nhà, tên đường, phường/xã, quận/huyện..." style="width: 100%; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); color: var(--text-primary); padding: 10px 14px; border-radius: var(--radius-sm); outline: none; font-size: 0.88rem;" />
-                    </div>
-
-                    <div>
-                        <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 6px; color: var(--text-secondary);">Ghi Chú Đơn Hàng</label>
-                        <textarea asp-for="OrderNotes" rows="2" placeholder="Ghi chú giao giờ hành chính, đóng gói hộp quà..." style="width: 100%; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); color: var(--text-primary); padding: 10px 14px; border-radius: var(--radius-sm); outline: none; font-size: 0.88rem;"></textarea>
-                    </div>
-                </div>
-
-                <!-- Section 2: Payment Method -->
-                <div style="background: var(--bg-surface); border: 1px solid var(--border-card); border-radius: var(--radius-md); padding: 24px;">
-                    <h3 style="font-size: 1.25rem; margin-bottom: 18px; color: var(--gold-primary);"><i class="fa-solid fa-credit-card" style="margin-right: 8px;"></i> Phương Thức Thanh Toán</h3>
-                    <div style="display: flex; flex-direction: column; gap: 12px;">
-                        <label style="display: flex; align-items: center; gap: 14px; padding: 14px 18px; border: 1px solid var(--border-card); border-radius: var(--radius-sm); cursor: pointer; background: var(--bg-surface-elevated);">
-                            <input type="radio" asp-for="PaymentMethod" value="COD" checked />
-                            <div>
-                                <strong style="display: block; font-size: 0.95rem;"><i class="fa-solid fa-money-bill-wave" style="color: #2A9D8F; margin-right: 6px;"></i> Thanh toán khi nhận hàng (COD)</strong>
-                                <span style="font-size: 0.8rem; color: var(--text-muted);">Kiểm tra hàng trước khi thanh toán tiền mặt cho shipper</span>
-                            </div>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 14px; padding: 14px 18px; border: 1px solid var(--border-card); border-radius: var(--radius-sm); cursor: pointer; background: var(--bg-surface-elevated);">
-                            <input type="radio" asp-for="PaymentMethod" value="VNPAY" />
-                            <div>
-                                <strong style="display: block; font-size: 0.95rem;"><i class="fa-solid fa-qrcode text-gold-gradient" style="margin-right: 6px;"></i> Cổng VNPAY / VNPAY-QR</strong>
-                                <span style="font-size: 0.8rem; color: var(--text-muted);">Quét mã QR qua ứng dụng ngân hàng hoặc thẻ nội địa</span>
-                            </div>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 14px; padding: 14px 18px; border: 1px solid var(--border-card); border-radius: var(--radius-sm); cursor: pointer; background: var(--bg-surface-elevated);">
-                            <input type="radio" asp-for="PaymentMethod" value="MoMo" />
-                            <div>
-                                <strong style="display: block; font-size: 0.95rem;"><i class="fa-solid fa-wallet" style="color: #A50064; margin-right: 6px;"></i> Ví điện tử MoMo</strong>
-                                <span style="font-size: 0.8rem; color: var(--text-muted);">Thanh toán siêu tốc qua ứng dụng Ví MoMo</span>
-                            </div>
-                        </label>
                     </div>
                 </div>
             </div>
 
+            <div style="background:rgba(42,157,143,.1);border:1px solid rgba(42,157,143,.35);border-radius:var(--radius-md);padding:16px 20px">
+                <strong><i class="fa-solid fa-money-bill-wave"></i> Thanh toán khi nhận hàng (COD)</strong>
+                <p style="margin:6px 0 0;color:var(--text-muted)">Bạn thanh toán cho nhân viên giao hàng khi nhận đơn. Cửa hàng chỉ ghi nhận đã thanh toán sau khi xác nhận đã thu tiền.</p>
+            </div>
             <!-- Right: Order Items & Voucher & Place Order Button -->
             <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 24px; box-shadow: var(--shadow-luxury);">
                 <h3 style="font-size: 1.25rem; margin-bottom: 18px; color: var(--gold-primary);">Đơn Hàng Của Bạn (@cart.Count món)</h3>
@@ -154,13 +102,14 @@
 
         async function applyVoucher() {
             const code = document.getElementById('voucherCodeInput').value;
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
             const msgEl = document.getElementById('voucherMsg');
             if (!code.trim()) return;
 
             try {
                 const res = await fetch('/Checkout/CheckVoucher', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': token },
                     body: JSON.stringify({ code })
                 });
                 const data = await res.json();
