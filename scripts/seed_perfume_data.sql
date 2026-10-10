@@ -89,7 +89,7 @@ DECLARE @FamGourmand INT = (SELECT TOP 1 Id FROM FragranceFamilies WHERE Slug = 
 IF NOT EXISTS (SELECT 1 FROM Products WHERE Slug = 'dior-sauvage-elixir')
 BEGIN
     -- 1. Dior Sauvage Elixir
-    INSERT INTO Products (Name, Slug, Sku, ShortDescription, FullDescription, BrandId, CategoryId, FragranceFamilyId, Gender, Concentration, Longevity, Sillage, ReleaseYear, SeasonRecommendation, BasePrice, MainImageUrl, IsFeatured, IsBestSeller, IsNewArrival, IsInStock, RatingAverage, RatingCount, MetaTitle, MetaDescription, CreatedAt, IsDeleted)
+    INSERT INTO Products (Name, Slug, Sku, ShortDescription, FullDescription, BrandId, CategoryId, FragranceFamilyId, Gender, Concentration, Longevity, Sillage, ReleaseYear, SeasonRecommendation, BasePrice, MainImageUrl, IsFeatured, IsBestSeller, IsNewArrival, IsInStock, RatingAverage, RatingCount, ViewCount, MetaTitle, MetaDescription, CreatedAt, IsDeleted)
     VALUES (
         N'Dior Sauvage Elixir Parfum',
         'dior-sauvage-elixir',
@@ -98,14 +98,14 @@ BEGIN
         N'Dior Sauvage Elixir tái hiện lại DNA kinh điển của dòng Sauvage nhưng nâng tầm lên một đẳng cấp hoàn toàn mới. Nồng độ tinh dầu cực cao kết hợp giữa gia vị ấm nồng, hoa oải hương tươi tắn và hương gỗ phong phú mang lại sức hút thôi miên đối phương.',
         @BrandDior, @CatMen, @FamOriental, 2, 4, N'Trên 12 giờ', N'Tỏa hương xa trên 2 mét', 2021, N'Thu, Đông, Đêm tiệc',
         3850000, 'https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=800&q=80',
-        1, 1, 0, 1, 4.9, 128,
+        1, 1, 0, 1, 4.9, 128, 1250,
         N'Dior Sauvage Elixir Parfum Chính Hãng | Nước Hoa Nam Đỉnh Cao',
         N'Mua nước hoa Dior Sauvage Elixir Parfum chính hãng. Hương gỗ cay nồng sang trọng, lưu hương trên 12h, cam kết 100% chuẩn Pháp.',
         GETUTCDATE(), 0
     );
 
     -- 2. Bleu de Chanel Parfum
-    INSERT INTO Products (Name, Slug, Sku, ShortDescription, FullDescription, BrandId, CategoryId, FragranceFamilyId, Gender, Concentration, Longevity, Sillage, ReleaseYear, SeasonRecommendation, BasePrice, MainImageUrl, IsFeatured, IsBestSeller, IsNewArrival, IsInStock, RatingAverage, RatingCount, MetaTitle, MetaDescription, CreatedAt, IsDeleted)
+    INSERT INTO Products (Name, Slug, Sku, ShortDescription, FullDescription, BrandId, CategoryId, FragranceFamilyId, Gender, Concentration, Longevity, Sillage, ReleaseYear, SeasonRecommendation, BasePrice, MainImageUrl, IsFeatured, IsBestSeller, IsNewArrival, IsInStock, RatingAverage, RatingCount, ViewCount, MetaTitle, MetaDescription, CreatedAt, IsDeleted)
     VALUES (
         N'Bleu de Chanel Parfum',
         'bleu-de-chanel-parfum',
@@ -114,14 +114,14 @@ BEGIN
         N'Bleu de Chanel Parfum thể hiện sự tinh túy thuần khiết nhất của dòng Bleu. Mở đầu bằng sự tươi mát rực rỡ của cam chanh, nhanh chóng chuyển sang nốt hương gỗ đàn hương New Caledonia ấm áp và sâu lắng vô cùng sang trọng.',
         @BrandChanel, @CatMen, @FamWoody, 2, 4, N'10 - 12 giờ', N'Tỏa hương trong bán kính 1 - 2 mét', 2018, N'Bốn mùa, Mọi hoàn cảnh',
         3650000, 'https://images.unsplash.com/photo-1523293182086-7651a899d37f?auto=format&fit=crop&w=800&q=80',
-        1, 1, 0, 1, 4.8, 95,
+        1, 1, 0, 1, 4.8, 95, 980,
         N'Bleu de Chanel Parfum Chính Hãng | Biểu Tượng Lịch Lãm',
         N'Nước hoa Bleu de Chanel Parfum chính hãng - nồng độ tinh dầu cao nhất dòng Bleu, sang trọng và chuẩn mực quý ông.',
         GETUTCDATE(), 0
     );
 
     -- 3. Creed Aventus
-    INSERT INTO Products (Name, Slug, Sku, ShortDescription, FullDescription, BrandId, CategoryId, FragranceFamilyId, Gender, Concentration, Longevity, Sillage, ReleaseYear, SeasonRecommendation, BasePrice, MainImageUrl, IsFeatured, IsBestSeller, IsNewArrival, IsInStock, RatingAverage, RatingCount, MetaTitle, MetaDescription, CreatedAt, IsDeleted)
+    INSERT INTO Products (Name, Slug, Sku, ShortDescription, FullDescription, BrandId, CategoryId, FragranceFamilyId, Gender, Concentration, Longevity, Sillage, ReleaseYear, SeasonRecommendation, BasePrice, MainImageUrl, IsFeatured, IsBestSeller, IsNewArrival, IsInStock, RatingAverage, RatingCount, ViewCount, MetaTitle, MetaDescription, CreatedAt, IsDeleted)
     VALUES (
         N'Creed Aventus Millesime EDP',
         'creed-aventus-edp',
@@ -130,14 +130,14 @@ BEGIN
         N'Lấy cảm hứng từ cuộc đời oanh liệt của Hoàng đế Napoleon, Creed Aventus là sự tôn vinh sức mạnh, tầm nhìn và thành công. Sự kết hợp độc nhất giữa quả dứa tươi, khói bạch dương và long diên hương tạo nên một mùi hương hoàng gia không thể trộn lẫn.',
         @BrandCreed, @CatMen, @FamFresh, 2, 3, N'8 - 10 giờ', N'Tỏa hương xa 2 mét', 2010, N'Xuân, Hạ, Thu, Hội nghị & Sự kiện',
         7800000, 'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=800&q=80',
-        1, 1, 0, 1, 4.9, 210,
+        1, 1, 0, 1, 4.9, 210, 2450,
         N'Creed Aventus Millesime EDP Hoàng Gia Anh | Nước Hoa Niche Cao Cấp',
         N'Sở hữu ngay Creed Aventus EDP - Biểu tượng đế vương của phái mạnh với nốt dứa khói trứ danh. Hàng chính hãng đầy đủ tem hộp.',
         GETUTCDATE(), 0
     );
 
     -- 4. Tom Ford Tobacco Vanille
-    INSERT INTO Products (Name, Slug, Sku, ShortDescription, FullDescription, BrandId, CategoryId, FragranceFamilyId, Gender, Concentration, Longevity, Sillage, ReleaseYear, SeasonRecommendation, BasePrice, MainImageUrl, IsFeatured, IsBestSeller, IsNewArrival, IsInStock, RatingAverage, RatingCount, MetaTitle, MetaDescription, CreatedAt, IsDeleted)
+    INSERT INTO Products (Name, Slug, Sku, ShortDescription, FullDescription, BrandId, CategoryId, FragranceFamilyId, Gender, Concentration, Longevity, Sillage, ReleaseYear, SeasonRecommendation, BasePrice, MainImageUrl, IsFeatured, IsBestSeller, IsNewArrival, IsInStock, RatingAverage, RatingCount, ViewCount, MetaTitle, MetaDescription, CreatedAt, IsDeleted)
     VALUES (
         N'Tom Ford Tobacco Vanille EDP',
         'tom-ford-tobacco-vanille',
@@ -146,14 +146,14 @@ BEGIN
         N'Tobacco Vanille mở ra không gian của một câu lạc bộ quý ông London cổ điển. Mùi lá thuốc lá hảo hạng hòa cùng vani béo ngậy, gừng cay và hoa quả khô tạo nên trải nghiệm ấm áp và ngây ngất tột độ trong những đêm đông lạnh giá.',
         @BrandTomFord, @CatUnisex, @FamGourmand, 1, 3, N'Trên 12 giờ', N'Tỏa hương xa trên 2 mét', 2007, N'Thu, Đông, Đêm tiệc xa hoa',
         6800000, 'https://images.unsplash.com/photo-1547887537-6158d64c35b3?auto=format&fit=crop&w=800&q=80',
-        1, 0, 0, 1, 4.9, 74,
+        1, 0, 0, 1, 4.9, 74, 820,
         N'Tom Ford Tobacco Vanille EDP | Nước Hoa Niche Đẳng Cấp',
         N'Tom Ford Tobacco Vanille hương lá thuốc lá và vani nồng nàn. Mùi hương ấm áp xa xỉ bậc nhất cho mùa thu đông.',
         GETUTCDATE(), 0
     );
 
     -- 5. Maison Margiela Replica Jazz Club
-    INSERT INTO Products (Name, Slug, Sku, ShortDescription, FullDescription, BrandId, CategoryId, FragranceFamilyId, Gender, Concentration, Longevity, Sillage, ReleaseYear, SeasonRecommendation, BasePrice, MainImageUrl, IsFeatured, IsBestSeller, IsNewArrival, IsInStock, RatingAverage, RatingCount, MetaTitle, MetaDescription, CreatedAt, IsDeleted)
+    INSERT INTO Products (Name, Slug, Sku, ShortDescription, FullDescription, BrandId, CategoryId, FragranceFamilyId, Gender, Concentration, Longevity, Sillage, ReleaseYear, SeasonRecommendation, BasePrice, MainImageUrl, IsFeatured, IsBestSeller, IsNewArrival, IsInStock, RatingAverage, RatingCount, ViewCount, MetaTitle, MetaDescription, CreatedAt, IsDeleted)
     VALUES (
         N'Maison Margiela Replica Jazz Club EDT',
         'replica-jazz-club',
@@ -162,14 +162,14 @@ BEGIN
         N'Brooklyn, năm 2013 - Replica Jazz Club lưu giữ bầu không khí trầm lắng của một quán bar Jazz huyền thoại. Nốt hương rượu Rum nồng say, khói thuốc lá êm dịu và đậu tonka gợi cảm mang lại cảm giác thư thái nhưng đầy cuốn hút.',
         @BrandMargiela, @CatUnisex, @FamOriental, 1, 2, N'7 - 9 giờ', N'Tỏa hương thoang thoảng 1 mét', 2013, N'Thu, Đông, Hẹn hò lãng mạn',
         3300000, 'https://images.unsplash.com/photo-1615397349754-cfa2066a298e?auto=format&fit=crop&w=800&q=80',
-        1, 0, 1, 1, 4.7, 88,
+        1, 0, 1, 1, 4.7, 88, 760,
         N'Replica Jazz Club Maison Margiela Chính Hãng | Giai Điệu Rượu Rum & Thuốc Lá',
         N'Trải nghiệm không gian Jazz Club với hương rượu Rum và nốt thuốc lá ấm cúng. Thiết kế lọ thủy tinh vintage đậm chất nghệ thuật.',
         GETUTCDATE(), 0
     );
 
     -- 6. Kilian Angels'' Share
-    INSERT INTO Products (Name, Slug, Sku, ShortDescription, FullDescription, BrandId, CategoryId, FragranceFamilyId, Gender, Concentration, Longevity, Sillage, ReleaseYear, SeasonRecommendation, BasePrice, MainImageUrl, IsFeatured, IsBestSeller, IsNewArrival, IsInStock, RatingAverage, RatingCount, MetaTitle, MetaDescription, CreatedAt, IsDeleted)
+    INSERT INTO Products (Name, Slug, Sku, ShortDescription, FullDescription, BrandId, CategoryId, FragranceFamilyId, Gender, Concentration, Longevity, Sillage, ReleaseYear, SeasonRecommendation, BasePrice, MainImageUrl, IsFeatured, IsBestSeller, IsNewArrival, IsInStock, RatingAverage, RatingCount, ViewCount, MetaTitle, MetaDescription, CreatedAt, IsDeleted)
     VALUES (
         N'Kilian Angels'' Share EDP',
         'kilian-angels-share',
@@ -178,7 +178,7 @@ BEGIN
         N'Được sáng tạo bởi Kilian Hennessy - hậu duệ đời thứ 8 của đế chế rượu cognac lừng danh Hennessy. Angels'' Share là phần rượu bốc hơi lên thiên đường trong quá trình ủ. Mùi hương như một ly rượu cognac quý tộc sóng sánh trong ly pha lê lấp lánh.',
         @BrandKilian, @CatUnisex, @FamGourmand, 1, 3, N'10 - 12 giờ', N'Tỏa hương xa 2 mét', 2020, N'Thu, Đông, Tiệc tối sang trọng',
         5900000, 'https://images.unsplash.com/photo-1595425970377-c9703cf48b6d?auto=format&fit=crop&w=800&q=80',
-        1, 0, 1, 1, 4.9, 115,
+        1, 0, 1, 1, 4.9, 115, 1100,
         N'Kilian Angels'' Share EDP | Nước Hoa Rượu Cognac Xa Xỉ',
         N'Kilian Angels'' Share EDP chính hãng từ Pháp. Hương rượu cognac kết hợp gỗ sồi và quế ấm áp cho mùa lễ hội.',
         GETUTCDATE(), 0
