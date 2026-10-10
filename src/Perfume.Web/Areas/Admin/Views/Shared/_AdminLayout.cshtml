@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@(ViewData["Title"] ?? "Database Management Console") | PERFUME LUXE ADMIN</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/luxury-perfume.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="dark-theme">
+    <!-- AWS Console Style Top Navigation -->
+    <header style="background: #111116; border-bottom: 1px solid rgba(212, 175, 55, 0.2); padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1000;">
+        <div style="display: flex; align-items: center; gap: 20px;">
+            <a href="/admin/databaseconsole" style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 34px; height: 34px; border-radius: 6px; background: var(--gold-gradient); display: flex; align-items: center; justify-content: center; color: #000; font-weight: 800; font-size: 1.1rem;">
+                    <i class="fa-solid fa-database"></i>
+                </div>
+                <div>
+                    <span style="font-weight: 700; letter-spacing: 0.05em; font-size: 1.05rem; color: #FFF;">AWS-Style DB Console</span>
+                    <span style="font-size: 0.7rem; color: var(--gold-primary); display: block; line-height: 1;">PerfumeDb &bull; MS SQL Server 2022</span>
+                </div>
+            </a>
+
+            <div style="display: flex; gap: 14px; margin-left: 20px; font-size: 0.88rem;">
+                <a href="/admin/databaseconsole" style="color: var(--gold-primary); font-weight: 600;"><i class="fa-solid fa-table-cells" style="margin-right: 4px;"></i> Tables & Visual CRUD</a>
+                <a href="#queryConsoleSection" onclick="document.getElementById('queryTabBtn')?.click();" style="color: var(--text-secondary);"><i class="fa-solid fa-terminal" style="margin-right: 4px;"></i> SQL Query Runner</a>
+                <a href="#seederSection" onclick="document.getElementById('seederTabBtn')?.click();" style="color: var(--text-secondary);"><i class="fa-solid fa-file-import" style="margin-right: 4px;"></i> Script & Seeder</a>
+            </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; background: rgba(42, 157, 143, 0.15); border: 1px solid rgba(42, 157, 143, 0.4); padding: 4px 10px; border-radius: 20px; color: #2A9D8F;">
+                <span style="width: 8px; height: 8px; border-radius: 50%; background: #2A9D8F; display: inline-block;"></span>
+                <span>Database: Connected</span>
+            </div>
+
+            <!-- Dark / Light theme toggle -->
+            <button type="button" class="icon-btn" id="themeToggleBtnAdmin" style="width: 34px; height: 34px;" title="Chuyển theme">
+                <i class="fa-solid fa-moon" id="themeIconAdmin"></i>
+            </button>
+
+            <!-- Storefront Link -->
+            <a href="/" class="btn-luxe-outline" style="padding: 6px 14px; font-size: 0.78rem;">
+                <i class="fa-solid fa-store" style="margin-right: 4px;"></i> Về Cửa Hàng
+            </a>
+        </div>
+    </header>
+
+    <main>
+        @RenderBody()
+    </main>
+
+    <script>
+        (function() {
+            const saved = localStorage.getItem('perfume_luxe_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', saved);
+            document.body.className = saved === 'dark' ? 'dark-theme' : 'light-theme';
+            const icon = document.getElementById('themeIconAdmin');
+            if (icon) icon.className = saved === 'dark' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+        })();
+
+        document.getElementById('themeToggleBtnAdmin')?.addEventListener('click', function() {
+            const cur = document.documentElement.getAttribute('data-theme') || 'dark';
+            const next = cur === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('perfume_luxe_theme', next);
+            document.documentElement.setAttribute('data-theme', next);
+            document.body.className = next === 'dark' ? 'dark-theme' : 'light-theme';
+            const icon = document.getElementById('themeIconAdmin');
+            if (icon) icon.className = next === 'dark' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+        });
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

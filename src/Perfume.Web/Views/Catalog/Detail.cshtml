@@ -1,0 +1,290 @@
+@model ProductDetailDto
+@{
+    ViewData["Title"] = $"{Model.Name} Chính Hãng - {Model.BrandName}";
+    ViewData["MetaDescription"] = Model.MetaDescription ?? Model.ShortDescription;
+    ViewData["OgImage"] = Model.MainImageUrl;
+    var related = ViewBag.RelatedProducts as List<ProductCardDto> ?? new List<ProductCardDto>();
+    var defaultVariant = Model.Variants.FirstOrDefault(v => v.IsDefault) ?? Model.Variants.FirstOrDefault();
+}
+
+<div style="max-width: 1360px; margin: 40px auto; padding: 0 24px;">
+    <!-- Breadcrumbs -->
+    <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 24px;">
+        <a href="/">Trang Chủ</a> &bull; 
+        <a href="/bo-suu-tap">Bộ Sưu Tập</a> &bull; 
+        <a href="/bo-suu-tap?brandSlug=@Model.BrandSlug">@Model.BrandName</a> &bull; 
+        <span style="color: var(--gold-primary);">@Model.Name</span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 60px; margin-bottom: 80px;">
+        <!-- Left: Image Showcase -->
+        <div>
+            <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); overflow: hidden; padding: 20px; box-shadow: var(--shadow-luxury); margin-bottom: 20px; text-align: center;">
+                <img id="mainProductImg" src="@Model.MainImageUrl" alt="@Model.Name" style="max-width: 100%; height: 480px; object-fit: contain; border-radius: var(--radius-md); transition: transform 0.4s ease;" />
+            </div>
+
+            <!-- Trust Badges -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; text-align: center; font-size: 0.78rem; color: var(--text-secondary);">
+                <div style="background: var(--bg-surface); border: 1px solid var(--border-card); padding: 12px 8px; border-radius: var(--radius-sm);">
+                    <i class="fa-solid fa-certificate text-gold-gradient" style="font-size: 1.2rem; display: block; margin-bottom: 6px;"></i>
+                    100% Chính Hãng
+                </div>
+                <div style="background: var(--bg-surface); border: 1px solid var(--border-card); padding: 12px 8px; border-radius: var(--radius-sm);">
+                    <i class="fa-solid fa-truck-fast text-gold-gradient" style="font-size: 1.2rem; display: block; margin-bottom: 6px;"></i>
+                    Hỏa Tốc 2H
+                </div>
+                <div style="background: var(--bg-surface); border: 1px solid var(--border-card); padding: 12px 8px; border-radius: var(--radius-sm);">
+                    <i class="fa-solid fa-shield-halved text-gold-gradient" style="font-size: 1.2rem; display: block; margin-bottom: 6px;"></i>
+                    Đổi Trả 7 Ngày
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Info & Variant Selection -->
+        <div>
+            <span style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--gold-primary); font-weight: 700;">@Model.BrandName (@Model.BrandCountry)</span>
+            <h1 style="font-size: 2.5rem; margin: 6px 0 16px; line-height: 1.2;">@Model.Name</h1>
+
+            <!-- Rating & Concentration -->
+            <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 6px; color: var(--gold-primary); font-size: 0.9rem;">
+                    <i class="fa-solid fa-star"></i>
+                    <span style="font-weight: 700;">@Model.RatingAverage.ToString("0.0")</span>
+                    <span style="color: var(--text-muted); font-size: 0.8rem;">(@Model.RatingCount đánh giá)</span>
+                </div>
+                <span style="font-size: 0.8rem; background: rgba(212, 175, 55, 0.15); border: 1px solid var(--border-subtle); color: var(--gold-primary); padding: 2px 10px; border-radius: 20px; font-weight: 600;">
+                    @Model.Concentration
+                </span>
+                <span style="font-size: 0.8rem; background: var(--bg-surface-elevated); color: var(--text-secondary); padding: 2px 10px; border-radius: 20px;">
+                    Dành cho: @Model.Gender
+                </span>
+            </div>
+
+            <!-- Price Display -->
+            <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 18px 24px; margin-bottom: 24px; display: flex; align-items: baseline; gap: 14px;">
+                <span id="activePrice" style="font-size: 2rem; font-weight: 700; color: var(--gold-primary);">
+                    @((defaultVariant?.SalePrice ?? Model.BasePrice).ToString("N0"))₫
+                </span>
+                @if (defaultVariant != null && defaultVariant.OriginalPrice > defaultVariant.SalePrice)
+                {
+                    <span id="activeOriginalPrice" style="font-size: 1.1rem; text-decoration: line-through; color: var(--text-muted);">
+                        @defaultVariant.OriginalPrice.ToString("N0")₫
+                    </span>
+                }
+            </div>
+
+            <!-- Variant Selector (Dung tích) -->
+            @if (Model.Variants.Any())
+            {
+                <div style="margin-bottom: 28px;">
+                    <label style="display: block; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; color: var(--text-secondary);">
+                        Chọn Dung Tích / Phiên Bản:
+                    </label>
+                    <div style="display: flex; flex-wrap: wrap; gap: 12px;">
+                        @foreach (var v in Model.Variants)
+                        {
+                            bool isDefault = (defaultVariant?.Id == v.Id);
+                            <button type="button" class="variant-btn @(isDefault ? "active" : "")" 
+                                    data-id="@v.Id" 
+                                    data-price="@v.SalePrice" 
+                                    data-orig="@v.OriginalPrice"
+                                    onclick="selectVariant(this)"
+                                    style="padding: 10px 18px; border-radius: var(--radius-sm); border: 1px solid @(isDefault ? "var(--gold-primary)" : "var(--border-card)"); background: @(isDefault ? "rgba(212, 175, 55, 0.15)" : "var(--bg-surface)"); color: var(--text-primary); cursor: pointer; font-size: 0.85rem; font-weight: 600;">
+                                @v.VolumeLabel
+                            </button>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Quantity & Add to Cart -->
+            <div style="display: flex; gap: 16px; margin-bottom: 36px; align-items: center; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; border: 1px solid var(--border-card); border-radius: var(--radius-sm); background: var(--bg-surface);">
+                    <button type="button" onclick="changeQty(-1)" style="padding: 12px 16px; background: none; border: none; color: var(--text-primary); cursor: pointer;"><i class="fa-solid fa-minus"></i></button>
+                    <input type="number" id="buyQty" value="1" min="1" max="10" style="width: 45px; text-align: center; background: none; border: none; color: var(--text-primary); font-weight: 700; outline: none;" />
+                    <button type="button" onclick="changeQty(1)" style="padding: 12px 16px; background: none; border: none; color: var(--text-primary); cursor: pointer;"><i class="fa-solid fa-plus"></i></button>
+                </div>
+
+                <button type="button" class="btn-luxe" onclick="handleAddToCart()" style="flex-grow: 1; padding: 14px 28px; font-size: 0.95rem;">
+                    <i class="fa-solid fa-bag-shopping" style="margin-right: 8px;"></i> Thêm Vào Giỏ Hàng
+                </button>
+            </div>
+
+            <!-- Perfume Specs Table -->
+            <div style="background: var(--bg-surface); border: 1px solid var(--border-card); border-radius: var(--radius-md); padding: 20px; font-size: 0.88rem;">
+                <div style="display: grid; grid-template-columns: 140px 1fr; gap: 10px; margin-bottom: 8px;">
+                    <span style="color: var(--text-muted);">Độ Lưu Hương:</span>
+                    <span style="font-weight: 600;"><i class="fa-solid fa-clock" style="color: var(--gold-primary); margin-right: 6px;"></i>@(Model.Longevity ?? "7 - 12 giờ")</span>
+                </div>
+                <div style="display: grid; grid-template-columns: 140px 1fr; gap: 10px; margin-bottom: 8px;">
+                    <span style="color: var(--text-muted);">Độ Tỏa Hương:</span>
+                    <span style="font-weight: 600;"><i class="fa-solid fa-wind" style="color: var(--gold-primary); margin-right: 6px;"></i>@(Model.Sillage ?? "Bán kính 1 - 2 mét")</span>
+                </div>
+                <div style="display: grid; grid-template-columns: 140px 1fr; gap: 10px;">
+                    <span style="color: var(--text-muted);">Mùa Khuyên Dùng:</span>
+                    <span style="font-weight: 600;"><i class="fa-solid fa-cloud-sun" style="color: var(--gold-primary); margin-right: 6px;"></i>@(Model.SeasonRecommendation ?? "Bốn mùa, Ngày và Đêm")</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- KIM TỰ THÁP 3 TẦNG HƯƠNG (FRAGRANCE PYRAMID VISUALIZER) -->
+    <section style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 40px; margin-bottom: 80px; box-shadow: var(--shadow-luxury);">
+        <div style="text-align: center; margin-bottom: 36px;">
+            <span style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.2em; color: var(--gold-primary); font-weight: 700;">Nghệ Thuật Khứu Giác</span>
+            <h2 style="font-size: 2.2rem; margin-top: 6px;">Kim Tự Tháp 3 Tầng Hương (Scent Pyramid)</h2>
+            <p style="color: var(--text-secondary); max-width: 600px; margin: 8px auto 0; font-size: 0.9rem;">
+                Tác phẩm @Model.Name biến đổi qua 3 giai đoạn mùi hương tinh xảo khi hòa quyện vào làn da của bạn.
+            </p>
+        </div>
+
+        <div class="scent-pyramid" style="max-width: 850px; margin: 0 auto;">
+            <!-- Top Notes -->
+            <div class="pyramid-tier">
+                <div class="tier-badge">
+                    <span>Hương Đầu</span>
+                    <small>10 - 15 Phút</small>
+                </div>
+                <div class="tier-notes">
+                    @if (Model.TopNotes.Any())
+                    {
+                        @foreach (var n in Model.TopNotes)
+                        {
+                            <span class="tier-note-item"><i class="fa-solid fa-sparkles text-gold-gradient"></i> @n.Name</span>
+                        }
+                    }
+                    else
+                    {
+                        <span class="tier-note-item">Cam Bergamot tươi mát, Tiêu cay ấm</span>
+                    }
+                </div>
+            </div>
+
+            <!-- Heart Notes -->
+            <div class="pyramid-tier">
+                <div class="tier-badge">
+                    <span>Hương Giữa</span>
+                    <small>2 - 4 Giờ</small>
+                </div>
+                <div class="tier-notes">
+                    @if (Model.HeartNotes.Any())
+                    {
+                        @foreach (var n in Model.HeartNotes)
+                        {
+                            <span class="tier-note-item"><i class="fa-solid fa-heart text-gold-gradient"></i> @n.Name</span>
+                        }
+                    }
+                    else
+                    {
+                        <span class="tier-note-item">Hoa Oải Hương Pháp, Nhục đậu khấu</span>
+                    }
+                </div>
+            </div>
+
+            <!-- Base Notes -->
+            <div class="pyramid-tier">
+                <div class="tier-badge">
+                    <span>Hương Cuối</span>
+                    <small>6 - 12 Giờ</small>
+                </div>
+                <div class="tier-notes">
+                    @if (Model.BaseNotes.Any())
+                    {
+                        @foreach (var n in Model.BaseNotes)
+                        {
+                            <span class="tier-note-item"><i class="fa-solid fa-tree text-gold-gradient"></i> @n.Name</span>
+                        }
+                    }
+                    else
+                    {
+                        <span class="tier-note-item">Gỗ Đàn Hương, Vani Bourbon, Long diên hương</span>
+                    }
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FULL STORY / DESCRIPTION -->
+    <section style="background: var(--bg-surface); border: 1px solid var(--border-card); border-radius: var(--radius-lg); padding: 40px; margin-bottom: 80px;">
+        <h3 style="font-size: 1.6rem; margin-bottom: 16px; color: var(--gold-primary);">Câu Chuyện & Cảm Hứng Sáng Tạo</h3>
+        <div style="font-size: 0.95rem; line-height: 1.8; color: var(--text-secondary);">
+            @(Model.FullDescription ?? Model.ShortDescription)
+        </div>
+    </section>
+</div>
+
+<!-- GOOGLE STRUCTURED DATA (JSON-LD) FOR SEO -->
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org/",
+  "@@type": "Product",
+  "name": "@Model.Name",
+  "image": ["@Model.MainImageUrl"],
+  "description": "@(Model.MetaDescription ?? Model.ShortDescription)",
+  "sku": "@Model.Sku",
+  "brand": {
+    "@@type": "Brand",
+    "name": "@Model.BrandName"
+  },
+  "offers": {
+    "@@type": "Offer",
+    "url": "@($"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}")",
+    "priceCurrency": "VND",
+    "price": "@Model.BasePrice",
+    "availability": "https://schema.org/InStock",
+    "seller": {
+      "@@type": "Organization",
+      "name": "PERFUME LUXE"
+    }
+  },
+  "aggregateRating": {
+    "@@type": "AggregateRating",
+    "ratingValue": "@Model.RatingAverage",
+    "reviewCount": "@Math.Max(1, Model.RatingCount)"
+  }
+}
+</script>
+
+@section Scripts {
+    <script>
+        let selectedVariantId = @(defaultVariant?.Id.ToString() ?? "null");
+
+        function selectVariant(btn) {
+            document.querySelectorAll('.variant-btn').forEach(b => {
+                b.style.borderColor = 'var(--border-card)';
+                b.style.background = 'var(--bg-surface)';
+            });
+
+            btn.style.borderColor = 'var(--gold-primary)';
+            btn.style.background = 'rgba(212, 175, 55, 0.15)';
+
+            selectedVariantId = btn.getAttribute('data-id');
+            const price = Number(btn.getAttribute('data-price'));
+            const orig = Number(btn.getAttribute('data-orig'));
+
+            document.getElementById('activePrice').innerText = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+            const origEl = document.getElementById('activeOriginalPrice');
+            if (origEl) {
+                if (orig > price) {
+                    origEl.innerText = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(orig);
+                    origEl.style.display = 'inline';
+                } else {
+                    origEl.style.display = 'none';
+                }
+            }
+        }
+
+        function changeQty(delta) {
+            const el = document.getElementById('buyQty');
+            let val = parseInt(el.value) + delta;
+            if (val < 1) val = 1;
+            if (val > 10) val = 10;
+            el.value = val;
+        }
+
+        function handleAddToCart() {
+            const qty = parseInt(document.getElementById('buyQty').value) || 1;
+            addToCart('@Model.Slug', selectedVariantId, qty);
+        }
+    </script>
+}

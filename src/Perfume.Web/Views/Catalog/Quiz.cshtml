@@ -1,0 +1,208 @@
+@{
+    ViewData["Title"] = "Trắc Nghiệm Tư Vấn Chọn Mùi Hương - Fragrance Finder";
+    ViewData["MetaDescription"] = "Bài trắc nghiệm thông minh tư vấn chai nước hoa phù hợp nhất với tính cách, phong cách sống và thời tiết của bạn.";
+}
+
+<div style="max-width: 900px; margin: 60px auto; padding: 0 24px; text-align: center;">
+    <span style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.25em; color: var(--gold-primary); font-weight: 700;">
+        <i class="fa-solid fa-wand-magic-sparkles" style="margin-right: 6px;"></i> AI Fragrance Finder
+    </span>
+    <h1 style="font-size: 2.8rem; margin: 10px 0 16px; line-height: 1.2;">
+        Khám Phá <span class="text-gold-gradient">Mùi Hương Hoàn Hảo</span> Cho Bạn
+    </h1>
+    <p style="color: var(--text-secondary); font-size: 1rem; max-width: 600px; margin: 0 auto 40px;">
+        Chỉ mất 30 giây trả lời 3 câu hỏi để hệ thống tìm ra kiệt tác nước hoa tương thích nhất với cá tính của bạn.
+    </p>
+
+    <!-- Quiz Card Container -->
+    <div id="quizContainer" style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 40px; box-shadow: var(--shadow-luxury); position: relative;">
+        <!-- Progress Bar -->
+        <div style="background: var(--bg-surface-elevated); height: 6px; border-radius: 3px; margin-bottom: 30px; overflow: hidden;">
+            <div id="quizProgress" style="background: var(--gold-gradient); height: 100%; width: 33.3%; transition: width 0.3s ease;"></div>
+        </div>
+
+        <!-- Question 1 -->
+        <div id="qStep1" class="quiz-step">
+            <span style="font-size: 0.8rem; color: var(--gold-primary); font-weight: 600;">CÂU HỎI 1 / 3</span>
+            <h3 style="font-size: 1.6rem; margin: 12px 0 24px;">Bạn đang tìm mùi hương cho ai?</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                <button type="button" class="quiz-opt-btn" onclick="selectQuizAnswer('gender', 'men', 2)">
+                    <i class="fa-solid fa-mars" style="font-size: 1.8rem; color: #48CAE4; margin-bottom: 10px; display: block;"></i>
+                    <strong style="font-size: 1.05rem;">Quý Ông (Men)</strong>
+                    <span style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Nam tính, lịch lãm & bản lĩnh</span>
+                </button>
+                <button type="button" class="quiz-opt-btn" onclick="selectQuizAnswer('gender', 'women', 2)">
+                    <i class="fa-solid fa-venus" style="font-size: 1.8rem; color: #E56B6F; margin-bottom: 10px; display: block;"></i>
+                    <strong style="font-size: 1.05rem;">Phái Đẹp (Women)</strong>
+                    <span style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Quyến rũ, dịu dàng & kiêu kỳ</span>
+                </button>
+                <button type="button" class="quiz-opt-btn" onclick="selectQuizAnswer('gender', 'unisex', 2)">
+                    <i class="fa-solid fa-infinity" style="font-size: 1.8rem; color: var(--gold-primary); margin-bottom: 10px; display: block;"></i>
+                    <strong style="font-size: 1.05rem;">Phi Giới Tính (Unisex)</strong>
+                    <span style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Độc bản, phá cách & thời thượng</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Question 2 -->
+        <div id="qStep2" class="quiz-step" style="display: none;">
+            <span style="font-size: 0.8rem; color: var(--gold-primary); font-weight: 600;">CÂU HỎI 2 / 3</span>
+            <h3 style="font-size: 1.6rem; margin: 12px 0 24px;">Phong thái / Vibe bạn muốn toát ra nhất?</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px;">
+                <button type="button" class="quiz-opt-btn" onclick="selectQuizAnswer('vibe', 'cozy', 3)">
+                    <i class="fa-solid fa-fire" style="font-size: 1.6rem; color: #B8860B; margin-bottom: 10px; display: block;"></i>
+                    <strong>Trầm Ấm & Sâu Lắng</strong>
+                    <span style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">Gỗ tuyết tùng, đàn hương, rượu</span>
+                </button>
+                <button type="button" class="quiz-opt-btn" onclick="selectQuizAnswer('vibe', 'fresh', 3)">
+                    <i class="fa-solid fa-wind" style="font-size: 1.6rem; color: #2A9D8F; margin-bottom: 10px; display: block;"></i>
+                    <strong>Tươi Mát & Sảng Khoái</strong>
+                    <span style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">Cam chanh bergamot, gió biển</span>
+                </button>
+                <button type="button" class="quiz-opt-btn" onclick="selectQuizAnswer('vibe', 'romantic', 3)">
+                    <i class="fa-solid fa-heart" style="font-size: 1.6rem; color: #E56B6F; margin-bottom: 10px; display: block;"></i>
+                    <strong>Ngọt Ngào & Lãng Mạn</strong>
+                    <span style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">Hoa hồng, hoa nhài, vani bourbon</span>
+                </button>
+                <button type="button" class="quiz-opt-btn" onclick="selectQuizAnswer('vibe', 'luxury', 3)">
+                    <i class="fa-solid fa-crown" style="font-size: 1.6rem; color: var(--gold-primary); margin-bottom: 10px; display: block;"></i>
+                    <strong>Quyền Lực & Sang Trọng</strong>
+                    <span style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">Trầm hương, dứa khói, long diên</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Question 3 -->
+        <div id="qStep3" class="quiz-step" style="display: none;">
+            <span style="font-size: 0.8rem; color: var(--gold-primary); font-weight: 600;">CÂU HỎI 3 / 3</span>
+            <h3 style="font-size: 1.6rem; margin: 12px 0 24px;">Bạn dự định dùng vào hoàn cảnh nào nhất?</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                <button type="button" class="quiz-opt-btn" onclick="submitQuiz('evening')">
+                    <i class="fa-solid fa-champagne-glasses" style="font-size: 1.8rem; color: var(--gold-primary); margin-bottom: 10px; display: block;"></i>
+                    <strong>Tiệc Tối & Hẹn Hò</strong>
+                    <span style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Huyền bí, lôi cuốn khó cưỡng</span>
+                </button>
+                <button type="button" class="quiz-opt-btn" onclick="submitQuiz('daily')">
+                    <i class="fa-solid fa-briefcase" style="font-size: 1.8rem; color: #48CAE4; margin-bottom: 10px; display: block;"></i>
+                    <strong>Công Sở & Hằng Ngày</strong>
+                    <span style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Thanh lịch, dễ chịu và bền bỉ</span>
+                </button>
+                <button type="button" class="quiz-opt-btn" onclick="submitQuiz('all')">
+                    <i class="fa-solid fa-sun" style="font-size: 1.8rem; color: #F3E5AB; margin-bottom: 10px; display: block;"></i>
+                    <strong>Bốn Mùa Linh Hoạt</strong>
+                    <span style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Tự tin trong mọi khoảnh khắc</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Result Section -->
+        <div id="quizResultSection" style="display: none; text-align: left;">
+            <div style="text-align: center; margin-bottom: 30px;">
+                <span style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.2em; color: var(--gold-primary); font-weight: 700;">Kết Quả Đề Xuất Dành Riêng Cho Bạn</span>
+                <h3 style="font-size: 2rem; margin-top: 6px;">Mùi Hương Hoàn Hảo Cho Cá Tính Của Bạn</h3>
+            </div>
+
+            <div id="quizResultGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 24px; margin-bottom: 30px;">
+                <!-- Populated dynamically -->
+            </div>
+
+            <div style="text-align: center;">
+                <button type="button" class="btn-luxe-outline" onclick="restartQuiz()">
+                    <i class="fa-solid fa-rotate-right" style="margin-right: 6px;"></i> Làm Lại Trắc Nghiệm
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .quiz-opt-btn {
+            background: var(--bg-surface-elevated);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-md);
+            padding: 24px 16px;
+            text-align: center;
+            cursor: pointer;
+            color: var(--text-primary);
+            transition: var(--transition);
+        }
+        .quiz-opt-btn:hover {
+            transform: translateY(-4px);
+            border-color: var(--gold-primary);
+            box-shadow: var(--glow-gold);
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        const quizAnswers = {
+            genderPreference: 'unisex',
+            vibe: 'luxury',
+            seasonOrOccasion: 'all'
+        };
+
+        function selectQuizAnswer(field, val, nextStep) {
+            if (field === 'gender') quizAnswers.genderPreference = val;
+            if (field === 'vibe') quizAnswers.vibe = val;
+
+            document.querySelectorAll('.quiz-step').forEach(s => s.style.display = 'none');
+            const next = document.getElementById(`qStep${nextStep}`);
+            if (next) next.style.display = 'block';
+
+            const progress = document.getElementById('quizProgress');
+            if (progress) progress.style.width = (nextStep === 2 ? '66.6%' : '100%');
+        }
+
+        async function submitQuiz(occasion) {
+            quizAnswers.seasonOrOccasion = occasion;
+
+            document.querySelectorAll('.quiz-step').forEach(s => s.style.display = 'none');
+            const resultSec = document.getElementById('quizResultSection');
+            resultSec.style.display = 'block';
+
+            const grid = document.getElementById('quizResultGrid');
+            grid.innerHTML = '<div style="text-align:center; grid-column: 1/-1; padding: 40px; color: var(--gold-primary);"><i class="fa-solid fa-spinner fa-spin fa-2x"></i><p style="margin-top: 10px;">Đang phân tích và gợi ý mùi hương hoàn hảo...</p></div>';
+
+            try {
+                const res = await fetch('/Catalog/QuizSubmit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(quizAnswers)
+                });
+                const data = await res.json();
+
+                if (!data.items || data.items.length === 0) {
+                    grid.innerHTML = '<p style="text-align:center; grid-column: 1/-1;">Chưa có dữ liệu phù hợp.</p>';
+                    return;
+                }
+
+                grid.innerHTML = data.items.map(p => `
+                    <div class="perfume-card">
+                        <a href="/nuoc-hoa/${p.slug}" class="card-img-wrapper">
+                            <img src="${p.mainImageUrl || 'https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=400&q=80'}" alt="${p.name}" />
+                        </a>
+                        <div class="card-body">
+                            <div class="card-brand">${p.brandName}</div>
+                            <h4 class="card-title"><a href="/nuoc-hoa/${p.slug}">${p.name}</a></h4>
+                            <div class="card-footer">
+                                <span class="card-price">${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(p.basePrice)}</span>
+                                <button type="button" class="btn-luxe" onclick="addToCart('${p.slug}', null, 1)" style="padding: 8px 16px; font-size: 0.78rem;">Thêm</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                grid.innerHTML = `<p style="text-align:center; grid-column: 1/-1; color: #E63946;">Lỗi: ${err.message}</p>`;
+            }
+        }
+
+        function restartQuiz() {
+            document.querySelectorAll('.quiz-step').forEach(s => s.style.display = 'none');
+            document.getElementById('quizResultSection').style.display = 'none';
+            document.getElementById('qStep1').style.display = 'block';
+            document.getElementById('quizProgress').style.width = '33.3%';
+        }
+    </script>
+}
