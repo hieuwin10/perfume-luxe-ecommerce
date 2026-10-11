@@ -13,11 +13,23 @@
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="@(ViewData["CanonicalUrl"] ?? $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}")" />
 
-    <meta property="og:type" content="website" />
+    <!-- Open Graph / Facebook -->
+    <meta property="og:site_name" content="PERFUME LUXE" />
+    <meta property="og:type" content="@(ViewData["OgType"] ?? "website")" />
     <meta property="og:title" content="@(ViewData["Title"] ?? "PERFUME LUXE - Nước Hoa Xa Xỉ Chính Hãng")" />
     <meta property="og:description" content="@(ViewData["MetaDescription"] ?? "Bộ sưu tập nước hoa cao cấp, chiết 10ml và fullbox với 3 tầng hương độc bản.")" />
     <meta property="og:image" content="@(ViewData["OgImage"] ?? "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=1200&q=80")" />
     <meta property="og:url" content="@($"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}")" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="@(ViewData["Title"] ?? "PERFUME LUXE - Nước Hoa Xa Xỉ Chính Hãng")" />
+    <meta name="twitter:description" content="@(ViewData["MetaDescription"] ?? "Bộ sưu tập nước hoa cao cấp, chiết 10ml và fullbox với 3 tầng hương độc bản.")" />
+    <meta name="twitter:image" content="@(ViewData["OgImage"] ?? "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=1200&q=80")" />
+
+    <!-- Favicon & Brand Theme -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💎</text></svg>" />
+    <meta name="theme-color" content="#0B0B0E" />
 
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />

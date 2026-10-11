@@ -188,3 +188,38 @@
         </div>
     </section>
 }
+
+<!-- GOOGLE STRUCTURED DATA (JSON-LD) FOR HOMEPAGE SEO -->
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@type": "WebSite",
+  "name": "PERFUME LUXE",
+  "alternateName": "Haute Parfumerie Paris",
+  "url": "@($"{Context.Request.Scheme}://{Context.Request.Host}/")",
+  "potentialAction": {
+    "@@type": "SearchAction",
+    "target": {
+      "@@type": "EntryPoint",
+      "urlTemplate": "@($"{Context.Request.Scheme}://{Context.Request.Host}/bo-suu-tap?keyword={{search_term_string}}")"
+    },
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@type": "Organization",
+  "name": "PERFUME LUXE",
+  "url": "@($"{Context.Request.Scheme}://{Context.Request.Host}/")",
+  "logo": "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=400&q=80",
+  "contactPoint": {
+    "@@type": "ContactPoint",
+    "telephone": "+84-1900-8888",
+    "contactType": "Customer Service",
+    "areaServed": "VN",
+    "availableLanguage": ["Vietnamese", "English"]
+  }
+}
+</script>

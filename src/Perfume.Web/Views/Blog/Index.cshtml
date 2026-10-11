@@ -49,3 +49,38 @@
         </div>
     }
 </div>
+
+<!-- GOOGLE STRUCTURED DATA (JSON-LD) FOR BLOG INDEX SEO -->
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@type": "Blog",
+  "name": "Cẩm Nang & Nghệ Thuật Nước Hoa - PERFUME LUXE",
+  "description": "Những câu chuyện đằng sau các chai nước hoa kinh điển, cẩm nang phối hương theo mùa và bí quyết lưu hương bất tận.",
+  "url": "@($"{Context.Request.Scheme}://{Context.Request.Host}/blog")",
+  "publisher": {
+    "@@type": "Organization",
+    "name": "PERFUME LUXE"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@@type": "ListItem",
+      "position": 1,
+      "name": "Trang Chủ",
+      "item": "@($"{Context.Request.Scheme}://{Context.Request.Host}/")"
+    },
+    {
+      "@@type": "ListItem",
+      "position": 2,
+      "name": "Cẩm Nang",
+      "item": "@($"{Context.Request.Scheme}://{Context.Request.Host}/blog")"
+    }
+  ]
+}
+</script>

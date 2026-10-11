@@ -1,6 +1,8 @@
 @model List<ProductCardDto>
 @{
     ViewData["Title"] = "Bộ Sưu Tập Nước Hoa Cao Cấp";
+    ViewData["MetaDescription"] = "Khám phá danh mục nước hoa cao cấp chính hãng từ các thương hiệu hàng đầu: Dior, Chanel, Creed, Tom Ford, Le Labo, Kilian. Đầy đủ phiên bản chiết 10ml và fullbox.";
+    ViewData["OgType"] = "website";
     var filter = ViewBag.Filter as ProductFilterParams ?? new ProductFilterParams();
     var brands = ViewBag.Brands as List<Brand> ?? new List<Brand>();
     var families = ViewBag.Families as List<FragranceFamily> ?? new List<FragranceFamily>();
@@ -145,3 +147,25 @@
         </div>
     </div>
 </div>
+
+<!-- GOOGLE STRUCTURED DATA (JSON-LD) FOR COLLECTION PAGE SEO -->
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@type": "ItemList",
+  "itemListElement": [
+  @for (int i = 0; i < Model.Count; i++)
+  {
+      var p = Model[i];
+      <text>
+      {
+        "@@type": "ListItem",
+        "position": @(i + 1),
+        "url": "@($"{Context.Request.Scheme}://{Context.Request.Host}/nuoc-hoa/{p.Slug}")",
+        "name": "@p.Name"
+      }@(i < Model.Count - 1 ? "," : "")
+      </text>
+  }
+  ]
+}
+</script>

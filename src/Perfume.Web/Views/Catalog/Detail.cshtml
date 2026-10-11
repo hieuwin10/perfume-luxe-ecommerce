@@ -321,7 +321,7 @@ function handleAddToCart() {
 <!-- GOOGLE STRUCTURED DATA (JSON-LD) FOR SEO -->
 <script type="application/ld+json">
 {
-  "@@context": "https://schema.org/",
+  "@@context": "https://schema.org",
   "@@type": "Product",
   "name": "@Model.Name",
   "image": ["@Model.MainImageUrl"],
@@ -335,16 +335,53 @@ function handleAddToCart() {
     "@@type": "Offer",
     "url": "@($"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}")",
     "priceCurrency": "VND",
-    "price": "@Model.BasePrice",
+    "price": "@Model.BasePrice.ToString(System.Globalization.CultureInfo.InvariantCulture)",
+    "priceValidUntil": "@DateTime.UtcNow.AddYears(1).ToString("yyyy-MM-dd")",
+    "itemCondition": "https://schema.org/NewCondition",
     "availability": "https://schema.org/InStock",
     "seller": {
       "@@type": "Organization",
       "name": "PERFUME LUXE"
+    },
+    "hasMerchantReturnPolicy": {
+      "@@type": "MerchantReturnPolicy",
+      "applicableCountry": "VN",
+      "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+      "merchantReturnDays": 7,
+      "returnMethod": "https://schema.org/ReturnByMail",
+      "returnFees": "https://schema.org/FreeReturn"
+    },
+    "shippingDetails": {
+      "@@type": "OfferShippingDetails",
+      "shippingRate": {
+        "@@type": "MonetaryAmount",
+        "value": "35000",
+        "currency": "VND"
+      },
+      "shippingDestination": {
+        "@@type": "DefinedRegion",
+        "addressCountry": "VN"
+      },
+      "deliveryTime": {
+        "@@type": "ShippingDeliveryTime",
+        "handlingTime": {
+          "@@type": "QuantitativeValue",
+          "minValue": 0,
+          "maxValue": 1,
+          "unitCode": "DAY"
+        },
+        "transitTime": {
+          "@@type": "QuantitativeValue",
+          "minValue": 1,
+          "maxValue": 3,
+          "unitCode": "DAY"
+        }
+      }
     }
   },
   "aggregateRating": {
     "@@type": "AggregateRating",
-    "ratingValue": "@Model.RatingAverage",
+    "ratingValue": "@Model.RatingAverage.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)",
     "reviewCount": "@Math.Max(1, Model.RatingCount)"
   }
 }
