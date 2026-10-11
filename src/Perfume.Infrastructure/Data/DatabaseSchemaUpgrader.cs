@@ -8,7 +8,7 @@ namespace Perfume.Infrastructure;
 
 public static class DatabaseSchemaUpgrader
 {
-    private const string Version = "20261011_01_customer_carts_and_refresh_tokens";
+    private const string Version = "20261011_02_system_settings";
 
     public static async Task ApplyAsync(PerfumeDbContext db, IConfiguration configuration, ILogger logger, bool databaseCreatedThisStart, CancellationToken cancellationToken = default)
     {
@@ -124,6 +124,20 @@ BEGIN
     );
     CREATE UNIQUE INDEX IX_RefreshTokenRecords_TokenHash ON dbo.RefreshTokenRecords(TokenHash);
     CREATE INDEX IX_RefreshTokenRecords_UserId_ExpiresAt ON dbo.RefreshTokenRecords(UserId, ExpiresAt);
+END;
+IF OBJECT_ID(N'dbo.SystemSettings', N'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.SystemSettings
+    (
+        Id int IDENTITY(1,1) NOT NULL PRIMARY KEY,
+        CreatedAt datetime2 NOT NULL CONSTRAINT DF_SystemSettings_CreatedAt DEFAULT SYSUTCDATETIME(),
+        UpdatedAt datetime2 NULL,
+        IsDeleted bit NOT NULL CONSTRAINT DF_SystemSettings_IsDeleted DEFAULT 0,
+        [Key] nvarchar(100) NOT NULL,
+        [Value] nvarchar(4000) NOT NULL,
+        Description nvarchar(500) NULL
+    );
+    CREATE UNIQUE INDEX IX_SystemSettings_Key ON dbo.SystemSettings([Key]);
 END;
 INSERT INTO dbo.__PerfumeSchemaVersions(Version) VALUES (@version);";
                 migration.Parameters.Add(new SqlParameter("@version", Version));

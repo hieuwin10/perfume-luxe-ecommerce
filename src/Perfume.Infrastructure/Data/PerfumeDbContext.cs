@@ -33,6 +33,7 @@ public class PerfumeDbContext : IdentityDbContext<AppUser, AppRole, string>
     public DbSet<ShoppingCart> ShoppingCarts => Set<ShoppingCart>();
     public DbSet<ShoppingCartItem> ShoppingCartItems => Set<ShoppingCartItem>();
     public DbSet<RefreshTokenRecord> RefreshTokenRecords => Set<RefreshTokenRecord>();
+    public DbSet<SystemSetting> SystemSettings => Set<SystemSetting>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -241,6 +242,17 @@ public class PerfumeDbContext : IdentityDbContext<AppUser, AppRole, string>
             entity.HasIndex(t => t.TokenHash).IsUnique();
             entity.HasIndex(t => new { t.UserId, t.ExpiresAt });
             entity.HasQueryFilter(t => !t.IsDeleted);
+        });
+
+        // System Settings
+        builder.Entity<SystemSetting>(entity =>
+        {
+            entity.ToTable("SystemSettings");
+            entity.HasIndex(s => s.Key).IsUnique();
+            entity.Property(s => s.Key).HasMaxLength(100).IsRequired();
+            entity.Property(s => s.Value).HasMaxLength(4000).IsRequired();
+            entity.Property(s => s.Description).HasMaxLength(500);
+            entity.HasQueryFilter(s => !s.IsDeleted);
         });
     }
 

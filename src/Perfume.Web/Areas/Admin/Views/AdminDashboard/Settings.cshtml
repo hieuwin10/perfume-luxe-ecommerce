@@ -1,0 +1,218 @@
+@model Perfume.Application.DTOs.SystemSettingsDto
+@{
+    ViewData["Title"] = "Cài Đặt Hệ Thống & Cửa Hàng";
+    Layout = "_AdminLayout";
+}
+
+<div style="max-width: 1100px; margin: 0 auto;">
+    <div style="margin-bottom: 24px;">
+        <h1 style="font-size: 1.6rem; font-weight: 800; margin: 0 0 6px; color: var(--text-primary);">
+            <i class="fa-solid fa-gear text-gold-gradient" style="margin-right: 8px;"></i> Cài Đặt Hệ Thống & Vận Hành
+        </h1>
+        <p style="color: var(--text-muted); margin: 0; font-size: 0.88rem;">
+            Cấu hình thông tin thương hiệu, địa chỉ boutique, chính sách vận chuyển miễn phí và cổng email tự động
+        </p>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div style="background: rgba(42,157,143,0.15); border: 1px solid #2A9D8F; border-radius: 8px; padding: 12px 18px; margin-bottom: 20px; color: #2A9D8F; font-size: 0.9rem;">
+            <i class="fa-solid fa-circle-check" style="margin-right: 6px;"></i> @TempData["Success"]
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div style="background: rgba(230,57,70,0.12); border: 1px solid #e63946; border-radius: 8px; padding: 12px 18px; margin-bottom: 20px; color: #f87171; font-size: 0.9rem;">
+            <i class="fa-solid fa-triangle-exclamation" style="margin-right: 6px;"></i> @TempData["Error"]
+        </div>
+    }
+
+    <form method="post" action="/admin/admindashboard/settings">
+        @Html.AntiForgeryToken()
+
+        <!-- Section 1: Store Information -->
+        <div class="luxury-card" style="padding: 24px; margin-bottom: 24px;">
+            <h3 style="font-size: 1.15rem; font-weight: 700; margin: 0 0 18px; color: var(--text-primary); border-bottom: 1px solid var(--border-card); padding-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-store text-gold-gradient"></i> Thông Tin Thương Hiệu & Boutique
+            </h3>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px;">
+                <div>
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+                        Tên Cửa Hàng / Thương Hiệu
+                    </label>
+                    <input type="text" name="StoreName" value="@Model.StoreName" required
+                           style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.9rem; outline: none;" />
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+                        Khẩu Hiệu (Slogan)
+                    </label>
+                    <input type="text" name="StoreSlogan" value="@Model.StoreSlogan" required
+                           style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.9rem; outline: none;" />
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+                        Hotline Chăm Sóc Khách Hàng
+                    </label>
+                    <input type="text" name="Hotline" value="@Model.Hotline" required
+                           style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.9rem; outline: none;" />
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+                        Email CSKH / Concierge
+                    </label>
+                    <input type="email" name="ContactEmail" value="@Model.ContactEmail" required
+                           style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.9rem; outline: none;" />
+                </div>
+
+                <div style="grid-column: 1 / -1;">
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+                        Địa Chỉ Showroom / Boutique Trực Tiếp
+                    </label>
+                    <input type="text" name="BoutiqueAddress" value="@Model.BoutiqueAddress" required
+                           style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.9rem; outline: none;" />
+                </div>
+
+                <div style="grid-column: 1 / -1;">
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+                        Thời Gian Phục Vụ
+                    </label>
+                    <input type="text" name="WorkingHours" value="@Model.WorkingHours" required
+                           style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.9rem; outline: none;" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Shipping & Order Policy -->
+        <div class="luxury-card" style="padding: 24px; margin-bottom: 24px;">
+            <h3 style="font-size: 1.15rem; font-weight: 700; margin: 0 0 18px; color: var(--text-primary); border-bottom: 1px solid var(--border-card); padding-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-truck-ramp-box text-gold-gradient"></i> Chính Sách Vận Chuyển & Phí Ship
+            </h3>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px;">
+                <div>
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+                        Ngưỡng Miễn Phí Vận Chuyển (VNĐ)
+                    </label>
+                    <input type="number" name="FreeShippingThreshold" value="@Model.FreeShippingThreshold" step="10000" min="0" required
+                           style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--gold-primary); font-weight: 700; font-size: 0.95rem; outline: none;" />
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">Đơn hàng từ mức này trở lên sẽ được miễn phí vận chuyển toàn quốc (Hiện tại: @Model.FreeShippingThreshold.ToString("N0") ₫).</span>
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+                        Phí Giao Hàng Tiêu Chuẩn (VNĐ)
+                    </label>
+                    <input type="number" name="DefaultShippingFee" value="@Model.DefaultShippingFee" step="1000" min="0" required
+                           style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-weight: 700; font-size: 0.95rem; outline: none;" />
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">Áp dụng cho các đơn hàng chưa đạt ngưỡng miễn phí (Hiện tại: @Model.DefaultShippingFee.ToString("N0") ₫).</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: SMTP Mail Configuration -->
+        <div class="luxury-card" style="padding: 24px; margin-bottom: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-card); padding-bottom: 10px; margin-bottom: 18px;">
+                <h3 style="font-size: 1.15rem; font-weight: 700; margin: 0; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-envelope text-gold-gradient"></i> Cấu Hình Cổng Email Tự Động (SMTP Mailer)
+                </h3>
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; color: var(--gold-primary); font-weight: 600;">
+                    <input type="checkbox" name="SmtpEnabled" value="true" checked="@Model.SmtpEnabled" style="accent-color: var(--gold-primary); width: 16px; height: 16px;" /> Kích hoạt gửi email
+                </label>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 18px;">
+                <div>
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+                        SMTP Server Host
+                    </label>
+                    <input type="text" name="SmtpHost" value="@Model.SmtpHost" required
+                           style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.9rem; outline: none;" />
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">Mặc định local dev: localhost hoặc mailpit</span>
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+                        Cổng (Port)
+                    </label>
+                    <input type="number" name="SmtpPort" value="@Model.SmtpPort" required
+                           style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.9rem; outline: none;" />
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">Mailpit: 1025, TLS: 587</span>
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+                        Bảo mật SSL
+                    </label>
+                    <div style="padding-top: 10px;">
+                        <label style="display: flex; align-items: center; gap: 8px; font-size: 0.88rem; color: var(--text-secondary); cursor: pointer;">
+                            <input type="checkbox" name="SmtpEnableSsl" value="true" checked="@Model.SmtpEnableSsl" style="accent-color: var(--gold-primary);" /> Bật STARTTLS / SSL
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+                        Email Người Gửi (From Email)
+                    </label>
+                    <input type="email" name="SmtpFromEmail" value="@Model.SmtpFromEmail" required
+                           style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.9rem; outline: none;" />
+                </div>
+
+                <div style="grid-column: span 2;">
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+                        Tên Hiển Thị Người Gửi (From Name)
+                    </label>
+                    <input type="text" name="SmtpFromName" value="@Model.SmtpFromName" required
+                           style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.9rem; outline: none;" />
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+                        Tài Khoản SMTP (Username nếu có)
+                    </label>
+                    <input type="text" name="SmtpUserName" value="@Model.SmtpUserName" placeholder="Bỏ trống nếu không có mật khẩu"
+                           style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.9rem; outline: none;" />
+                </div>
+
+                <div style="grid-column: span 2;">
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+                        Mật Khẩu SMTP (Password)
+                    </label>
+                    <input type="password" name="SmtpPassword" value="@Model.SmtpPassword" placeholder="••••••••"
+                           style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.9rem; outline: none;" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div style="display: flex; justify-content: flex-end; gap: 14px; margin-bottom: 30px;">
+            <button type="submit" class="btn-luxe" style="padding: 12px 28px; font-size: 0.95rem; font-weight: 700;">
+                <i class="fa-solid fa-floppy-disk" style="margin-right: 8px;"></i> Lưu Cài Đặt Hệ Thống
+            </button>
+        </div>
+    </form>
+
+    <!-- Section 4: Live Test SMTP Panel -->
+    <div class="luxury-card" style="padding: 24px; border: 1px dashed var(--gold-primary); background: rgba(212,175,55,0.03);">
+        <h3 style="font-size: 1.05rem; font-weight: 700; margin: 0 0 10px; color: var(--gold-primary); display: flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-paper-plane"></i> Thử Nghiệm Kết Nối SMTP (Live Ping Test)
+        </h3>
+        <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 14px;">
+            Hệ thống sẽ gửi ngay một email kiểm tra tới địa chỉ bạn chỉ định để kiểm tra cổng kết nối và thông điệp.
+        </p>
+
+        <form method="post" action="/admin/admindashboard/testsmtp" style="display: flex; gap: 10px; max-width: 550px; margin: 0;">
+            @Html.AntiForgeryToken()
+            <input type="email" name="recipientEmail" placeholder="Nhập email của bạn (vd: admin@perfumeluxe.com)..." required
+                   style="flex-grow: 1; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.88rem; outline: none;" />
+            <button type="submit" class="btn-luxe-outline" style="padding: 10px 18px; font-size: 0.88rem; white-space: nowrap;">
+                <i class="fa-solid fa-vial" style="margin-right: 6px;"></i> Test Gửi Thử
+            </button>
+        </form>
+    </div>
+</div>

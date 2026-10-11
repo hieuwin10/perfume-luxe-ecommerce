@@ -2,7 +2,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Perfume.Application.DTOs;
 using Perfume.Application.Interfaces;
+using Perfume.Domain.Entities;
+using Perfume.Domain.Enums;
 using Perfume.Infrastructure.Data;
 using Perfume.Infrastructure.Identity;
 
@@ -15,12 +18,14 @@ public class AdminDashboardController : Controller
     private readonly PerfumeDbContext _db;
     private readonly IDatabaseConsoleService _dbConsole;
     private readonly UserManager<AppUser> _userManager;
+    private readonly ISystemSettingService _settingService;
 
-    public AdminDashboardController(PerfumeDbContext db, IDatabaseConsoleService dbConsole, UserManager<AppUser> userManager)
+    public AdminDashboardController(PerfumeDbContext db, IDatabaseConsoleService dbConsole, UserManager<AppUser> userManager, ISystemSettingService settingService)
     {
         _db = db;
         _dbConsole = dbConsole;
         _userManager = userManager;
+        _settingService = settingService;
     }
 
     [Authorize(Roles = "Admin")]
@@ -180,6 +185,194 @@ public class AdminDashboardController : Controller
         ViewBag.TotalPages = (int)Math.Ceiling((double)total / pageSize);
         ViewBag.Total = total;
         return View(orders);
+    }
+
+    // ─── ORDER DETAILS & PACKING SLIP ─────────────────────────────────────────
+    public async Task<IActionResult> OrderDetails(int id)
+    {
+        var order = await _db.Orders
+            .Include(o => o.Items)
+            .FirstOrDefaultAsync(o => o.Id == id);
+        if (order == null) return NotFound();
+        return View(order);
+    }
+
+    public async Task<IActionResult> PrintInvoice(int id)
+    {
+        var order = await _db.Orders
+            .Include(o => o.Items)
+            .FirstOrDefaultAsync(o => o.Id == id);
+        if (order == null) return NotFound();
+        var settings = await _settingService.GetSettingsAsync();
+        ViewBag.Settings = settings;
+        return View(order);
+    }
+
+    // ─── CREATE PRODUCT ───────────────────────────────────────────────────────
+    [HttpGet]
+    public async Task<IActionResult> CreateProduct()
+    {
+        ViewBag.Brands = await _db.Brands.OrderBy(b => b.Name).ToListAsync();
+        ViewBag.Categories = await _db.Categories.OrderBy(c => c.Name).ToListAsync();
+        ViewBag.FragranceFamilies = await _db.FragranceFamilies.OrderBy(f => f.Name).ToListAsync();
+        return View(new CreateProductDto());
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CreateProduct(CreateProductDto model)
+    {
+        if (!ModelState.IsValid)
+        {
+            ViewBag.Brands = await _db.Brands.OrderBy(b => b.Name).ToListAsync();
+            ViewBag.Categories = await _db.Categories.OrderBy(c => c.Name).ToListAsync();
+            ViewBag.FragranceFamilies = await _db.FragranceFamilies.OrderBy(f => f.Name).ToListAsync();
+            return View(model);
+        }
+
+        // Tạo slug tự động nếu trống
+        var slug = string.IsNullOrWhiteSpace(model.Slug)
+            ? System.Text.RegularExpressions.Regex.Replace(model.Name.ToLowerInvariant().Normalize(System.Text.NormalizationForm.FormD), @"[^a-z0-9\s-]", "").Replace(" ", "-")
+            : model.Slug.Trim().ToLowerInvariant();
+
+        // Kiểm tra trùng slug
+        if (await _db.Products.AnyAsync(p => p.Slug == slug))
+        {
+            slug = $"{slug}-{DateTime.UtcNow.Ticks % 10000}";
+        }
+
+        var product = new Product
+        {
+            Name = model.Name.Trim(),
+            Slug = slug,
+            Sku = model.Sku.Trim().ToUpperInvariant(),
+            BrandId = model.BrandId,
+            CategoryId = model.CategoryId,
+            FragranceFamilyId = model.FragranceFamilyId,
+            Gender = model.Gender,
+            Concentration = model.Concentration,
+            BasePrice = model.BasePrice,
+            MainImageUrl = string.IsNullOrWhiteSpace(model.MainImageUrl)
+                ? "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=800&q=80"
+                : model.MainImageUrl.Trim(),
+            ShortDescription = model.ShortDescription?.Trim(),
+            FullDescription = model.FullDescription?.Trim(),
+            Longevity = model.Longevity?.Trim() ?? "7 - 12 giờ",
+            Sillage = model.Sillage?.Trim() ?? "Toả hương trong bán kính 1 - 2 mét",
+            ReleaseYear = model.ReleaseYear,
+            SeasonRecommendation = model.SeasonRecommendation?.Trim() ?? "Bốn mùa",
+            IsFeatured = model.IsFeatured,
+            IsBestSeller = model.IsBestSeller,
+            IsNewArrival = model.IsNewArrival,
+            IsInStock = true,
+            RatingAverage = 5.0,
+            RatingCount = 1,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        // Thêm ảnh chính vào Images collection
+        product.Images.Add(new ProductImage
+        {
+            ImageUrl = product.MainImageUrl,
+            IsMain = true,
+            AltText = product.Name,
+            DisplayOrder = 1
+        });
+
+        // Tạo biến thể ban đầu
+        product.Variants.Add(new ProductVariant
+        {
+            VolumeMl = model.InitialVolumeMl > 0 ? model.InitialVolumeMl : 100,
+            VolumeLabel = string.IsNullOrWhiteSpace(model.InitialVolumeLabel) ? $"Chai Full {model.InitialVolumeMl}ml" : model.InitialVolumeLabel.Trim(),
+            VariantSku = $"{product.Sku}-V{model.InitialVolumeMl}",
+            OriginalPrice = product.BasePrice,
+            SalePrice = product.BasePrice,
+            StockQuantity = model.InitialStockQuantity >= 0 ? model.InitialStockQuantity : 20,
+            IsDefault = true,
+            CreatedAt = DateTime.UtcNow
+        });
+
+        // 3 Tầng hương
+        async Task AddNotes(string? raw, NoteLevel level)
+        {
+            if (string.IsNullOrWhiteSpace(raw)) return;
+            var parts = raw.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries);
+            int order = 1;
+            foreach (var noteName in parts)
+            {
+                var cleanName = noteName.Trim();
+                if (string.IsNullOrWhiteSpace(cleanName)) continue;
+                var noteSlug = cleanName.ToLowerInvariant().Replace(" ", "-");
+                var noteEntity = await _db.FragranceNotes.FirstOrDefaultAsync(n => n.Name == cleanName || n.Slug == noteSlug);
+                if (noteEntity == null)
+                {
+                    noteEntity = new FragranceNote
+                    {
+                        Name = cleanName,
+                        Slug = noteSlug,
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    _db.FragranceNotes.Add(noteEntity);
+                    await _db.SaveChangesAsync();
+                }
+                product.FragranceNotes.Add(new ProductFragranceNote
+                {
+                    FragranceNoteId = noteEntity.Id,
+                    NoteLevel = level,
+                    DisplayOrder = order++
+                });
+            }
+        }
+
+        await AddNotes(model.TopNotes, NoteLevel.Top);
+        await AddNotes(model.HeartNotes, NoteLevel.Heart);
+        await AddNotes(model.BaseNotes, NoteLevel.Base);
+
+        _db.Products.Add(product);
+        await _db.SaveChangesAsync();
+
+        TempData["Success"] = $"Đã thêm thành công sản phẩm nước hoa '{product.Name}'!";
+        return RedirectToAction(nameof(Products));
+    }
+
+    // ─── SYSTEM SETTINGS ──────────────────────────────────────────────────────
+    [HttpGet]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Settings()
+    {
+        var settings = await _settingService.GetSettingsAsync();
+        return View(settings);
+    }
+
+    [HttpPost]
+    [Authorize(Roles = "Admin")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Settings(SystemSettingsDto model)
+    {
+        if (!ModelState.IsValid) return View(model);
+        await _settingService.SaveSettingsAsync(model);
+        TempData["Success"] = "Đã lưu cài đặt hệ thống thành công!";
+        return RedirectToAction(nameof(Settings));
+    }
+
+    [HttpPost]
+    [Authorize(Roles = "Admin")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> TestSmtp(string recipientEmail)
+    {
+        if (string.IsNullOrWhiteSpace(recipientEmail))
+        {
+            TempData["Error"] = "Vui lòng nhập địa chỉ email người nhận thử nghiệm.";
+            return RedirectToAction(nameof(Settings));
+        }
+
+        var result = await _settingService.TestSmtpConnectionAsync(recipientEmail.Trim());
+        if (result.Success)
+            TempData["Success"] = result.Message;
+        else
+            TempData["Error"] = result.Message;
+
+        return RedirectToAction(nameof(Settings));
     }
 
     // ─── ERD ──────────────────────────────────────────────────────────────────
