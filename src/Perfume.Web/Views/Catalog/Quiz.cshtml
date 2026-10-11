@@ -1,115 +1,231 @@
 @{
-    ViewData["Title"] = "Trắc Nghiệm Tư Vấn Chọn Mùi Hương - Fragrance Finder";
-    ViewData["MetaDescription"] = "Bài trắc nghiệm thông minh tư vấn chai nước hoa phù hợp nhất với tính cách, phong cách sống và thời tiết của bạn.";
+    ViewData["Title"] = "AI Fragrance Finder - Trắc Nghiệm Tìm Mùi Hương Thượng Lưu | PERFUME LUXE";
+    ViewData["MetaDescription"] = "Trải nghiệm động cơ tư vấn nước hoa thông minh chuẩn Haute Parfumerie. Phân tích phong cách, tính cách và hoàn cảnh để khám phá kiệt tác mùi hương dành riêng cho bạn.";
 }
 
-<div style="max-width: 900px; margin: 60px auto; padding: 0 24px; text-align: center;">
-    <span style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.25em; color: var(--gold-primary); font-weight: 700;">
-        <i class="fa-solid fa-wand-magic-sparkles" style="margin-right: 6px;"></i> AI Fragrance Finder
-    </span>
-    <h1 style="font-size: 2.8rem; margin: 10px 0 16px; line-height: 1.2;">
-        Khám Phá <span class="text-gold-gradient">Mùi Hương Hoàn Hảo</span> Cho Bạn
-    </h1>
-    <p style="color: var(--text-secondary); font-size: 1rem; max-width: 600px; margin: 0 auto 40px;">
-        Chỉ mất 30 giây trả lời 3 câu hỏi để hệ thống tìm ra kiệt tác nước hoa tương thích nhất với cá tính của bạn.
-    </p>
+<div class="quiz-page-wrapper">
+    <!-- Header Banner -->
+    <div class="quiz-header">
+        <span class="quiz-badge">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> AI FRAGRANCE CONCIERGE 2026
+        </span>
+        <h1 class="quiz-main-title">
+            Khám Phá <span class="text-gold-gradient">Kiệt Tác Mùi Hương</span> Của Riêng Bạn
+        </h1>
+        <p class="quiz-subtitle">
+            Hệ thống phân tích ma trận 5 chiều (Phong thái, Hoàn cảnh, Độ lưu tỏa, Nốt hương & Ngân sách) nhằm trao gửi hồ sơ danh phận mùi hương độc bản.
+        </p>
+    </div>
 
-    <!-- Quiz Card Container -->
-    <div id="quizContainer" style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 40px; box-shadow: var(--shadow-luxury); position: relative;">
-        <!-- Progress Bar -->
-        <div style="background: var(--bg-surface-elevated); height: 6px; border-radius: 3px; margin-bottom: 30px; overflow: hidden;">
-            <div id="quizProgress" style="background: var(--gold-gradient); height: 100%; width: 33.3%; transition: width 0.3s ease;"></div>
+    <!-- Main Quiz Container -->
+    <div id="quizContainer" class="quiz-card-box">
+        <!-- Progress Bar & Top Navigation -->
+        <div class="quiz-nav-bar">
+            <button type="button" id="quizBackBtn" class="quiz-back-btn" style="visibility: hidden;" onclick="prevQuizStep()">
+                <i class="fa-solid fa-arrow-left"></i> Quay lại
+            </button>
+            <div class="quiz-step-indicator" id="stepCounterText">CÂU HỎI 1 / 5</div>
+            <div class="quiz-timer-pill"><i class="fa-regular fa-clock"></i> ~45 giây</div>
         </div>
 
-        <!-- Question 1 -->
-        <div id="qStep1" class="quiz-step">
-            <span style="font-size: 0.8rem; color: var(--gold-primary); font-weight: 600;">CÂU HỎI 1 / 3</span>
-            <h3 style="font-size: 1.6rem; margin: 12px 0 24px;">Bạn đang tìm mùi hương cho ai?</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
-                <button type="button" class="quiz-opt-btn" onclick="selectQuizAnswer('gender', 'men', 2)">
-                    <i class="fa-solid fa-mars" style="font-size: 1.8rem; color: #48CAE4; margin-bottom: 10px; display: block;"></i>
-                    <strong style="font-size: 1.05rem;">Quý Ông (Men)</strong>
-                    <span style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Nam tính, lịch lãm & bản lĩnh</span>
-                </button>
-                <button type="button" class="quiz-opt-btn" onclick="selectQuizAnswer('gender', 'women', 2)">
-                    <i class="fa-solid fa-venus" style="font-size: 1.8rem; color: #E56B6F; margin-bottom: 10px; display: block;"></i>
-                    <strong style="font-size: 1.05rem;">Phái Đẹp (Women)</strong>
-                    <span style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Quyến rũ, dịu dàng & kiêu kỳ</span>
-                </button>
-                <button type="button" class="quiz-opt-btn" onclick="selectQuizAnswer('gender', 'unisex', 2)">
-                    <i class="fa-solid fa-infinity" style="font-size: 1.8rem; color: var(--gold-primary); margin-bottom: 10px; display: block;"></i>
-                    <strong style="font-size: 1.05rem;">Phi Giới Tính (Unisex)</strong>
-                    <span style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Độc bản, phá cách & thời thượng</span>
-                </button>
-            </div>
+        <div class="quiz-progress-track">
+            <div id="quizProgress" class="quiz-progress-fill" style="width: 20%;"></div>
         </div>
 
-        <!-- Question 2 -->
-        <div id="qStep2" class="quiz-step" style="display: none;">
-            <span style="font-size: 0.8rem; color: var(--gold-primary); font-weight: 600;">CÂU HỎI 2 / 3</span>
-            <h3 style="font-size: 1.6rem; margin: 12px 0 24px;">Phong thái / Vibe bạn muốn toát ra nhất?</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px;">
-                <button type="button" class="quiz-opt-btn" onclick="selectQuizAnswer('vibe', 'cozy', 3)">
-                    <i class="fa-solid fa-fire" style="font-size: 1.6rem; color: #B8860B; margin-bottom: 10px; display: block;"></i>
-                    <strong>Trầm Ấm & Sâu Lắng</strong>
-                    <span style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">Gỗ tuyết tùng, đàn hương, rượu</span>
+        <!-- STEP 1: ĐỐI TƯỢNG -->
+        <div id="qStep1" class="quiz-step-pane active">
+            <h3 class="quiz-step-title">Bạn đang tìm kiếm kiệt tác mùi hương cho ai?</h3>
+            <p class="quiz-step-desc">Định hình phong cách và đối tượng cảm nhận ban đầu</p>
+            <div class="quiz-grid quiz-grid-3">
+                <button type="button" class="quiz-option-card" onclick="selectQuizAnswer('gender', 'men', 2)">
+                    <div class="quiz-icon-box"><i class="fa-solid fa-mars" style="color: #48CAE4;"></i></div>
+                    <strong class="quiz-opt-title">Quý Ông (Men)</strong>
+                    <span class="quiz-opt-desc">Nam tính, bản lĩnh, lịch lãm & quyền uy</span>
                 </button>
-                <button type="button" class="quiz-opt-btn" onclick="selectQuizAnswer('vibe', 'fresh', 3)">
-                    <i class="fa-solid fa-wind" style="font-size: 1.6rem; color: #2A9D8F; margin-bottom: 10px; display: block;"></i>
-                    <strong>Tươi Mát & Sảng Khoái</strong>
-                    <span style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">Cam chanh bergamot, gió biển</span>
+                <button type="button" class="quiz-option-card" onclick="selectQuizAnswer('gender', 'women', 2)">
+                    <div class="quiz-icon-box"><i class="fa-solid fa-venus" style="color: #E56B6F;"></i></div>
+                    <strong class="quiz-opt-title">Phái Đẹp (Women)</strong>
+                    <span class="quiz-opt-desc">Quyến rũ, kiêu kỳ, dịu dàng & đài các</span>
                 </button>
-                <button type="button" class="quiz-opt-btn" onclick="selectQuizAnswer('vibe', 'romantic', 3)">
-                    <i class="fa-solid fa-heart" style="font-size: 1.6rem; color: #E56B6F; margin-bottom: 10px; display: block;"></i>
-                    <strong>Ngọt Ngào & Lãng Mạn</strong>
-                    <span style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">Hoa hồng, hoa nhài, vani bourbon</span>
-                </button>
-                <button type="button" class="quiz-opt-btn" onclick="selectQuizAnswer('vibe', 'luxury', 3)">
-                    <i class="fa-solid fa-crown" style="font-size: 1.6rem; color: var(--gold-primary); margin-bottom: 10px; display: block;"></i>
-                    <strong>Quyền Lực & Sang Trọng</strong>
-                    <span style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">Trầm hương, dứa khói, long diên</span>
+                <button type="button" class="quiz-option-card" onclick="selectQuizAnswer('gender', 'unisex', 2)">
+                    <div class="quiz-icon-box"><i class="fa-solid fa-infinity" style="color: var(--gold-primary);"></i></div>
+                    <strong class="quiz-opt-title">Phi Giới Tính (Unisex)</strong>
+                    <span class="quiz-opt-desc">Độc bản, phá cách, tự do & thời thượng</span>
                 </button>
             </div>
         </div>
 
-        <!-- Question 3 -->
-        <div id="qStep3" class="quiz-step" style="display: none;">
-            <span style="font-size: 0.8rem; color: var(--gold-primary); font-weight: 600;">CÂU HỎI 3 / 3</span>
-            <h3 style="font-size: 1.6rem; margin: 12px 0 24px;">Bạn dự định dùng vào hoàn cảnh nào nhất?</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
-                <button type="button" class="quiz-opt-btn" onclick="submitQuiz('evening')">
-                    <i class="fa-solid fa-champagne-glasses" style="font-size: 1.8rem; color: var(--gold-primary); margin-bottom: 10px; display: block;"></i>
-                    <strong>Tiệc Tối & Hẹn Hò</strong>
-                    <span style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Huyền bí, lôi cuốn khó cưỡng</span>
+        <!-- STEP 2: PHONG THÁI & VIBE -->
+        <div id="qStep2" class="quiz-step-pane">
+            <h3 class="quiz-step-title">Phong thái hoặc Vibe bạn muốn toát ra nhất?</h3>
+            <p class="quiz-step-desc">Linh hồn của mùi hương sẽ phản chiếu chiều sâu nội tâm của bạn</p>
+            <div class="quiz-grid quiz-grid-3">
+                <button type="button" class="quiz-option-card" onclick="selectQuizAnswer('vibe', 'luxury', 3)">
+                    <div class="quiz-icon-box"><i class="fa-solid fa-crown" style="color: var(--gold-primary);"></i></div>
+                    <strong class="quiz-opt-title">Quyền Lực & Sang Trọng</strong>
+                    <span class="quiz-opt-desc">Trầm hương Oud, da thuộc quý, dứa khói hoàng gia</span>
                 </button>
-                <button type="button" class="quiz-opt-btn" onclick="submitQuiz('daily')">
-                    <i class="fa-solid fa-briefcase" style="font-size: 1.8rem; color: #48CAE4; margin-bottom: 10px; display: block;"></i>
-                    <strong>Công Sở & Hằng Ngày</strong>
-                    <span style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Thanh lịch, dễ chịu và bền bỉ</span>
+                <button type="button" class="quiz-option-card" onclick="selectQuizAnswer('vibe', 'cozy', 3)">
+                    <div class="quiz-icon-box"><i class="fa-solid fa-fire" style="color: #E76F51;"></i></div>
+                    <strong class="quiz-opt-title">Trầm Ấm & Sâu Lắng</strong>
+                    <span class="quiz-opt-desc">Gỗ đàn hương, tuyết tùng, hổ phách & rượu ủ</span>
                 </button>
-                <button type="button" class="quiz-opt-btn" onclick="submitQuiz('all')">
-                    <i class="fa-solid fa-sun" style="font-size: 1.8rem; color: #F3E5AB; margin-bottom: 10px; display: block;"></i>
-                    <strong>Bốn Mùa Linh Hoạt</strong>
-                    <span style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Tự tin trong mọi khoảnh khắc</span>
+                <button type="button" class="quiz-option-card" onclick="selectQuizAnswer('vibe', 'fresh', 3)">
+                    <div class="quiz-icon-box"><i class="fa-solid fa-wind" style="color: #2A9D8F;"></i></div>
+                    <strong class="quiz-opt-title">Tươi Mát & Phóng Khoáng</strong>
+                    <span class="quiz-opt-desc">Cam Bergamot Calabre, gió biển & thảo mộc thanh sạch</span>
+                </button>
+                <button type="button" class="quiz-option-card" onclick="selectQuizAnswer('vibe', 'romantic', 3)">
+                    <div class="quiz-icon-box"><i class="fa-solid fa-heart" style="color: #E56B6F;"></i></div>
+                    <strong class="quiz-opt-title">Ngọt Ngào & Quyến Rũ</strong>
+                    <span class="quiz-opt-desc">Hoa hồng Grasse, vani Bourbon & nhài Sambac mị hoặc</span>
+                </button>
+                <button type="button" class="quiz-option-card" onclick="selectQuizAnswer('vibe', 'mysterious', 3)">
+                    <div class="quiz-icon-box"><i class="fa-solid fa-moon" style="color: #9D4EDD;"></i></div>
+                    <strong class="quiz-opt-title">Bí Ẩn & Khó Đoán</strong>
+                    <span class="quiz-opt-desc">Gia vị cay ấm, khói huyền ảo, hoắc hương mê hoặc</span>
                 </button>
             </div>
         </div>
 
-        <!-- Result Section -->
-        <div id="quizResultSection" style="display: none; text-align: left;">
-            <div style="text-align: center; margin-bottom: 30px;">
-                <span style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.2em; color: var(--gold-primary); font-weight: 700;">Kết Quả Đề Xuất Dành Riêng Cho Bạn</span>
-                <h3 style="font-size: 2rem; margin-top: 6px;">Mùi Hương Hoàn Hảo Cho Cá Tính Của Bạn</h3>
-            </div>
-
-            <div id="quizResultGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 24px; margin-bottom: 30px;">
-                <!-- Populated dynamically -->
-            </div>
-
-            <div style="text-align: center;">
-                <button type="button" class="btn-luxe-outline" onclick="restartQuiz()">
-                    <i class="fa-solid fa-rotate-right" style="margin-right: 6px;"></i> Làm Lại Trắc Nghiệm
+        <!-- STEP 3: HOÀN CẢNH & DỊP SỬ DỤNG -->
+        <div id="qStep3" class="quiz-step-pane">
+            <h3 class="quiz-step-title">Bạn dự định đồng hành cùng mùi hương trong dịp nào?</h3>
+            <p class="quiz-step-desc">Mỗi không gian sẽ có nốt hương tỏa sáng rực rỡ nhất</p>
+            <div class="quiz-grid quiz-grid-2">
+                <button type="button" class="quiz-option-card" onclick="selectQuizAnswer('occasion', 'evening', 4)">
+                    <div class="quiz-icon-box"><i class="fa-solid fa-champagne-glasses" style="color: var(--gold-primary);"></i></div>
+                    <strong class="quiz-opt-title">Dạ Tiệc Tối & Hẹn Hò Lãng Mạn</strong>
+                    <span class="quiz-opt-desc">Không gian lung linh, cần sức hút ma mị và để lại ấn tượng khó quên</span>
                 </button>
+                <button type="button" class="quiz-option-card" onclick="selectQuizAnswer('occasion', 'daily', 4)">
+                    <div class="quiz-icon-box"><i class="fa-solid fa-briefcase" style="color: #48CAE4;"></i></div>
+                    <strong class="quiz-opt-title">Công Sở & Giao Tiếp Hằng Ngày</strong>
+                    <span class="quiz-opt-desc">Thanh lịch, dễ chịu, tinh tế và đáng tin cậy suốt 8 tiếng làm việc</span>
+                </button>
+                <button type="button" class="quiz-option-card" onclick="selectQuizAnswer('occasion', 'all', 4)">
+                    <div class="quiz-icon-box"><i class="fa-solid fa-sun" style="color: #F4A261;"></i></div>
+                    <strong class="quiz-opt-title">Bốn Mùa Đa Dụng (Signature Scent)</strong>
+                    <span class="quiz-opt-desc">Tự tin là chính mình trong mọi khoảnh khắc, mọi điều kiện thời tiết</span>
+                </button>
+                <button type="button" class="quiz-option-card" onclick="selectQuizAnswer('occasion', 'special', 4)">
+                    <div class="quiz-icon-box"><i class="fa-solid fa-gem" style="color: #D4AF37;"></i></div>
+                    <strong class="quiz-opt-title">Sự Kiện Trọng Đại & Đẳng Cấp</strong>
+                    <span class="quiz-opt-desc">Ký kết thương vụ lớn, thảm đỏ, lễ kỷ niệm khẳng định vị thế đỉnh cao</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- STEP 4: CƯỜNG ĐỘ & ĐỘ LƯU TỎA -->
+        <div id="qStep4" class="quiz-step-pane">
+            <h3 class="quiz-step-title">Cường độ tỏa hương và thời gian lưu hương bạn kỳ vọng?</h3>
+            <p class="quiz-step-desc">Quyết định nồng độ tinh dầu Eau de Parfum (EDP) hay Extrait de Parfum</p>
+            <div class="quiz-grid quiz-grid-3">
+                <button type="button" class="quiz-option-card" onclick="selectQuizAnswer('intensity', 'moderate', 5)">
+                    <div class="quiz-icon-box"><i class="fa-solid fa-feather" style="color: #2A9D8F;"></i></div>
+                    <strong class="quiz-opt-title">Thoang Thoảng Tinh Tế (Skin Scent)</strong>
+                    <span class="quiz-opt-desc">Tỏa gần trong vòng tay, dịu nhẹ, lưu hương 4 - 6 giờ tao nhã</span>
+                </button>
+                <button type="button" class="quiz-option-card" onclick="selectQuizAnswer('intensity', 'strong', 5)">
+                    <div class="quiz-icon-box"><i class="fa-solid fa-shield-halved" style="color: var(--gold-primary);"></i></div>
+                    <strong class="quiz-opt-title">Lưu Hương Bền Bỉ (8 - 12 Giờ)</strong>
+                    <span class="quiz-opt-desc">Tỏa hương 1 - 2 mét ấn tượng, bám tỏa trọn vẹn suốt một ngày dài</span>
+                </button>
+                <button type="button" class="quiz-option-card" onclick="selectQuizAnswer('intensity', 'intense', 5)">
+                    <div class="quiz-icon-box"><i class="fa-solid fa-bolt" style="color: #E63946;"></i></div>
+                    <strong class="quiz-opt-title">Bùng Nổ & Sâu Đậm (>12 Giờ)</strong>
+                    <span class="quiz-opt-desc">Nồng độ Extrait / Parfum đậm đặc, để lại vệt hương khó phai mờ</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- STEP 5: NGÂN SÁCH & TRẢI NGHIỆM -->
+        <div id="qStep5" class="quiz-step-pane">
+            <h3 class="quiz-step-title">Tầm ngân sách và định dạng sở hữu ưu tiên của bạn?</h3>
+            <p class="quiz-step-desc">Chúng tôi sẽ cân đối dung tích và các phân khúc giá tương thích nhất</p>
+            <div class="quiz-grid quiz-grid-3">
+                <button type="button" class="quiz-option-card" onclick="finalizeQuiz('sample')">
+                    <div class="quiz-icon-box"><i class="fa-solid fa-vial" style="color: #48CAE4;"></i></div>
+                    <strong class="quiz-opt-title">Trải Nghiệm Chiết 10ml</strong>
+                    <span class="quiz-opt-desc">Thử nghiệm linh hoạt hương xa xỉ chính hãng (Dưới 1.000.000₫)</span>
+                </button>
+                <button type="button" class="quiz-option-card" onclick="finalizeQuiz('mid')">
+                    <div class="quiz-icon-box"><i class="fa-solid fa-box-open" style="color: var(--gold-primary);"></i></div>
+                    <strong class="quiz-opt-title">Fullbox Cao Cấp Tiêu Chuẩn</strong>
+                    <span class="quiz-opt-desc">Dung tích 50ml - 100ml nguyên seal chính hãng (3.000.000₫ - 5.500.000₫)</span>
+                </button>
+                <button type="button" class="quiz-option-card" onclick="finalizeQuiz('high')">
+                    <div class="quiz-icon-box"><i class="fa-solid fa-gem" style="color: #E56B6F;"></i></div>
+                    <strong class="quiz-opt-title">Kiệt Tác Haute Parfumerie</strong>
+                    <span class="quiz-opt-desc">Tuyệt phẩm Niche giới hạn không giới hạn ngân sách (Trên 5.500.000₫)</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- RESULT SECTION: LUXURY SCENT DOSSIER -->
+        <div id="quizResultSection" class="quiz-result-wrapper" style="display: none;">
+            <!-- Loading Indicator -->
+            <div id="quizLoadingState" class="quiz-loading-box">
+                <div class="luxury-spinner">
+                    <i class="fa-solid fa-wand-magic-sparkles fa-spin fa-3x" style="color: var(--gold-primary);"></i>
+                </div>
+                <h4 style="font-size: 1.4rem; margin-top: 20px; font-family: var(--font-serif);">AI Fragrance Engine Đang Phân Tích...</h4>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 6px;">Đang tính toán ma trận nốt hương và tạo lập hồ sơ danh phận mùi hương của bạn</p>
+            </div>
+
+            <!-- Content Area -->
+            <div id="quizResultContent" style="display: none;">
+                <!-- Archetype Dossier Hero Card -->
+                <div class="archetype-hero-card">
+                    <div class="archetype-header">
+                        <span class="archetype-tag">
+                            <i class="fa-solid fa-fingerprint"></i> HỒ SƠ DANH PHẬN MÙI HƯƠNG (SCENT ARCHETYPE)
+                        </span>
+                        <h2 id="resArchetypeTitle" class="archetype-title text-gold-gradient">THE SOVEREIGN ARISTOCRAT</h2>
+                        <h4 id="resArchetypeSubtitle" class="archetype-subtitle">BẬC ĐẾ VƯƠNG QUYỀN UY & ĐẲNG CẤP</h4>
+                    </div>
+
+                    <p id="resArchetypeDesc" class="archetype-desc"></p>
+
+                    <div class="archetype-meta-grid">
+                        <div class="meta-item">
+                            <span class="meta-label"><i class="fa-solid fa-layer-group"></i> Nhóm Hương Chủ Đạo</span>
+                            <div id="resAccordsTags" class="meta-tags-list"></div>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label"><i class="fa-solid fa-sparkles"></i> Nốt Hương Chữ Ký</span>
+                            <div id="resNotesTags" class="meta-tags-list"></div>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label"><i class="fa-solid fa-calendar-check"></i> Hoàn Cảnh Khuyên Dùng</span>
+                            <div id="resOccasionText" class="meta-highlight-text"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Products Recommendations Header -->
+                <div class="results-products-header">
+                    <span class="sub-lead">TUYỂN CHỌN THEO ĐIỂM TƯƠNG THÍCH CAO NHẤT</span>
+                    <h3 class="title-lead">Top 4 Kiệt Tác Dành Riêng Cho Bạn</h3>
+                </div>
+
+                <!-- Products Grid -->
+                <div id="quizResultGrid" class="quiz-products-grid">
+                    <!-- Populated dynamically via JS -->
+                </div>
+
+                <!-- Post-Quiz Action Bar -->
+                <div class="quiz-actions-bar">
+                    <button type="button" class="btn-luxe" onclick="copyQuizShareLink()">
+                        <i class="fa-solid fa-share-nodes"></i> Sao Chép Hồ Sơ Mùi Hương
+                    </button>
+                    <button type="button" class="btn-luxe-outline" onclick="restartQuiz()">
+                        <i class="fa-solid fa-rotate-right"></i> Làm Lại Trắc Nghiệm
+                    </button>
+                    <a href="/bo-suu-tap" class="btn-luxe-outline">
+                        <i class="fa-solid fa-compass"></i> Khám Phá Toàn Bộ Cửa Hàng
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -117,20 +233,383 @@
 
 @section Styles {
     <style>
-        .quiz-opt-btn {
+        .quiz-page-wrapper {
+            max-width: 960px;
+            margin: 50px auto 80px;
+            padding: 0 20px;
+            text-align: center;
+        }
+        .quiz-badge {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.25em;
+            color: var(--gold-primary);
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(212, 175, 55, 0.08);
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            margin-bottom: 12px;
+        }
+        .quiz-main-title {
+            font-size: 2.8rem;
+            line-height: 1.25;
+            margin-bottom: 14px;
+            font-family: var(--font-serif);
+        }
+        .quiz-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            max-width: 680px;
+            margin: 0 auto 36px;
+            line-height: 1.6;
+        }
+        .quiz-card-box {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 40px;
+            box-shadow: var(--shadow-luxury);
+            position: relative;
+            text-align: left;
+        }
+        .quiz-nav-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        .quiz-back-btn {
+            background: none;
+            border: none;
+            color: var(--gold-primary);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: var(--transition);
+        }
+        .quiz-back-btn:hover {
+            color: #fff;
+            transform: translateX(-3px);
+        }
+        .quiz-step-indicator {
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            color: var(--gold-primary);
+        }
+        .quiz-timer-pill {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            background: var(--bg-surface-elevated);
+            padding: 4px 10px;
+            border-radius: 12px;
+        }
+        .quiz-progress-track {
+            background: var(--bg-surface-elevated);
+            height: 6px;
+            border-radius: 3px;
+            margin-bottom: 36px;
+            overflow: hidden;
+        }
+        .quiz-progress-fill {
+            background: var(--gold-gradient);
+            height: 100%;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .quiz-step-pane {
+            display: none;
+            animation: fadeInStep 0.35s ease;
+        }
+        .quiz-step-pane.active {
+            display: block;
+        }
+        @@keyframes fadeInStep {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .quiz-step-title {
+            font-size: 1.8rem;
+            font-family: var(--font-serif);
+            margin: 0 0 6px;
+            color: var(--text-primary);
+        }
+        .quiz-step-desc {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 28px;
+        }
+        .quiz-grid {
+            display: grid;
+            gap: 18px;
+        }
+        .quiz-grid-3 {
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        }
+        .quiz-grid-2 {
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        }
+        .quiz-option-card {
             background: var(--bg-surface-elevated);
             border: 1px solid var(--border-card);
             border-radius: var(--radius-md);
-            padding: 24px 16px;
-            text-align: center;
+            padding: 24px 20px;
+            text-align: left;
             cursor: pointer;
             color: var(--text-primary);
-            transition: var(--transition);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
         }
-        .quiz-opt-btn:hover {
+        .quiz-option-card:hover {
             transform: translateY(-4px);
             border-color: var(--gold-primary);
             box-shadow: var(--glow-gold);
+            background: rgba(212, 175, 55, 0.04);
+        }
+        .quiz-icon-box {
+            font-size: 2rem;
+            margin-bottom: 14px;
+        }
+        .quiz-opt-title {
+            display: block;
+            font-size: 1.15rem;
+            margin-bottom: 6px;
+            color: var(--text-primary);
+            font-family: var(--font-serif);
+        }
+        .quiz-opt-desc {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+        
+        /* Archetype Dossier Hero */
+        .archetype-hero-card {
+            background: linear-gradient(135deg, rgba(20, 20, 20, 0.95), rgba(30, 26, 18, 0.95));
+            border: 1px solid var(--gold-primary);
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.15);
+            border-radius: var(--radius-lg);
+            padding: 36px;
+            margin-bottom: 40px;
+            position: relative;
+        }
+        .archetype-tag {
+            font-size: 0.78rem;
+            letter-spacing: 0.2em;
+            color: var(--gold-primary);
+            font-weight: 700;
+            display: block;
+            margin-bottom: 8px;
+        }
+        .archetype-title {
+            font-size: 2.4rem;
+            font-family: var(--font-serif);
+            margin: 0 0 4px;
+            letter-spacing: 0.05em;
+        }
+        .archetype-subtitle {
+            font-size: 1.15rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+            letter-spacing: 0.1em;
+            margin: 0 0 18px;
+        }
+        .archetype-desc {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: var(--text-primary);
+            margin-bottom: 24px;
+            border-left: 3px solid var(--gold-primary);
+            padding-left: 16px;
+        }
+        .archetype-meta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-subtle);
+        }
+        .meta-label {
+            display: block;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--gold-primary);
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .meta-tags-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .meta-tag-pill {
+            font-size: 0.78rem;
+            background: var(--bg-surface-elevated);
+            border: 1px solid var(--border-card);
+            padding: 4px 10px;
+            border-radius: 12px;
+            color: var(--text-secondary);
+        }
+        .meta-highlight-text {
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            font-style: italic;
+        }
+
+        /* Products Grid */
+        .results-products-header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+        .results-products-header .sub-lead {
+            font-size: 0.8rem;
+            letter-spacing: 0.2em;
+            color: var(--gold-primary);
+            font-weight: 700;
+        }
+        .results-products-header .title-lead {
+            font-size: 2rem;
+            font-family: var(--font-serif);
+            margin-top: 6px;
+        }
+        .quiz-products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+        .luxury-quiz-item {
+            background: var(--bg-surface-elevated);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .luxury-quiz-item:hover {
+            transform: translateY(-5px);
+            border-color: var(--gold-primary);
+            box-shadow: var(--shadow-luxury);
+        }
+        .match-score-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: var(--gold-gradient);
+            color: #000;
+            font-weight: 800;
+            font-size: 0.78rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.4);
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .quiz-item-img-wrapper {
+            position: relative;
+            aspect-ratio: 1;
+            overflow: hidden;
+            background: #111;
+        }
+        .quiz-item-img-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        .luxury-quiz-item:hover .quiz-item-img-wrapper img {
+            transform: scale(1.05);
+        }
+        .quiz-item-body {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+        .quiz-item-brand {
+            font-size: 0.75rem;
+            letter-spacing: 0.15em;
+            color: var(--gold-primary);
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+        .quiz-item-name {
+            font-size: 1.15rem;
+            font-family: var(--font-serif);
+            margin: 6px 0 10px;
+            color: var(--text-primary);
+            line-height: 1.35;
+        }
+        .quiz-item-name a {
+            color: inherit;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .quiz-item-name a:hover {
+            color: var(--gold-primary);
+        }
+        .ai-explain-box {
+            background: rgba(212, 175, 55, 0.06);
+            border-left: 2px solid var(--gold-primary);
+            padding: 8px 10px;
+            border-radius: 0 4px 4px 0;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.45;
+            margin-bottom: 14px;
+        }
+        .quiz-item-notes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-bottom: 14px;
+        }
+        .quiz-note-chip {
+            font-size: 0.7rem;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: var(--text-muted);
+        }
+        .quiz-item-footer {
+            margin-top: auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-subtle);
+        }
+        .quiz-item-price {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--gold-primary);
+        }
+        .quiz-actions-bar {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 14px;
+            margin-top: 20px;
+        }
+        .quiz-loading-box {
+            text-align: center;
+            padding: 60px 20px;
         }
     </style>
 }
@@ -140,30 +619,74 @@
         const quizAnswers = {
             genderPreference: 'unisex',
             vibe: 'luxury',
-            seasonOrOccasion: 'all'
+            seasonOrOccasion: 'all',
+            intensityPreference: 'strong',
+            budgetPreference: 'mid'
         };
+
+        let currentStep = 1;
+        const totalSteps = 5;
+
+        function updateStepUI(step) {
+            currentStep = step;
+
+            // Show/Hide back button
+            const backBtn = document.getElementById('quizBackBtn');
+            if (backBtn) {
+                backBtn.style.visibility = (currentStep > 1) ? 'visible' : 'hidden';
+            }
+
+            // Update step counter text
+            const stepText = document.getElementById('stepCounterText');
+            if (stepText) {
+                stepText.innerText = `CÂU HỎI ${currentStep} / ${totalSteps}`;
+            }
+
+            // Update progress bar
+            const progress = document.getElementById('quizProgress');
+            if (progress) {
+                progress.style.width = `${(currentStep / totalSteps) * 100}%`;
+            }
+
+            // Switch active pane
+            document.querySelectorAll('.quiz-step-pane').forEach(p => p.classList.remove('active'));
+            const targetPane = document.getElementById(`qStep${currentStep}`);
+            if (targetPane) {
+                targetPane.classList.add('active');
+            }
+        }
 
         function selectQuizAnswer(field, val, nextStep) {
             if (field === 'gender') quizAnswers.genderPreference = val;
             if (field === 'vibe') quizAnswers.vibe = val;
+            if (field === 'occasion') quizAnswers.seasonOrOccasion = val;
+            if (field === 'intensity') quizAnswers.intensityPreference = val;
 
-            document.querySelectorAll('.quiz-step').forEach(s => s.style.display = 'none');
-            const next = document.getElementById(`qStep${nextStep}`);
-            if (next) next.style.display = 'block';
-
-            const progress = document.getElementById('quizProgress');
-            if (progress) progress.style.width = (nextStep === 2 ? '66.6%' : '100%');
+            updateStepUI(nextStep);
         }
 
-        async function submitQuiz(occasion) {
-            quizAnswers.seasonOrOccasion = occasion;
+        function prevQuizStep() {
+            if (currentStep > 1) {
+                updateStepUI(currentStep - 1);
+            }
+        }
 
-            document.querySelectorAll('.quiz-step').forEach(s => s.style.display = 'none');
+        async function finalizeQuiz(budget) {
+            quizAnswers.budgetPreference = budget;
+
+            // Hide step panes, show result container
+            document.querySelectorAll('.quiz-step-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById('quizBackBtn').style.visibility = 'hidden';
+            document.getElementById('stepCounterText').innerText = 'KẾT QUẢ ĐỀ XUẤT';
+            document.getElementById('quizProgress').style.width = '100%';
+
             const resultSec = document.getElementById('quizResultSection');
             resultSec.style.display = 'block';
 
-            const grid = document.getElementById('quizResultGrid');
-            grid.innerHTML = '<div style="text-align:center; grid-column: 1/-1; padding: 40px; color: var(--gold-primary);"><i class="fa-solid fa-spinner fa-spin fa-2x"></i><p style="margin-top: 10px;">Đang phân tích và gợi ý mùi hương hoàn hảo...</p></div>';
+            const loadingBox = document.getElementById('quizLoadingState');
+            const contentBox = document.getElementById('quizResultContent');
+            loadingBox.style.display = 'block';
+            contentBox.style.display = 'none';
 
             try {
                 const res = await fetch('/Catalog/QuizSubmit', {
@@ -173,36 +696,94 @@
                 });
                 const data = await res.json();
 
-                if (!data.items || data.items.length === 0) {
-                    grid.innerHTML = '<p style="text-align:center; grid-column: 1/-1;">Chưa có dữ liệu phù hợp.</p>';
-                    return;
+                if (!data.success || !data.result) {
+                    throw new Error('Không thể tải hồ sơ mùi hương.');
                 }
 
-                grid.innerHTML = data.items.map(p => `
-                    <div class="perfume-card">
-                        <a href="/nuoc-hoa/${p.slug}" class="card-img-wrapper">
-                            <img src="${p.mainImageUrl || 'https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=400&q=80'}" alt="${p.name}" />
-                        </a>
-                        <div class="card-body">
-                            <div class="card-brand">${p.brandName}</div>
-                            <h4 class="card-title"><a href="/nuoc-hoa/${p.slug}">${p.name}</a></h4>
-                            <div class="card-footer">
-                                <span class="card-price">${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(p.basePrice)}</span>
-                                <button type="button" class="btn-luxe" onclick="addToCart('${p.slug}', null, 1)" style="padding: 8px 16px; font-size: 0.78rem;">Thêm</button>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
+                renderQuizDossier(data.result);
+                loadingBox.style.display = 'none';
+                contentBox.style.display = 'block';
             } catch (err) {
-                grid.innerHTML = `<p style="text-align:center; grid-column: 1/-1; color: #E63946;">Lỗi: ${err.message}</p>`;
+                loadingBox.innerHTML = `<p style="color: #E63946; font-size: 1.1rem;"><i class="fa-solid fa-triangle-exclamation"></i> Có lỗi xảy ra: ${err.message}</p>
+                <button type="button" class="btn-luxe" onclick="restartQuiz()" style="margin-top: 16px;">Thử lại</button>`;
             }
         }
 
+        function renderQuizDossier(result) {
+            // Render Archetype
+            document.getElementById('resArchetypeTitle').innerText = result.archetypeTitle || 'THE SOVEREIGN ARISTOCRAT';
+            document.getElementById('resArchetypeSubtitle').innerText = result.archetypeSubtitle || 'DANH PHẬN MÙI HƯƠNG ĐỘC BẢN';
+            document.getElementById('resArchetypeDesc').innerText = result.archetypeDescription || '';
+
+            // Accords
+            const accordsBox = document.getElementById('resAccordsTags');
+            accordsBox.innerHTML = (result.dominantAccords || []).map(a => `<span class="meta-tag-pill">${a}</span>`).join('');
+
+            // Key Notes
+            const notesBox = document.getElementById('resNotesTags');
+            notesBox.innerHTML = (result.keyNotes || []).map(n => `<span class="meta-tag-pill">${n}</span>`).join('');
+
+            // Occasion
+            document.getElementById('resOccasionText').innerText = result.bestOccasions || 'Mọi khoảnh khắc đặc biệt';
+
+            // Products
+            const grid = document.getElementById('quizResultGrid');
+            const items = result.items || [];
+
+            if (items.length === 0) {
+                grid.innerHTML = '<p style="text-align:center; grid-column: 1/-1;">Chưa có sản phẩm phù hợp trong hệ thống.</p>';
+                return;
+            }
+
+            grid.innerHTML = items.map(p => `
+                <div class="luxury-quiz-item">
+                    <div class="match-score-badge">
+                        <i class="fa-solid fa-fire"></i> ${p.matchScore}% PHÙ HỢP
+                    </div>
+                    <a href="/nuoc-hoa/${p.slug}" class="quiz-item-img-wrapper">
+                        <img src="${p.mainImageUrl || 'https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=400&q=80'}" alt="${p.name}" loading="lazy" />
+                    </a>
+                    <div class="quiz-item-body">
+                        <div class="quiz-item-brand">${p.brandName} ${p.brandCountry ? `(${p.brandCountry})` : ''}</div>
+                        <h4 class="quiz-item-name"><a href="/nuoc-hoa/${p.slug}">${p.name}</a></h4>
+                        
+                        <div class="ai-explain-box">
+                            <i class="fa-solid fa-wand-magic-sparkles" style="color: var(--gold-primary);"></i>
+                            <strong>Lý do AI tuyển chọn:</strong> ${p.matchReason}
+                        </div>
+
+                        ${p.topNotes && p.topNotes.length > 0 ? `
+                            <div class="quiz-item-notes">
+                                ${p.topNotes.map(n => `<span class="quiz-note-chip">Nốt ${n}</span>`).join('')}
+                            </div>
+                        ` : ''}
+
+                        <div class="quiz-item-footer">
+                            <div class="quiz-item-price">${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(p.basePrice)}</div>
+                            <button type="button" class="btn-luxe" onclick="addToCart('${p.slug}', null, 1)" style="padding: 8px 14px; font-size: 0.78rem;">
+                                <i class="fa-solid fa-bag-shopping"></i> Thêm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
         function restartQuiz() {
-            document.querySelectorAll('.quiz-step').forEach(s => s.style.display = 'none');
+            currentStep = 1;
+            updateStepUI(1);
             document.getElementById('quizResultSection').style.display = 'none';
-            document.getElementById('qStep1').style.display = 'block';
-            document.getElementById('quizProgress').style.width = '33.3%';
+        }
+
+        function copyQuizShareLink() {
+            const url = window.location.href;
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(url).then(() => {
+                    alert('✨ Đã sao chép liên kết Hồ Sơ Mùi Hương! Bạn có thể gửi cho bạn bè hoặc lưu trữ.');
+                });
+            } else {
+                alert('Liên kết: ' + url);
+            }
         }
     </script>
 }

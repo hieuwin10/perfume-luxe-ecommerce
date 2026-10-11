@@ -63,7 +63,7 @@ public class CatalogController : Controller
     [HttpPost]
     public async Task<IActionResult> QuizSubmit([FromBody] QuizAnswerRequest request)
     {
-        var recommendations = await _catalogService.GetQuizRecommendationsAsync(request);
-        return Json(new { success = true, items = recommendations });
+        var result = await _catalogService.GetQuizRecommendationsAsync(request);
+        return Json(new { success = true, result, items = result.Items });
     }
 }

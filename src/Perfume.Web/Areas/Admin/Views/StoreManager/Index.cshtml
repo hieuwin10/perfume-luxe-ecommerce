@@ -1,46 +1,498 @@
 @model Perfume.Web.Areas.Admin.Controllers.StoreManagerDashboardViewModel
 @{
-    ViewData["Title"] = "Thống kê cửa hàng";
+    ViewData["Title"] = "Thống Kê Vận Hành Cửa Hàng & Kho Bãi";
     Layout = "_AdminLayout";
 }
-<div style="max-width:1400px;margin:0 auto">
-    @if (TempData["Error"] != null) { <p style="color:#f87171">@TempData["Error"]</p> }
-    @if (TempData["Success"] != null) { <p style="color:#2a9d8f">@TempData["Success"]</p> }
-    <h1><i class="fa-solid fa-chart-line text-gold-gradient"></i> Thống kê cửa hàng</h1>
-    <form method="get" style="display:flex;gap:12px;align-items:end;margin:18px 0">
-        <label>Từ ngày<input type="date" name="from" value="@Model.From.ToString("yyyy-MM-dd")" /></label>
-        <label>Đến ngày<input type="date" name="to" value="@Model.To.ToString("yyyy-MM-dd")" /></label>
-        <button class="btn-luxe" type="submit">Lọc</button>
-        <a class="btn-luxe-outline" href="@Url.Action("ExportCsv", new { from = Model.From.ToString("yyyy-MM-dd"), to = Model.To.ToString("yyyy-MM-dd") })">Xuất CSV</a>
-    </form>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin:20px 0">
-        <div class="luxury-card" style="padding:20px">Doanh thu đã thu<h2>@Model.Revenue.ToString("N0") ₫</h2><small>Chỉ đơn đã giao và COD đã xác nhận thu</small></div>
-        <div class="luxury-card" style="padding:20px">Đơn đã giao và đã thu<h2>@Model.PaidOrders</h2></div>
-        <div class="luxury-card" style="padding:20px">Giá trị đơn trung bình<h2>@Model.AverageOrderValue.ToString("N0") ₫</h2></div>
-        <div class="luxury-card" style="padding:20px">Tổng đơn trong kỳ<h2>@Model.OrderCount</h2><small>Chờ: @Model.PendingOrders · Hủy: @Model.CancelledOrders</small></div>
+
+<style>
+    .retail-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+    .filter-card {
+        background: #151821;
+        border: 1px solid rgba(212, 175, 55, 0.2);
+        border-radius: var(--radius-md);
+        padding: 18px 24px;
+        margin-bottom: 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+    .preset-btn {
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-decoration: none;
+        color: var(--text-secondary);
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.2s ease;
+    }
+    .preset-btn:hover {
+        color: #fff;
+        border-color: var(--gold-primary);
+        background: rgba(212, 175, 55, 0.15);
+    }
+    .preset-btn.active {
+        color: #000;
+        background: var(--gold-gradient);
+        border-color: var(--gold-primary);
+        font-weight: 700;
+        box-shadow: 0 2px 10px rgba(212, 175, 55, 0.35);
+    }
+    .date-input-luxe {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.15);
+        color: var(--text-primary);
+        padding: 7px 12px;
+        border-radius: var(--radius-sm);
+        font-size: 0.85rem;
+        outline: none;
+    }
+    .date-input-luxe:focus {
+        border-color: var(--gold-primary);
+    }
+    .stock-badge-critical {
+        background: rgba(239, 68, 68, 0.2);
+        color: #f87171;
+        border: 1px solid rgba(239, 68, 68, 0.4);
+        padding: 3px 8px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        animation: pulseAlert 2s infinite ease-in-out;
+    }
+    .stock-badge-warning {
+        background: rgba(245, 158, 11, 0.15);
+        color: #fbbf24;
+        border: 1px solid rgba(245, 158, 11, 0.3);
+        padding: 3px 8px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+    @@keyframes pulseAlert {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.6; }
+    }
+</style>
+
+<div style="max-width: 1480px; margin: 0 auto; padding-bottom: 60px;">
+    <!-- Breadcrumb & Role Notice -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 0.82rem; color: var(--text-muted);">
+        <div>
+            <a href="/admin/storemanager" style="color: var(--gold-primary); text-decoration: none;">Cửa Hàng</a>
+            <span style="margin: 0 6px;">/</span>
+            <span>Báo Cáo & Thống Kê Đặc Quyền Role Quản Lý Cửa Hàng</span>
+        </div>
+        <span style="display: inline-flex; align-items: center; gap: 6px; background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.3); padding: 4px 12px; border-radius: 20px; color: var(--gold-primary); font-size: 0.75rem;">
+            <i class="fa-solid fa-shield-halved"></i> Phân Hệ Quản Lý Bán Lẻ & Kho Bãi Chuyên Sâu
+        </span>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px">
-        <section class="luxury-card" style="padding:20px">
-            <h2>Trạng thái đơn hàng</h2>
-            @foreach (var row in Model.StatusCounts) { <p>@row.Key <strong>@row.Value</strong></p> }
-            <a href="/admin/admindashboard/orders">Xử lý đơn hàng →</a>
-        </section>
-        <section class="luxury-card" style="padding:20px">
-            <h2>Sản phẩm bán chạy</h2>
-            @if (Model.TopProducts.Count == 0) { <p>Chưa có đơn đã giao và thu tiền trong khoảng này.</p> }
-            @foreach (var item in Model.TopProducts) { <p>@item.Name — @item.Quantity chai, @item.Revenue.ToString("N0") ₫</p> }
-        </section>
-        <section class="luxury-card" style="padding:20px">
-            <h2>Cảnh báo tồn kho (≤ 5)</h2>
-            @if (Model.LowStock.Count == 0) { <p>Chưa có phiên bản tồn thấp.</p> }
-            @foreach (var item in Model.LowStock) { <p>@item.Product?.Name / @item.VolumeLabel — <strong>@item.StockQuantity</strong></p> }
-            <a href="/admin/admindashboard/products">Quản lý sản phẩm và kho →</a>
-        </section>
-        <section class="luxury-card" style="padding:20px">
-            <h2>Voucher trong các đơn đã thu</h2>
-            @if (Model.VoucherStats.Count == 0) { <p>Chưa ghi nhận sử dụng voucher đã thanh toán.</p> }
-            @foreach (var item in Model.VoucherStats) { <p>@item.Code — @item.Orders đơn, @item.Revenue.ToString("N0") ₫</p> }
-            <a href="/admin/storemanager/vouchers">Quản lý voucher →</a>
-        </section>
+
+    <!-- Header -->
+    <div class="retail-header">
+        <div>
+            <h1 style="font-size: 1.85rem; font-weight: 800; margin: 0 0 6px; color: var(--text-primary); font-family: var(--font-serif);">
+                <i class="fa-solid fa-chart-line text-gold-gradient" style="margin-right: 8px;"></i> Trung Tâm Phân Tích Vận Hành Cửa Hàng
+            </h1>
+            <p style="color: var(--text-muted); margin: 0; font-size: 0.88rem;">
+                Theo dõi dòng tiền bán lẻ, tốc độ xoay vòng kho, nguy cơ đứt hàng, hiệu suất voucher và đối soát thanh toán.
+            </p>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <a class="btn-luxe-primary" href="@Url.Action("ExportCsv", new { from = Model.From.ToString("yyyy-MM-dd"), to = Model.To.ToString("yyyy-MM-dd") })" style="font-size: 0.85rem; padding: 10px 18px;">
+                <i class="fa-solid fa-file-csv" style="margin-right: 6px;"></i> Xuất Báo Cáo CSV
+            </a>
+            <a class="btn-luxe-outline" href="/admin/admindashboard/products" style="font-size: 0.85rem; padding: 10px 16px;">
+                <i class="fa-solid fa-boxes-stacked" style="margin-right: 6px;"></i> Quản Lý Tồn Kho
+            </a>
+        </div>
+    </div>
+
+    <!-- Quick Preset Tabs & Date Filter -->
+    <div class="filter-card">
+        <!-- Preset buttons -->
+        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+            <span style="font-size: 0.78rem; text-transform: uppercase; color: var(--text-muted); margin-right: 4px; font-weight: 700;">Chọn nhanh:</span>
+            <a href="@Url.Action("Index", new { preset = "today" })" class="preset-btn @(Model.CurrentPreset == "today" ? "active" : "")">Hôm Nay</a>
+            <a href="@Url.Action("Index", new { preset = "7days" })" class="preset-btn @(Model.CurrentPreset == "7days" ? "active" : "")">7 Ngày Qua</a>
+            <a href="@Url.Action("Index", new { preset = "thismonth" })" class="preset-btn @(Model.CurrentPreset == "thismonth" ? "active" : "")">Tháng Này</a>
+            <a href="@Url.Action("Index", new { preset = "thisquarter" })" class="preset-btn @(Model.CurrentPreset == "thisquarter" ? "active" : "")">Quý Này</a>
+        </div>
+
+        <!-- Custom Date Range Form -->
+        <form method="get" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="font-size: 0.8rem; color: var(--text-muted);">Từ:</span>
+                <input type="date" name="from" value="@Model.From.ToString("yyyy-MM-dd")" class="date-input-luxe" />
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="font-size: 0.8rem; color: var(--text-muted);">Đến:</span>
+                <input type="date" name="to" value="@Model.To.ToString("yyyy-MM-dd")" class="date-input-luxe" />
+            </div>
+            <button class="btn-luxe" type="submit" style="padding: 7px 16px; font-size: 0.82rem;">
+                <i class="fa-solid fa-filter" style="margin-right: 4px;"></i> Lọc
+            </button>
+        </form>
+    </div>
+
+    <!-- 6 Primary Retail KPIs Grid -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 28px;">
+        <!-- KPI 1: Doanh thu thực thu -->
+        <div class="luxury-card" style="padding: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.08em; font-weight: 700;">Doanh Thu Thực Thu</span>
+                <i class="fa-solid fa-coins" style="color: var(--gold-primary); font-size: 1.1rem;"></i>
+            </div>
+            <div style="font-size: 1.7rem; font-weight: 800; color: var(--gold-primary); margin: 10px 0 4px; font-family: var(--font-serif);">
+                @Model.Revenue.ToString("N0") ₫
+            </div>
+            <small style="color: var(--text-muted); font-size: 0.75rem;">@Model.PaidOrders đơn giao thành công</small>
+        </div>
+
+        <!-- KPI 2: Giá trị đơn trung bình -->
+        <div class="luxury-card" style="padding: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.08em; font-weight: 700;">AOV (Đơn Trung Bình)</span>
+                <i class="fa-solid fa-receipt" style="color: #818cf8; font-size: 1.1rem;"></i>
+            </div>
+            <div style="font-size: 1.7rem; font-weight: 800; color: #818cf8; margin: 10px 0 4px; font-family: var(--font-serif);">
+                @Model.AverageOrderValue.ToString("N0") ₫
+            </div>
+            <small style="color: var(--text-muted); font-size: 0.75rem;">Trên @Model.PaidOrders giao hoàn tất</small>
+        </div>
+
+        <!-- KPI 3: Ước tính giá trị kho tồn -->
+        <div class="luxury-card" style="padding: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.08em; font-weight: 700;">Ước Tính Vốn Tồn Kho</span>
+                <i class="fa-solid fa-warehouse" style="color: #38bdf8; font-size: 1.1rem;"></i>
+            </div>
+            <div style="font-size: 1.7rem; font-weight: 800; color: #38bdf8; margin: 10px 0 4px; font-family: var(--font-serif);">
+                @Model.TotalStockValuation.ToString("N0") ₫
+            </div>
+            <small style="color: var(--text-muted); font-size: 0.75rem;">Tổng @Model.TotalStockUnits chai hiện có trong kho</small>
+        </div>
+
+        <!-- KPI 4: Cảnh báo hàng tồn kho nguy cấp -->
+        <div class="luxury-card" style="padding: 20px; border-left: 3px solid #ef4444;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 0.75rem; text-transform: uppercase; color: #ef4444; letter-spacing: 0.08em; font-weight: 700;">Nguy Cơ Đứt Hàng</span>
+                <i class="fa-solid fa-triangle-exclamation" style="color: #ef4444; font-size: 1.1rem;"></i>
+            </div>
+            <div style="font-size: 1.7rem; font-weight: 800; color: #ef4444; margin: 10px 0 4px; font-family: var(--font-serif);">
+                @(Model.OutOfStock.Count + Model.LowStock.Count) phiên bản
+            </div>
+            <small style="color: var(--text-muted); font-size: 0.75rem;">
+                <strong style="color: #f87171;">@Model.OutOfStock.Count hết hàng</strong> · <strong style="color: #fbbf24;">@Model.LowStock.Count sắp hết</strong>
+            </small>
+        </div>
+
+        <!-- KPI 5: Tỷ lệ hủy đơn & Thất thoát -->
+        <div class="luxury-card" style="padding: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.08em; font-weight: 700;">Tỷ Lệ Hủy Đơn</span>
+                <i class="fa-solid fa-ban" style="color: #f59e0b; font-size: 1.1rem;"></i>
+            </div>
+            <div style="font-size: 1.7rem; font-weight: 800; color: #f59e0b; margin: 10px 0 4px; font-family: var(--font-serif);">
+                @Model.CancellationRate%
+            </div>
+            <small style="color: var(--text-muted); font-size: 0.75rem;">
+                @Model.CancelledOrders hủy (@Model.LostRevenue.ToString("N0") ₫ thất thoát)
+            </small>
+        </div>
+
+        <!-- KPI 6: Voucher & Khuyến mãi -->
+        <div class="luxury-card" style="padding: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.08em; font-weight: 700;">Chiết Khấu Khuyến Mãi</span>
+                <i class="fa-solid fa-tags" style="color: #ec4899; font-size: 1.1rem;"></i>
+            </div>
+            <div style="font-size: 1.7rem; font-weight: 800; color: #ec4899; margin: 10px 0 4px; font-family: var(--font-serif);">
+                @Model.TotalDiscountGiven.ToString("N0") ₫
+            </div>
+            <small style="color: var(--text-muted); font-size: 0.75rem;">
+                @Model.VoucherOrdersCount đơn áp dụng mã (@Model.VoucherAdoptionRate%)
+            </small>
+        </div>
+    </div>
+
+    <!-- 2 Charts Section: Kênh thanh toán & Đối soát dòng tiền + Trạng thái tiến độ đơn -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 24px; margin-bottom: 28px;">
+        <!-- Chart 1: Phương thức thanh toán & Dòng tiền -->
+        <div class="luxury-card" style="padding: 24px;">
+            <h3 style="font-size: 1.1rem; margin: 0 0 14px; color: var(--gold-primary); font-family: var(--font-serif);">
+                <i class="fa-solid fa-money-bill-transfer" style="margin-right: 8px;"></i> Đối Soát Dòng Tiền & Kênh Thanh Toán
+            </h3>
+            <div style="height: 240px; position: relative;">
+                <canvas id="paymentReconciliationChart"></canvas>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 16px;">
+                @foreach (var p in Model.PaymentMethodStats)
+                {
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 12px; background: rgba(255,255,255,0.02); border-radius: 6px; font-size: 0.82rem;">
+                        <span style="color: var(--text-secondary);">@p.Method (@p.Count đơn)</span>
+                        <div>
+                            <span style="color: var(--text-muted); margin-right: 8px;">Tổng: @p.TotalAmount.ToString("N0") ₫</span>
+                            <strong style="color: #2ecc71;">Đã thu: @p.PaidAmount.ToString("N0") ₫</strong>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Chart 2: Trạng thái tiến độ đơn hàng -->
+        <div class="luxury-card" style="padding: 24px;">
+            <h3 style="font-size: 1.1rem; margin: 0 0 14px; color: var(--gold-primary); font-family: var(--font-serif);">
+                <i class="fa-solid fa-chart-pie" style="margin-right: 8px;"></i> Phân Bổ Tiến Độ Đơn Hàng Trong Kỳ
+            </h3>
+            <div style="height: 240px; position: relative;">
+                <canvas id="orderProgressChart"></canvas>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-top: 16px;">
+                @foreach (var row in Model.StatusCounts)
+                {
+                    <div style="padding: 8px 12px; background: rgba(255,255,255,0.02); border-radius: 6px; border: 1px solid rgba(255,255,255,0.06); text-align: center;">
+                        <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">@row.Key</span>
+                        <strong style="color: var(--gold-primary); font-size: 1.05rem;">@row.Value đơn</strong>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- 4 Detailed Operational Panels Grid -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 24px; margin-bottom: 28px;">
+        <!-- Panel 1: Top Sản Phẩm Bán Chạy -->
+        <div class="luxury-card" style="padding: 24px;">
+            <h3 style="font-size: 1.15rem; margin: 0 0 16px; color: var(--gold-primary); font-family: var(--font-serif);">
+                <i class="fa-solid fa-trophy" style="margin-right: 8px;"></i> Top Sản Phẩm Bán Chạy Nhất
+            </h3>
+            @if (Model.TopProducts.Count == 0)
+            {
+                <p style="color: var(--text-muted); font-size: 0.88rem;">Chưa có đơn đã hoàn tất trong khoảng thời gian này.</p>
+            }
+            else
+            {
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    @foreach (var item in Model.TopProducts)
+                    {
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 1px solid var(--border-card);">
+                            <div>
+                                <div style="font-weight: 700; color: var(--text-primary); font-size: 0.9rem;">@item.Name</div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted);">Số lượng: <strong style="color: var(--gold-primary);">@item.Quantity chai</strong></div>
+                            </div>
+                            <div style="font-weight: 700; color: #2ecc71; font-size: 0.9rem;">
+                                @item.Revenue.ToString("N0") ₫
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <!-- Panel 2: Cảnh Báo Tồn Kho Khẩn Cấp (Hết hàng + Sắp hết) -->
+        <div class="luxury-card" style="padding: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="font-size: 1.15rem; margin: 0; color: #ef4444; font-family: var(--font-serif);">
+                    <i class="fa-solid fa-triangle-exclamation" style="margin-right: 8px;"></i> Cảnh Báo Kho & Nhập Hàng Gấp
+                </h3>
+                <a href="/admin/admindashboard/products" style="font-size: 0.78rem; color: var(--gold-primary);">Quản lý kho &rarr;</a>
+            </div>
+            
+            <!-- Danh sách hết hàng hoàn toàn (Stock == 0) -->
+            @if (Model.OutOfStock.Count > 0)
+            {
+                <div style="margin-bottom: 14px;">
+                    <span style="font-size: 0.75rem; font-weight: 700; color: #f87171; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 6px;">
+                        ĐÃ HẾT HÀNG HOÀN TOÀN (@Model.OutOfStock.Count)
+                    </span>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        @foreach (var item in Model.OutOfStock.Take(5))
+                        {
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 7px 10px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: var(--radius-sm);">
+                                <div>
+                                    <div style="font-weight: 600; color: var(--text-primary); font-size: 0.82rem;">@item.Product?.Name</div>
+                                    <div style="font-size: 0.72rem; color: var(--text-muted);">@item.VolumeLabel · SKU: @item.VariantSku</div>
+                                </div>
+                                <span class="stock-badge-critical">CHÁY HÀNG (0)</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Danh sách sắp hết hàng (Stock <= 5) -->
+            @if (Model.LowStock.Count > 0)
+            {
+                <div>
+                    <span style="font-size: 0.75rem; font-weight: 700; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 6px;">
+                        SẮP HẾT HÀNG (≤ 5 CHAI) (@Model.LowStock.Count)
+                    </span>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        @foreach (var item in Model.LowStock.Take(5))
+                        {
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 7px 10px; background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: var(--radius-sm);">
+                                <div>
+                                    <div style="font-weight: 600; color: var(--text-primary); font-size: 0.82rem;">@item.Product?.Name</div>
+                                    <div style="font-size: 0.72rem; color: var(--text-muted);">@item.VolumeLabel</div>
+                                </div>
+                                <span class="stock-badge-warning">Còn @item.StockQuantity chai</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            @if (Model.OutOfStock.Count == 0 && Model.LowStock.Count == 0)
+            {
+                <p style="color: #2ecc71; font-size: 0.88rem; margin: 10px 0;"><i class="fa-solid fa-circle-check" style="margin-right: 6px;"></i>Tất cả mặt hàng đều đạt định mức an toàn.</p>
+            }
+        </div>
+
+        <!-- Panel 3: Khách Hàng VIP Thân Thiết Mua Nhiều Nhất -->
+        <div class="luxury-card" style="padding: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="font-size: 1.15rem; margin: 0; color: var(--gold-primary); font-family: var(--font-serif);">
+                    <i class="fa-solid fa-crown" style="margin-right: 8px;"></i> Khách Hàng VIP Thân Thiết
+                </h3>
+                <span style="font-size: 0.78rem; color: var(--text-muted);">Chi tiêu cao nhất</span>
+            </div>
+            @if (Model.TopVipCustomers.Count == 0)
+            {
+                <p style="color: var(--text-muted); font-size: 0.88rem;">Chưa có dữ liệu khách hàng VIP hoàn tất đơn trong kỳ.</p>
+            }
+            else
+            {
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    @foreach (var vip in Model.TopVipCustomers)
+                    {
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: rgba(255,255,255,0.02); border-radius: var(--radius-sm); border: 1px solid rgba(212,175,55,0.15);">
+                            <div>
+                                <strong style="color: var(--text-primary); font-size: 0.88rem; display: block;">@vip.Name</strong>
+                                <span style="font-size: 0.75rem; color: var(--text-muted);">@vip.Email · @vip.OrderCount đơn</span>
+                            </div>
+                            <span style="font-weight: 700; color: var(--gold-primary); font-size: 0.95rem;">
+                                @vip.TotalSpent.ToString("N0") ₫
+                            </span>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <!-- Panel 4: Hiệu Quả Mã Ưu Đãi Voucher -->
+        <div class="luxury-card" style="padding: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="font-size: 1.15rem; margin: 0; color: var(--gold-primary); font-family: var(--font-serif);">
+                    <i class="fa-solid fa-ticket" style="margin-right: 8px;"></i> Hiệu Quả Mã Voucher
+                </h3>
+                <a href="/admin/storemanager/vouchers" style="font-size: 0.78rem; color: var(--gold-primary);">Tạo voucher &rarr;</a>
+            </div>
+            @if (Model.VoucherStats.Count == 0)
+            {
+                <p style="color: var(--text-muted); font-size: 0.88rem;">Chưa có đơn hàng nào áp dụng mã giảm giá trong kỳ.</p>
+            }
+            else
+            {
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    @foreach (var item in Model.VoucherStats)
+                    {
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: var(--bg-surface-elevated); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+                            <div>
+                                <strong style="color: var(--gold-primary); font-family: monospace; font-size: 0.9rem;">@item.Code</strong>
+                                <div style="font-size: 0.75rem; color: var(--text-muted);">@item.Orders lượt áp dụng</div>
+                            </div>
+                            <span style="font-weight: 700; color: #2ecc71; font-size: 0.88rem;">@item.Revenue.ToString("N0") ₫</span>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
     </div>
 </div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Chart 1: Payment Reconciliation
+            const payLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.PaymentMethodStats.Select(p => p.Method)));
+            const payData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.PaymentMethodStats.Select(p => p.PaidAmount)));
+            
+            const payCtx = document.getElementById('paymentReconciliationChart');
+            if (payCtx) {
+                new Chart(payCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: payLabels.length > 0 ? payLabels : ['Chưa có dữ liệu'],
+                        datasets: [{
+                            data: payData.length > 0 ? payData : [1],
+                            backgroundColor: ['#D4AF37', '#10B981', '#3B82F6', '#EC4899', '#8B5CF6'],
+                            borderWidth: 2,
+                            borderColor: '#151821'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { color: '#cbd5e1', font: { size: 11 } } },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(ctx) {
+                                        return ctx.label + ': ' + Number(ctx.raw).toLocaleString('vi-VN') + ' ₫';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Chart 2: Order Progress Bar
+            const statusLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.StatusCounts.Keys));
+            const statusData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.StatusCounts.Values));
+
+            const statusCtx = document.getElementById('orderProgressChart');
+            if (statusCtx) {
+                new Chart(statusCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: statusLabels.length > 0 ? statusLabels : ['Chưa có đơn'],
+                        datasets: [{
+                            label: 'Số Đơn Hàng',
+                            data: statusData.length > 0 ? statusData : [0],
+                            backgroundColor: 'rgba(212, 175, 55, 0.75)',
+                            borderColor: '#D4AF37',
+                            borderWidth: 1,
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { beginAtZero: true, ticks: { color: '#94a3b8', stepSize: 1 } },
+                            x: { ticks: { color: '#94a3b8' } }
+                        },
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+}

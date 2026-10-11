@@ -16,25 +16,109 @@ public class StoreManagerController : Controller
     private readonly PerfumeDbContext _db;
     public StoreManagerController(PerfumeDbContext db) => _db = db;
 
-    public async Task<IActionResult> Index(DateTime? from, DateTime? to)
+    public async Task<IActionResult> Index(DateTime? from, DateTime? to, string? preset = null)
     {
-        var fromDate = (from ?? DateTime.UtcNow.Date.AddDays(-29)).Date;
-        var toDate = (to ?? DateTime.UtcNow.Date).Date;
+        var now = DateTime.UtcNow;
+        DateTime fromDate;
+        DateTime toDate = now.Date;
+
+        if (!string.IsNullOrEmpty(preset))
+        {
+            switch (preset.ToLowerInvariant())
+            {
+                case "today":
+                    fromDate = now.Date;
+                    toDate = now.Date;
+                    break;
+                case "7days":
+                    fromDate = now.Date.AddDays(-6);
+                    toDate = now.Date;
+                    break;
+                case "thismonth":
+                    fromDate = new DateTime(now.Year, now.Month, 1);
+                    toDate = now.Date;
+                    break;
+                case "thisquarter":
+                    int currentQuarter = (now.Month - 1) / 3 + 1;
+                    fromDate = new DateTime(now.Year, (currentQuarter - 1) * 3 + 1, 1);
+                    toDate = now.Date;
+                    break;
+                default:
+                    fromDate = (from ?? now.Date.AddDays(-29)).Date;
+                    toDate = (to ?? now.Date).Date;
+                    break;
+            }
+        }
+        else
+        {
+            fromDate = (from ?? now.Date.AddDays(-29)).Date;
+            toDate = (to ?? now.Date).Date;
+        }
+
         if (toDate < fromDate) toDate = fromDate;
         var endExclusive = toDate.AddDays(1);
+
         var period = _db.Orders.Where(o => o.CreatedAt >= fromDate && o.CreatedAt < endExclusive);
+        var totalOrderCount = await period.CountAsync();
         var paid = period.Where(o => o.OrderStatus == OrderStatus.Delivered && o.PaymentStatus == PaymentStatus.Completed);
         var paidCount = await paid.CountAsync();
         var revenue = await paid.SumAsync(o => (decimal?)o.TotalAmount) ?? 0m;
-        var statuses = await period.GroupBy(o => o.OrderStatus).Select(g => new { Status = g.Key, Count = g.Count() }).ToDictionaryAsync(x => x.Status.ToString(), x => x.Count);
+
+        var cancelledOrdersQuery = period.Where(o => o.OrderStatus == OrderStatus.Cancelled);
+        var cancelledCount = await cancelledOrdersQuery.CountAsync();
+        var lostRevenue = await cancelledOrdersQuery.SumAsync(o => (decimal?)o.TotalAmount) ?? 0m;
+        var cancellationRate = totalOrderCount > 0 ? Math.Round((double)cancelledCount / totalOrderCount * 100, 1) : 0;
+
+        var totalDiscountGiven = await period.SumAsync(o => (decimal?)o.DiscountAmount) ?? 0m;
+        var voucherOrdersCount = await period.CountAsync(o => !string.IsNullOrEmpty(o.VoucherCode));
+        var voucherAdoptionRate = totalOrderCount > 0 ? Math.Round((double)voucherOrdersCount / totalOrderCount * 100, 1) : 0;
+
+        // Payment Methods & Dòng tiền
+        var paymentMethods = await period
+            .GroupBy(o => o.PaymentMethod)
+            .Select(g => new PaymentMethodStat
+            {
+                Method = g.Key.ToString(),
+                Count = g.Count(),
+                TotalAmount = g.Sum(o => o.TotalAmount),
+                PaidAmount = g.Where(o => o.OrderStatus == OrderStatus.Delivered && o.PaymentStatus == PaymentStatus.Completed).Sum(o => o.TotalAmount)
+            })
+            .ToListAsync();
+
+        var statuses = await period.GroupBy(o => o.OrderStatus)
+            .Select(g => new { Status = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(x => x.Status.ToString(), x => x.Count);
+
         var topProducts = await _db.OrderItems
             .Where(i => i.Order != null && i.Order.CreatedAt >= fromDate && i.Order.CreatedAt < endExclusive &&
                         i.Order.OrderStatus == OrderStatus.Delivered && i.Order.PaymentStatus == PaymentStatus.Completed)
             .GroupBy(i => i.ProductName)
             .Select(g => new TopProductStat { Name = g.Key, Quantity = g.Sum(i => i.Quantity), Revenue = g.Sum(i => i.UnitPrice * i.Quantity) })
             .OrderByDescending(x => x.Quantity).Take(10).ToListAsync();
-        var lowStock = await _db.ProductVariants.Include(v => v.Product).Where(v => v.StockQuantity <= 5)
-            .OrderBy(v => v.StockQuantity).Take(30).ToListAsync();
+
+        // Kho bãi & Tồn kho
+        var allVariants = await _db.ProductVariants.Include(v => v.Product).ToListAsync();
+        var outOfStockVariants = allVariants.Where(v => v.StockQuantity <= 0).ToList();
+        var lowStockVariants = allVariants.Where(v => v.StockQuantity > 0 && v.StockQuantity <= 5).OrderBy(v => v.StockQuantity).ToList();
+        var totalStockUnits = allVariants.Sum(v => v.StockQuantity);
+        var totalStockValuation = allVariants.Sum(v => v.StockQuantity * (v.SalePrice > 0 ? v.SalePrice : v.OriginalPrice));
+
+        // Khách hàng thân thiết VIP trong kỳ
+        var topVipCustomers = await paid
+            .Where(o => !string.IsNullOrEmpty(o.CustomerEmail))
+            .GroupBy(o => new { o.CustomerName, o.CustomerEmail, o.CustomerPhone })
+            .Select(g => new VipCustomerStat
+            {
+                Name = g.Key.CustomerName,
+                Email = g.Key.CustomerEmail,
+                Phone = g.Key.CustomerPhone ?? "",
+                OrderCount = g.Count(),
+                TotalSpent = g.Sum(o => o.TotalAmount)
+            })
+            .OrderByDescending(x => x.TotalSpent)
+            .Take(5)
+            .ToListAsync();
+
         var voucherStats = await paid.Where(o => o.VoucherCode != null)
             .GroupBy(o => o.VoucherCode!)
             .Select(g => new VoucherUsageStat { Code = g.Key, Orders = g.Count(), Revenue = g.Sum(o => o.TotalAmount) })
@@ -42,12 +126,29 @@ public class StoreManagerController : Controller
 
         return View(new StoreManagerDashboardViewModel
         {
-            From = fromDate, To = toDate, Revenue = revenue, PaidOrders = paidCount,
+            From = fromDate,
+            To = toDate,
+            CurrentPreset = preset ?? "custom",
+            Revenue = revenue,
+            PaidOrders = paidCount,
             AverageOrderValue = paidCount == 0 ? 0 : revenue / paidCount,
-            OrderCount = await period.CountAsync(), StatusCounts = statuses, TopProducts = topProducts,
-            LowStock = lowStock, VoucherStats = voucherStats,
+            OrderCount = totalOrderCount,
+            StatusCounts = statuses,
+            TopProducts = topProducts,
+            LowStock = lowStockVariants,
+            OutOfStock = outOfStockVariants,
+            TotalStockUnits = totalStockUnits,
+            TotalStockValuation = totalStockValuation,
+            VoucherStats = voucherStats,
             PendingOrders = await period.CountAsync(o => o.OrderStatus == OrderStatus.Pending),
-            CancelledOrders = await period.CountAsync(o => o.OrderStatus == OrderStatus.Cancelled)
+            CancelledOrders = cancelledCount,
+            CancellationRate = cancellationRate,
+            LostRevenue = lostRevenue,
+            TotalDiscountGiven = totalDiscountGiven,
+            VoucherOrdersCount = voucherOrdersCount,
+            VoucherAdoptionRate = voucherAdoptionRate,
+            PaymentMethodStats = paymentMethods,
+            TopVipCustomers = topVipCustomers
         });
     }
 
@@ -302,16 +403,46 @@ public class StoreManagerDashboardViewModel
 {
     public DateTime From { get; set; }
     public DateTime To { get; set; }
+    public string CurrentPreset { get; set; } = "30days";
     public decimal Revenue { get; set; }
     public int PaidOrders { get; set; }
     public decimal AverageOrderValue { get; set; }
     public int OrderCount { get; set; }
     public int PendingOrders { get; set; }
     public int CancelledOrders { get; set; }
+    public double CancellationRate { get; set; }
+    public decimal LostRevenue { get; set; }
+    public decimal TotalDiscountGiven { get; set; }
+    public int VoucherOrdersCount { get; set; }
+    public double VoucherAdoptionRate { get; set; }
+    public int TotalStockUnits { get; set; }
+    public decimal TotalStockValuation { get; set; }
+
     public Dictionary<string, int> StatusCounts { get; set; } = new();
     public List<TopProductStat> TopProducts { get; set; } = new();
     public List<ProductVariant> LowStock { get; set; } = new();
+    public List<ProductVariant> OutOfStock { get; set; } = new();
     public List<VoucherUsageStat> VoucherStats { get; set; } = new();
+    public List<PaymentMethodStat> PaymentMethodStats { get; set; } = new();
+    public List<VipCustomerStat> TopVipCustomers { get; set; } = new();
 }
+
 public class TopProductStat { public string Name { get; set; } = ""; public int Quantity { get; set; } public decimal Revenue { get; set; } }
 public class VoucherUsageStat { public string Code { get; set; } = ""; public int Orders { get; set; } public decimal Revenue { get; set; } }
+
+public class PaymentMethodStat
+{
+    public string Method { get; set; } = "";
+    public int Count { get; set; }
+    public decimal TotalAmount { get; set; }
+    public decimal PaidAmount { get; set; }
+}
+
+public class VipCustomerStat
+{
+    public string Name { get; set; } = "";
+    public string Email { get; set; } = "";
+    public string Phone { get; set; } = "";
+    public int OrderCount { get; set; }
+    public decimal TotalSpent { get; set; }
+}

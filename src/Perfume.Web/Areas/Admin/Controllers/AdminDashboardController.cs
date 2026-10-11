@@ -19,34 +19,135 @@ public class AdminDashboardController : Controller
     private readonly IDatabaseConsoleService _dbConsole;
     private readonly UserManager<AppUser> _userManager;
     private readonly ISystemSettingService _settingService;
+    private readonly IBlogService _blogService;
 
-    public AdminDashboardController(PerfumeDbContext db, IDatabaseConsoleService dbConsole, UserManager<AppUser> userManager, ISystemSettingService settingService)
+    public AdminDashboardController(PerfumeDbContext db, IDatabaseConsoleService dbConsole, UserManager<AppUser> userManager, ISystemSettingService settingService, IBlogService blogService)
     {
         _db = db;
         _dbConsole = dbConsole;
         _userManager = userManager;
         _settingService = settingService;
+        _blogService = blogService;
     }
 
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,StoreManager")]
     public async Task<IActionResult> Index()
     {
+        if (!User.IsInRole("Admin") && User.IsInRole("StoreManager"))
+        {
+            return RedirectToAction("Index", "StoreManager");
+        }
+
+        var now = DateTime.UtcNow;
+        var startOfMonth = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+
+        var allOrders = await _db.Orders
+            .Include(o => o.Items)
+            .OrderByDescending(o => o.CreatedAt)
+            .ToListAsync();
+
+        var totalOrders = allOrders.Count;
+        var deliveredOrders = allOrders.Where(o => o.OrderStatus == OrderStatus.Delivered).ToList();
+        var totalRevenue = deliveredOrders.Sum(o => o.TotalAmount);
+        var revenueThisMonth = deliveredOrders.Where(o => o.CreatedAt >= startOfMonth).Sum(o => o.TotalAmount);
+        var avgOrderValue = totalOrders > 0 ? allOrders.Average(o => o.TotalAmount) : 0;
+
+        var pendingCount = allOrders.Count(o => o.OrderStatus == OrderStatus.Pending);
+        var confirmedCount = allOrders.Count(o => o.OrderStatus == OrderStatus.Confirmed);
+        var shippingCount = allOrders.Count(o => o.OrderStatus == OrderStatus.Shipping);
+        var deliveredCount = deliveredOrders.Count;
+        var cancelledCount = allOrders.Count(o => o.OrderStatus == OrderStatus.Cancelled);
+        var fulfillmentRate = totalOrders > 0 ? Math.Round((double)deliveredCount / totalOrders * 100, 1) : 0;
+
+        // Biểu đồ doanh thu 7 ngày gần nhất
+        var chartLabels = new List<string>();
+        var chartData = new List<decimal>();
+        for (int i = 6; i >= 0; i--)
+        {
+            var date = now.Date.AddDays(-i);
+            var nextDate = date.AddDays(1);
+            var dayRevenue = deliveredOrders
+                .Where(o => o.CreatedAt >= date && o.CreatedAt < nextDate)
+                .Sum(o => o.TotalAmount);
+            chartLabels.Add(date.ToString("dd/MM"));
+            chartData.Add(dayRevenue);
+        }
+
+        // Biểu đồ trạng thái đơn hàng
+        var orderStatusChart = new Dictionary<string, int>
+        {
+            { "Đã Giao (Thành công)", deliveredCount },
+            { "Đang Vận Chuyển", shippingCount },
+            { "Đã Xác Nhận", confirmedCount },
+            { "Chờ Xử Lý", pendingCount },
+            { "Đã Hủy", cancelledCount }
+        };
+
+        // Phân bố phương thức thanh toán
+        var paymentMethodChart = new Dictionary<string, int>
+        {
+            { "COD (Tiền mặt)", allOrders.Count(o => o.PaymentMethod == PaymentMethod.COD) },
+            { "VNPAY QR", allOrders.Count(o => o.PaymentMethod == PaymentMethod.VNPAY) },
+            { "Chuyển Khoản", allOrders.Count(o => o.PaymentMethod == PaymentMethod.BankTransfer) },
+            { "Ví MoMo", allOrders.Count(o => o.PaymentMethod == PaymentMethod.MoMo) }
+        };
+
+        // Top sản phẩm bán chạy nhất
+        var topProducts = await _db.OrderItems
+            .GroupBy(i => new { i.ProductId, i.ProductName, i.ProductImageUrl })
+            .Select(g => new DashboardTopProductStat
+            {
+                ProductId = g.Key.ProductId,
+                ProductName = g.Key.ProductName,
+                ImageUrl = g.Key.ProductImageUrl,
+                QuantitySold = g.Sum(x => x.Quantity),
+                TotalRevenue = g.Sum(x => x.UnitPrice * x.Quantity)
+            })
+            .OrderByDescending(x => x.QuantitySold)
+            .Take(5)
+            .ToListAsync();
+
+        // Thống kê theo nhóm hương
+        var scentStats = await _db.FragranceFamilies
+            .Where(f => !f.IsDeleted)
+            .Select(f => new ScentFamilyStat
+            {
+                Name = f.Name,
+                ColorHex = f.ColorHex ?? "#D4AF37",
+                ProductCount = f.Products.Count(p => !p.IsDeleted)
+            })
+            .ToListAsync();
+
         var vm = new AdminDashboardViewModel
         {
-            TotalProducts = await _db.Products.CountAsync(),
-            TotalOrders = await _db.Orders.CountAsync(),
+            TotalProducts = await _db.Products.CountAsync(p => !p.IsDeleted),
+            TotalOrders = totalOrders,
             TotalUsers = await _db.Users.CountAsync(),
-            TotalBrands = await _db.Brands.CountAsync(),
-            TotalCategories = await _db.Categories.CountAsync(),
-            TotalBlogPosts = await _db.BlogPosts.CountAsync(),
-            TotalReviews = await _db.Reviews.CountAsync(),
-            TotalVouchers = await _db.Vouchers.CountAsync(),
-            RecentUsers = await _db.Users.OrderByDescending(u => u.CreatedAt).Take(8).ToListAsync(),
-            RecentOrders = await _db.Orders
-                .Include(o => o.Items)
-                .OrderByDescending(o => o.CreatedAt)
-                .Take(8)
-                .ToListAsync(),
+            TotalBrands = await _db.Brands.CountAsync(b => !b.IsDeleted),
+            TotalCategories = await _db.Categories.CountAsync(c => !c.IsDeleted),
+            TotalBlogPosts = await _db.BlogPosts.CountAsync(b => !b.IsDeleted),
+            TotalReviews = await _db.Reviews.CountAsync(r => !r.IsDeleted),
+            TotalVouchers = await _db.Vouchers.CountAsync(v => !v.IsDeleted),
+            
+            TotalRevenue = totalRevenue,
+            RevenueThisMonth = revenueThisMonth,
+            AverageOrderValue = avgOrderValue,
+            PendingOrdersCount = pendingCount,
+            ConfirmedOrdersCount = confirmedCount,
+            ShippingOrdersCount = shippingCount,
+            DeliveredOrdersCount = deliveredCount,
+            CancelledOrdersCount = cancelledCount,
+            FulfillmentRate = fulfillmentRate,
+
+            RevenueChartLabels = chartLabels,
+            RevenueChartData = chartData,
+            OrderStatusChart = orderStatusChart,
+            PaymentMethodChart = paymentMethodChart,
+            TopProducts = topProducts,
+            ScentFamilyStats = scentStats,
+
+            RecentUsers = await _db.Users.OrderByDescending(u => u.CreatedAt).Take(6).ToListAsync(),
+            RecentOrders = allOrders.Take(8).ToList(),
             Tables = await _dbConsole.GetAllTablesAsync(),
         };
         return View(vm);
@@ -382,6 +483,81 @@ public class AdminDashboardController : Controller
         var tables = await _dbConsole.GetAllTablesAsync();
         return View(tables);
     }
+
+    // ─── BLOG MANAGEMENT ──────────────────────────────────────────────────────
+    [Authorize(Roles = "Admin,StoreManager")]
+    public async Task<IActionResult> Blogs()
+    {
+        var posts = await _blogService.GetAllPostsForAdminAsync();
+        return View(posts);
+    }
+
+    [HttpGet]
+    [Authorize(Roles = "Admin,StoreManager")]
+    public async Task<IActionResult> CreateBlog()
+    {
+        ViewBag.Categories = await _blogService.GetBlogCategoriesAsync();
+        return View(new BlogPost());
+    }
+
+    [HttpPost]
+    [Authorize(Roles = "Admin,StoreManager")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CreateBlog(BlogPost post)
+    {
+        if (string.IsNullOrWhiteSpace(post.Title) || string.IsNullOrWhiteSpace(post.Content))
+        {
+            ModelState.AddModelError("", "Tiêu đề và nội dung bài viết không được để trống.");
+            ViewBag.Categories = await _blogService.GetBlogCategoriesAsync();
+            return View(post);
+        }
+
+        await _blogService.CreatePostAsync(post);
+        TempData["Success"] = $"Đã xuất bản bài viết \"{post.Title}\" thành công!";
+        return RedirectToAction(nameof(Blogs));
+    }
+
+    [HttpGet]
+    [Authorize(Roles = "Admin,StoreManager")]
+    public async Task<IActionResult> EditBlog(int id)
+    {
+        var post = await _blogService.GetPostByIdAsync(id);
+        if (post == null) return NotFound();
+
+        ViewBag.Categories = await _blogService.GetBlogCategoriesAsync();
+        return View(nameof(CreateBlog), post);
+    }
+
+    [HttpPost]
+    [Authorize(Roles = "Admin,StoreManager")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditBlog(BlogPost post)
+    {
+        if (string.IsNullOrWhiteSpace(post.Title) || string.IsNullOrWhiteSpace(post.Content))
+        {
+            ModelState.AddModelError("", "Tiêu đề và nội dung bài viết không được để trống.");
+            ViewBag.Categories = await _blogService.GetBlogCategoriesAsync();
+            return View(nameof(CreateBlog), post);
+        }
+
+        var success = await _blogService.UpdatePostAsync(post);
+        if (!success) return NotFound();
+
+        TempData["Success"] = $"Đã cập nhật bài viết \"{post.Title}\" thành công!";
+        return RedirectToAction(nameof(Blogs));
+    }
+
+    [HttpPost]
+    [Authorize(Roles = "Admin,StoreManager")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteBlog(int id)
+    {
+        var success = await _blogService.DeletePostAsync(id);
+        if (!success) return NotFound();
+
+        TempData["Success"] = "Đã xóa bài viết thành công!";
+        return RedirectToAction(nameof(Blogs));
+    }
 }
 
 public class AdminDashboardViewModel
@@ -394,7 +570,45 @@ public class AdminDashboardViewModel
     public int TotalBlogPosts { get; set; }
     public int TotalReviews { get; set; }
     public int TotalVouchers { get; set; }
+
+    // Thống kê tài chính & vận hành
+    public decimal TotalRevenue { get; set; }
+    public decimal RevenueThisMonth { get; set; }
+    public decimal AverageOrderValue { get; set; }
+    public int PendingOrdersCount { get; set; }
+    public int ConfirmedOrdersCount { get; set; }
+    public int ShippingOrdersCount { get; set; }
+    public int DeliveredOrdersCount { get; set; }
+    public int CancelledOrdersCount { get; set; }
+    public double FulfillmentRate { get; set; }
+
+    // Biểu đồ
+    public List<string> RevenueChartLabels { get; set; } = new();
+    public List<decimal> RevenueChartData { get; set; } = new();
+    public Dictionary<string, int> OrderStatusChart { get; set; } = new();
+    public Dictionary<string, int> PaymentMethodChart { get; set; } = new();
+
+    // Top sản phẩm & Nhóm hương
+    public List<DashboardTopProductStat> TopProducts { get; set; } = new();
+    public List<ScentFamilyStat> ScentFamilyStats { get; set; } = new();
+
     public IList<AppUser> RecentUsers { get; set; } = new List<AppUser>();
     public IList<Perfume.Domain.Entities.Order> RecentOrders { get; set; } = new List<Perfume.Domain.Entities.Order>();
     public IList<TableInfo> Tables { get; set; } = new List<TableInfo>();
+}
+
+public class DashboardTopProductStat
+{
+    public int ProductId { get; set; }
+    public string ProductName { get; set; } = string.Empty;
+    public string? ImageUrl { get; set; }
+    public int QuantitySold { get; set; }
+    public decimal TotalRevenue { get; set; }
+}
+
+public class ScentFamilyStat
+{
+    public string Name { get; set; } = string.Empty;
+    public string ColorHex { get; set; } = "#D4AF37";
+    public int ProductCount { get; set; }
 }

@@ -80,12 +80,22 @@ using (var scope = app.Services.CreateScope())
     if (!string.IsNullOrWhiteSpace(adminEmail) && !string.IsNullOrWhiteSpace(adminPassword))
     {
         var userManager = services.GetRequiredService<UserManager<AppUser>>();
-        if (await userManager.FindByEmailAsync(adminEmail) == null)
+        var existingAdmin = await userManager.FindByEmailAsync(adminEmail);
+        if (existingAdmin == null)
         {
             var admin = new AppUser { UserName = adminEmail, Email = adminEmail, FullName = "System Administrator", EmailConfirmed = true };
             var result = await userManager.CreateAsync(admin, adminPassword);
             if (result.Succeeded) await userManager.AddToRoleAsync(admin, "Admin");
             else logger.LogError("Initial administrator was not created; check password policy and local environment settings.");
+        }
+        else
+        {
+            var token = await userManager.GeneratePasswordResetTokenAsync(existingAdmin);
+            await userManager.ResetPasswordAsync(existingAdmin, token, adminPassword);
+            if (!await userManager.IsInRoleAsync(existingAdmin, "Admin"))
+            {
+                await userManager.AddToRoleAsync(existingAdmin, "Admin");
+            }
         }
     }
 }

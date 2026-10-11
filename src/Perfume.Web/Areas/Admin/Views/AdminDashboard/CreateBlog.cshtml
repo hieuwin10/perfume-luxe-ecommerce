@@ -1,0 +1,160 @@
+@model BlogPost
+@{
+    bool isEdit = Model != null && Model.Id > 0;
+    ViewData["Title"] = isEdit ? "Chỉnh Sửa Bài Viết" : "Soạn Bài Viết Mới";
+    Layout = "_AdminLayout";
+    var categories = ViewBag.Categories as List<BlogCategory> ?? new List<BlogCategory>();
+}
+
+<style>
+    .form-group-luxe {
+        margin-bottom: 22px;
+    }
+    .form-label-luxe {
+        display: block;
+        font-size: 0.82rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-muted);
+        margin-bottom: 8px;
+        font-weight: 600;
+    }
+    .form-input-luxe {
+        width: 100%;
+        padding: 12px 16px;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid var(--border-card);
+        border-radius: var(--radius-sm);
+        color: var(--text-primary);
+        font-size: 0.92rem;
+        outline: none;
+        transition: border-color 0.2s ease;
+    }
+    .form-input-luxe:focus {
+        border-color: var(--gold-primary);
+        box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+    }
+</style>
+
+<div style="max-width: 1100px; margin: 0 auto;">
+    <!-- Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; flex-wrap: wrap; gap: 14px;">
+        <div>
+            <h1 style="font-size: 1.8rem; font-weight: 800; margin: 0 0 6px; color: var(--text-primary);">
+                <i class="fa-solid fa-pen-nib text-gold-gradient" style="margin-right: 8px;"></i> @(isEdit ? "Chỉnh Sửa Bài Viết" : "Soạn Thảo Bài Viết Mới")
+            </h1>
+            <p style="color: var(--text-muted); margin: 0; font-size: 0.9rem;">Biên soạn cẩm nang mùi hương & cấu hình thẻ SEO Rich Snippets</p>
+        </div>
+        <a href="/admin/admindashboard/blogs" class="btn-luxe-outline" style="font-size: 0.85rem; padding: 8px 16px;">
+            <i class="fa-solid fa-arrow-left" style="margin-right: 6px;"></i> Quay Lại Danh Sách
+        </a>
+    </div>
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #f87171; padding: 14px 18px; border-radius: var(--radius-sm); margin-bottom: 24px; font-size: 0.9rem;">
+            @Html.ValidationSummary(false)
+        </div>
+    }
+
+    <form method="post" action="@(isEdit ? "/admin/admindashboard/editblog" : "/admin/admindashboard/createblog")">
+        @Html.AntiForgeryToken()
+        @if (isEdit && Model != null)
+        {
+            <input type="hidden" name="Id" value="@Model.Id" />
+            <input type="hidden" name="CreatedAt" value="@Model.CreatedAt" />
+            <input type="hidden" name="ViewCount" value="@Model.ViewCount" />
+        }
+
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px;">
+            <!-- Left Column: Content -->
+            <div>
+                <div class="luxury-card" style="padding: 30px; margin-bottom: 24px;">
+                    <div class="form-group-luxe">
+                        <label class="form-label-luxe">Tiêu Đề Bài Viết <span style="color: #ef4444;">*</span></label>
+                        <input type="text" name="Title" value="@Model?.Title" required class="form-input-luxe" placeholder="Ví dụ: Kim Tự Tháp Mùi Hương: Giải Mã 3 Tầng Hương Trong Nước Hoa" />
+                    </div>
+
+                    <div class="form-group-luxe">
+                        <label class="form-label-luxe">Đường Dẫn Tĩnh (Slug - Bỏ trống để tự tạo)</label>
+                        <input type="text" name="Slug" value="@Model?.Slug" class="form-input-luxe" placeholder="giai-ma-3-tang-huong-nuoc-hoa" />
+                    </div>
+
+                    <div class="form-group-luxe">
+                        <label class="form-label-luxe">Đoạn Tóm Tắt (Lead Summary)</label>
+                        <textarea name="Summary" rows="3" class="form-input-luxe" style="resize: vertical;" placeholder="Tóm tắt ngắn gọn 2-3 câu thu hút người đọc trên danh sách bài viết...">@Model?.Summary</textarea>
+                    </div>
+
+                    <div class="form-group-luxe" style="margin-bottom: 0;">
+                        <label class="form-label-luxe">Nội Dung Bài Viết (Hỗ trợ mã HTML) <span style="color: #ef4444;">*</span></label>
+                        <textarea name="Content" rows="14" required class="form-input-luxe" style="resize: vertical; font-family: monospace; font-size: 0.88rem; line-height: 1.6;" placeholder="<p>Nhập nội dung bài viết...</p>">@Model?.Content</textarea>
+                    </div>
+                </div>
+
+                <!-- SEO Box -->
+                <div class="luxury-card" style="padding: 30px;">
+                    <h3 style="font-size: 1.1rem; color: var(--gold-primary); margin-bottom: 16px;">
+                        <i class="fa-solid fa-magnifying-glass" style="margin-right: 8px;"></i> Tối Ưu Hóa Tìm Kiếm (SEO Meta)
+                    </h3>
+                    <div class="form-group-luxe">
+                        <label class="form-label-luxe">Thẻ Meta Title</label>
+                        <input type="text" name="MetaTitle" value="@Model?.MetaTitle" class="form-input-luxe" placeholder="Giải Mã 3 Tầng Hương Trong Nước Hoa | Perfume Luxe" />
+                    </div>
+                    <div class="form-group-luxe" style="margin-bottom: 0;">
+                        <label class="form-label-luxe">Thẻ Meta Description</label>
+                        <textarea name="MetaDescription" rows="2" class="form-input-luxe" style="resize: vertical;" placeholder="Khám phá cấu trúc 3 tầng hương chuẩn Haute Parfumerie...">@Model?.MetaDescription</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Settings -->
+            <div>
+                <div class="luxury-card" style="padding: 26px; margin-bottom: 24px;">
+                    <h3 style="font-size: 1.1rem; color: var(--text-primary); margin-bottom: 20px; border-bottom: 1px solid var(--border-card); padding-bottom: 10px;">
+                        Xuất Bản & Phân Loại
+                    </h3>
+
+                    <div class="form-group-luxe">
+                        <label class="form-label-luxe">Chuyên Mục Bài Viết</label>
+                        <select name="CategoryId" class="form-input-luxe" style="background: #18181c;">
+                            <option value="">-- Chọn chuyên mục --</option>
+                            @foreach (var cat in categories)
+                            {
+                                <option value="@cat.Id" selected="@(Model?.CategoryId == cat.Id ? "selected" : null)">
+                                    @cat.Name
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="form-group-luxe">
+                        <label class="form-label-luxe">Tên Tác Giả</label>
+                        <input type="text" name="AuthorName" value="@(string.IsNullOrEmpty(Model?.AuthorName) ? "Master Parfumeur" : Model.AuthorName)" class="form-input-luxe" />
+                    </div>
+
+                    <div class="form-group-luxe">
+                        <label class="form-label-luxe">Ảnh Bìa Thumbnail (URL)</label>
+                        <input type="url" name="ThumbnailUrl" value="@Model?.ThumbnailUrl" class="form-input-luxe" placeholder="https://images.unsplash.com/..." />
+                        @if (!string.IsNullOrEmpty(Model?.ThumbnailUrl))
+                        {
+                            <div style="margin-top: 10px; border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--border-card);">
+                                <img src="@Model.ThumbnailUrl" style="width: 100%; height: 140px; object-fit: cover;" alt="Preview" />
+                            </div>
+                        }
+                    </div>
+
+                    <div class="form-group-luxe" style="margin-bottom: 24px;">
+                        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; color: var(--text-primary); font-size: 0.9rem;">
+                            <input type="checkbox" name="IsPublished" value="true" @(Model == null || Model.IsPublished ? "checked" : "") style="width: 18px; height: 18px; accent-color: var(--gold-primary);" />
+                            <span>Hiển thị công khai trên website</span>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn-luxe-primary" style="width: 100%; padding: 14px; font-weight: 700; font-size: 0.95rem;">
+                        <i class="fa-solid fa-floppy-disk" style="margin-right: 8px;"></i> @(isEdit ? "Lưu Cập Nhật" : "Xuất Bản Bài Viết")
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>

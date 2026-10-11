@@ -1,99 +1,410 @@
 @model Perfume.Web.Areas.Admin.Controllers.AdminDashboardViewModel
 @{
-    ViewData["Title"] = "Admin Dashboard";
+    ViewData["Title"] = "Bảng Điều Khiển Quản Trị & Thống Kê Doanh Nghiệp";
     Layout = "_AdminLayout";
 }
 
-<div style="max-width: 1400px; margin: 0 auto;">
-    <!-- Welcome Header -->
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; flex-wrap: wrap; gap: 14px;">
+<style>
+    .kpi-metric-card {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-card);
+        border-radius: var(--radius-lg);
+        padding: 22px 24px;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    .kpi-metric-card:hover {
+        border-color: var(--gold-primary);
+        transform: translateY(-3px);
+        box-shadow: 0 12px 24px rgba(0,0,0,0.4);
+    }
+    .kpi-metric-card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, transparent, var(--gold-primary), transparent);
+        opacity: 0.6;
+    }
+    .chart-container-card {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-card);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+    }
+    .status-badge-delivered {
+        background: rgba(46, 204, 113, 0.15);
+        color: #2ecc71;
+        border: 1px solid #2ecc71;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 0.72rem;
+        font-weight: 600;
+    }
+    .status-badge-shipping {
+        background: rgba(59, 130, 246, 0.15);
+        color: #60a5fa;
+        border: 1px solid #3b82f6;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 0.72rem;
+        font-weight: 600;
+    }
+    .status-badge-confirmed {
+        background: rgba(168, 85, 247, 0.15);
+        color: #c084fc;
+        border: 1px solid #a855f7;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 0.72rem;
+        font-weight: 600;
+    }
+    .status-badge-pending {
+        background: rgba(245, 158, 11, 0.15);
+        color: #fbbf24;
+        border: 1px solid #f59e0b;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 0.72rem;
+        font-weight: 600;
+    }
+    .quick-action-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 16px;
+        border-radius: var(--radius-sm);
+        font-size: 0.82rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+</style>
+
+<div style="max-width: 1440px; margin: 0 auto; padding-bottom: 60px;">
+    <!-- Welcome Header & Quick Actions -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; flex-wrap: wrap; gap: 16px;">
         <div>
-            <h1 style="font-size: 1.8rem; font-weight: 800; margin: 0 0 6px; color: var(--text-primary);">
-                <i class="fa-solid fa-gauge-high text-gold-gradient" style="margin-right: 8px;"></i> Bảng Điều Khiển Quản Trị
-            </h1>
-            <p style="color: var(--text-muted); margin: 0; font-size: 0.9rem;">Hệ thống quản lý thời gian thực Haute Parfumerie & Database</p>
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+                <h1 style="font-size: 1.85rem; font-weight: 800; margin: 0; color: var(--text-primary); font-family: var(--font-serif);">
+                    <i class="fa-solid fa-chart-line text-gold-gradient" style="margin-right: 8px;"></i> Trung Tâm Điều Hành & Thống Kê Doanh Nghiệp
+                </h1>
+                <span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 12px; background: rgba(46, 204, 113, 0.15); color: #2ecc71; font-size: 0.72rem; font-weight: 700; border: 1px solid #2ecc71;">
+                    <span style="width: 6px; height: 6px; border-radius: 50%; background: #2ecc71; animation: pulse 1.5s infinite;"></span> LIVE
+                </span>
+            </div>
+            <p style="color: var(--text-muted); margin: 0; font-size: 0.9rem;">
+                Phân tích dữ liệu kinh doanh thời gian thực, quản lý kho hàng và giám sát vận hành toàn diện
+            </p>
         </div>
-        <div style="display: flex; gap: 10px;">
-            <a href="/admin/admindashboard/erd" class="btn-luxe-outline" style="font-size: 0.85rem; padding: 8px 16px;">
-                <i class="fa-solid fa-diagram-project" style="margin-right: 6px;"></i> Xem Sơ Đồ ERD
+
+        <!-- Quick Action Bar -->
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <a href="/admin/admindashboard/createproduct" class="quick-action-btn btn-luxe-primary">
+                <i class="fa-solid fa-plus"></i> Thêm Nước Hoa
             </a>
-            <a href="/admin/databaseconsole" class="btn-luxe" style="font-size: 0.85rem; padding: 8px 16px;">
-                <i class="fa-solid fa-terminal" style="margin-right: 6px;"></i> Mở DB Console
+            <a href="/admin/admindashboard/createblog" class="quick-action-btn btn-luxe-outline">
+                <i class="fa-solid fa-feather-pointed"></i> Soạn Bài Viết
+            </a>
+            <a href="/admin/storemanager/vouchers" class="quick-action-btn btn-luxe-outline">
+                <i class="fa-solid fa-ticket"></i> Quản Lý Voucher
+            </a>
+            <a href="/admin/admindashboard/erd" class="quick-action-btn btn-luxe-outline">
+                <i class="fa-solid fa-diagram-project"></i> Sơ Đồ ERD
+            </a>
+            <a href="/admin/databaseconsole" class="quick-action-btn btn-luxe" style="background: rgba(212,175,55,0.15); border: 1px solid var(--gold-primary);">
+                <i class="fa-solid fa-terminal"></i> DB Console
             </a>
         </div>
     </div>
 
-    <!-- Metric Cards Grid -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-bottom: 32px;">
-        <div class="luxury-card" style="padding: 22px;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                <div>
-                    <span style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted);">Sản Phẩm</span>
-                    <div style="font-size: 2rem; font-weight: 800; color: var(--gold-primary); margin-top: 4px;">@Model.TotalProducts</div>
-                </div>
-                <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(212,175,55,0.12); display: flex; align-items: center; justify-content: center; color: var(--gold-primary); font-size: 1.2rem;">
-                    <i class="fa-solid fa-bottle-droplet"></i>
+    <!-- 1. KPI THỐNG KÊ TÀI CHÍNH & VẬN HÀNH (5 THẺ LỚN) -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 18px; margin-bottom: 30px;">
+        <!-- Tổng Doanh Thu -->
+        <div class="kpi-metric-card">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                <span style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-weight: 700;">Tổng Doanh Thu Đã Thu</span>
+                <div style="width: 38px; height: 38px; border-radius: 8px; background: rgba(212,175,55,0.15); border: 1px solid var(--gold-primary); display: flex; align-items: center; justify-content: center; color: var(--gold-primary);">
+                    <i class="fa-solid fa-coins"></i>
                 </div>
             </div>
-            <a href="/admin/admindashboard/products" style="font-size: 0.8rem; color: var(--gold-primary); text-decoration: none; display: inline-block; margin-top: 10px;">Quản lý kho hàng &rarr;</a>
+            <div style="font-size: 1.85rem; font-weight: 800; color: var(--gold-primary); font-family: var(--font-serif); line-height: 1.2;">
+                @Model.TotalRevenue.ToString("N0") ₫
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 0.78rem; color: var(--text-muted);">
+                <span>Từ @Model.DeliveredOrdersCount đơn đã giao hoàn tất</span>
+                <span style="color: #2ecc71; font-weight: 600;"><i class="fa-solid fa-arrow-trend-up"></i> Tăng trưởng</span>
+            </div>
         </div>
 
-        <div class="luxury-card" style="padding: 22px;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                <div>
-                    <span style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted);">Đơn Hàng</span>
-                    <div style="font-size: 2rem; font-weight: 800; color: #2A9D8F; margin-top: 4px;">@Model.TotalOrders</div>
-                </div>
-                <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(42,157,143,0.12); display: flex; align-items: center; justify-content: center; color: #2A9D8F; font-size: 1.2rem;">
-                    <i class="fa-solid fa-boxes-stacked"></i>
+        <!-- Doanh Thu Tháng Này -->
+        <div class="kpi-metric-card">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                <span style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-weight: 700;">Doanh Thu Tháng Này</span>
+                <div style="width: 38px; height: 38px; border-radius: 8px; background: rgba(42,157,143,0.15); border: 1px solid #2A9D8F; display: flex; align-items: center; justify-content: center; color: #2A9D8F;">
+                    <i class="fa-solid fa-calendar-check"></i>
                 </div>
             </div>
-            <a href="/admin/admindashboard/orders" style="font-size: 0.8rem; color: #2A9D8F; text-decoration: none; display: inline-block; margin-top: 10px;">Danh sách đơn hàng &rarr;</a>
+            <div style="font-size: 1.85rem; font-weight: 800; color: #2A9D8F; font-family: var(--font-serif); line-height: 1.2;">
+                @Model.RevenueThisMonth.ToString("N0") ₫
+            </div>
+            <div style="margin-top: 10px; font-size: 0.78rem; color: var(--text-muted);">
+                Tháng @DateTime.UtcNow.Month/@DateTime.UtcNow.Year
+            </div>
         </div>
 
-        <div class="luxury-card" style="padding: 22px;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                <div>
-                    <span style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted);">Người Dùng</span>
-                    <div style="font-size: 2rem; font-weight: 800; color: #818cf8; margin-top: 4px;">@Model.TotalUsers</div>
-                </div>
-                <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(99,102,241,0.12); display: flex; align-items: center; justify-content: center; color: #818cf8; font-size: 1.2rem;">
-                    <i class="fa-solid fa-users"></i>
+        <!-- Giá Trị Đơn Trung Bình (AOV) -->
+        <div class="kpi-metric-card">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                <span style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-weight: 700;">Giá Trị Đơn TB (AOV)</span>
+                <div style="width: 38px; height: 38px; border-radius: 8px; background: rgba(99,102,241,0.15); border: 1px solid #818cf8; display: flex; align-items: center; justify-content: center; color: #818cf8;">
+                    <i class="fa-solid fa-receipt"></i>
                 </div>
             </div>
-            @if (User.IsInRole("Admin"))
+            <div style="font-size: 1.85rem; font-weight: 800; color: #818cf8; font-family: var(--font-serif); line-height: 1.2;">
+                @Model.AverageOrderValue.ToString("N0") ₫
+            </div>
+            <div style="margin-top: 10px; font-size: 0.78rem; color: var(--text-muted);">
+                Trên tổng @Model.TotalOrders đơn đặt hàng
+            </div>
+        </div>
+
+        <!-- Đơn Chờ Xử Lý (Pending Alert) -->
+        <div class="kpi-metric-card">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                <span style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-weight: 700;">Đơn Chờ Duyệt (Gấp)</span>
+                <div style="width: 38px; height: 38px; border-radius: 8px; background: rgba(245,158,11,0.15); border: 1px solid #f59e0b; display: flex; align-items: center; justify-content: center; color: #f59e0b;">
+                    <i class="fa-solid fa-clock"></i>
+                </div>
+            </div>
+            <div style="font-size: 1.85rem; font-weight: 800; color: #f59e0b; font-family: var(--font-serif); line-height: 1.2;">
+                @Model.PendingOrdersCount đơn
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 0.78rem;">
+                <a href="/admin/admindashboard/orders" style="color: #f59e0b; text-decoration: none; font-weight: 600;">Xử lý ngay &rarr;</a>
+                <span style="color: var(--text-muted);">@Model.ShippingOrdersCount đang giao</span>
+            </div>
+        </div>
+
+        <!-- Tỷ Lệ Hoàn Thành Đơn -->
+        <div class="kpi-metric-card">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                <span style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-weight: 700;">Tỷ Lệ Giao Thành Công</span>
+                <div style="width: 38px; height: 38px; border-radius: 8px; background: rgba(46,204,113,0.15); border: 1px solid #2ecc71; display: flex; align-items: center; justify-content: center; color: #2ecc71;">
+                    <i class="fa-solid fa-truck-ramp-box"></i>
+                </div>
+            </div>
+            <div style="font-size: 1.85rem; font-weight: 800; color: #2ecc71; font-family: var(--font-serif); line-height: 1.2;">
+                @Model.FulfillmentRate%
+            </div>
+            <div style="margin-top: 10px; font-size: 0.78rem; color: var(--text-muted);">
+                Đã hủy: @Model.CancelledOrdersCount đơn
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. BIỂU ĐỒ TRỰC QUAN (CHART.JS) -->
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 22px; margin-bottom: 30px;">
+        <!-- Biểu đồ Doanh Thu 7 Ngày Gần Nhất -->
+        <div class="chart-container-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div>
+                    <h3 style="font-size: 1.15rem; margin: 0 0 4px; color: var(--text-primary); font-family: var(--font-serif);">
+                        <i class="fa-solid fa-chart-area text-gold-gradient" style="margin-right: 8px;"></i> Xu Hướng Doanh Thu 7 Ngày Gần Nhất
+                    </h3>
+                    <p style="margin: 0; font-size: 0.8rem; color: var(--text-muted);">Số liệu tổng hợp từ các đơn hàng thực tế đã giao và thanh toán</p>
+                </div>
+                <span style="padding: 4px 10px; background: rgba(212,175,55,0.12); color: var(--gold-primary); border-radius: 6px; font-size: 0.75rem; font-weight: 600;">
+                    Đơn vị: VNĐ
+                </span>
+            </div>
+            <div style="height: 280px; position: relative;">
+                <canvas id="revenueLineChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Biểu đồ Donut: Trạng Thái Đơn Hàng -->
+        <div class="chart-container-card">
+            <div style="margin-bottom: 20px;">
+                <h3 style="font-size: 1.15rem; margin: 0 0 4px; color: var(--text-primary); font-family: var(--font-serif);">
+                    <i class="fa-solid fa-chart-pie text-gold-gradient" style="margin-right: 8px;"></i> Phân Bố Trạng Thái Đơn Hàng
+                </h3>
+                <p style="margin: 0; font-size: 0.8rem; color: var(--text-muted);">Tỷ lệ các giai đoạn xử lý đơn (@Model.TotalOrders đơn)</p>
+            </div>
+            <div style="height: 250px; position: relative; display: flex; align-items: center; justify-content: center;">
+                <canvas id="orderStatusDoughnutChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. TOP SẢN PHẨM BÁN CHẠY & NHÓM HƯƠNG & PHƯƠNG THỨC THANH TOÁN -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 22px; margin-bottom: 30px;">
+        <!-- Top Sản Phẩm Bán Chạy -->
+        <div class="luxury-card" style="padding: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+                <h3 style="font-size: 1.15rem; margin: 0; color: var(--text-primary); font-family: var(--font-serif);">
+                    <i class="fa-solid fa-trophy" style="color: var(--gold-primary); margin-right: 8px;"></i> Top Kiệt Tác Bán Chạy Nhất
+                </h3>
+                <a href="/admin/admindashboard/products" style="font-size: 0.8rem; color: var(--gold-primary); text-decoration: none;">Xem kho hàng &rarr;</a>
+            </div>
+            @if (Model.TopProducts.Any())
             {
-                <a href="/admin/admindashboard/users" style="font-size: 0.8rem; color: #818cf8; text-decoration: none; display: inline-block; margin-top: 10px;">Phân quyền Admin &rarr;</a>
+                <div style="display: flex; flex-direction: column; gap: 14px;">
+                    @foreach (var p in Model.TopProducts)
+                    {
+                        <div style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 12px; border-bottom: 1px solid var(--border-card);">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <img src="@(p.ImageUrl ?? "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=150&q=80")" 
+                                     alt="@p.ProductName" 
+                                     style="width: 44px; height: 44px; object-fit: cover; border-radius: var(--radius-sm); border: 1px solid var(--border-card);" />
+                                <div>
+                                    <div style="font-size: 0.88rem; font-weight: 700; color: var(--text-primary);">@p.ProductName</div>
+                                    <div style="font-size: 0.75rem; color: var(--gold-primary); font-weight: 600;">Đã bán: @p.QuantitySold chai</div>
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 0.88rem; font-weight: 700; color: #2ecc71;">@p.TotalRevenue.ToString("N0") ₫</div>
+                            </div>
+                        </div>
+                    }
+                </div>
             }
             else
             {
-                <span style="font-size: 0.8rem; color: var(--text-muted); display: inline-block; margin-top: 10px;">Admin duy trì</span>
+                <p style="color: var(--text-muted); font-size: 0.88rem;">Chưa có dữ liệu bán hàng.</p>
             }
         </div>
 
-        <div class="luxury-card" style="padding: 22px;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                <div>
-                    <span style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted);">Thương Hiệu & Danh Mục</span>
-                    <div style="font-size: 2rem; font-weight: 800; color: #e879f9; margin-top: 4px;">@Model.TotalBrands / @Model.TotalCategories</div>
-                </div>
-                <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(232,121,249,0.12); display: flex; align-items: center; justify-content: center; color: #e879f9; font-size: 1.2rem;">
-                    <i class="fa-solid fa-tags"></i>
-                </div>
+        <!-- Phân Bố Phương Thức Thanh Toán -->
+        <div class="luxury-card" style="padding: 24px;">
+            <div style="margin-bottom: 18px;">
+                <h3 style="font-size: 1.15rem; margin: 0 0 4px; color: var(--text-primary); font-family: var(--font-serif);">
+                    <i class="fa-solid fa-credit-card" style="color: #60a5fa; margin-right: 8px;"></i> Phương Thức Thanh Toán
+                </h3>
+                <p style="margin: 0; font-size: 0.8rem; color: var(--text-muted);">Thị phần thanh toán của khách hàng</p>
             </div>
-            <a href="/admin/databaseconsole" style="font-size: 0.8rem; color: #e879f9; text-decoration: none; display: inline-block; margin-top: 10px;">Bảng Catalog &rarr;</a>
+            <div style="height: 220px; position: relative;">
+                <canvas id="paymentMethodChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Phân Bố Nhóm Hương (Fragrance Families) -->
+        <div class="luxury-card" style="padding: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+                <h3 style="font-size: 1.15rem; margin: 0; color: var(--text-primary); font-family: var(--font-serif);">
+                    <i class="fa-solid fa-spray-can-sparkles" style="color: #e879f9; margin-right: 8px;"></i> Danh Mục Nhóm Hương
+                </h3>
+                <span style="font-size: 0.78rem; color: var(--text-muted);">@Model.ScentFamilyStats.Count nhóm</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                @foreach (var s in Model.ScentFamilyStats)
+                {
+                    var percent = Model.TotalProducts > 0 ? (s.ProductCount * 100 / Model.TotalProducts) : 0;
+                    <div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 4px;">
+                            <span style="color: var(--text-primary); font-weight: 600;">@s.Name</span>
+                            <span style="color: var(--gold-primary); font-weight: 700;">@s.ProductCount chai (@percent%)</span>
+                        </div>
+                        <div style="height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden;">
+                            <div style="height: 100%; width: @percent%; background: @s.ColorHex; border-radius: 3px;"></div>
+                        </div>
+                    </div>
+                }
+            </div>
         </div>
     </div>
 
-    <!-- Recent Tables & Activity Row -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 24px; margin-bottom: 32px;">
+    <!-- 4. DANH SÁCH ĐƠN HÀNG GẦN ĐÂY CẦN XỬ LÝ -->
+    <div class="luxury-card" style="padding: 0; overflow: hidden; margin-bottom: 30px;">
+        <div style="padding: 20px 24px; border-bottom: 1px solid var(--border-card); display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h3 style="font-size: 1.2rem; margin: 0 0 4px; color: var(--text-primary); font-family: var(--font-serif);">
+                    <i class="fa-solid fa-boxes-stacked text-gold-gradient" style="margin-right: 8px;"></i> Đơn Hàng Mới Nhất Cần Xử Lý
+                </h3>
+                <p style="margin: 0; font-size: 0.82rem; color: var(--text-muted);">Danh sách 8 giao dịch phát sinh gần đây nhất trong hệ thống</p>
+            </div>
+            <a href="/admin/admindashboard/orders" class="btn-luxe-outline" style="font-size: 0.8rem; padding: 6px 14px;">
+                Xem Toàn Bộ Đơn Hàng &rarr;
+            </a>
+        </div>
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem;">
+                <thead>
+                    <tr style="background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border-card); color: var(--text-muted); font-size: 0.78rem; text-transform: uppercase;">
+                        <th style="padding: 14px 20px;">Mã Đơn</th>
+                        <th style="padding: 14px 20px;">Khách Hàng</th>
+                        <th style="padding: 14px 20px;">Ngày Đặt</th>
+                        <th style="padding: 14px 20px;">Tổng Tiền</th>
+                        <th style="padding: 14px 20px;">Thanh Toán</th>
+                        <th style="padding: 14px 20px; text-align: center;">Trạng Thái</th>
+                        <th style="padding: 14px 20px; text-align: right;">Thao Tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var o in Model.RecentOrders)
+                    {
+                        <tr style="border-bottom: 1px solid var(--border-card); transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+                            <td style="padding: 14px 20px; font-weight: 700; color: var(--gold-primary); font-family: monospace;">
+                                @o.OrderCode
+                            </td>
+                            <td style="padding: 14px 20px;">
+                                <div style="font-weight: 600; color: var(--text-primary);">@o.CustomerName</div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted);">@o.CustomerPhone</div>
+                            </td>
+                            <td style="padding: 14px 20px; color: var(--text-muted); font-size: 0.8rem;">
+                                @o.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                            </td>
+                            <td style="padding: 14px 20px; font-weight: 700; color: #2ecc71;">
+                                @o.TotalAmount.ToString("N0") ₫
+                            </td>
+                            <td style="padding: 14px 20px; font-size: 0.8rem; color: var(--text-secondary);">
+                                @o.PaymentMethod
+                            </td>
+                            <td style="padding: 14px 20px; text-align: center;">
+                                @switch (o.OrderStatus)
+                                {
+                                    case Perfume.Domain.Enums.OrderStatus.Delivered:
+                                        <span class="status-badge-delivered"><i class="fa-solid fa-circle-check"></i> Đã Giao</span>
+                                        break;
+                                    case Perfume.Domain.Enums.OrderStatus.Shipping:
+                                        <span class="status-badge-shipping"><i class="fa-solid fa-truck-fast"></i> Đang Giao</span>
+                                        break;
+                                    case Perfume.Domain.Enums.OrderStatus.Confirmed:
+                                        <span class="status-badge-confirmed"><i class="fa-solid fa-box-archive"></i> Đã Chuẩn Bị</span>
+                                        break;
+                                    case Perfume.Domain.Enums.OrderStatus.Pending:
+                                        <span class="status-badge-pending"><i class="fa-solid fa-clock"></i> Chờ Duyệt</span>
+                                        break;
+                                    default:
+                                        <span style="color: #f87171; font-size: 0.75rem;">@o.OrderStatus</span>
+                                        break;
+                                }
+                            </td>
+                            <td style="padding: 14px 20px; text-align: right;">
+                                <a href="/admin/admindashboard/orderdetails/@o.Id" class="btn-luxe-outline" style="padding: 5px 12px; font-size: 0.75rem;">
+                                    Chi Tiết &rarr;
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 5. QUẢN TRỊ DATABASE & NGƯỜI DÙNG ĐĂNG KÝ MỚI -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 24px;">
         <!-- Database Tables Quick Access -->
         <div class="luxury-card" style="padding: 24px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
-                <h3 style="font-size: 1.15rem; margin: 0; color: var(--text-primary);">
-                    <i class="fa-solid fa-database text-gold-gradient" style="margin-right: 8px;"></i> Toàn Bộ Bảng Trong Database (@Model.Tables.Count)
+                <h3 style="font-size: 1.15rem; margin: 0; color: var(--text-primary); font-family: var(--font-serif);">
+                    <i class="fa-solid fa-database text-gold-gradient" style="margin-right: 8px;"></i> Cấu Trúc Bảng CSDL (@Model.Tables.Count Bảng)
                 </h3>
-                <a href="/admin/databaseconsole" style="font-size: 0.82rem; color: var(--gold-primary);">Xem Console &rarr;</a>
+                <a href="/admin/databaseconsole" style="font-size: 0.82rem; color: var(--gold-primary);">Mở DB Console &rarr;</a>
             </div>
             <div style="display: flex; flex-wrap: wrap; gap: 8px;">
                 @foreach (var table in Model.Tables)
@@ -113,31 +424,176 @@
         <!-- Recent Registered Users -->
         <div class="luxury-card" style="padding: 24px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
-                <h3 style="font-size: 1.15rem; margin: 0; color: var(--text-primary);">
-                    <i class="fa-solid fa-user-plus" style="color: #818cf8; margin-right: 8px;"></i> Người Dùng Đăng Ký Gần Đây
+                <h3 style="font-size: 1.15rem; margin: 0; color: var(--text-primary); font-family: var(--font-serif);">
+                    <i class="fa-solid fa-user-plus" style="color: #818cf8; margin-right: 8px;"></i> Khách Hàng Gia Nhập Gần Đây
                 </h3>
                 @if (User.IsInRole("Admin"))
                 {
-                    <a href="/admin/admindashboard/users" style="font-size: 0.82rem; color: #818cf8;">Tất cả người dùng &rarr;</a>
+                    <a href="/admin/admindashboard/users" style="font-size: 0.82rem; color: #818cf8;">Quản lý tài khoản &rarr;</a>
                 }
             </div>
             <div style="display: flex; flex-direction: column; gap: 10px;">
                 @foreach (var u in Model.RecentUsers)
                 {
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: var(--bg-surface-elevated); border-radius: 8px; border: 1px solid var(--border-subtle);">
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--gold-gradient); display: flex; align-items: center; justify-content: center; font-weight: 700; color: #000; font-size: 0.8rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--bg-surface-elevated); border-radius: 8px; border: 1px solid var(--border-subtle);">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 36px; height: 36px; border-radius: 50%; background: var(--gold-gradient); display: flex; align-items: center; justify-content: center; font-weight: 800; color: #000; font-size: 0.85rem;">
                                 @((u.FullName.Length > 0 ? u.FullName.Substring(0, 1) : "U").ToUpper())
                             </div>
                             <div>
-                                <div style="font-size: 0.88rem; font-weight: 600; color: var(--text-primary);">@u.FullName</div>
+                                <div style="font-size: 0.88rem; font-weight: 700; color: var(--text-primary);">@u.FullName</div>
                                 <div style="font-size: 0.75rem; color: var(--text-muted);">@u.Email</div>
                             </div>
                         </div>
-                        <span style="font-size: 0.75rem; color: var(--text-muted);">@u.CreatedAt.ToString("dd/MM HH:mm")</span>
+                        <span style="font-size: 0.75rem; color: var(--text-muted);"><i class="fa-regular fa-clock" style="margin-right: 4px;"></i>@u.CreatedAt.ToString("dd/MM HH:mm")</span>
                     </div>
                 }
             </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <!-- Chart.js 4.4.1 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // 1. Biểu đồ Đường/Diện tích Doanh Thu 7 Ngày Gần Nhất
+            const revCtx = document.getElementById('revenueLineChart');
+            if (revCtx) {
+                const labels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.RevenueChartLabels));
+                const dataValues = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.RevenueChartData));
+
+                const gradient = revCtx.getContext('2d').createLinearGradient(0, 0, 0, 260);
+                gradient.addColorStop(0, 'rgba(212, 175, 55, 0.45)');
+                gradient.addColorStop(1, 'rgba(212, 175, 55, 0.0)');
+
+                new Chart(revCtx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Doanh Thu (₫)',
+                            data: dataValues,
+                            borderColor: '#D4AF37',
+                            backgroundColor: gradient,
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: '#D4AF37',
+                            pointBorderColor: '#000',
+                            pointBorderWidth: 2,
+                            pointRadius: 5,
+                            pointHoverRadius: 7
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(context.raw);
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                                ticks: { color: '#9ca3af' }
+                            },
+                            y: {
+                                grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                                ticks: {
+                                    color: '#9ca3af',
+                                    callback: function(value) {
+                                        if (value >= 1000000) return (value / 1000000) + ' Tr';
+                                        return value;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // 2. Biểu đồ Doughnut Trạng Thái Đơn Hàng
+            const statusCtx = document.getElementById('orderStatusDoughnutChart');
+            if (statusCtx) {
+                const statusData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.OrderStatusChart));
+                const keys = Object.keys(statusData);
+                const values = Object.values(statusData);
+
+                new Chart(statusCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: keys,
+                        datasets: [{
+                            data: values,
+                            backgroundColor: [
+                                '#2ecc71', // Đã giao
+                                '#3b82f6', // Đang giao
+                                '#a855f7', // Đã xác nhận
+                                '#f59e0b', // Chờ duyệt
+                                '#ef4444'  // Đã hủy
+                            ],
+                            borderWidth: 2,
+                            borderColor: '#141418'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { color: '#9ca3af', font: { size: 11 }, padding: 12 }
+                            }
+                        },
+                        cutout: '68%'
+                    }
+                });
+            }
+
+            // 3. Biểu đồ Doughnut Phương Thức Thanh Toán
+            const payCtx = document.getElementById('paymentMethodChart');
+            if (payCtx) {
+                const payData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.PaymentMethodChart));
+                const payKeys = Object.keys(payData);
+                const payValues = Object.values(payData);
+
+                new Chart(payCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: payKeys,
+                        datasets: [{
+                            data: payValues,
+                            backgroundColor: [
+                                '#2A9D8F', // COD
+                                '#D4AF37', // VNPAY
+                                '#818cf8', // BankTransfer
+                                '#ec4899'  // MoMo
+                            ],
+                            borderWidth: 2,
+                            borderColor: '#141418'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { color: '#9ca3af', font: { size: 11 }, padding: 10 }
+                            }
+                        },
+                        cutout: '65%'
+                    }
+                });
+            }
+        });
+    </script>
+}

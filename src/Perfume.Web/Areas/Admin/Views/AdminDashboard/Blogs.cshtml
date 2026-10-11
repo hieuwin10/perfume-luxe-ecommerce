@@ -1,0 +1,123 @@
+@model List<BlogPost>
+@{
+    ViewData["Title"] = "Quản Lý Bài Viết & Tạp Chí";
+    Layout = "_AdminLayout";
+}
+
+<div style="max-width: 1400px; margin: 0 auto;">
+    <!-- Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; flex-wrap: wrap; gap: 14px;">
+        <div>
+            <h1 style="font-size: 1.8rem; font-weight: 800; margin: 0 0 6px; color: var(--text-primary);">
+                <i class="fa-solid fa-feather-pointed text-gold-gradient" style="margin-right: 8px;"></i> Quản Lý Tạp Chí & Cẩm Nang
+            </h1>
+            <p style="color: var(--text-muted); margin: 0; font-size: 0.9rem;">Hệ thống biên tập bài viết Haute Parfumerie Journal & Tối ưu SEO On-Page</p>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <a href="/blog" target="_blank" class="btn-luxe-outline" style="font-size: 0.85rem; padding: 8px 16px;">
+                <i class="fa-solid fa-arrow-up-right-from-square" style="margin-right: 6px;"></i> Xem Trang Tạp Chí
+            </a>
+            <a href="/admin/admindashboard/createblog" class="btn-luxe-primary" style="font-size: 0.85rem; padding: 8px 18px;">
+                <i class="fa-solid fa-plus" style="margin-right: 6px;"></i> Soạn Bài Viết Mới
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div style="background: rgba(46, 204, 113, 0.15); border: 1px solid #2ecc71; color: #2ecc71; padding: 12px 18px; border-radius: var(--radius-sm); margin-bottom: 20px; font-size: 0.9rem;">
+            <i class="fa-solid fa-circle-check" style="margin-right: 8px;"></i>@TempData["Success"]
+        </div>
+    }
+
+    <!-- Table -->
+    <div class="luxury-card" style="overflow: hidden; padding: 0;">
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem;">
+                <thead>
+                    <tr style="background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border-card); color: var(--text-muted); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em;">
+                        <th style="padding: 16px 20px; width: 60px;">ID</th>
+                        <th style="padding: 16px 20px; width: 90px;">Hình Ảnh</th>
+                        <th style="padding: 16px 20px;">Tiêu Đề & Đường Dẫn (Slug)</th>
+                        <th style="padding: 16px 20px;">Chuyên Mục</th>
+                        <th style="padding: 16px 20px;">Tác Giả</th>
+                        <th style="padding: 16px 20px; text-align: center;">Lượt Xem</th>
+                        <th style="padding: 16px 20px; text-align: center;">Trạng Thái</th>
+                        <th style="padding: 16px 20px; text-align: right;">Thao Tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var post in Model)
+                        {
+                            <tr style="border-bottom: 1px solid var(--border-card); transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+                                <td style="padding: 16px 20px; color: var(--text-muted); font-weight: 600;">#@post.Id</td>
+                                <td style="padding: 16px 20px;">
+                                    <img src="@(post.ThumbnailUrl ?? "https://images.unsplash.com/photo-1547887537-6158d64c35b3?auto=format&fit=crop&w=150&q=80")" 
+                                         alt="@post.Title" 
+                                         style="width: 64px; height: 44px; object-fit: cover; border-radius: var(--radius-sm); border: 1px solid var(--border-card);" />
+                                </td>
+                                <td style="padding: 16px 20px;">
+                                    <div style="font-weight: 700; color: var(--text-primary); font-size: 0.95rem; margin-bottom: 4px;">
+                                        @post.Title
+                                    </div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted); font-family: monospace;">
+                                        /blog/@post.Slug
+                                    </div>
+                                </td>
+                                <td style="padding: 16px 20px;">
+                                    <span style="background: rgba(212,175,55,0.12); color: var(--gold-primary); border: 1px solid rgba(212,175,55,0.25); padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">
+                                        @(post.Category?.Name ?? "Chưa phân loại")
+                                    </span>
+                                </td>
+                                <td style="padding: 16px 20px; color: var(--text-secondary);">
+                                    <i class="fa-solid fa-user-pen" style="color: var(--gold-primary); font-size: 0.75rem; margin-right: 4px;"></i>@post.AuthorName
+                                </td>
+                                <td style="padding: 16px 20px; text-align: center; font-weight: 600;">
+                                    <span style="color: #60a5fa;"><i class="fa-solid fa-eye" style="margin-right: 4px;"></i>@post.ViewCount</span>
+                                </td>
+                                <td style="padding: 16px 20px; text-align: center;">
+                                    @if (post.IsPublished)
+                                    {
+                                        <span style="background: rgba(46, 204, 113, 0.15); color: #2ecc71; border: 1px solid #2ecc71; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">
+                                            <i class="fa-solid fa-circle" style="font-size: 0.5rem; vertical-align: middle; margin-right: 4px;"></i>Đã Xuất Bản
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span style="background: rgba(148, 163, 184, 0.15); color: #94a3b8; border: 1px solid #94a3b8; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">
+                                            Bản Nháp
+                                        </span>
+                                    }
+                                </td>
+                                <td style="padding: 16px 20px; text-align: right;">
+                                    <div style="display: inline-flex; gap: 8px;">
+                                        <a href="/admin/admindashboard/editblog/@post.Id" class="btn-luxe-outline" style="padding: 6px 12px; font-size: 0.78rem;" title="Chỉnh sửa">
+                                            <i class="fa-solid fa-pen-to-square"></i> Sửa
+                                        </a>
+                                        <form method="post" action="/admin/admindashboard/deleteblog" onsubmit="return confirm('Quý vị có chắc chắn muốn xóa bài viết này không?');" style="margin: 0; display: inline;">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@post.Id" />
+                                            <button type="submit" class="icon-btn" style="width: 32px; height: 32px; color: #f87171; border-color: rgba(248,113,113,0.3);" title="Xóa">
+                                                <i class="fa-solid fa-trash-can"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="8" style="text-align: center; padding: 50px; color: var(--text-muted);">
+                                Chưa có bài viết nào trong hệ thống. Hãy bắt đầu viết bài đầu tiên!
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

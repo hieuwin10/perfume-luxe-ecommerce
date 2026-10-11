@@ -14,7 +14,7 @@ public interface IPerfumeCatalogService
     Task<List<Category>> GetCategoriesAsync();
     Task<List<FragranceFamily>> GetFragranceFamiliesAsync();
     Task<List<FragranceNote>> GetFragranceNotesAsync();
-    Task<List<ProductCardDto>> GetQuizRecommendationsAsync(QuizAnswerRequest request);
+    Task<QuizRecommendationResultDto> GetQuizRecommendationsAsync(QuizAnswerRequest request);
 }
 
 public interface IOrderService

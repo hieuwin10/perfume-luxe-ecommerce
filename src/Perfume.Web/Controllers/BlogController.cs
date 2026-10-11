@@ -13,11 +13,26 @@ public class BlogController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(string? category, int page = 1)
     {
-        var posts = await _blogService.GetRecentPostsAsync(12);
+        if (page < 1) page = 1;
+        const int pageSize = 9;
+
+        var (posts, totalCount) = await _blogService.GetPostsPagedAsync(category, page, pageSize);
         var categories = await _blogService.GetBlogCategoriesAsync();
+
         ViewBag.Categories = categories;
+        ViewBag.CurrentCategory = category;
+        ViewBag.CurrentPage = page;
+        ViewBag.TotalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+        ViewBag.TotalCount = totalCount;
+
+        // Nếu ở trang 1 và không lọc category, lấy bài viết nổi bật đầu tiên làm Hero Article
+        if (page == 1 && string.IsNullOrWhiteSpace(category) && posts.Any())
+        {
+            ViewBag.HeroPost = posts.First();
+        }
+
         return View(posts);
     }
 
@@ -29,7 +44,7 @@ public class BlogController : Controller
         var post = await _blogService.GetPostBySlugAsync(slug);
         if (post == null) return NotFound();
 
-        var recentPosts = await _blogService.GetRecentPostsAsync(4);
+        var recentPosts = await _blogService.GetRecentPostsAsync(6);
         ViewBag.RecentPosts = recentPosts.Where(p => p.Id != post.Id).Take(3).ToList();
 
         return View(post);
