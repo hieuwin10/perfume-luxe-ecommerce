@@ -86,8 +86,8 @@
                             bool isDefault = (defaultVariant?.Id == v.Id);
                             <button type="button" class="variant-btn @(isDefault ? "active" : "")" 
                                     data-id="@v.Id" 
-                                    data-price="@v.SalePrice" 
-                                    data-orig="@v.OriginalPrice"
+                                    data-price="@v.SalePrice.ToString(System.Globalization.CultureInfo.InvariantCulture)" 
+                                    data-orig="@v.OriginalPrice.ToString(System.Globalization.CultureInfo.InvariantCulture)"
                                     onclick="selectVariant(this)"
                                     style="padding: 10px 18px; border-radius: var(--radius-sm); border: 1px solid @(isDefault ? "var(--gold-primary)" : "var(--border-card)"); background: @(isDefault ? "rgba(212, 175, 55, 0.15)" : "var(--bg-surface)"); color: var(--text-primary); cursor: pointer; font-size: 0.85rem; font-weight: 600;">
                                 @v.VolumeLabel
@@ -275,6 +275,46 @@ document.getElementById('customerReviewForm')?.addEventListener('submit', async 
         message.style.cssText = 'margin:12px 0;padding:12px;border-radius:8px;color:#f87171;background:rgba(239,68,68,.12)';
     } finally { message.hidden = false; button.disabled = false; }
 });
+
+let selectedVariantId = @(defaultVariant?.Id.ToString() ?? "null");
+
+function selectVariant(btn) {
+    document.querySelectorAll('.variant-btn').forEach(b => {
+        b.style.borderColor = 'var(--border-card)';
+        b.style.background = 'var(--bg-surface)';
+    });
+
+    btn.style.borderColor = 'var(--gold-primary)';
+    btn.style.background = 'rgba(212, 175, 55, 0.15)';
+
+    selectedVariantId = btn.getAttribute('data-id');
+    const price = Number(btn.getAttribute('data-price'));
+    const orig = Number(btn.getAttribute('data-orig'));
+
+    document.getElementById('activePrice').innerText = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+    const origEl = document.getElementById('activeOriginalPrice');
+    if (origEl) {
+        if (orig > price) {
+            origEl.innerText = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(orig);
+            origEl.style.display = 'inline';
+        } else {
+            origEl.style.display = 'none';
+        }
+    }
+}
+
+function changeQty(delta) {
+    const el = document.getElementById('buyQty');
+    let val = parseInt(el.value) + delta;
+    if (val < 1) val = 1;
+    if (val > 10) val = 10;
+    el.value = val;
+}
+
+function handleAddToCart() {
+    const qty = parseInt(document.getElementById('buyQty').value) || 1;
+    addToCart('@Model.Slug', selectedVariantId, qty);
+}
 </script>
 }
 
@@ -309,47 +349,3 @@ document.getElementById('customerReviewForm')?.addEventListener('submit', async 
   }
 }
 </script>
-
-@section Scripts {
-    <script>
-        let selectedVariantId = @(defaultVariant?.Id.ToString() ?? "null");
-
-        function selectVariant(btn) {
-            document.querySelectorAll('.variant-btn').forEach(b => {
-                b.style.borderColor = 'var(--border-card)';
-                b.style.background = 'var(--bg-surface)';
-            });
-
-            btn.style.borderColor = 'var(--gold-primary)';
-            btn.style.background = 'rgba(212, 175, 55, 0.15)';
-
-            selectedVariantId = btn.getAttribute('data-id');
-            const price = Number(btn.getAttribute('data-price'));
-            const orig = Number(btn.getAttribute('data-orig'));
-
-            document.getElementById('activePrice').innerText = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
-            const origEl = document.getElementById('activeOriginalPrice');
-            if (origEl) {
-                if (orig > price) {
-                    origEl.innerText = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(orig);
-                    origEl.style.display = 'inline';
-                } else {
-                    origEl.style.display = 'none';
-                }
-            }
-        }
-
-        function changeQty(delta) {
-            const el = document.getElementById('buyQty');
-            let val = parseInt(el.value) + delta;
-            if (val < 1) val = 1;
-            if (val > 10) val = 10;
-            el.value = val;
-        }
-
-        function handleAddToCart() {
-            const qty = parseInt(document.getElementById('buyQty').value) || 1;
-            addToCart('@Model.Slug', selectedVariantId, qty);
-        }
-    </script>
-}
