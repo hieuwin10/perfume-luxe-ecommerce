@@ -190,7 +190,10 @@
                     <li><i class="fa-solid fa-phone" style="width: 20px; color: var(--gold-primary);"></i> Hotline: 1900 8888 (8:00 - 22:00)</li>
                     <li><i class="fa-solid fa-envelope" style="width: 20px; color: var(--gold-primary);"></i> Email: concierge@perfumeluxe.vn</li>
                     <li><i class="fa-solid fa-location-dot" style="width: 20px; color: var(--gold-primary);"></i> Boutique: 88 Đồng Khởi, Quận 1, TP. HCM</li>
-                    <li><a href="/admin/databaseconsole" class="nav-link" style="color: var(--gold-primary);"><i class="fa-solid fa-terminal" style="width: 20px;"></i> Console Quản Trị CSDL (AWS Style)</a></li>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <li><a href="/admin/databaseconsole" class="nav-link" style="color: var(--gold-primary);"><i class="fa-solid fa-terminal" style="width: 20px;"></i> Console Quản Trị CSDL (AWS Style)</a></li>
+                    }
                 </ul>
             </div>
 
@@ -208,9 +211,7 @@
             <div>&copy; @DateTime.UtcNow.Year PERFUME LUXE. Haute Parfumerie Enterprise System. All rights reserved.</div>
             <div style="display: flex; gap: 16px;">
                 <span>Thanh toán:</span>
-                <span><i class="fa-solid fa-qrcode" style="color: var(--gold-primary);"></i> VNPAY-QR</span>
-                <span><i class="fa-solid fa-wallet" style="color: #A50064;"></i> MoMo</span>
-                <span><i class="fa-solid fa-money-bill-wave" style="color: #2A9D8F;"></i> COD</span>
+                <span><i class="fa-solid fa-money-bill-wave" style="color: #2A9D8F;"></i> COD (Thanh toán khi nhận hàng)</span>
             </div>
         </div>
     </footer>

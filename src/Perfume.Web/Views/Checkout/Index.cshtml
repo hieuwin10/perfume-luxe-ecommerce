@@ -27,13 +27,42 @@
                     <h3 style="font-size: 1.25rem; margin-bottom: 18px; color: var(--gold-primary);"><i class="fa-solid fa-user" style="margin-right: 8px;"></i> Thông Tin Giao Hàng</h3>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
                         <div>
+                            <label asp-for="CustomerName" style="display:block;font-size:.8rem;font-weight:600;margin-bottom:6px;color:var(--text-secondary)">Họ &amp; Tên *</label>
+                            <input asp-for="CustomerName" autocomplete="name" required maxlength="120" placeholder="Nguyễn Văn A" style="width:100%;background:var(--bg-surface-elevated);border:1px solid var(--border-card);color:var(--text-primary);padding:10px 14px;border-radius:var(--radius-sm);outline:none;font-size:.88rem" />
+                            <span asp-validation-for="CustomerName" style="color:#E63946;font-size:.78rem"></span>
+                        </div>
+                        <div>
+                            <label asp-for="CustomerPhone" style="display:block;font-size:.8rem;font-weight:600;margin-bottom:6px;color:var(--text-secondary)">Số điện thoại *</label>
+                            <input asp-for="CustomerPhone" type="tel" autocomplete="tel" required maxlength="32" placeholder="0912 345 678" style="width:100%;background:var(--bg-surface-elevated);border:1px solid var(--border-card);color:var(--text-primary);padding:10px 14px;border-radius:var(--radius-sm);outline:none;font-size:.88rem" />
+                            <span asp-validation-for="CustomerPhone" style="color:#E63946;font-size:.78rem"></span>
+                        </div>
                     </div>
-                </div>
-            </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+                        <div>
+                            <label asp-for="CustomerEmail" style="display:block;font-size:.8rem;font-weight:600;margin-bottom:6px;color:var(--text-secondary)">Email nhận xác nhận *</label>
+                            <input asp-for="CustomerEmail" type="email" autocomplete="email" required maxlength="254" placeholder="example@gmail.com" style="width:100%;background:var(--bg-surface-elevated);border:1px solid var(--border-card);color:var(--text-primary);padding:10px 14px;border-radius:var(--radius-sm);outline:none;font-size:.88rem" />
+                            <span asp-validation-for="CustomerEmail" style="color:#E63946;font-size:.78rem"></span>
+                        </div>
+                        <div>
+                            <label asp-for="City" style="display:block;font-size:.8rem;font-weight:600;margin-bottom:6px;color:var(--text-secondary)">Tỉnh / Thành phố</label>
+                            <input asp-for="City" autocomplete="address-level1" placeholder="TP. Hồ Chí Minh / Hà Nội" style="width:100%;background:var(--bg-surface-elevated);border:1px solid var(--border-card);color:var(--text-primary);padding:10px 14px;border-radius:var(--radius-sm);outline:none;font-size:.88rem" />
+                        </div>
+                    </div>
+                    <div style="margin-bottom:16px">
+                        <label asp-for="ShippingAddress" style="display:block;font-size:.8rem;font-weight:600;margin-bottom:6px;color:var(--text-secondary)">Địa chỉ nhận hàng chi tiết *</label>
+                        <input asp-for="ShippingAddress" autocomplete="street-address" required maxlength="500" placeholder="Số nhà, tên đường, phường/xã, quận/huyện..." style="width:100%;background:var(--bg-surface-elevated);border:1px solid var(--border-card);color:var(--text-primary);padding:10px 14px;border-radius:var(--radius-sm);outline:none;font-size:.88rem" />
+                        <span asp-validation-for="ShippingAddress" style="color:#E63946;font-size:.78rem"></span>
+                    </div>
+                    <div>
+                        <label asp-for="OrderNotes" style="display:block;font-size:.8rem;font-weight:600;margin-bottom:6px;color:var(--text-secondary)">Ghi chú đơn hàng</label>
+                        <textarea asp-for="OrderNotes" rows="3" placeholder="Ghi chú giao giờ hành chính, đóng gói quà..." style="width:100%;background:var(--bg-surface-elevated);border:1px solid var(--border-card);color:var(--text-primary);padding:10px 14px;border-radius:var(--radius-sm);outline:none;font-size:.88rem"></textarea>
+                    </div>
+                    </div>
 
             <div style="background:rgba(42,157,143,.1);border:1px solid rgba(42,157,143,.35);border-radius:var(--radius-md);padding:16px 20px">
                 <strong><i class="fa-solid fa-money-bill-wave"></i> Thanh toán khi nhận hàng (COD)</strong>
                 <p style="margin:6px 0 0;color:var(--text-muted)">Bạn thanh toán cho nhân viên giao hàng khi nhận đơn. Cửa hàng chỉ ghi nhận đã thanh toán sau khi xác nhận đã thu tiền.</p>
+            </div>
             </div>
             <!-- Right: Order Items & Voucher & Place Order Button -->
             <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 24px; box-shadow: var(--shadow-luxury);">
