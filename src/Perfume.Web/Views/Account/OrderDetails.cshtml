@@ -1,21 +1,29 @@
 @model Perfume.Domain.Entities.Order
 @{
-    ViewData["Title"] = $"Đơn hàng {Model.OrderCode}";
+    ViewData["Title"] = "Chi tiết đơn hàng";
 }
-<div style="max-width:900px;margin:40px auto;padding:0 20px">
-    <h1>Đơn hàng @Model.OrderCode</h1>
-    <section class="luxury-card" style="padding:24px">
-        <p>Trạng thái: <strong>@Model.OrderStatus</strong> · Thanh toán: <strong>@Model.PaymentStatus</strong> (@Model.PaymentMethod)</p>
-        <p>Người nhận: @Model.CustomerName · @Model.CustomerPhone</p>
-        <p>Địa chỉ: @Model.ShippingAddress @Model.City</p>
-        @foreach (var item in Model.Items)
-        {
-            <div style="display:flex;justify-content:space-between;border-top:1px solid var(--border-card);padding:12px 0">
-                <span>@item.ProductName — @item.VariantLabel × @item.Quantity</span><strong>@((item.UnitPrice * item.Quantity).ToString("N0")) ₫</strong>
-            </div>
-        }
-        <p>Tạm tính @Model.SubTotal.ToString("N0") ₫ · Giảm @Model.DiscountAmount.ToString("N0") ₫ · Phí giao @Model.ShippingFee.ToString("N0") ₫</p>
-        <h2>Tổng: @Model.TotalAmount.ToString("N0") ₫</h2>
-    </section>
-    <p><a href="/account/myorders">← Trở về đơn hàng</a></p>
-</div>
+<main style="max-width:1000px;margin:42px auto;padding:0 20px" id="orderDetailRoot" data-order-id="@Model.Id">
+    <a href="/account/myorders" style="color:var(--gold-primary)"><i class="fa-solid fa-arrow-left"></i> Quay lại đơn hàng</a>
+    <div style="margin:20px 0 24px"><p class="eyebrow">Tài khoản khách hàng</p><h1 style="margin:4px 0">Chi tiết đơn hàng</h1></div>
+    <div id="orderDetailMessage" role="status" class="luxury-card" style="padding:22px;color:var(--text-secondary)">Đang tải đơn hàng…</div>
+    <div id="orderDetailContent" hidden></div>
+</main>
+@section Scripts {
+<script>
+(async function(){
+    const root=document.getElementById('orderDetailRoot'), message=document.getElementById('orderDetailMessage'), content=document.getElementById('orderDetailContent');
+    const id=Number(root.dataset.orderId), status={Pending:'Chờ xác nhận',Confirmed:'Đã xác nhận',Shipping:'Đang giao',Delivered:'Đã giao',Cancelled:'Đã hủy'}, payment={Pending:'Chờ thu COD',Completed:'Đã thanh toán',Failed:'Thanh toán lỗi',Refunded:'Đã hoàn tiền'};
+    const money=value=>new Intl.NumberFormat('vi-VN',{style:'currency',currency:'VND'}).format(value||0), safe=CustomerApi.escapeHtml;
+    try {
+        const order=await CustomerApi.get(`/api/v1/customer/orders/${id}`);
+        message.hidden=true; content.hidden=false;
+        content.innerHTML=`<section class="luxury-card" style="padding:24px;margin-bottom:18px"><div style="display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap"><div><strong style="font-size:1.1rem">${safe(order.orderCode)}</strong><p style="color:var(--text-secondary)">${new Date(order.createdAt).toLocaleString('vi-VN')}</p></div><div><span class="customer-order-status">${status[order.orderStatus]||safe(order.orderStatus)}</span><p style="color:var(--text-secondary);margin:8px 0 0">Thanh toán: ${payment[order.paymentStatus]||safe(order.paymentStatus)} · COD</p></div></div></section>
+        <div style="display:grid;grid-template-columns:minmax(0,1.4fr) minmax(260px,.8fr);gap:18px;align-items:start">
+            <section class="luxury-card" style="padding:22px"><h2 style="font-size:1.15rem">Sản phẩm</h2>${order.items.map(item=>`<article style="display:flex;gap:14px;align-items:center;padding:14px 0;border-top:1px solid var(--border-card)"><img src="${safe(item.productImageUrl||'https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=120&q=80')}" alt="${safe(item.productName)}" style="width:64px;height:64px;object-fit:cover;border-radius:8px"><div style="flex:1"><strong>${safe(item.productName)}</strong><p style="margin:5px 0;color:var(--gold-primary)">${safe(item.variantLabel)} · ${item.quantity} món</p></div><strong>${money(item.totalPrice)}</strong></article>`).join('')}</section>
+            <aside style="display:grid;gap:18px"><section class="luxury-card" style="padding:22px"><h2 style="font-size:1.05rem">Giao hàng</h2><strong>${safe(order.customerName)}</strong><p>${safe(order.customerPhone)}<br>${safe(order.customerEmail)}</p><p style="color:var(--text-secondary)">${safe(order.shippingAddress)}${order.city?`, ${safe(order.city)}`:''}</p>${order.trackingNumber?`<p>Mã vận đơn: <strong>${safe(order.trackingNumber)}</strong></p>`:''}</section>
+            <section class="luxury-card" style="padding:22px"><h2 style="font-size:1.05rem">Thanh toán</h2><p>Tạm tính <strong style="float:right">${money(order.subTotal)}</strong></p><p>Ưu đãi <strong style="float:right;color:#e63946">−${money(order.discountAmount)}</strong></p><p>Vận chuyển <strong style="float:right">${money(order.shippingFee)}</strong></p><hr style="border-color:var(--border-card)"><p><strong>Tổng cộng</strong><strong style="float:right;color:var(--gold-primary)">${money(order.totalAmount)}</strong></p></section></aside></div>`;
+    } catch(error){message.textContent=error.message||'Không tìm thấy đơn hàng này.';}
+})();
+</script>
+<style>@@media(max-width:720px){#orderDetailContent>div{grid-template-columns:1fr!important}}</style>
+}

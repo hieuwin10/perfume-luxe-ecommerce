@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Perfume.Infrastructure;
 using Perfume.Infrastructure.Data;
 using Perfume.Infrastructure.Identity;
+using Perfume.Web.Security;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddInfrastructureServices(builder.Configuration);
@@ -16,7 +18,27 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.ExpireTimeSpan = TimeSpan.FromDays(30);
     options.Cookie.HttpOnly = true;
     options.Cookie.SameSite = SameSiteMode.Lax;
+    options.Events.OnRedirectToLogin = context =>
+    {
+        if (context.Request.Path.StartsWithSegments("/api")) { context.Response.StatusCode = StatusCodes.Status401Unauthorized; return Task.CompletedTask; }
+        context.Response.Redirect(context.RedirectUri);
+        return Task.CompletedTask;
+    };
+    options.Events.OnRedirectToAccessDenied = context =>
+    {
+        if (context.Request.Path.StartsWithSegments("/api")) { context.Response.StatusCode = StatusCodes.Status403Forbidden; return Task.CompletedTask; }
+        context.Response.Redirect(context.RedirectUri);
+        return Task.CompletedTask;
+    };
 });
+builder.Services.AddSingleton<JwtTokenService>();
+builder.Services.AddAuthentication()
+    .AddScheme<AuthenticationSchemeOptions, BearerTokenHandler>("Bearer", _ => { });
+builder.Services.AddAuthorization(options => options.AddPolicy("CustomerApi", policy =>
+{
+    policy.AddAuthenticationSchemes(IdentityConstants.ApplicationScheme, "Bearer");
+    policy.RequireAuthenticatedUser();
+}));
 
 var dataPath = builder.Configuration["Storage:RootPath"] ?? Path.Combine(builder.Environment.ContentRootPath, "App_Data");
 Directory.CreateDirectory(Path.Combine(dataPath, "DataProtection-Keys"));

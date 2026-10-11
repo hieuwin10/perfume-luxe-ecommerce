@@ -12,6 +12,9 @@ services:
       Storage__RootPath: /app/App_Data
       InitialAdmin__Email: ${INITIAL_ADMIN_EMAIL:-}
       InitialAdmin__Password: ${INITIAL_ADMIN_PASSWORD:-}
+      Jwt__Issuer: ${JWT_ISSUER:-PerfumeLuxe}
+      Jwt__Audience: ${JWT_AUDIENCE:-PerfumeLuxe.Clients}
+      Jwt__SigningKey: ${JWT_SIGNING_KEY:-}
       Smtp__Enabled: "true"
       Smtp__Host: mailpit
       Smtp__Port: 1025

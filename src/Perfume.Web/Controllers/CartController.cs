@@ -1,119 +1,79 @@
+using System.Security.Claims;
+using System.Security.Cryptography;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 using Perfume.Application.DTOs;
 using Perfume.Application.Interfaces;
-using Perfume.Web.Extensions;
 
 namespace Perfume.Web.Controllers;
 
 public class CartController : Controller
 {
-    private const string CartSessionKey = "PERFUME_CART_SESSION";
-    private readonly IPerfumeCatalogService _catalogService;
+    private const string GuestCartCookie = "plx_guest_cart";
+    private readonly ICustomerCartService _carts;
 
-    public CartController(IPerfumeCatalogService catalogService)
-    {
-        _catalogService = catalogService;
-    }
-
-    private List<CartItemDto> GetCart()
-    {
-        return HttpContext.Session.GetObject<List<CartItemDto>>(CartSessionKey) ?? new List<CartItemDto>();
-    }
-
-    private void SaveCart(List<CartItemDto> cart)
-    {
-        HttpContext.Session.SetObject(CartSessionKey, cart);
-    }
+    public CartController(ICustomerCartService carts) => _carts = carts;
 
     [HttpGet]
-    public IActionResult Index()
-    {
-        var cart = GetCart();
-        return View(cart);
-    }
+    public async Task<IActionResult> Index(CancellationToken cancellationToken) =>
+        View(await _carts.GetAsync(CurrentUserId(), Request.Cookies[GuestCartCookie], cancellationToken));
 
     [HttpGet]
-    public IActionResult GetCartState()
+    public async Task<IActionResult> GetCartState(CancellationToken cancellationToken)
     {
-        var cart = GetCart();
-        var totalAmount = cart.Sum(i => i.TotalPrice);
-        var totalCount = cart.Sum(i => i.Quantity);
-        return Json(new { items = cart, totalAmount, totalCount });
+        var cart = await _carts.GetAsync(CurrentUserId(), Request.Cookies[GuestCartCookie], cancellationToken);
+        return Json(new { items = cart.Items, totalAmount = cart.SubTotal, totalCount = cart.TotalCount });
     }
 
     [HttpPost, ValidateAntiForgeryToken]
-    public async Task<IActionResult> AddToCart([FromBody] AddToCartRequest req)
+    public async Task<IActionResult> AddToCart([FromBody] AddToCartRequest request, CancellationToken cancellationToken)
     {
-        var product = await _catalogService.GetProductBySlugAsync(req.ProductSlug);
-        if (product == null) return NotFound();
-
-        var cart = GetCart();
-        var variant = product.Variants.FirstOrDefault(v => v.Id == req.VariantId) 
-                      ?? product.Variants.FirstOrDefault();
-
-        var existingItem = cart.FirstOrDefault(i => i.ProductId == product.Id && i.VariantId == (variant?.Id));
-        decimal price = variant != null && variant.SalePrice > 0 ? variant.SalePrice : product.BasePrice;
-        string variantLabel = variant?.VolumeLabel ?? "Fullbox";
-
-        if (existingItem != null)
+        try
         {
-            existingItem.Quantity += Math.Max(1, req.Quantity);
+            var cart = await _carts.AddAsync(CurrentUserId(), EnsureGuestToken(),
+                new CartAddItemRequest { ProductSlug = request.ProductSlug, VariantId = request.VariantId, Quantity = request.Quantity }, cancellationToken);
+            return Ok(new { success = true, items = cart.Items, totalAmount = cart.SubTotal, totalCount = cart.TotalCount });
         }
-        else
-        {
-            cart.Add(new CartItemDto
-            {
-                ProductId = product.Id,
-                VariantId = variant?.Id,
-                ProductName = product.Name,
-                ProductSlug = product.Slug,
-                ProductImageUrl = product.MainImageUrl,
-                VariantLabel = variantLabel,
-                UnitPrice = price,
-                Quantity = Math.Max(1, req.Quantity)
-            });
-        }
-
-        SaveCart(cart);
-        var totalAmount = cart.Sum(i => i.TotalPrice);
-        var totalCount = cart.Sum(i => i.Quantity);
-
-        return Json(new { success = true, items = cart, totalAmount, totalCount });
+        catch (KeyNotFoundException ex) { return NotFound(new { success = false, message = ex.Message }); }
+        catch (InvalidOperationException ex) { return BadRequest(new { success = false, message = ex.Message }); }
     }
 
     [HttpPost, ValidateAntiForgeryToken]
-    public IActionResult UpdateQuantity([FromBody] UpdateCartQuantityRequest req)
+    public async Task<IActionResult> UpdateQuantity([FromBody] UpdateCartQuantityRequest request, CancellationToken cancellationToken)
     {
-        var cart = GetCart();
-        var item = cart.FirstOrDefault(i => i.ProductId == req.ProductId && i.VariantId == req.VariantId);
-        if (item != null)
+        try
         {
-            if (req.Quantity <= 0)
-            {
-                cart.Remove(item);
-            }
-            else
-            {
-                item.Quantity = req.Quantity;
-            }
-            SaveCart(cart);
+            var cart = await _carts.SetQuantityAsync(CurrentUserId(), EnsureGuestToken(),
+                new CartLineRequest { ProductId = request.ProductId, VariantId = request.VariantId, Quantity = request.Quantity }, cancellationToken);
+            return Ok(new { success = true, items = cart.Items, totalAmount = cart.SubTotal, totalCount = cart.TotalCount });
         }
-
-        var totalAmount = cart.Sum(i => i.TotalPrice);
-        var totalCount = cart.Sum(i => i.Quantity);
-        return Json(new { success = true, items = cart, totalAmount, totalCount });
+        catch (InvalidOperationException ex) { return BadRequest(new { success = false, message = ex.Message }); }
     }
 
     [HttpPost, ValidateAntiForgeryToken]
-    public IActionResult RemoveItem([FromBody] RemoveCartItemRequest req)
+    public async Task<IActionResult> RemoveItem([FromBody] RemoveCartItemRequest request, CancellationToken cancellationToken)
     {
-        var cart = GetCart();
-        cart.RemoveAll(i => i.ProductId == req.ProductId && i.VariantId == req.VariantId);
-        SaveCart(cart);
+        var cart = await _carts.RemoveAsync(CurrentUserId(), EnsureGuestToken(), request.ProductId, request.VariantId, cancellationToken);
+        return Ok(new { success = true, items = cart.Items, totalAmount = cart.SubTotal, totalCount = cart.TotalCount });
+    }
 
-        var totalAmount = cart.Sum(i => i.TotalPrice);
-        var totalCount = cart.Sum(i => i.Quantity);
-        return Json(new { success = true, items = cart, totalAmount, totalCount });
+    private string? CurrentUserId() => User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+    private string EnsureGuestToken()
+    {
+        var token = Request.Cookies[GuestCartCookie];
+        if (!string.IsNullOrWhiteSpace(token) && token.Length <= 128) return token;
+        token = WebEncoders.Base64UrlEncode(RandomNumberGenerator.GetBytes(32));
+        Response.Cookies.Append(GuestCartCookie, token, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = Request.IsHttps,
+            SameSite = SameSiteMode.Lax,
+            IsEssential = true,
+            Path = "/",
+            MaxAge = TimeSpan.FromDays(30)
+        });
+        return token;
     }
 }
 

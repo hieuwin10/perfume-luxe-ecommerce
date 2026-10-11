@@ -219,7 +219,7 @@
     @if (TempData["ReviewError"] != null) { <p style="color:#f87171">@TempData["ReviewError"]</p> }
     @if (User.IsInRole("Customer"))
     {
-        <form method="post" action="/reviews/create" enctype="multipart/form-data" style="display:grid;gap:12px;margin:18px 0">
+        <form method="post" action="/reviews/create" enctype="multipart/form-data" id="customerReviewForm" data-product-id="@Model.Id" style="display:grid;gap:12px;margin:18px 0">
             @Html.AntiForgeryToken()
             <input type="hidden" name="productId" value="@Model.Id" />
             <label>Số sao<select name="rating" required><option value="5">5 sao</option><option value="4">4 sao</option><option value="3">3 sao</option><option value="2">2 sao</option><option value="1">1 sao</option></select></label>
@@ -227,6 +227,7 @@
             <label>Ảnh sản phẩm đã mua (tối đa 3 ảnh, mỗi ảnh 5 MB)<input type="file" name="images" accept="image/jpeg,image/png,image/webp" multiple /></label>
             <button class="btn-luxe" type="submit">Gửi đánh giá</button>
         </form>
+        <div id="reviewApiMessage" role="status" hidden style="margin:12px 0;padding:12px;border-radius:8px"></div>
     }
     else if (User.Identity?.IsAuthenticated != true)
     {
@@ -254,6 +255,28 @@
         </article>
     }
 </section>
+
+@section Scripts {
+<script>
+document.getElementById('customerReviewForm')?.addEventListener('submit', async event => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const button = form.querySelector('button[type="submit"]');
+    const message = document.getElementById('reviewApiMessage');
+    button.disabled = true;
+    message.hidden = true;
+    try {
+        const result = await CustomerApi.post(`/api/v1/products/${form.dataset.productId}/reviews`, new FormData(form));
+        message.textContent = result.message;
+        message.style.cssText = 'margin:12px 0;padding:12px;border-radius:8px;color:#52b788;background:rgba(82,183,136,.12)';
+        form.reset();
+    } catch (error) {
+        message.textContent = error.message || 'Chưa gửi được đánh giá.';
+        message.style.cssText = 'margin:12px 0;padding:12px;border-radius:8px;color:#f87171;background:rgba(239,68,68,.12)';
+    } finally { message.hidden = false; button.disabled = false; }
+});
+</script>
+}
 
 <!-- GOOGLE STRUCTURED DATA (JSON-LD) FOR SEO -->
 <script type="application/ld+json">

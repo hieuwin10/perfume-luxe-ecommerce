@@ -77,6 +77,17 @@ public class AccountController : Controller
         return View();
     }
 
+    [HttpGet]
+    public IActionResult ForgotPassword() => View();
+
+    [HttpGet]
+    public IActionResult ResetPassword(string? email, string? token)
+    {
+        ViewBag.Email = email;
+        ViewBag.Token = token;
+        return View();
+    }
+
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Register(string fullName, string email, string password, string confirmPassword)
@@ -179,24 +190,19 @@ public class AccountController : Controller
 
     [Authorize]
     [HttpGet]
-    public async Task<IActionResult> MyOrders()
+    public IActionResult MyOrders()
     {
-        var userId = _userManager.GetUserId(User);
-        if (string.IsNullOrEmpty(userId)) return Challenge();
-        var orders = await _db.Orders.Include(o => o.Items).Where(o => o.UserId == userId)
-            .OrderByDescending(o => o.CreatedAt).Take(100).ToListAsync();
-        return View(orders);
+        if (string.IsNullOrEmpty(_userManager.GetUserId(User))) return Challenge();
+        return View(new List<Perfume.Domain.Entities.Order>());
     }
 
     [Authorize]
     [HttpGet]
-    public async Task<IActionResult> OrderDetails(int id)
+    public IActionResult OrderDetails(int id)
     {
         var userId = _userManager.GetUserId(User);
         if (string.IsNullOrEmpty(userId)) return Challenge();
-        var order = await _db.Orders.Include(o => o.Items)
-            .FirstOrDefaultAsync(o => o.Id == id && o.UserId == userId);
-        return order == null ? NotFound() : View(order);
+        return View(new Perfume.Domain.Entities.Order { Id = id });
     }
 
     [HttpGet]

@@ -37,6 +37,7 @@ public static class DependencyInjection
         services.AddScoped<IDatabaseConsoleService, DatabaseConsoleService>();
         services.AddScoped<IPerfumeCatalogService, PerfumeCatalogService>();
         services.AddScoped<IOrderService, OrderService>();
+        services.AddScoped<ICustomerCartService, CustomerCartService>();
         services.AddScoped<IBlogService, BlogService>();
         services.AddScoped<IOrderEmailSender, SmtpOrderEmailSender>();
         return services;

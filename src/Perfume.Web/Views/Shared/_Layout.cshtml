@@ -108,7 +108,7 @@
                                 <a href="/admin/storemanager" class="dropdown-item-luxe"><i class="fa-solid fa-chart-line"></i> Thống kê cửa hàng</a>
                             }
                             <div style="border-top: 1px solid var(--border-card); margin: 4px 0;"></div>
-                            <form method="post" action="/account/logout" style="margin: 0;">
+                            <form method="post" action="/account/logout" id="customerLogoutForm" style="margin: 0;">
                                 @Html.AntiForgeryToken()
                                 <button type="submit" class="dropdown-item-luxe" style="width: 100%; text-align: left; background: none; border: none; cursor: pointer; color: #f87171;">
                                     <i class="fa-solid fa-right-from-bracket"></i> Đăng Xuất
@@ -220,6 +220,7 @@
     <div class="toast-container-luxe" id="toastContainer"></div>
 
     <!-- Scripts -->
+    <script src="~/js/customer-api.js" asp-append-version="true"></script>
     <script>
         // 1. Theme Management (Dark / Light + Cốc Cốc / Chrome system auto-detection)
         (function() {
@@ -275,15 +276,11 @@
         closeCartBtn?.addEventListener('click', closeCart);
         cartOverlay?.addEventListener('click', closeCart);
 
-        function antiForgeryHeaders() {
-            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
-            return token ? { 'RequestVerificationToken': token } : {};
-        }
+        const money = value => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value || 0);
 
         async function refreshCartState() {
             try {
-                const res = await fetch('/Cart/GetCartState');
-                const data = await res.json();
+                const data = await CustomerApi.get('/api/v1/cart');
                 
                 // Update badge
                 const badge = document.getElementById('headerCartCount');
@@ -291,7 +288,7 @@
 
                 // Update subtotal
                 const subtotal = document.getElementById('cartDrawerSubtotal');
-                if (subtotal) subtotal.innerText = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(data.totalAmount);
+                if (subtotal) subtotal.innerText = money(data.subTotal);
 
                 // Update items in drawer
                 const container = document.getElementById('cartDrawerItems');
@@ -308,48 +305,39 @@
 
                 container.innerHTML = data.items.map(item => `
                     <div style="display: flex; gap: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--border-card); align-items: center;">
-                        <img src="${item.productImageUrl || 'https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=150&q=80'}" style="width: 64px; height: 64px; object-fit: cover; border-radius: var(--radius-sm); border: 1px solid var(--border-card);" alt="${item.productName}" />
+                        <img src="${CustomerApi.escapeHtml(item.productImageUrl || 'https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=150&q=80')}" style="width: 64px; height: 64px; object-fit: cover; border-radius: var(--radius-sm); border: 1px solid var(--border-card);" alt="${CustomerApi.escapeHtml(item.productName)}" />
                         <div style="flex-grow: 1;">
-                            <div style="font-size: 0.9rem; font-weight: 600; line-height: 1.2; margin-bottom: 2px;">${item.productName}</div>
-                            <div style="font-size: 0.75rem; color: var(--gold-primary); margin-bottom: 4px;">${item.variantLabel}</div>
-                            <div style="font-size: 0.85rem; font-weight: 700;">${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.unitPrice)} x ${item.quantity}</div>
+                            <div style="font-size: 0.9rem; font-weight: 600; line-height: 1.2; margin-bottom: 2px;">${CustomerApi.escapeHtml(item.productName)}</div>
+                            <div style="font-size: 0.75rem; color: var(--gold-primary); margin-bottom: 4px;">${CustomerApi.escapeHtml(item.variantLabel)}</div>
+                            <div style="font-size: 0.85rem; font-weight: 700;">${money(item.unitPrice)} x ${item.quantity}</div>
                         </div>
-                        <button onclick="removeCartItem(${item.productId}, ${item.variantId})" style="background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 6px;"><i class="fa-solid fa-trash-can"></i></button>
+                        <button onclick="removeCartItem(${item.productId}, ${item.variantId ?? 'null'})" aria-label="Xóa ${CustomerApi.escapeHtml(item.productName)}" style="background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 6px;"><i class="fa-solid fa-trash-can"></i></button>
                     </div>
                 `).join('');
             } catch (err) {
                 console.error(err);
+                const badge = document.getElementById('headerCartCount');
+                if (badge) badge.innerText = '–';
             }
         }
 
         async function addToCart(slug, variantId = null, quantity = 1) {
             try {
-                const res = await fetch('/Cart/AddToCart', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', ...antiForgeryHeaders() },
-                    body: JSON.stringify({ productSlug: slug, variantId: variantId, quantity: quantity })
-                });
-                const data = await res.json();
-                if (data.success) {
-                    showToast('Đã thêm sản phẩm vào giỏ hàng!', 'success');
-                    openCart();
-                }
+                await CustomerApi.post('/api/v1/cart/items', { productSlug: slug, variantId, quantity });
+                showToast('Đã thêm sản phẩm vào giỏ hàng!', 'success');
+                openCart();
             } catch (err) {
-                showToast('Không thể thêm vào giỏ hàng.', 'error');
+                showToast(err.message || 'Không thể thêm vào giỏ hàng.', 'error');
             }
         }
 
         async function removeCartItem(productId, variantId) {
             try {
-                const res = await fetch('/Cart/RemoveItem', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', ...antiForgeryHeaders() },
-                    body: JSON.stringify({ productId, variantId })
-                });
-                refreshCartState();
+                await CustomerApi.delete(`/api/v1/cart/items/${productId}?variantId=${variantId ?? ''}`);
+                await refreshCartState();
                 showToast('Đã xóa sản phẩm khỏi giỏ hàng.', 'info');
             } catch (err) {
-                console.error(err);
+                showToast(err.message || 'Chưa xóa được sản phẩm.', 'error');
             }
         }
 
@@ -360,7 +348,7 @@
             const toast = document.createElement('div');
             toast.className = 'toast-luxe';
             let icon = type === 'success' ? 'fa-circle-check text-gold-gradient' : 'fa-circle-info text-gold-gradient';
-            toast.innerHTML = `<i class="fa-solid ${icon}"></i> <span>${message}</span>`;
+            toast.innerHTML = `<i class="fa-solid ${icon}"></i> <span>${CustomerApi.escapeHtml(message)}</span>`;
             container.appendChild(toast);
 
             setTimeout(() => {
@@ -370,6 +358,12 @@
                 setTimeout(() => toast.remove(), 300);
             }, 3000);
         }
+
+        document.getElementById('customerLogoutForm')?.addEventListener('submit', async event => {
+            event.preventDefault();
+            try { await CustomerApi.post('/api/v1/auth/logout', {}); }
+            finally { window.location.assign('/'); }
+        });
 
         // Initialize cart count on load
         refreshCartState();

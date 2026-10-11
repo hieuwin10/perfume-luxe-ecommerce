@@ -111,6 +111,8 @@ public class CartItemDto
     public string VariantLabel { get; set; } = string.Empty;
     public decimal UnitPrice { get; set; }
     public int Quantity { get; set; }
+    public int StockQuantity { get; set; }
+    public bool IsAvailable { get; set; } = true;
     public decimal TotalPrice => UnitPrice * Quantity;
 }
 

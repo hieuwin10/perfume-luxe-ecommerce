@@ -1,66 +1,81 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Perfume.Application.DTOs;
 using Perfume.Application.Interfaces;
 using Perfume.Domain.Enums;
+using Perfume.Infrastructure.Identity;
 using Perfume.Infrastructure.Services;
-using Perfume.Web.Extensions;
 
 namespace Perfume.Web.Controllers;
 
 public class CheckoutController : Controller
 {
-    private const string CartSessionKey = "PERFUME_CART_SESSION";
+    private const string GuestCartCookie = "plx_guest_cart";
     private readonly IOrderService _orderService;
     private readonly IOrderEmailSender _emailSender;
+    private readonly ICustomerCartService _carts;
+    private readonly UserManager<AppUser> _users;
     private readonly IDataProtector _guestOrderProtector;
 
-    public CheckoutController(IOrderService orderService, IOrderEmailSender emailSender, IDataProtectionProvider protectionProvider)
+    public CheckoutController(IOrderService orderService, IOrderEmailSender emailSender, ICustomerCartService carts,
+        UserManager<AppUser> users, IDataProtectionProvider protectionProvider)
     {
         _orderService = orderService;
         _emailSender = emailSender;
+        _carts = carts;
+        _users = users;
         _guestOrderProtector = protectionProvider.CreateProtector("PerfumeLuxe.GuestOrderTracking.v1");
     }
 
     [HttpGet]
-    public IActionResult Index()
+    public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
-        var cart = HttpContext.Session.GetObject<List<CartItemDto>>(CartSessionKey) ?? new();
-        if (cart.Count == 0) return RedirectToAction("Index", "Cart");
-        ViewBag.Cart = cart;
-        ViewBag.SubTotal = cart.Sum(i => i.TotalPrice);
-        return View(new CheckoutRequestDto { PaymentMethod = PaymentMethod.COD });
+        var state = await _carts.GetAsync(CurrentUserId(), Request.Cookies[GuestCartCookie], cancellationToken);
+        if (state.Items.Count == 0) return RedirectToAction("Index", "Cart");
+        ViewBag.Cart = state.Items;
+        ViewBag.SubTotal = state.SubTotal;
+        var user = await _users.GetUserAsync(User);
+        return View(new CheckoutRequestDto
+        {
+            PaymentMethod = PaymentMethod.COD,
+            CustomerName = user?.FullName ?? string.Empty,
+            CustomerEmail = user?.Email ?? string.Empty,
+            CustomerPhone = user?.PhoneNumber ?? string.Empty,
+            ShippingAddress = user?.Address ?? string.Empty
+        });
     }
 
     [HttpPost, ValidateAntiForgeryToken]
-    public async Task<IActionResult> PlaceOrder(CheckoutRequestDto model)
+    public async Task<IActionResult> PlaceOrder(CheckoutRequestDto model, CancellationToken cancellationToken)
     {
-        var cart = HttpContext.Session.GetObject<List<CartItemDto>>(CartSessionKey) ?? new();
-        if (cart.Count == 0) return RedirectToAction("Index", "Cart");
-        model.Items = cart;
+        var userId = CurrentUserId();
+        var guestToken = Request.Cookies[GuestCartCookie];
+        var cart = await _carts.GetAsync(userId, guestToken, cancellationToken);
+        if (cart.Items.Count == 0) return RedirectToAction("Index", "Cart");
+        model.Items = cart.Items;
         model.PaymentMethod = PaymentMethod.COD;
         if (!ModelState.IsValid)
         {
-            ViewBag.Cart = cart;
-            ViewBag.SubTotal = cart.Sum(i => i.TotalPrice);
+            ViewBag.Cart = cart.Items;
+            ViewBag.SubTotal = cart.SubTotal;
             ViewBag.Error = "Vui lòng kiểm tra lại thông tin giao hàng.";
             return View("Index", model);
         }
 
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var (success, error, order) = await _orderService.PlaceOrderAsync(model, userId);
         if (!success || order == null)
         {
-            ViewBag.Cart = cart;
-            ViewBag.SubTotal = cart.Sum(i => i.TotalPrice);
+            ViewBag.Cart = cart.Items;
+            ViewBag.SubTotal = cart.SubTotal;
             ViewBag.Error = error ?? "Không thể đặt hàng, vui lòng thử lại.";
             return View("Index", model);
         }
 
-        HttpContext.Session.Remove(CartSessionKey);
+        await _carts.ClearAsync(userId, guestToken, cancellationToken);
         string? token = null;
-        if (string.IsNullOrEmpty(order.UserId)) token = _guestOrderProtector.Protect(order.OrderCode);
+        if (order.UserId == null) token = _guestOrderProtector.Protect(order.OrderCode);
         var trackingUrl = token == null ? null : Url.Action(nameof(Success), "Checkout", new { token }, Request.Scheme);
         await _emailSender.SendOrderConfirmationAsync(order, trackingUrl);
         return order.UserId == null
@@ -77,35 +92,31 @@ public class CheckoutController : Controller
             try { verifiedCode = _guestOrderProtector.Unprotect(token); }
             catch { return NotFound(); }
         }
-        else if (string.IsNullOrEmpty(User.FindFirstValue(ClaimTypes.NameIdentifier)))
-        {
-            return NotFound();
-        }
+        else if (string.IsNullOrEmpty(CurrentUserId())) return NotFound();
 
         if (string.IsNullOrWhiteSpace(verifiedCode)) return NotFound();
         var order = await _orderService.GetOrderByCodeAsync(verifiedCode);
         if (order == null) return NotFound();
         if (order.UserId == null && string.IsNullOrWhiteSpace(token)) return NotFound();
-        if (order.UserId != null && !string.Equals(order.UserId, User.FindFirstValue(ClaimTypes.NameIdentifier), StringComparison.Ordinal))
-            return NotFound();
-
+        if (order.UserId != null && !string.Equals(order.UserId, CurrentUserId(), StringComparison.Ordinal)) return NotFound();
         ViewBag.IsGuest = order.UserId == null;
         return View(order);
     }
 
     [HttpPost, ValidateAntiForgeryToken]
-    public async Task<IActionResult> CheckVoucher([FromBody] VoucherCheckRequest req)
+    public async Task<IActionResult> CheckVoucher([FromBody] VoucherCheckRequest request, CancellationToken cancellationToken)
     {
-        var cart = HttpContext.Session.GetObject<List<CartItemDto>>(CartSessionKey) ?? new();
-        var subtotal = cart.Sum(i => i.TotalPrice);
-        var voucher = await _orderService.ValidateVoucherAsync(req.Code, subtotal);
+        var cart = await _carts.GetAsync(CurrentUserId(), Request.Cookies[GuestCartCookie], cancellationToken);
+        var voucher = await _orderService.ValidateVoucherAsync(request.Code, cart.SubTotal);
         if (voucher == null) return Json(new { valid = false, message = "Mã ưu đãi không hợp lệ hoặc không đủ điều kiện áp dụng." });
         var discount = voucher.DiscountPercent.HasValue
-            ? subtotal * voucher.DiscountPercent.Value / 100m
+            ? cart.SubTotal * voucher.DiscountPercent.Value / 100m
             : voucher.DiscountAmount ?? 0m;
         if (voucher.MaxDiscountAmount.HasValue) discount = Math.Min(discount, voucher.MaxDiscountAmount.Value);
         return Json(new { valid = true, discount, message = $"Áp dụng thành công mã {voucher.Code}: Giảm {discount:N0}₫!" });
     }
+
+    private string? CurrentUserId() => User.FindFirstValue(ClaimTypes.NameIdentifier);
 }
 
 public class VoucherCheckRequest { public string Code { get; set; } = string.Empty; }

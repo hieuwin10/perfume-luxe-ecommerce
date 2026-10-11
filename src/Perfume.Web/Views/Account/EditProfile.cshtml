@@ -6,8 +6,9 @@
     <div class="luxury-card" style="padding:28px">
         <h1>Chỉnh sửa hồ sơ</h1>
         @if (TempData["Success"] != null) { <p>@TempData["Success"]</p> }
+        <div id="profileMessage" role="status" hidden style="margin:14px 0;padding:12px;border-radius:8px"></div>
         <div asp-validation-summary="All" style="color:#f87171"></div>
-        <form method="post" action="/account/editprofile" style="display:grid;gap:16px">
+        <form method="post" action="/account/editprofile" id="customerProfileForm" style="display:grid;gap:16px">
             @Html.AntiForgeryToken()
             <label>Họ và tên<input name="fullName" value="@Model.FullName" maxlength="100" required /></label>
             <label>Email<input value="@Model.Email" readonly /></label>
@@ -17,3 +18,29 @@
         </form>
     </div>
 </div>
+
+@section Scripts {
+<script>
+document.getElementById('customerProfileForm')?.addEventListener('submit', async event => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const button = form.querySelector('button[type="submit"]');
+    const message = document.getElementById('profileMessage');
+    const fields = new FormData(form);
+    button.disabled = true;
+    message.hidden = true;
+    try {
+        const profile = await CustomerApi.put('/api/v1/customer/profile', {
+            fullName: fields.get('fullName'), phoneNumber: fields.get('phoneNumber'), address: fields.get('address')
+        });
+        message.textContent = 'Đã cập nhật hồ sơ.';
+        message.style.cssText = 'margin:14px 0;padding:12px;border-radius:8px;color:#52b788;background:rgba(82,183,136,.12)';
+        const headerName = document.querySelector('#userDropdownMenu [style*="font-weight: 700"]');
+        if (headerName) headerName.textContent = profile.fullName;
+    } catch (failure) {
+        message.textContent = failure.message || 'Chưa cập nhật được hồ sơ.';
+        message.style.cssText = 'margin:14px 0;padding:12px;border-radius:8px;color:#f87171;background:rgba(239,68,68,.12)';
+    } finally { message.hidden = false; button.disabled = false; }
+});
+</script>
+}

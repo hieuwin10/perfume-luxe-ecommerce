@@ -9,6 +9,7 @@ namespace Perfume.Infrastructure.Services;
 public interface IOrderEmailSender
 {
     Task SendOrderConfirmationAsync(Order order, string? trackingUrl);
+    Task SendPasswordResetAsync(string email, string fullName, string resetUrl);
 }
 
 public sealed class SmtpOrderEmailSender : IOrderEmailSender
@@ -45,5 +46,34 @@ public sealed class SmtpOrderEmailSender : IOrderEmailSender
             await client.SendMailAsync(message);
         }
         catch (Exception ex) { _logger.LogWarning(ex, "Order {OrderCode} was saved but its confirmation email failed.", order.OrderCode); }
+    }
+
+    public async Task SendPasswordResetAsync(string email, string fullName, string resetUrl)
+    {
+        if (!bool.TryParse(_configuration["Smtp:Enabled"], out var enabled) || !enabled) return;
+        try
+        {
+            var host = _configuration["Smtp:Host"];
+            if (string.IsNullOrWhiteSpace(host)) throw new InvalidOperationException("SMTP host is not configured.");
+            var port = int.TryParse(_configuration["Smtp:Port"], out var parsedPort) ? parsedPort : 1025;
+            var fromAddress = _configuration["Smtp:FromEmail"] ?? "noreply@perfumeluxe.local";
+            var fromName = _configuration["Smtp:FromName"] ?? "PERFUME LUXE";
+            using var message = new MailMessage(new MailAddress(fromAddress, fromName), new MailAddress(email))
+            {
+                Subject = "PERFUME LUXE - Đặt lại mật khẩu",
+                Body = $"Xin chào {fullName},\n\nBạn vừa yêu cầu đặt lại mật khẩu. Mở liên kết dưới đây để tạo mật khẩu mới (liên kết chỉ dùng một lần):\n\n{resetUrl}\n\nNếu bạn không yêu cầu, hãy bỏ qua email này.",
+                IsBodyHtml = false
+            };
+            using var client = new SmtpClient(host, port)
+            {
+                EnableSsl = bool.TryParse(_configuration["Smtp:EnableSsl"], out var ssl) && ssl,
+                DeliveryMethod = SmtpDeliveryMethod.Network,
+                Timeout = 5000
+            };
+            var username = _configuration["Smtp:UserName"];
+            if (!string.IsNullOrWhiteSpace(username)) client.Credentials = new NetworkCredential(username, _configuration["Smtp:Password"]);
+            await client.SendMailAsync(message);
+        }
+        catch (Exception ex) { _logger.LogWarning(ex, "Password reset email could not be sent."); }
     }
 }

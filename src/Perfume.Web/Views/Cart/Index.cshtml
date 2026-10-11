@@ -1,17 +1,17 @@
-@model List<CartItemDto>
+@model CartStateDto
 @{
     ViewData["Title"] = "Giỏ Hàng Của Bạn";
-    decimal subTotal = Model.Sum(i => i.TotalPrice);
+    decimal subTotal = Model.SubTotal;
 }
 
 <div style="max-width: 1100px; margin: 40px auto; padding: 0 24px;">
     <h1 style="font-size: 2.4rem; margin-bottom: 24px;"><i class="fa-solid fa-bag-shopping text-gold-gradient" style="margin-right: 10px;"></i> Giỏ Hàng Của Bạn</h1>
 
-    @if (Model.Any())
+    @if (Model.Items.Any())
     {
-        <div style="display: grid; grid-template-columns: 1fr 340px; gap: 40px; align-items: start;">
+        <div id="cartLayout" style="display: grid; grid-template-columns: 1fr 340px; gap: 40px; align-items: start;">
             <!-- Cart Items Table -->
-            <div style="background: var(--bg-surface); border: 1px solid var(--border-card); border-radius: var(--radius-md); overflow: hidden; padding: 20px;">
+            <div style="background: var(--bg-surface); border: 1px solid var(--border-card); border-radius: var(--radius-md); overflow-x: auto; padding: 20px;">
                 <table class="data-table-custom" style="width: 100%;">
                     <thead>
                         <tr>
@@ -23,7 +23,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var item in Model)
+                        @foreach (var item in Model.Items)
                         {
                             <tr>
                                 <td>
@@ -32,6 +32,10 @@
                                         <div>
                                             <a href="/nuoc-hoa/@item.ProductSlug" style="font-weight: 600; font-size: 0.95rem; display: block;">@item.ProductName</a>
                                             <span style="font-size: 0.78rem; color: var(--gold-primary);">@item.VariantLabel</span>
+                                            @if (!item.IsAvailable)
+                                            {
+                                                <span style="display:block;color:#f87171;font-size:.76rem;margin-top:5px">Sản phẩm tạm hết hàng hoặc số lượng đã thay đổi.</span>
+                                            }
                                         </div>
                                     </div>
                                 </td>
@@ -95,13 +99,13 @@
 @section Scripts {
     <script>
         async function updateItemQty(productId, variantId, qty) {
-            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
-            await fetch('/Cart/UpdateQuantity', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', ...(token ? { 'RequestVerificationToken': token } : {}) },
-                body: JSON.stringify({ productId, variantId, quantity: qty })
-            });
-            window.location.reload();
+            try {
+                await CustomerApi.put('/api/v1/cart/items', { productId, variantId, quantity: Math.max(0, qty) });
+                window.location.reload();
+            } catch (error) { showToast(error.message || 'Chưa cập nhật được số lượng.', 'error'); }
         }
     </script>
+}
+@section Styles {
+<style>@@media(max-width:850px){#cartLayout{grid-template-columns:1fr!important;gap:20px!important}}@@media(max-width:560px){.data-table-custom{min-width:650px}}</style>
 }

@@ -30,6 +30,9 @@ public class PerfumeDbContext : IdentityDbContext<AppUser, AppRole, string>
     public DbSet<BlogCategory> BlogCategories => Set<BlogCategory>();
     public DbSet<BlogPost> BlogPosts => Set<BlogPost>();
     public DbSet<UserLoyalty> UserLoyalties => Set<UserLoyalty>();
+    public DbSet<ShoppingCart> ShoppingCarts => Set<ShoppingCart>();
+    public DbSet<ShoppingCartItem> ShoppingCartItems => Set<ShoppingCartItem>();
+    public DbSet<RefreshTokenRecord> RefreshTokenRecords => Set<RefreshTokenRecord>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -209,6 +212,35 @@ public class PerfumeDbContext : IdentityDbContext<AppUser, AppRole, string>
         {
             entity.HasIndex(c => c.Slug).IsUnique();
             entity.HasQueryFilter(c => !c.IsDeleted);
+        });
+
+        builder.Entity<ShoppingCart>(entity =>
+        {
+            entity.HasIndex(c => c.OwnerKey).IsUnique();
+            entity.Property(c => c.OwnerKey).HasMaxLength(520).IsRequired();
+            entity.Property(c => c.UserId).HasMaxLength(450);
+            entity.HasIndex(c => c.UserId).IsUnique().HasFilter("[UserId] IS NOT NULL");
+            entity.HasMany(c => c.Items).WithOne(i => i.ShoppingCart)
+                .HasForeignKey(i => i.ShoppingCartId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasQueryFilter(c => !c.IsDeleted);
+        });
+
+        builder.Entity<ShoppingCartItem>(entity =>
+        {
+            entity.HasIndex(i => new { i.ShoppingCartId, i.ProductId, i.VariantId });
+            entity.HasOne<Product>().WithMany().HasForeignKey(i => i.ProductId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<ProductVariant>().WithMany().HasForeignKey(i => i.VariantId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasQueryFilter(i => !i.IsDeleted);
+        });
+
+        builder.Entity<RefreshTokenRecord>(entity =>
+        {
+            entity.Property(t => t.UserId).HasMaxLength(450).IsRequired();
+            entity.Property(t => t.TokenHash).HasMaxLength(64).IsRequired();
+            entity.Property(t => t.ReplacedByTokenHash).HasMaxLength(64);
+            entity.HasIndex(t => t.TokenHash).IsUnique();
+            entity.HasIndex(t => new { t.UserId, t.ExpiresAt });
+            entity.HasQueryFilter(t => !t.IsDeleted);
         });
     }
 

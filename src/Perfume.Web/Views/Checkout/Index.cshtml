@@ -10,16 +10,13 @@
         <i class="fa-solid fa-lock text-gold-gradient" style="margin-right: 10px;"></i> Thanh Toán Đơn Hàng
     </h1>
 
-    @if (ViewBag.Error != null)
-    {
-        <div style="background: rgba(230, 57, 70, 0.15); border: 1px solid rgba(230, 57, 70, 0.4); color: #E63946; padding: 12px 18px; border-radius: var(--radius-sm); margin-bottom: 24px;">
-            <i class="fa-solid fa-triangle-exclamation"></i> @ViewBag.Error
-        </div>
-    }
+    <div id="checkoutApiError" role="alert" hidden="@(ViewBag.Error == null ? "hidden" : null)" style="background: rgba(230, 57, 70, 0.15); border: 1px solid rgba(230, 57, 70, 0.4); color: #E63946; padding: 12px 18px; border-radius: var(--radius-sm); margin-bottom: 24px;">
+        @if (ViewBag.Error != null) { <i class="fa-solid fa-triangle-exclamation"></i> @ViewBag.Error }
+    </div>
 
     <form asp-action="PlaceOrder" method="post" id="checkoutForm">
         @Html.AntiForgeryToken()
-        <div style="display: grid; grid-template-columns: 1fr 420px; gap: 40px; align-items: start;">
+        <div id="checkoutGrid" style="display: grid; grid-template-columns: 1fr 420px; gap: 40px; align-items: start;">
             <!-- Left: Customer Information & Payment -->
             <div style="display: flex; flex-direction: column; gap: 24px;">
                 <!-- Section 1: Customer Details -->
@@ -128,23 +125,46 @@
         let baseSubTotal = @subTotal;
         let shippingFee = @(subTotal >= 2000000 ? 0 : 35000);
         let currentDiscount = 0;
+        const checkoutForm = document.getElementById('checkoutForm');
+        const checkoutError = document.getElementById('checkoutApiError');
+
+        checkoutForm?.addEventListener('submit', async event => {
+            event.preventDefault();
+            const submit = checkoutForm.querySelector('button[type="submit"]');
+            checkoutError.hidden = true;
+            submit.disabled = true;
+            submit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang xác nhận đơn…';
+            const values = new FormData(checkoutForm);
+            try {
+                const result = await CustomerApi.post('/api/v1/orders', {
+                    customerName: values.get('CustomerName'),
+                    customerPhone: values.get('CustomerPhone'),
+                    customerEmail: values.get('CustomerEmail'),
+                    shippingAddress: values.get('ShippingAddress'),
+                    city: values.get('City'),
+                    orderNotes: values.get('OrderNotes'),
+                    voucherCode: values.get('VoucherCode')
+                });
+                window.location.assign(result.successUrl || '/account/myorders');
+            } catch (error) {
+                checkoutError.textContent = error.message || 'Chưa đặt được đơn hàng. Vui lòng thử lại.';
+                checkoutError.hidden = false;
+            } finally {
+                submit.disabled = false;
+                submit.innerHTML = '<i class="fa-solid fa-check" style="margin-right: 6px;"></i> Xác Nhận Đặt Hàng Ngay';
+            }
+        });
 
         async function applyVoucher() {
             const code = document.getElementById('voucherCodeInput').value;
-            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
             const msgEl = document.getElementById('voucherMsg');
             if (!code.trim()) return;
 
             try {
-                const res = await fetch('/Checkout/CheckVoucher', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': token },
-                    body: JSON.stringify({ code })
-                });
-                const data = await res.json();
+                const data = await CustomerApi.post('/api/v1/vouchers/validate', { code });
 
                 if (data.valid) {
-                    currentDiscount = data.discount;
+                    currentDiscount = data.discountAmount;
                     msgEl.style.color = '#52B788';
                     msgEl.innerText = data.message;
                     document.getElementById('displayDiscount').innerText = '-' + new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(currentDiscount);
@@ -161,8 +181,11 @@
                 }
             } catch (err) {
                 msgEl.style.color = '#E63946';
-                msgEl.innerText = 'Lỗi kiểm tra voucher.';
+                msgEl.innerText = err.message || 'Lỗi kiểm tra voucher.';
             }
         }
     </script>
+}
+@section Styles {
+<style>@@media(max-width:920px){#checkoutGrid{grid-template-columns:1fr!important;gap:22px!important}}@@media(max-width:620px){#checkoutGrid input,#checkoutGrid textarea{font-size:1rem!important}#checkoutGrid [style*="grid-template-columns: 1fr 1fr"]{grid-template-columns:1fr!important}}</style>
 }
