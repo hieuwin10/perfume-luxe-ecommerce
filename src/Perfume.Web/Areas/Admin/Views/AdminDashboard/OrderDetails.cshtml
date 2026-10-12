@@ -127,9 +127,16 @@
                         <span>Phí vận chuyển:</span>
                         <span>@(Model.ShippingFee == 0 ? "Miễn phí (Free)" : Model.ShippingFee.ToString("N0") + " ₫")</span>
                     </div>
+                    @if (Model.IsGiftWrapping)
+                    {
+                        <div style="display: flex; justify-content: space-between; font-size: 0.88rem; color: var(--gold-primary);">
+                            <span><i class="fa-solid fa-gift" style="margin-right: 4px;"></i> Gói quà hoàng gia:</span>
+                            <span>+@Model.GiftWrappingFee.ToString("N0") ₫</span>
+                        </div>
+                    }
                     <div style="border-top: 1px solid var(--border-card); margin: 4px 0;"></div>
                     <div style="display: flex; justify-content: space-between; font-size: 1.15rem; font-weight: 800; color: var(--gold-primary);">
-                        <span>Tổng tiền cần thu (COD):</span>
+                        <span>@(Model.PaymentMethod == PaymentMethod.COD ? "Tổng tiền cần thu (COD):" : "Tổng giá trị đơn (VietQR):")</span>
                         <span>@Model.TotalAmount.ToString("N0") ₫</span>
                     </div>
                 </div>
@@ -140,9 +147,17 @@
         <div style="display: flex; flex-direction: column; gap: 20px;">
             <!-- Customer Card -->
             <div class="luxury-card" style="padding: 22px;">
-                <h3 style="font-size: 1.05rem; font-weight: 700; margin: 0 0 16px; color: var(--text-primary); border-bottom: 1px solid var(--border-card); padding-bottom: 10px;">
-                    <i class="fa-solid fa-user text-gold-gradient" style="margin-right: 8px;"></i> Thông Tin Khách Nhận Hàng
-                </h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-card); padding-bottom: 10px; margin-bottom: 16px;">
+                    <h3 style="font-size: 1.05rem; font-weight: 700; margin: 0; color: var(--text-primary);">
+                        <i class="fa-solid fa-user text-gold-gradient" style="margin-right: 8px;"></i> Thông Tin Khách Nhận Hàng
+                    </h3>
+                    @if (Model.OrderStatus is OrderStatus.Pending or OrderStatus.Confirmed)
+                    {
+                        <button onclick="document.getElementById('editShippingModal').style.display = 'flex'" class="btn-luxe-outline" style="padding: 4px 10px; font-size: 0.75rem;">
+                            <i class="fa-solid fa-pen"></i> Sửa địa chỉ
+                        </button>
+                    }
+                </div>
                 <div style="display: flex; flex-direction: column; gap: 12px; font-size: 0.88rem;">
                     <div>
                         <span style="color: var(--text-muted); font-size: 0.78rem; text-transform: uppercase;">Người nhận:</span>
@@ -174,6 +189,75 @@
                             <div style="font-style: italic; color: var(--text-primary); margin-top: 2px;">"@Model.OrderNotes"</div>
                         </div>
                     }
+                    @if (Model.IsGiftWrapping)
+                    {
+                        <div style="background: linear-gradient(135deg, rgba(212,175,55,0.15) 0%, rgba(20,20,20,0.8) 100%); border: 1px solid var(--gold-primary); padding: 12px; border-radius: 6px; margin-top: 6px;">
+                            <div style="color: var(--gold-primary); font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; gap: 6px;">
+                                <i class="fa-solid fa-gift"></i> GÓI QUÀ HOÀNG GIA (+50.000₫)
+                            </div>
+                            <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 2px;">
+                                Đóng hộp nhung cao cấp, thắt nơ ruy băng lụa & niêm phong sáp.
+                            </div>
+                            @if (!string.IsNullOrWhiteSpace(Model.GiftMessage))
+                            {
+                                <div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed rgba(212,175,55,0.3); font-size: 0.82rem;">
+                                    <strong style="color: var(--gold-primary);"><i class="fa-solid fa-feather-pointed"></i> Lời chúc viết tay:</strong>
+                                    <div style="font-style: italic; color: var(--text-primary); margin-top: 2px;">"@Model.GiftMessage"</div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Modal Edit Shipping -->
+            <div id="editShippingModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 2000; align-items: center; justify-content: center; padding: 20px;">
+                <div class="luxury-card" style="max-width: 500px; width: 100%; padding: 24px; border: 1px solid var(--gold-primary);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <h3 style="margin: 0; font-size: 1.15rem; color: var(--text-primary); font-weight: 700;">Sửa Thông Tin Nhận Hàng</h3>
+                        <button onclick="document.getElementById('editShippingModal').style.display='none'" style="background: none; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer;">&times;</button>
+                    </div>
+
+                    <form method="post" action="/admin/admindashboard/updateordershippinginfo">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="orderId" value="@Model.Id" />
+
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            <div>
+                                <label style="display: block; font-size: 0.78rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase;">Tên người nhận *</label>
+                                <input type="text" name="customerName" value="@Model.CustomerName" required
+                                       style="width: 100%; padding: 8px 12px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.88rem; outline: none;" />
+                            </div>
+
+                            <div>
+                                <label style="display: block; font-size: 0.78rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase;">Số điện thoại *</label>
+                                <input type="text" name="customerPhone" value="@Model.CustomerPhone" required
+                                       style="width: 100%; padding: 8px 12px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.88rem; outline: none;" />
+                            </div>
+
+                            <div>
+                                <label style="display: block; font-size: 0.78rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase;">Địa chỉ nhận hàng *</label>
+                                <input type="text" name="shippingAddress" value="@Model.ShippingAddress" required
+                                       style="width: 100%; padding: 8px 12px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.88rem; outline: none;" />
+                            </div>
+
+                            <div>
+                                <label style="display: block; font-size: 0.78rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase;">Tỉnh / Thành phố</label>
+                                <input type="text" name="city" value="@Model.City"
+                                       style="width: 100%; padding: 8px 12px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.88rem; outline: none;" />
+                            </div>
+
+                            <div>
+                                <label style="display: block; font-size: 0.78rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase;">Ghi chú nội bộ / Giao hàng</label>
+                                <textarea name="orderNotes" rows="2" style="width: 100%; padding: 8px 12px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.85rem; outline: none;">@Model.OrderNotes</textarea>
+                            </div>
+
+                            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px;">
+                                <button type="button" onclick="document.getElementById('editShippingModal').style.display='none'" class="btn-luxe-outline" style="padding: 8px 16px;">Hủy</button>
+                                <button type="submit" class="btn-luxe" style="padding: 8px 20px;">Lưu Thay Đổi</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
 
@@ -240,6 +324,17 @@
                         <input type="hidden" name="orderId" value="@Model.Id" />
                         <button type="submit" class="btn-luxe" style="width: 100%; padding: 10px; font-size: 0.88rem; background: #2A9D8F; border-color: #2A9D8F;">
                             <i class="fa-solid fa-hand-holding-dollar" style="margin-right: 6px;"></i> Xác Nhận Đã Thu Tiền COD
+                        </button>
+                    </form>
+                }
+
+                @if (Model.PaymentMethod == PaymentMethod.BankTransfer && Model.PaymentStatus != PaymentStatus.Completed)
+                {
+                    <form method="post" action="/admin/storemanager/confirmbanktransferpayment" style="margin-top: 10px;">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="orderId" value="@Model.Id" />
+                        <button type="submit" class="btn-luxe" style="width: 100%; padding: 10px; font-size: 0.88rem; background: #2A9D8F; border-color: #2A9D8F;" onclick="return confirm('Xác nhận đã nhận đủ tiền chuyển khoản cho đơn này?');">
+                            <i class="fa-solid fa-qrcode" style="margin-right: 6px;"></i> Xác Nhận Đã Nhận Chuyển Khoản VietQR
                         </button>
                     </form>
                 }

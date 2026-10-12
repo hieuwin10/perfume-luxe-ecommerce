@@ -1,0 +1,160 @@
+@model List<Perfume.Domain.Entities.FragranceNote>
+@{
+    ViewData["Title"] = "Quản Lý Nốt Hương (Fragrance Notes)";
+    Layout = "_AdminLayout";
+    string? search = ViewBag.Search;
+}
+
+<div style="max-width: 1300px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
+        <div>
+            <h1 style="font-size: 1.6rem; font-weight: 800; margin: 0 0 6px; color: var(--text-primary);">
+                <i class="fa-solid fa-leaf text-gold-gradient" style="margin-right: 8px;"></i> Nốt Hương Tinh Dầu (Fragrance Notes)
+            </h1>
+            <p style="color: var(--text-muted); margin: 0; font-size: 0.88rem;">
+                Kho nốt hương cấu thành kim tự tháp: Cam Bergamot, Gỗ tuyết tùng, Trầm hương Oud (Tổng: @Model.Count nốt hương)
+            </p>
+        </div>
+
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <!-- Search -->
+            <form method="get" action="/admin/catalogmanager/fragrancenotes" style="display: flex; gap: 8px; margin: 0;">
+                <input type="text" name="search" value="@search" placeholder="Tìm kiếm nốt hương..." 
+                       style="padding: 8px 14px; background: var(--bg-input, rgba(255,255,255,0.06)); border: 1px solid var(--border-card); border-radius: 8px; color: var(--text-primary); font-size: 0.88rem; width: 220px; outline: none;" />
+                <button type="submit" class="btn-luxe" style="padding: 8px 14px; font-size: 0.85rem;">Tìm</button>
+            </form>
+
+            <button onclick="openNoteModal(0, '', '', '')" class="btn-luxe" style="padding: 8px 18px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px;">
+                <i class="fa-solid fa-plus"></i> Thêm Nốt Hương
+            </button>
+        </div>
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+        <div style="background: rgba(230,57,70,0.12); border: 1px solid #e63946; border-radius: 8px; padding: 12px 18px; margin-bottom: 20px; color: #f87171; font-size: 0.9rem;">
+            <i class="fa-solid fa-triangle-exclamation" style="margin-right: 6px;"></i> @TempData["Error"]
+        </div>
+    }
+    @if (TempData["Success"] != null)
+    {
+        <div style="background: rgba(42,157,143,0.15); border: 1px solid #2A9D8F; border-radius: 8px; padding: 12px 18px; margin-bottom: 20px; color: #2A9D8F; font-size: 0.9rem;">
+            <i class="fa-solid fa-circle-check" style="margin-right: 6px;"></i> @TempData["Success"]
+        </div>
+    }
+
+    <!-- Notes Table -->
+    <div class="luxury-card" style="padding: 0; overflow: hidden;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem;">
+            <thead>
+                <tr style="background: var(--bg-surface-elevated); border-bottom: 1px solid var(--border-card); color: var(--text-muted); text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.05em;">
+                    <th style="padding: 12px 20px;">Nốt Hương</th>
+                    <th style="padding: 12px 20px;">Đường Dẫn (Slug)</th>
+                    <th style="padding: 12px 20px;">Mô Tả Hương Vị</th>
+                    <th style="padding: 12px 20px; text-align: center;">Số Chai Nước Hoa Dùng</th>
+                    <th style="padding: 12px 20px; text-align: right;">Hành Động</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var n in Model)
+                {
+                    <tr style="border-bottom: 1px solid var(--border-subtle);">
+                        <td style="padding: 12px 20px;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                @if (!string.IsNullOrWhiteSpace(n.ImageUrl))
+                                {
+                                    <img src="@n.ImageUrl" alt="@n.Name" style="width: 36px; height: 36px; border-radius: 6px; object-fit: cover; border: 1px solid var(--border-card);" />
+                                }
+                                else
+                                {
+                                    <div style="width: 36px; height: 36px; border-radius: 6px; background: rgba(212,175,55,0.1); border: 1px solid var(--border-card); display: flex; align-items: center; justify-content: center; color: var(--gold-primary);">
+                                        <i class="fa-solid fa-leaf" style="font-size: 0.85rem;"></i>
+                                    </div>
+                                }
+                                <div style="font-weight: 600; color: var(--text-primary);">@n.Name</div>
+                            </div>
+                        </td>
+                        <td style="padding: 12px 20px; color: var(--text-muted); font-size: 0.8rem;">
+                            <code>@n.Slug</code>
+                        </td>
+                        <td style="padding: 12px 20px; color: var(--text-secondary); max-width: 360px; font-size: 0.82rem;">
+                            @(n.Description ?? "Chưa có mô tả.")
+                        </td>
+                        <td style="padding: 12px 20px; text-align: center;">
+                            <span style="background: rgba(212,175,55,0.15); color: var(--gold-primary); padding: 4px 10px; border-radius: 12px; font-weight: 700; font-size: 0.78rem;">
+                                @n.ProductNotes.Count chai
+                            </span>
+                        </td>
+                        <td style="padding: 12px 20px; text-align: right; white-space: nowrap;">
+                            <button onclick="openNoteModal(@n.Id, '@n.Name', '@(n.ImageUrl ?? "")', '@(n.Description ?? "")')"
+                                    style="background: none; border: none; color: var(--gold-primary); cursor: pointer; padding: 4px; margin-right: 8px; font-size: 0.85rem;" title="Sửa">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                            <form method="post" action="/admin/catalogmanager/deletefragrancenote" style="display: inline; margin: 0;" onsubmit="return confirm('Bạn có chắc muốn xóa nốt hương này?');">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@n.Id" />
+                                <button type="submit" style="background: none; border: none; color: #f87171; cursor: pointer; padding: 4px; font-size: 0.85rem;" title="Xóa">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal Create / Edit Fragrance Note -->
+<div id="noteModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 2000; align-items: center; justify-content: center; padding: 20px;">
+    <div class="luxury-card" style="max-width: 500px; width: 100%; padding: 26px; border: 1px solid var(--gold-primary);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+            <h3 id="noteModalTitle" style="margin: 0; font-size: 1.2rem; color: var(--text-primary); font-weight: 700;">Thêm Nốt Hương Mới</h3>
+            <button onclick="closeNoteModal()" style="background: none; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer;">&times;</button>
+        </div>
+
+        <form method="post" action="/admin/catalogmanager/savefragrancenote">
+            @Html.AntiForgeryToken()
+            <input type="hidden" id="noteId" name="id" value="0" />
+
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+                <div>
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase;">Tên Nốt Hương *</label>
+                    <input type="text" id="noteName" name="name" required placeholder="vd: Cam Bergamot, Gỗ đàn hương..."
+                           style="width: 100%; padding: 10px 12px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.9rem; outline: none;" />
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase;">Hình Ảnh CDN Url</label>
+                    <input type="url" id="noteImage" name="imageUrl" placeholder="https://..."
+                           style="width: 100%; padding: 10px 12px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.9rem; outline: none;" />
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase;">Mô Tả Nốt Hương</label>
+                    <textarea id="noteDesc" name="description" rows="3" placeholder="Hương thơm tươi mát của cam quýt pha chút cay nhẹ của thảo mộc..."
+                              style="width: 100%; padding: 10px 12px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.85rem; outline: none;"></textarea>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+                    <button type="button" onclick="closeNoteModal()" class="btn-luxe-outline" style="padding: 8px 16px;">Hủy</button>
+                    <button type="submit" class="btn-luxe" style="padding: 8px 20px;">Lưu</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openNoteModal(id, name, image, desc) {
+        document.getElementById('noteId').value = id;
+        document.getElementById('noteName').value = name;
+        document.getElementById('noteImage').value = image;
+        document.getElementById('noteDesc').value = desc;
+        document.getElementById('noteModalTitle').innerText = id === 0 ? 'Thêm Nốt Hương Mới' : 'Sửa Nốt Hương';
+        document.getElementById('noteModal').style.display = 'flex';
+    }
+    function closeNoteModal() {
+        document.getElementById('noteModal').style.display = 'none';
+    }
+</script>

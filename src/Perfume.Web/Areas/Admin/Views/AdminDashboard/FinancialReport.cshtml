@@ -1,0 +1,424 @@
+@model Perfume.Web.Areas.Admin.Controllers.FinancialReportViewModel
+@{
+    ViewData["Title"] = "Báo Cáo Tài Chính P&L & Định Giá Kho";
+    Layout = "_AdminLayout";
+}
+
+<div style="max-width: 1400px; margin: 0 auto; padding-bottom: 60px;">
+    <!-- HEADER & EXPORT ACTIONS -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+        <div>
+            <span style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.2em; color: var(--gold-primary); font-weight: 700; display: block; margin-bottom: 4px;">
+                <i class="fa-solid fa-coins"></i> Executive Financial Analytics
+            </span>
+            <h1 style="font-size: 1.85rem; font-weight: 800; margin: 0; color: var(--text-primary);">
+                Báo Cáo Tài Chính P&amp;L &amp; Định Giá Kho Hàng
+            </h1>
+            <p style="color: var(--text-muted); margin: 4px 0 0; font-size: 0.88rem;">
+                Phân tích Doanh thu thuần, Giá vốn hàng bán (COGS), Biên lợi nhuận gộp và tổng giá trị tồn kho Haute Parfumerie.
+            </p>
+        </div>
+
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <a href="/admin/admindashboard/exportfinancialorderscsv?fromDate=@(Model.FromDate?.ToString("yyyy-MM-dd"))&toDate=@(Model.ToDate?.ToString("yyyy-MM-dd"))" class="btn-luxe-outline" style="padding: 8px 16px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-file-csv" style="color: #2A9D8F;"></i> Xuất CSV Đơn Hàng P&amp;L
+            </a>
+            <a href="/admin/admindashboard/exportinventoryvaluationcsv" class="btn-luxe" style="padding: 8px 18px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-file-excel"></i> Xuất CSV Định Giá Kho
+            </a>
+        </div>
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="luxury-card" style="padding: 16px 20px; margin-bottom: 24px; border: 1px solid var(--border-card); background: var(--bg-surface);">
+        <form method="get" action="/admin/admindashboard/financialreport" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+            <!-- Quick Presets -->
+            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                <a href="/admin/admindashboard/financialreport?preset=today" class="btn-preset @(Model.Preset == "today" ? "active" : "")">Hôm Nay</a>
+                <a href="/admin/admindashboard/financialreport?preset=7days" class="btn-preset @(Model.Preset == "7days" ? "active" : "")">7 Ngày Qua</a>
+                <a href="/admin/admindashboard/financialreport?preset=30days" class="btn-preset @(Model.Preset == "30days" ? "active" : "")">30 Ngày Qua</a>
+                <a href="/admin/admindashboard/financialreport?preset=thismonth" class="btn-preset @(Model.Preset == "thismonth" ? "active" : "")">Tháng Này</a>
+                <a href="/admin/admindashboard/financialreport?preset=thisyear" class="btn-preset @(Model.Preset == "thisyear" ? "active" : "")">Năm Nay</a>
+                <a href="/admin/admindashboard/financialreport?preset=all" class="btn-preset @(Model.Preset == "all" ? "active" : "")">Toàn Bộ</a>
+            </div>
+
+            <!-- Custom Date Range -->
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Từ:</span>
+                <input type="date" name="fromDate" value="@(Model.FromDate?.ToString("yyyy-MM-dd"))" style="background: var(--bg-surface-elevated); border: 1px solid var(--border-card); color: var(--text-primary); padding: 6px 10px; border-radius: 6px; font-size: 0.85rem; outline: none;" />
+                <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Đến:</span>
+                <input type="date" name="toDate" value="@(Model.ToDate?.ToString("yyyy-MM-dd"))" style="background: var(--bg-surface-elevated); border: 1px solid var(--border-card); color: var(--text-primary); padding: 6px 10px; border-radius: 6px; font-size: 0.85rem; outline: none;" />
+                <button type="submit" class="btn-luxe" style="padding: 6px 14px; font-size: 0.85rem;">
+                    <i class="fa-solid fa-filter"></i> Lọc
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- 4 MAIN KPI STAT CARDS -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; margin-bottom: 28px;">
+        <!-- Card 1: Doanh Thu Thuần -->
+        <div class="luxury-card stat-card" style="padding: 22px; border-left: 4px solid var(--gold-primary);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="font-size: 0.78rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em; font-weight: 600;">Doanh Thu Thuần (Net Sales)</span>
+                <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(212,175,55,0.15); display: flex; align-items: center; justify-content: center; color: var(--gold-primary);">
+                    <i class="fa-solid fa-sack-dollar"></i>
+                </div>
+            </div>
+            <div style="font-size: 1.85rem; font-weight: 800; color: var(--gold-primary);">
+                @Model.NetRevenue.ToString("N0") ₫
+            </div>
+            <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-subtle); font-size: 0.78rem; color: var(--text-muted); display: flex; justify-content: space-between;">
+                <span>Doanh số gộp: <strong style="color: var(--text-primary);">@Model.GrossSales.ToString("N0")₫</strong></span>
+                <span>Voucher: <strong style="color: #f87171;">-@Model.VoucherDiscounts.ToString("N0")₫</strong></span>
+            </div>
+        </div>
+
+        <!-- Card 2: Lợi Nhuận Gộp -->
+        <div class="luxury-card stat-card" style="padding: 22px; border-left: 4px solid #2A9D8F;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="font-size: 0.78rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em; font-weight: 600;">Lợi Nhuận Gộp (Gross Profit)</span>
+                <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(42,157,143,0.15); display: flex; align-items: center; justify-content: center; color: #2A9D8F;">
+                    <i class="fa-solid fa-chart-line-up"></i>
+                </div>
+            </div>
+            <div style="font-size: 1.85rem; font-weight: 800; color: #2A9D8F;">
+                @Model.GrossProfit.ToString("N0") ₫
+            </div>
+            <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-subtle); font-size: 0.78rem; color: var(--text-muted); display: flex; justify-content: space-between;">
+                <span>Biên lợi nhuận gộp:</span>
+                <strong style="color: #2A9D8F; font-size: 0.88rem;">@Model.GrossMarginPercent.ToString("F1")%</strong>
+            </div>
+        </div>
+
+        <!-- Card 3: Giá Vốn COGS -->
+        <div class="luxury-card stat-card" style="padding: 22px; border-left: 4px solid #f87171;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="font-size: 0.78rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em; font-weight: 600;">Giá Vốn Hàng Bán (COGS)</span>
+                <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(248,113,113,0.15); display: flex; align-items: center; justify-content: center; color: #f87171;">
+                    <i class="fa-solid fa-receipt"></i>
+                </div>
+            </div>
+            <div style="font-size: 1.85rem; font-weight: 800; color: #f87171;">
+                @Model.TotalCogs.ToString("N0") ₫
+            </div>
+            <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-subtle); font-size: 0.78rem; color: var(--text-muted); display: flex; justify-content: space-between;">
+                <span>Số đơn hoàn tất: <strong style="color: var(--text-primary);">@Model.TotalOrdersCount đơn</strong></span>
+                <span>AOV: <strong style="color: var(--gold-primary);">@Model.AverageOrderValue.ToString("N0")₫</strong></span>
+            </div>
+        </div>
+
+        <!-- Card 4: Định Giá Kho -->
+        <div class="luxury-card stat-card" style="padding: 22px; border-left: 4px solid #c084fc;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="font-size: 0.78rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em; font-weight: 600;">Định Giá Kho Theo Giá Vốn</span>
+                <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(192,132,252,0.15); display: flex; align-items: center; justify-content: center; color: #c084fc;">
+                    <i class="fa-solid fa-warehouse"></i>
+                </div>
+            </div>
+            <div style="font-size: 1.85rem; font-weight: 800; color: #c084fc;">
+                @Model.TotalInventoryCostValue.ToString("N0") ₫
+            </div>
+            <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-subtle); font-size: 0.78rem; color: var(--text-muted); display: flex; justify-content: space-between;">
+                <span>Tồn kho: <strong style="color: var(--text-primary);">@Model.TotalStockQuantity chai</strong></span>
+                <span>Giá bán lẻ: <strong style="color: var(--gold-primary);">@Model.TotalInventoryRetailValue.ToString("N0")₫</strong></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- CHARTS SECTION -->
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 28px;" id="chartsGrid">
+        <!-- Daily Revenue & Profit Trend Chart -->
+        <div class="luxury-card" style="padding: 22px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+                <h3 style="margin: 0; font-size: 1.05rem; font-weight: 700; color: var(--text-primary);">
+                    <i class="fa-solid fa-chart-line text-gold-gradient" style="margin-right: 8px;"></i> Xu Hướng Doanh Thu &amp; Lợi Nhuận Gộp (14 Ngày)
+                </h3>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">Đơn vị: VNĐ</span>
+            </div>
+            <div style="height: 280px; position: relative;">
+                <canvas id="trendChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Scent Family Revenue Share -->
+        <div class="luxury-card" style="padding: 22px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+                <h3 style="margin: 0; font-size: 1.05rem; font-weight: 700; color: var(--text-primary);">
+                    <i class="fa-solid fa-chart-pie text-gold-gradient" style="margin-right: 8px;"></i> Cơ Cấu Theo Nhóm Hương
+                </h3>
+            </div>
+            <div style="height: 280px; position: relative;">
+                <canvas id="familyPieChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- INVENTORY VALUATION BY BRAND -->
+    <div class="luxury-card" style="padding: 0; overflow: hidden; margin-bottom: 28px;">
+        <div style="padding: 18px 24px; border-bottom: 1px solid var(--border-card); background: var(--bg-surface-elevated); display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h3 style="margin: 0; font-size: 1.1rem; font-weight: 700; color: var(--text-primary);">
+                    <i class="fa-solid fa-tags text-gold-gradient" style="margin-right: 8px;"></i> Định Giá Tồn Kho Theo Thương Hiệu Hàng Đầu
+                </h3>
+                <span style="font-size: 0.78rem; color: var(--text-muted);">Đánh giá vốn tồn đọng và tiềm năng lợi nhuận gộp theo từng nhà pha chế</span>
+            </div>
+            <a href="/admin/admindashboard/exportinventoryvaluationcsv" class="btn-luxe-outline" style="padding: 4px 12px; font-size: 0.78rem;">
+                <i class="fa-solid fa-download"></i> Tải toàn bộ kho
+            </a>
+        </div>
+
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem;">
+                <thead>
+                    <tr style="border-bottom: 1px solid var(--border-card); color: var(--text-muted); text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.05em;">
+                        <th style="padding: 12px 24px;">Thương Hiệu</th>
+                        <th style="padding: 12px 24px; text-align: center;">Tồn Kho (Chai)</th>
+                        <th style="padding: 12px 24px; text-align: right;">Giá Trị Vốn</th>
+                        <th style="padding: 12px 24px; text-align: right;">Giá Trị Niêm Yết</th>
+                        <th style="padding: 12px 24px; text-align: right;">Lợi Nhuận Tiềm Năng</th>
+                        <th style="padding: 12px 24px; text-align: right;">Biên Lãi Kho</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var b in Model.BrandValuations)
+                    {
+                        var brandMargin = b.TotalRetailValue > 0 ? Math.Round((double)b.PotentialProfit / (double)b.TotalRetailValue * 100, 1) : 0;
+                        <tr style="border-bottom: 1px solid var(--border-subtle);">
+                            <td style="padding: 14px 24px; font-weight: 700; color: var(--text-primary);">
+                                @b.BrandName
+                            </td>
+                            <td style="padding: 14px 24px; text-align: center; font-weight: 600;">
+                                @b.TotalUnits
+                            </td>
+                            <td style="padding: 14px 24px; text-align: right; color: var(--text-secondary);">
+                                @b.TotalCostValue.ToString("N0") ₫
+                            </td>
+                            <td style="padding: 14px 24px; text-align: right; font-weight: 600; color: var(--text-primary);">
+                                @b.TotalRetailValue.ToString("N0") ₫
+                            </td>
+                            <td style="padding: 14px 24px; text-align: right; font-weight: 700; color: #2A9D8F;">
+                                +@b.PotentialProfit.ToString("N0") ₫
+                            </td>
+                            <td style="padding: 14px 24px; text-align: right;">
+                                <span style="background: rgba(42,157,143,0.15); color: #2A9D8F; border: 1px solid rgba(42,157,143,0.3); padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 0.78rem;">
+                                    @brandMargin%
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- P&L ORDERS AUDIT TABLE -->
+    <div class="luxury-card" style="padding: 0; overflow: hidden;">
+        <div style="padding: 18px 24px; border-bottom: 1px solid var(--border-card); background: var(--bg-surface-elevated); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div>
+                <h3 style="margin: 0; font-size: 1.1rem; font-weight: 700; color: var(--text-primary);">
+                    <i class="fa-solid fa-file-invoice-dollar text-gold-gradient" style="margin-right: 8px;"></i> Bảng Kê Chi Tiết P&amp;L Từng Đơn Hàng (@Model.OrderEntries.Count đơn)
+                </h3>
+                <span style="font-size: 0.78rem; color: var(--text-muted);">Đối soát giá vốn thực tế &amp; lợi nhuận ròng của từng đơn hàng trong kỳ</span>
+            </div>
+            <a href="/admin/admindashboard/exportfinancialorderscsv?fromDate=@(Model.FromDate?.ToString("yyyy-MM-dd"))&toDate=@(Model.ToDate?.ToString("yyyy-MM-dd"))" class="btn-luxe" style="padding: 6px 14px; font-size: 0.8rem;">
+                <i class="fa-solid fa-file-csv"></i> Tải bảng kê CSV
+            </a>
+        </div>
+
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.86rem;">
+                <thead>
+                    <tr style="border-bottom: 1px solid var(--border-card); color: var(--text-muted); text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.05em;">
+                        <th style="padding: 12px 20px;">Mã Đơn</th>
+                        <th style="padding: 12px 20px;">Thời Gian</th>
+                        <th style="padding: 12px 20px;">Khách Hàng</th>
+                        <th style="padding: 12px 20px;">Hình Thức</th>
+                        <th style="padding: 12px 20px; text-align: right;">Doanh Thu Thuần</th>
+                        <th style="padding: 12px 20px; text-align: right;">Giá Vốn COGS</th>
+                        <th style="padding: 12px 20px; text-align: right;">Lợi Nhuận Gộp</th>
+                        <th style="padding: 12px 20px; text-align: right;">Biên Lãi</th>
+                        <th style="padding: 12px 20px; text-align: center;">Thao Tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.OrderEntries.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="9" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                                <i class="fa-solid fa-inbox" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                                Không có đơn hàng hoàn tất nào trong khoảng thời gian đã chọn.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var o in Model.OrderEntries)
+                        {
+                            <tr style="border-bottom: 1px solid var(--border-subtle);">
+                                <td style="padding: 12px 20px; font-family: monospace; font-weight: 700; color: var(--gold-primary);">
+                                    @o.OrderCode
+                                </td>
+                                <td style="padding: 12px 20px; color: var(--text-muted); font-size: 0.8rem;">
+                                    @o.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                                </td>
+                                <td style="padding: 12px 20px; font-weight: 600; color: var(--text-primary);">
+                                    @o.CustomerName
+                                </td>
+                                <td style="padding: 12px 20px;">
+                                    <span style="font-size: 0.75rem; background: rgba(255,255,255,0.06); padding: 2px 8px; border-radius: 4px; border: 1px solid var(--border-subtle);">
+                                        @(o.PaymentMethod == "BankTransfer" ? "VietQR" : "COD")
+                                    </span>
+                                </td>
+                                <td style="padding: 12px 20px; text-align: right; font-weight: 700; color: var(--text-primary);">
+                                    @o.TotalAmount.ToString("N0") ₫
+                                </td>
+                                <td style="padding: 12px 20px; text-align: right; color: #f87171;">
+                                    @o.EstimatedCogs.ToString("N0") ₫
+                                </td>
+                                <td style="padding: 12px 20px; text-align: right; font-weight: 700; color: #2A9D8F;">
+                                    +@o.GrossProfit.ToString("N0") ₫
+                                </td>
+                                <td style="padding: 12px 20px; text-align: right; font-weight: 700; color: var(--gold-primary);">
+                                    @o.MarginPercent.ToString("F1")%
+                                </td>
+                                <td style="padding: 12px 20px; text-align: center;">
+                                    <a href="/admin/admindashboard/orderdetails/@o.OrderId" class="btn-luxe-outline" style="padding: 4px 10px; font-size: 0.75rem;">
+                                        Xem
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Trend Line/Bar Chart
+        const trendLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.DailyChartLabels));
+        const revenueData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.DailyRevenueData));
+        const profitData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.DailyProfitData));
+
+        const trendCtx = document.getElementById('trendChart')?.getContext('2d');
+        if (trendCtx) {
+            new Chart(trendCtx, {
+                type: 'line',
+                data: {
+                    labels: trendLabels,
+                    datasets: [
+                        {
+                            label: 'Doanh Thu Thuần',
+                            data: revenueData,
+                            borderColor: '#D4AF37',
+                            backgroundColor: 'rgba(212, 175, 55, 0.15)',
+                            fill: true,
+                            tension: 0.35,
+                            borderWidth: 2
+                        },
+                        {
+                            label: 'Lợi Nhuận Gộp',
+                            data: profitData,
+                            borderColor: '#2A9D8F',
+                            backgroundColor: 'rgba(42, 157, 143, 0.15)',
+                            fill: true,
+                            tension: 0.35,
+                            borderWidth: 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#bbb', font: { size: 12 } }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#888' }
+                        },
+                        y: {
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: {
+                                color: '#888',
+                                callback: val => (val / 1000000).toFixed(1) + 'M'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Family Pie Chart
+        const familyLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.FamilyChartLabels.Count > 0 ? Model.FamilyChartLabels : new List<string> { "Woody", "Oriental", "Floral", "Fresh", "Gourmand" }));
+        const familyData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.FamilyChartData.Count > 0 ? Model.FamilyChartData : new List<decimal> { 4500000, 3200000, 2800000, 1900000, 1200000 }));
+
+        const familyCtx = document.getElementById('familyPieChart')?.getContext('2d');
+        if (familyCtx) {
+            new Chart(familyCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: familyLabels,
+                    datasets: [{
+                        data: familyData,
+                        backgroundColor: [
+                            '#D4AF37', '#2A9D8F', '#E76F51', '#457B9D', '#A855F7'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#111116'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#bbb', font: { size: 11 }, padding: 12 }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+}
+
+@section Styles {
+    <style>
+        .btn-preset {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            background: var(--bg-surface-elevated);
+            border: 1px solid var(--border-card);
+            transition: all 0.2s;
+        }
+        .btn-preset:hover, .btn-preset.active {
+            color: #000;
+            background: var(--gold-primary);
+            border-color: var(--gold-primary);
+            font-weight: 700;
+        }
+        .stat-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+        @@media (max-width: 992px) {
+            #chartsGrid {
+                grid-template-columns: 1fr !important;
+            }
+        }
+    </style>
+}

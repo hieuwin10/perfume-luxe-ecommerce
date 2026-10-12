@@ -302,7 +302,9 @@ public sealed class CustomerApiController : ControllerBase
             City = request.City?.Trim(),
             OrderNotes = request.OrderNotes?.Trim(),
             VoucherCode = request.VoucherCode?.Trim(),
-            PaymentMethod = PaymentMethod.COD,
+            PaymentMethod = request.PaymentMethod,
+            IsGiftWrapping = request.IsGiftWrapping,
+            GiftMessage = request.GiftMessage?.Trim(),
             Items = cart.Items.Select(i => new CartItemDto { ProductId = i.ProductId, VariantId = i.VariantId, Quantity = i.Quantity }).ToList()
         };
         var (success, error, order) = await _orders.PlaceOrderAsync(checkout, userId);
@@ -317,13 +319,14 @@ public sealed class CustomerApiController : ControllerBase
             trackingUrl = Url.Action("Success", "Checkout", new { token = trackingToken }, Request.Scheme);
         }
         await _email.SendOrderConfirmationAsync(order, trackingUrl);
+        var targetAction = order.PaymentMethod == PaymentMethod.BankTransfer ? "VietQR" : "Success";
         var response = new GuestOrderResponse
         {
             Order = ToOrderDto(order),
             TrackingToken = trackingToken,
             SuccessUrl = order.UserId == null
-                ? Url.Action("Success", "Checkout", new { token = trackingToken }, Request.Scheme)
-                : Url.Action("Success", "Checkout", new { orderCode = order.OrderCode }, Request.Scheme)
+                ? Url.Action(targetAction, "Checkout", new { token = trackingToken }, Request.Scheme)
+                : Url.Action(targetAction, "Checkout", new { orderCode = order.OrderCode }, Request.Scheme)
         };
         return Ok(response);
     }
@@ -503,6 +506,9 @@ public sealed class CustomerApiController : ControllerBase
         DiscountAmount = order.DiscountAmount,
         ShippingFee = order.ShippingFee,
         TotalAmount = order.TotalAmount,
+        IsGiftWrapping = order.IsGiftWrapping,
+        GiftWrappingFee = order.GiftWrappingFee,
+        GiftMessage = order.GiftMessage,
         CustomerName = order.CustomerName,
         CustomerPhone = order.CustomerPhone,
         CustomerEmail = order.CustomerEmail,

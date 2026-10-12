@@ -62,7 +62,10 @@
                     <li><a href="/catalog/quiz" class="nav-link" style="color: var(--gold-primary);"><i class="fa-solid fa-wand-magic-sparkles" style="margin-right: 4px;"></i> Trắc Nghiệm Mùi</a></li>
                     <li><a href="/blog" class="nav-link">Tạp Chí Mùi Hương</a></li>
                     <li><a href="/ve-chung-toi" class="nav-link">Về Chúng Tôi</a></li>
-                    <li><a href="/boutique" class="nav-link"><i class="fa-solid fa-store" style="margin-right: 4px; color: var(--gold-primary);"></i> Boutique</a></li>
+                    <li><a href="/discovery-box" class="nav-link" style="color: var(--gold-primary);"><i class="fa-solid fa-gift" style="margin-right: 4px;"></i> Discovery Box</a></li>
+                    <li><a href="/so-sanh" class="nav-link"><i class="fa-solid fa-scale-balanced" style="margin-right: 4px;"></i> So Sánh</a></li>
+                    <li><a href="/dat-lich-trai-nghiem" class="nav-link"><i class="fa-solid fa-crown" style="margin-right: 4px; color: var(--gold-primary);"></i> Thử Mùi VIP</a></li>
+                    <li><a href="/tra-cuu-don-hang" class="nav-link" style="color: var(--gold-primary);"><i class="fa-solid fa-truck-fast" style="margin-right: 4px;"></i> Tra Cứu Đơn</a></li>
 
                     @if (SignInManager.IsSignedIn(User))
                     {
@@ -110,6 +113,7 @@
                                 <i class="fa-solid fa-user-circle"></i> Tài Khoản Của Tôi
                             </a>
                             <a href="/account/myorders" class="dropdown-item-luxe"><i class="fa-solid fa-box"></i> Đơn hàng của tôi</a>
+                            <a href="/tra-cuu-don-hang" class="dropdown-item-luxe"><i class="fa-solid fa-truck-fast"></i> Tra Cứu Đơn Hàng</a>
                             @if (User.IsInRole("Admin"))
                             {
                                 <a href="/admin/admindashboard" class="dropdown-item-luxe"><i class="fa-solid fa-gauge-high"></i> Admin Dashboard</a>
@@ -199,6 +203,7 @@
             <div>
                 <h4 style="font-size: 1.15rem; margin-bottom: 20px; color: var(--gold-primary);">Chính Sách & Hỗ Trợ</h4>
                 <ul style="list-style: none; display: flex; flex-direction: column; gap: 10px; font-size: 0.9rem; color: var(--text-secondary);">
+                    <li><a href="/tra-cuu-don-hang" class="nav-link"><i class="fa-solid fa-truck-fast" style="color: var(--gold-primary); width: 18px;"></i> Tra Cứu Hành Trình Đơn</a></li>
                     <li><a href="/chinh-sach-doi-tra" class="nav-link"><i class="fa-solid fa-shield-halved" style="color: var(--gold-primary); width: 18px;"></i> Đổi Trả 7 Ngày & Hoàn 200%</a></li>
                     <li><a href="/huong-dan-mua-hang" class="nav-link"><i class="fa-solid fa-cart-shopping" style="color: var(--gold-primary); width: 18px;"></i> Hướng Dẫn Mua Hàng & COD</a></li>
                     <li><a href="/privacy" class="nav-link"><i class="fa-solid fa-lock" style="color: var(--gold-primary); width: 18px;"></i> Chính Sách Bảo Mật Dữ Liệu</a></li>

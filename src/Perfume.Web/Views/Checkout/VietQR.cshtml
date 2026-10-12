@@ -1,0 +1,201 @@
+@model Perfume.Domain.Entities.Order
+@{
+    ViewData["Title"] = $"Thanh Toán Chuyển Khoản VietQR - {Model.OrderCode}";
+    var qrUrl = ViewBag.QrUrl as string ?? "";
+    var bankName = ViewBag.BankName as string ?? "Vietcombank";
+    var bankCode = ViewBag.BankCode as string ?? "VCB";
+    var accountNumber = ViewBag.AccountNumber as string ?? "9988776655";
+    var accountName = ViewBag.AccountName as string ?? "CONG TY CP PERFUME LUXE";
+    var amount = ViewBag.Amount as decimal? ?? Model.TotalAmount;
+    var token = ViewBag.Token as string;
+    var orderCode = Model.OrderCode;
+}
+
+<div style="max-width: 900px; margin: 40px auto 80px; padding: 0 20px;">
+    <!-- HEADER -->
+    <div style="text-align: center; margin-bottom: 32px;">
+        <span style="font-size: 0.8rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold-primary); font-weight: 700; display: inline-block; margin-bottom: 8px;">
+            <i class="fa-solid fa-qrcode" style="margin-right: 6px;"></i> Cổng Thanh Toán Trực Tuyến Tự Động
+        </span>
+        <h1 style="font-size: clamp(1.8rem, 4vw, 2.4rem); font-family: var(--font-heading); font-weight: 700; margin: 0 0 10px; color: var(--text-primary);">
+            Quét Mã VietQR Napas247
+        </h1>
+        <p style="color: var(--text-secondary); max-width: 620px; margin: 0 auto; font-size: 0.95rem; line-height: 1.6;">
+            Sử dụng ứng dụng ngân hàng bất kỳ (Mobile Banking) hoặc ví điện tử để quét mã thanh toán tức thì 24/7. Hệ thống tự động ghi nhận thanh toán sau khi giao dịch thành công.
+        </p>
+    </div>
+
+    <!-- MAIN CARD -->
+    <div style="display: grid; grid-template-columns: 340px 1fr; gap: 32px; background: var(--bg-surface); border: 1px solid var(--border-card); border-radius: var(--radius-md); padding: 32px; box-shadow: var(--shadow-luxury); align-items: start;" id="vietqrGrid">
+        <!-- LEFT: QR CODE & COUNTDOWN -->
+        <div style="display: flex; flex-direction: column; align-items: center; text-align: center; background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 24px;">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 16px;">
+                <span style="font-weight: 800; color: #2A9D8F; font-size: 1.1rem; letter-spacing: 0.05em;">Viet<span style="color: #E63946;">QR</span></span>
+                <span style="color: var(--border-card);">|</span>
+                <span style="font-weight: 700; color: var(--text-muted); font-size: 0.85rem;">NAPAS 247</span>
+            </div>
+
+            <!-- QR IMAGE WRAPPER -->
+            <div style="position: relative; background: #fff; padding: 12px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.3); margin-bottom: 16px;">
+                <img src="@qrUrl" alt="Mã thanh toán VietQR" style="width: 250px; height: 250px; display: block; border-radius: 6px; object-fit: contain;" id="qrImage" />
+                <div style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); background: var(--gold-primary); color: #000; font-size: 0.7rem; font-weight: 700; padding: 2px 10px; border-radius: 99px; white-space: nowrap; box-shadow: 0 2px 6px rgba(0,0,0,0.4);">
+                    <i class="fa-solid fa-bolt"></i> Quét nhanh Napas247
+                </div>
+            </div>
+
+            <!-- COUNTDOWN TIMER -->
+            <div style="margin-top: 10px; width: 100%;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.78rem; color: var(--text-muted); margin-bottom: 4px;">
+                    <span>Thời gian giữ mã QR:</span>
+                    <strong style="color: var(--gold-primary); font-family: monospace; font-size: 0.95rem;" id="timerDisplay">14:59</strong>
+                </div>
+                <div style="height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden;">
+                    <div id="timerBar" style="height: 100%; width: 100%; background: linear-gradient(90deg, var(--gold-primary), #52B788); transition: width 1s linear;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: TRANSFER DETAILS & ACTION -->
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            <div style="border-bottom: 1px solid var(--border-card); padding-bottom: 16px;">
+                <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.08em; font-weight: 600;">Thông Tin Chuyển Khoản Chính Xác</span>
+                <div style="font-size: 1.6rem; font-weight: 800; color: var(--gold-primary); margin-top: 4px;">
+                    @amount.ToString("N0") ₫
+                </div>
+                <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 2px;">
+                    Đơn hàng: <strong style="color: var(--text-primary);">@orderCode</strong>
+                </div>
+            </div>
+
+            <!-- DETAIL ROWS WITH ONE-CLICK COPY -->
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <!-- Row 1: Ngân Hàng -->
+                <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-surface-elevated); padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+                    <div>
+                        <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Ngân Hàng Thụ Hưởng</div>
+                        <div style="font-weight: 700; color: var(--text-primary); font-size: 0.92rem; margin-top: 2px;">@bankName</div>
+                    </div>
+                    <span style="font-size: 0.78rem; background: rgba(212,175,55,0.12); color: var(--gold-primary); border: 1px solid rgba(212,175,55,0.3); padding: 3px 8px; border-radius: 4px; font-weight: 700;">@bankCode</span>
+                </div>
+
+                <!-- Row 2: Số Tài Khoản -->
+                <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-surface-elevated); padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+                    <div>
+                        <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Số Tài Khoản</div>
+                        <div style="font-weight: 800; font-family: monospace; color: var(--gold-primary); font-size: 1.15rem; margin-top: 2px;" id="valAcc">@accountNumber</div>
+                    </div>
+                    <button type="button" onclick="copyText('@accountNumber', this)" class="btn-luxe-outline" style="padding: 6px 12px; font-size: 0.75rem;">
+                        <i class="fa-solid fa-copy"></i> Sao chép
+                    </button>
+                </div>
+
+                <!-- Row 3: Tên Người Thụ Hưởng -->
+                <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-surface-elevated); padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+                    <div>
+                        <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Tên Chủ Tài Khoản</div>
+                        <div style="font-weight: 700; color: var(--text-primary); font-size: 0.92rem; margin-top: 2px;">@accountName</div>
+                    </div>
+                    <i class="fa-solid fa-shield-halved" style="color: #2A9D8F; font-size: 1.1rem;" title="Tài khoản doanh nghiệp đã định danh"></i>
+                </div>
+
+                <!-- Row 4: Số Tiền -->
+                <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-surface-elevated); padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+                    <div>
+                        <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Số Tiền Chuyển</div>
+                        <div style="font-weight: 800; color: #52B788; font-size: 1.05rem; margin-top: 2px;">@amount.ToString("N0") ₫</div>
+                    </div>
+                    <button type="button" onclick="copyText('@Convert.ToInt64(amount)', this)" class="btn-luxe-outline" style="padding: 6px 12px; font-size: 0.75rem;">
+                        <i class="fa-solid fa-copy"></i> Sao chép
+                    </button>
+                </div>
+
+                <!-- Row 5: Nội Dung Chuyển Khoản (QUAN TRỌNG) -->
+                <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(212,175,55,0.08); padding: 12px 16px; border-radius: var(--radius-sm); border: 1px dashed var(--gold-primary);">
+                    <div>
+                        <div style="font-size: 0.72rem; color: var(--gold-primary); text-transform: uppercase; font-weight: 700;">Nội Dung Chuyển Khoản *</div>
+                        <div style="font-weight: 800; font-family: monospace; color: var(--text-primary); font-size: 1.15rem; margin-top: 2px;">@orderCode</div>
+                    </div>
+                    <button type="button" onclick="copyText('@orderCode', this)" class="btn-luxe" style="padding: 6px 14px; font-size: 0.75rem;">
+                        <i class="fa-solid fa-copy"></i> Sao chép mã
+                    </button>
+                </div>
+            </div>
+
+            <!-- NOTICE -->
+            <div style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; background: rgba(255,255,255,0.02); padding: 10px 14px; border-radius: 6px; border-left: 3px solid var(--gold-primary);">
+                <i class="fa-solid fa-circle-info" style="color: var(--gold-primary); margin-right: 6px;"></i>
+                Vui lòng giữ nguyên <strong>Nội dung chuyển khoản</strong> để đơn hàng được duyệt tự động ngay khi tiền vào tài khoản.
+            </div>
+
+            <!-- CONFIRM BUTTON FORM -->
+            <form asp-action="ConfirmBankTransfer" method="post" id="confirmTransferForm" style="margin-top: 8px;">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="orderCode" value="@orderCode" />
+                @if (!string.IsNullOrEmpty(token))
+                {
+                    <input type="hidden" name="token" value="@token" />
+                }
+
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <button type="submit" class="btn-luxe" style="width: 100%; padding: 14px; font-size: 1rem; font-weight: 700; letter-spacing: 0.03em; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <i class="fa-solid fa-circle-check"></i> Tôi Đã Chuyển Khoản Thành Công
+                    </button>
+
+                    <a href="@(string.IsNullOrEmpty(token) ? $"/checkout/success?orderCode={orderCode}" : $"/checkout/success?token={token}")" class="btn-luxe-outline" style="text-align: center; padding: 10px; font-size: 0.85rem;">
+                        Thanh toán sau &bull; Xem chi tiết đơn hàng
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function copyText(val, btn) {
+            navigator.clipboard.writeText(val).then(() => {
+                const original = btn.innerHTML;
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Đã sao chép!';
+                btn.style.borderColor = '#52B788';
+                btn.style.color = '#52B788';
+                setTimeout(() => {
+                    btn.innerHTML = original;
+                    btn.style.borderColor = '';
+                    btn.style.color = '';
+                }, 2000);
+            });
+        }
+
+        // Countdown timer 15 mins
+        let timeLeft = 15 * 60;
+        const totalTime = 15 * 60;
+        const timerDisplay = document.getElementById('timerDisplay');
+        const timerBar = document.getElementById('timerBar');
+
+        const interval = setInterval(() => {
+            timeLeft--;
+            if (timeLeft <= 0) {
+                clearInterval(interval);
+                timerDisplay.innerText = '00:00 (Hết hạn)';
+                timerBar.style.width = '0%';
+                return;
+            }
+            const mins = Math.floor(timeLeft / 60);
+            const secs = timeLeft % 60;
+            timerDisplay.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            timerBar.style.width = `${(timeLeft / totalTime) * 100}%`;
+        }, 1000);
+    </script>
+}
+
+@section Styles {
+    <style>
+        @@media (max-width: 768px) {
+            #vietqrGrid {
+                grid-template-columns: 1fr !important;
+                gap: 24px !important;
+                padding: 20px !important;
+            }
+        }
+    </style>
+}

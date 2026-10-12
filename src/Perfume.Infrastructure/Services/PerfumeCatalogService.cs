@@ -110,8 +110,26 @@ public class PerfumeCatalogService : IPerfumeCatalogService
                 .ThenInclude(fn => fn.FragranceNote)
             .FirstOrDefaultAsync(p => p.Slug == slug);
 
-        if (product == null) return null;
+        return product == null ? null : MapToProductDetailDto(product);
+    }
 
+    public async Task<ProductDetailDto?> GetProductByIdAsync(int id)
+    {
+        var product = await _context.Products
+            .Include(p => p.Brand)
+            .Include(p => p.Category)
+            .Include(p => p.FragranceFamily)
+            .Include(p => p.Variants.OrderBy(v => v.VolumeMl))
+            .Include(p => p.Images.OrderBy(i => i.DisplayOrder))
+            .Include(p => p.FragranceNotes)
+                .ThenInclude(fn => fn.FragranceNote)
+            .FirstOrDefaultAsync(p => p.Id == id);
+
+        return product == null ? null : MapToProductDetailDto(product);
+    }
+
+    private static ProductDetailDto MapToProductDetailDto(Product product)
+    {
         return new ProductDetailDto
         {
             Id = product.Id,

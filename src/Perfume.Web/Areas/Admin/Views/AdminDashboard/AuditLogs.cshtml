@@ -1,0 +1,173 @@
+@model Perfume.Web.Areas.Admin.Controllers.AuditLogsViewModel
+@{
+    ViewData["Title"] = "Trung Tâm Nhật Ký Kiểm Toán (Audit Logs)";
+    Layout = "_AdminLayout";
+}
+
+<div style="max-width: 1400px; margin: 0 auto; padding-bottom: 60px;">
+    <!-- HEADER -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
+        <div>
+            <span style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.2em; color: var(--gold-primary); font-weight: 700; display: block; margin-bottom: 4px;">
+                <i class="fa-solid fa-clipboard-check"></i> Enterprise Security &amp; Compliance
+            </span>
+            <h1 style="font-size: 1.85rem; font-weight: 800; margin: 0; color: var(--text-primary);">
+                Trung Tâm Nhật Ký Kiểm Toán Hệ Thống (Audit Logs)
+            </h1>
+            <p style="color: var(--text-muted); margin: 4px 0 0; font-size: 0.88rem;">
+                Theo dõi và truy vết mọi thao tác can thiệp dữ liệu, thực thi câu lệnh SQL, điều chỉnh kho và sao lưu hệ thống.
+            </p>
+        </div>
+        <span style="background: rgba(212,175,55,0.15); border: 1px solid var(--gold-primary); color: var(--gold-primary); padding: 8px 18px; border-radius: 20px; font-size: 0.88rem; font-weight: 700;">
+            <i class="fa-solid fa-database" style="margin-right: 6px;"></i> Tổng: @Model.TotalCount sự kiện ghi nhận
+        </span>
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="luxury-card" style="padding: 18px 24px; margin-bottom: 24px; border: 1px solid var(--border-card); background: var(--bg-surface);">
+        <form method="get" action="/admin/admindashboard/auditlogs" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                <div>
+                    <label style="display: block; font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; font-weight: 600;">Hành Động (Action)</label>
+                    <select name="actionFilter" style="background: var(--bg-surface-elevated); border: 1px solid var(--border-card); color: var(--text-primary); padding: 7px 12px; border-radius: 6px; font-size: 0.85rem; outline: none;">
+                        <option value="">-- Tất cả hành động --</option>
+                        <option value="DATABASE_BACKUP" selected="@(Model.ActionFilter == "DATABASE_BACKUP")">DATABASE_BACKUP (Sao lưu DB)</option>
+                        <option value="SQL_QUERY" selected="@(Model.ActionFilter == "SQL_QUERY")">SQL_QUERY (Truy vấn DB)</option>
+                        <option value="SQL_SCRIPT" selected="@(Model.ActionFilter == "SQL_SCRIPT")">SQL_SCRIPT (Chạy script SQL)</option>
+                        <option value="ROW_SAVE" selected="@(Model.ActionFilter == "ROW_SAVE")">ROW_SAVE (Lưu/Sửa dữ liệu)</option>
+                        <option value="ROW_DELETE" selected="@(Model.ActionFilter == "ROW_DELETE")">ROW_DELETE (Xóa dữ liệu)</option>
+                        <option value="SEED_SCRIPT" selected="@(Model.ActionFilter == "SEED_SCRIPT")">SEED_SCRIPT (Nạp seed data)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; font-weight: 600;">Trạng Thái</label>
+                    <select name="succeededFilter" style="background: var(--bg-surface-elevated); border: 1px solid var(--border-card); color: var(--text-primary); padding: 7px 12px; border-radius: 6px; font-size: 0.85rem; outline: none;">
+                        <option value="">-- Tất cả kết quả --</option>
+                        <option value="true" selected="@(Model.SucceededFilter == true)">Thành Công (Success)</option>
+                        <option value="false" selected="@(Model.SucceededFilter == false)">Thất Bại (Failed)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; font-weight: 600;">Actor (User ID)</label>
+                    <input type="text" name="actorFilter" value="@Model.ActorFilter" placeholder="Tìm theo ID..." style="background: var(--bg-surface-elevated); border: 1px solid var(--border-card); color: var(--text-primary); padding: 7px 12px; border-radius: 6px; font-size: 0.85rem; outline: none; width: 180px;" />
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; align-self: flex-end;">
+                <button type="submit" class="btn-luxe" style="padding: 8px 18px; font-size: 0.85rem;">
+                    <i class="fa-solid fa-filter"></i> Lọc Nhật Ký
+                </button>
+                <a href="/admin/admindashboard/auditlogs" class="btn-luxe-outline" style="padding: 8px 14px; font-size: 0.85rem;">
+                    Đặt lại
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- AUDIT LOGS TABLE -->
+    <div class="luxury-card" style="padding: 0; overflow: hidden; margin-bottom: 24px;">
+        <div style="padding: 16px 20px; border-bottom: 1px solid var(--border-card); background: var(--bg-surface-elevated); display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="margin: 0; font-size: 1.05rem; font-weight: 700; color: var(--text-primary);">
+                <i class="fa-solid fa-list-check text-gold-gradient" style="margin-right: 8px;"></i> Lịch Sử Thao Tác Hệ Thống
+            </h3>
+            <span style="font-size: 0.78rem; color: var(--text-muted);">Trang @Model.CurrentPage / @Model.TotalPages (20 logs/trang)</span>
+        </div>
+
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.86rem;">
+                <thead>
+                    <tr style="border-bottom: 1px solid var(--border-card); color: var(--text-muted); text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.05em;">
+                        <th style="padding: 12px 18px;">ID</th>
+                        <th style="padding: 12px 18px;">Thời Gian</th>
+                        <th style="padding: 12px 18px;">Hành Động</th>
+                        <th style="padding: 12px 18px;">Đối Tượng (Target)</th>
+                        <th style="padding: 12px 18px;">Người Thực Hiện</th>
+                        <th style="padding: 12px 18px; text-align: center;">Kết Quả</th>
+                        <th style="padding: 12px 18px; text-align: center;">Dòng Tác Động</th>
+                        <th style="padding: 12px 18px; text-align: right;">Thời Gian (ms)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Logs.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="8" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                                <i class="fa-solid fa-inbox" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                                Không tìm thấy bản ghi kiểm toán nào phù hợp với bộ lọc.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var log in Model.Logs)
+                        {
+                            <tr style="border-bottom: 1px solid var(--border-subtle); transition: background 0.15s;">
+                                <td style="padding: 12px 18px; font-family: monospace; color: var(--text-muted);">
+                                    #@log.Id
+                                </td>
+                                <td style="padding: 12px 18px; color: var(--text-secondary); white-space: nowrap;">
+                                    @log.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss")
+                                </td>
+                                <td style="padding: 12px 18px;">
+                                    <span style="font-family: monospace; font-weight: 700; color: var(--gold-primary); background: rgba(212,175,55,0.08); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(212,175,55,0.2);">
+                                        @log.Action
+                                    </span>
+                                </td>
+                                <td style="padding: 12px 18px; color: var(--text-primary); font-weight: 600;">
+                                    @(string.IsNullOrEmpty(log.Target) ? "—" : log.Target)
+                                </td>
+                                <td style="padding: 12px 18px; font-family: monospace; font-size: 0.8rem; color: var(--text-muted);">
+                                    @(string.IsNullOrEmpty(log.ActorUserId) ? "System / Anonymous" : log.ActorUserId[..Math.Min(12, log.ActorUserId.Length)] + "...")
+                                </td>
+                                <td style="padding: 12px 18px; text-align: center;">
+                                    @if (log.Succeeded)
+                                    {
+                                        <span style="background: rgba(42,157,143,0.15); color: #2A9D8F; border: 1px solid rgba(42,157,143,0.3); padding: 2px 8px; border-radius: 99px; font-size: 0.75rem; font-weight: 700;">
+                                            <i class="fa-solid fa-circle-check"></i> Thành công
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span style="background: rgba(248,113,113,0.15); color: #f87171; border: 1px solid rgba(248,113,113,0.3); padding: 2px 8px; border-radius: 99px; font-size: 0.75rem; font-weight: 700;">
+                                            <i class="fa-solid fa-circle-xmark"></i> Thất bại
+                                        </span>
+                                    }
+                                </td>
+                                <td style="padding: 12px 18px; text-align: center; font-weight: 600; color: var(--text-primary);">
+                                    @(log.RowsAffected.HasValue ? log.RowsAffected.Value.ToString() : "—")
+                                </td>
+                                <td style="padding: 12px 18px; text-align: right; font-family: monospace; color: @(log.ElapsedMilliseconds > 500 ? "#f87171" : "var(--text-muted)"); font-weight: 600;">
+                                    @log.ElapsedMilliseconds ms
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- PAGINATION -->
+        @if (Model.TotalPages > 1)
+        {
+            <div style="padding: 16px 20px; border-top: 1px solid var(--border-card); display: flex; justify-content: center; gap: 8px;">
+                @if (Model.CurrentPage > 1)
+                {
+                    <a href="/admin/admindashboard/auditlogs?page=@(Model.CurrentPage - 1)&actionFilter=@Model.ActionFilter&succeededFilter=@Model.SucceededFilter&actorFilter=@Model.ActorFilter" class="btn-luxe-outline" style="padding: 6px 14px; font-size: 0.82rem;">
+                        <i class="fa-solid fa-chevron-left"></i> Trước
+                    </a>
+                }
+                <span style="display: flex; align-items: center; padding: 0 12px; font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">
+                    Trang @Model.CurrentPage / @Model.TotalPages
+                </span>
+                @if (Model.CurrentPage < Model.TotalPages)
+                {
+                    <a href="/admin/admindashboard/auditlogs?page=@(Model.CurrentPage + 1)&actionFilter=@Model.ActionFilter&succeededFilter=@Model.SucceededFilter&actorFilter=@Model.ActorFilter" class="btn-luxe-outline" style="padding: 6px 14px; font-size: 0.82rem;">
+                        Sau <i class="fa-solid fa-chevron-right"></i>
+                    </a>
+                }
+            </div>
+        }
+    </div>
+</div>

@@ -66,4 +66,89 @@ public class CatalogController : Controller
         var result = await _catalogService.GetQuizRecommendationsAsync(request);
         return Json(new { success = true, result, items = result.Items });
     }
+
+    [HttpGet]
+    [Route("so-sanh")]
+    [Route("catalog/compare")]
+    public async Task<IActionResult> Compare(int? id1, int? id2, int? id3)
+    {
+        var allProducts = await _db.Products
+            .AsNoTracking()
+            .Include(p => p.Brand)
+            .OrderBy(p => p.Name)
+            .Select(p => new CompareProductOptionDto
+            {
+                Id = p.Id,
+                Name = p.Name,
+                BrandName = p.Brand != null ? p.Brand.Name : ""
+            })
+            .ToListAsync();
+
+        ViewBag.AllProducts = allProducts;
+
+        var selectedIds = new List<int>();
+        if (id1.HasValue && id1.Value > 0) selectedIds.Add(id1.Value);
+        if (id2.HasValue && id2.Value > 0) selectedIds.Add(id2.Value);
+        if (id3.HasValue && id3.Value > 0) selectedIds.Add(id3.Value);
+
+        if (!selectedIds.Any() && allProducts.Count >= 2)
+        {
+            selectedIds.Add(allProducts[0].Id);
+            selectedIds.Add(allProducts[1].Id);
+        }
+
+        var productsToCompare = new List<ProductDetailDto>();
+        foreach (var id in selectedIds.Distinct())
+        {
+            var p = await _catalogService.GetProductByIdAsync(id);
+            if (p != null) productsToCompare.Add(p);
+        }
+
+        return View(productsToCompare);
+    }
+
+    [HttpGet]
+    [Route("discovery-box")]
+    [Route("hop-kham-pha")]
+    public async Task<IActionResult> DiscoveryBox()
+    {
+        var availablePerfumes = await _db.Products
+            .AsNoTracking()
+            .Include(p => p.Brand)
+            .Include(p => p.FragranceFamily)
+            .Where(p => !p.IsDeleted && p.IsInStock)
+            .OrderByDescending(p => p.IsFeatured)
+            .ThenBy(p => p.Name)
+            .Select(p => new DiscoveryPerfumeItemDto
+            {
+                Id = p.Id,
+                Name = p.Name,
+                BrandName = p.Brand != null ? p.Brand.Name : "",
+                MainImageUrl = p.MainImageUrl,
+                FamilyName = p.FragranceFamily != null ? p.FragranceFamily.Name : "Đa dạng",
+                FamilyColor = p.FragranceFamily != null ? p.FragranceFamily.ColorHex : "#D4AF37",
+                Gender = p.Gender.ToString()
+            })
+            .ToListAsync();
+
+        return View(availablePerfumes);
+    }
+}
+
+public class CompareProductOptionDto
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string BrandName { get; set; } = string.Empty;
+}
+
+public class DiscoveryPerfumeItemDto
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string BrandName { get; set; } = string.Empty;
+    public string? MainImageUrl { get; set; }
+    public string FamilyName { get; set; } = string.Empty;
+    public string? FamilyColor { get; set; } = "#D4AF37";
+    public string Gender { get; set; } = "Unisex";
 }

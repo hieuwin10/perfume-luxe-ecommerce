@@ -1,0 +1,165 @@
+@model Perfume.Infrastructure.Identity.AppUser
+@using Perfume.Domain.Entities
+@using Perfume.Domain.Enums
+@{
+    ViewData["Title"] = $"Hồ Sơ Khách Hàng: {Model.FullName}";
+    Layout = "_AdminLayout";
+    var orders = ViewBag.Orders as List<Order> ?? new List<Order>();
+    var loyalty = ViewBag.Loyalty as UserLoyalty;
+    bool isLocked = ViewBag.IsLocked ?? false;
+    var roles = ViewBag.Roles as IList<string> ?? new List<string>();
+    decimal totalSpent = ViewBag.TotalSpent ?? 0m;
+    int deliveredCount = ViewBag.DeliveredOrdersCount ?? 0;
+}
+
+<div style="max-width: 1200px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 6px;">
+                <a href="/admin/admindashboard/users" class="btn-luxe-outline" style="padding: 6px 12px; font-size: 0.82rem;">
+                    <i class="fa-solid fa-arrow-left"></i> Danh sách tài khoản
+                </a>
+                <h1 style="font-size: 1.6rem; font-weight: 800; margin: 0; color: var(--text-primary);">
+                    Hồ Sơ Khách Hàng CRM: <span class="text-gold-gradient">@Model.FullName</span>
+                </h1>
+            </div>
+            <p style="color: var(--text-muted); margin: 0; font-size: 0.88rem;">
+                Email: @Model.Email &bull; Đăng ký ngày: @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+            </p>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+            <form method="post" action="/admin/admindashboard/togglelockuser" style="margin: 0;">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="userId" value="@Model.Id" />
+                <button type="submit" class="@(isLocked ? "btn-luxe" : "btn-luxe-outline")" style="padding: 8px 16px; font-size: 0.85rem; color: @(isLocked ? "#000" : "#f87171"); border-color: @(isLocked ? "var(--gold-primary)" : "rgba(248,113,113,0.4)");">
+                    <i class="fa-solid @(isLocked ? "fa-lock-open" : "fa-lock")" style="margin-right: 6px;"></i>
+                    @(isLocked ? "Mở Khóa Tài Khoản" : "Khóa Tài Khoản")
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Metrics Row -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-bottom: 24px;">
+        <div class="luxury-card" style="padding: 18px;">
+            <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em;">Hạng Thành Viên</span>
+            <div style="font-size: 1.3rem; font-weight: 800; color: var(--gold-primary); margin-top: 6px; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-crown"></i> @(loyalty?.Tier.ToString() ?? Model.Tier.ToString())
+            </div>
+        </div>
+
+        <div class="luxury-card" style="padding: 18px;">
+            <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em;">Điểm Tích Lũy</span>
+            <div style="font-size: 1.3rem; font-weight: 800; color: #818cf8; margin-top: 6px;">
+                <i class="fa-solid fa-coins"></i> @(loyalty?.Points ?? Model.LoyaltyPoints) điểm
+            </div>
+        </div>
+
+        <div class="luxury-card" style="padding: 18px;">
+            <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em;">Chi Tiêu Lũy Kế</span>
+            <div style="font-size: 1.3rem; font-weight: 800; color: #2A9D8F; margin-top: 6px;">
+                @totalSpent.ToString("N0") ₫
+            </div>
+        </div>
+
+        <div class="luxury-card" style="padding: 18px;">
+            <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em;">Đơn Hàng Hoàn Tất</span>
+            <div style="font-size: 1.3rem; font-weight: 800; color: var(--text-primary); margin-top: 6px;">
+                @deliveredCount / @orders.Count đơn
+            </div>
+        </div>
+    </div>
+
+    <!-- Main 2-column info & orders -->
+    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 24px; align-items: start;">
+        <!-- Left Customer Info -->
+        <div class="luxury-card" style="padding: 24px;">
+            <h3 style="font-size: 1.1rem; font-weight: 700; margin: 0 0 16px; color: var(--text-primary); border-bottom: 1px solid var(--border-card); padding-bottom: 10px;">
+                <i class="fa-solid fa-address-card text-gold-gradient" style="margin-right: 6px;"></i> Thông Tin Cá Nhân
+            </h3>
+
+            <div style="display: flex; flex-direction: column; gap: 12px; font-size: 0.88rem;">
+                <div>
+                    <span style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">Số điện thoại:</span>
+                    <div style="font-weight: 600; color: var(--text-primary);">@(string.IsNullOrWhiteSpace(Model.PhoneNumber) ? "Chưa cập nhật" : Model.PhoneNumber)</div>
+                </div>
+
+                <div>
+                    <span style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">Địa chỉ lưu trữ:</span>
+                    <div style="color: var(--text-secondary); line-height: 1.4;">@(string.IsNullOrWhiteSpace(Model.Address) ? "Chưa có địa chỉ mặc định" : Model.Address)</div>
+                </div>
+
+                <div>
+                    <span style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">Trạng thái tài khoản:</span>
+                    <div>
+                        <span style="padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; background: @(isLocked ? "rgba(239,68,68,0.15)" : "rgba(42,157,143,0.15)"); color: @(isLocked ? "#f87171" : "#2A9D8F"); border: 1px solid @(isLocked ? "#ef4444" : "#2A9D8F");">
+                            @(isLocked ? "Đang bị khóa" : "Hoạt động bình thường")
+                        </span>
+                    </div>
+                </div>
+
+                <div>
+                    <span style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">Nhóm quyền (RBAC):</span>
+                    <div style="display: flex; gap: 6px; margin-top: 4px;">
+                        @foreach (var r in roles)
+                        {
+                            <span class="@(r == "Admin" ? "role-badge-admin" : r == "StoreManager" ? "role-badge-manager" : "role-badge-customer")">@r</span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Purchase History -->
+        <div class="luxury-card" style="padding: 0; overflow: hidden;">
+            <div style="padding: 16px 20px; border-bottom: 1px solid var(--border-card); background: var(--bg-surface-elevated); display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="margin: 0; font-size: 1.05rem; font-weight: 700; color: var(--text-primary);">
+                    <i class="fa-solid fa-clock-rotate-left text-gold-gradient" style="margin-right: 6px;"></i> Lịch Sử Mua Hàng (@orders.Count đơn)
+                </h3>
+            </div>
+
+            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem;">
+                <thead>
+                    <tr style="border-bottom: 1px solid var(--border-card); color: var(--text-muted); text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.05em;">
+                        <th style="padding: 12px 18px;">Mã Đơn</th>
+                        <th style="padding: 12px 18px;">Ngày Đặt</th>
+                        <th style="padding: 12px 18px;">Trạng Thái</th>
+                        <th style="padding: 12px 18px; text-align: right;">Tổng Tiền</th>
+                        <th style="padding: 12px 18px; text-align: right;">Thao Tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (orders.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="5" style="padding: 30px; text-align: center; color: var(--text-muted);">
+                                Khách hàng chưa có đơn hàng nào được ghi nhận.
+                            </td>
+                        </tr>
+                    }
+                    @foreach (var o in orders)
+                    {
+                        <tr style="border-bottom: 1px solid var(--border-subtle);">
+                            <td style="padding: 12px 18px; font-weight: 700; color: var(--gold-primary);">@o.OrderCode</td>
+                            <td style="padding: 12px 18px; color: var(--text-muted); font-size: 0.8rem;">@o.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td style="padding: 12px 18px;">
+                                <span style="padding: 2px 8px; border-radius: 12px; font-size: 0.72rem; font-weight: 600; background: rgba(212,175,55,0.12); color: var(--gold-primary);">
+                                    @o.OrderStatus
+                                </span>
+                            </td>
+                            <td style="padding: 12px 18px; text-align: right; font-weight: 700; color: var(--text-primary);">
+                                @o.TotalAmount.ToString("N0") ₫
+                            </td>
+                            <td style="padding: 12px 18px; text-align: right;">
+                                <a href="/admin/admindashboard/orderdetails/@o.Id" class="btn-luxe-outline" style="padding: 3px 8px; font-size: 0.75rem;">
+                                    Xem đơn
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

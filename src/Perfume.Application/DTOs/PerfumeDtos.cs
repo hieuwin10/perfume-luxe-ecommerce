@@ -130,6 +130,8 @@ public class CheckoutRequestDto
     public string? OrderNotes { get; set; }
     public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.COD;
     public string? VoucherCode { get; set; }
+    public bool IsGiftWrapping { get; set; } = false;
+    public string? GiftMessage { get; set; }
     public List<CartItemDto> Items { get; set; } = new();
 }
 

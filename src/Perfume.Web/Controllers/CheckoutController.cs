@@ -55,7 +55,10 @@ public class CheckoutController : Controller
         var cart = await _carts.GetAsync(userId, guestToken, cancellationToken);
         if (cart.Items.Count == 0) return RedirectToAction("Index", "Cart");
         model.Items = cart.Items;
-        model.PaymentMethod = PaymentMethod.COD;
+        if (model.PaymentMethod != PaymentMethod.COD && model.PaymentMethod != PaymentMethod.BankTransfer)
+        {
+            model.PaymentMethod = PaymentMethod.COD;
+        }
         if (!ModelState.IsValid)
         {
             ViewBag.Cart = cart.Items;
@@ -78,6 +81,70 @@ public class CheckoutController : Controller
         if (order.UserId == null) token = _guestOrderProtector.Protect(order.OrderCode);
         var trackingUrl = token == null ? null : Url.Action(nameof(Success), "Checkout", new { token }, Request.Scheme);
         await _emailSender.SendOrderConfirmationAsync(order, trackingUrl);
+
+        if (order.PaymentMethod == PaymentMethod.BankTransfer)
+        {
+            return order.UserId == null
+                ? RedirectToAction(nameof(VietQR), new { token })
+                : RedirectToAction(nameof(VietQR), new { orderCode = order.OrderCode });
+        }
+
+        return order.UserId == null
+            ? RedirectToAction(nameof(Success), new { token })
+            : RedirectToAction(nameof(Success), new { orderCode = order.OrderCode });
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> VietQR(string? orderCode, string? token)
+    {
+        string? verifiedCode = orderCode;
+        if (!string.IsNullOrWhiteSpace(token))
+        {
+            try { verifiedCode = _guestOrderProtector.Unprotect(token); }
+            catch { return NotFound(); }
+        }
+        else if (string.IsNullOrEmpty(CurrentUserId())) return NotFound();
+
+        if (string.IsNullOrWhiteSpace(verifiedCode)) return NotFound();
+        var order = await _orderService.GetOrderByCodeAsync(verifiedCode);
+        if (order == null) return NotFound();
+        if (order.UserId == null && string.IsNullOrWhiteSpace(token)) return NotFound();
+        if (order.UserId != null && !string.Equals(order.UserId, CurrentUserId(), StringComparison.Ordinal)) return NotFound();
+
+        ViewBag.IsGuest = order.UserId == null;
+        ViewBag.Token = token;
+        ViewBag.BankName = "Ngân hàng TMCP Ngoại Thương Việt Nam (Vietcombank)";
+        ViewBag.BankCode = "VCB";
+        ViewBag.AccountNumber = "9988776655";
+        ViewBag.AccountName = "CONG TY CP PERFUME LUXE";
+        ViewBag.TransferContent = order.OrderCode;
+        ViewBag.Amount = order.TotalAmount;
+        
+        var qrUrl = $"https://img.vietqr.io/image/vcb-9988776655-compact2.png?amount={Convert.ToInt64(order.TotalAmount)}&addInfo={Uri.EscapeDataString(order.OrderCode)}&accountName=CONG%20TY%20CP%20PERFUME%20LUXE";
+        ViewBag.QrUrl = qrUrl;
+
+        return View(order);
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> ConfirmBankTransfer(string? orderCode, string? token)
+    {
+        string? verifiedCode = orderCode;
+        if (!string.IsNullOrWhiteSpace(token))
+        {
+            try { verifiedCode = _guestOrderProtector.Unprotect(token); }
+            catch { return NotFound(); }
+        }
+        else if (string.IsNullOrEmpty(CurrentUserId())) return NotFound();
+
+        if (string.IsNullOrWhiteSpace(verifiedCode)) return NotFound();
+        var order = await _orderService.GetOrderByCodeAsync(verifiedCode);
+        if (order == null) return NotFound();
+        if (order.UserId == null && string.IsNullOrWhiteSpace(token)) return NotFound();
+        if (order.UserId != null && !string.Equals(order.UserId, CurrentUserId(), StringComparison.Ordinal)) return NotFound();
+
+        await _orderService.ConfirmPaymentAsync(order.OrderCode);
+
         return order.UserId == null
             ? RedirectToAction(nameof(Success), new { token })
             : RedirectToAction(nameof(Success), new { orderCode = order.OrderCode });

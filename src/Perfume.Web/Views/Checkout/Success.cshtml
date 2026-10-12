@@ -15,13 +15,44 @@
     </p>
 
     <!-- Order Code Badge -->
-    <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 24px; margin-bottom: 36px; display: inline-block; min-width: 320px; box-shadow: var(--shadow-luxury);">
+    <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 24px; margin-bottom: 30px; display: inline-block; min-width: 340px; box-shadow: var(--shadow-luxury);">
         <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-bottom: 6px;">Mã Đơn Hàng Của Bạn</span>
-        <strong style="font-size: 1.6rem; font-family: monospace; color: var(--gold-primary); letter-spacing: 0.05em;">@Model.OrderCode</strong>
-        <div style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 8px;">
-            Phương thức: <strong>@Model.PaymentMethod</strong> &bull; Tổng tiền: <strong style="color: var(--gold-primary);">@Model.TotalAmount.ToString("N0")₫</strong>
+        <strong style="font-size: 1.7rem; font-family: monospace; color: var(--gold-primary); letter-spacing: 0.05em;">@Model.OrderCode</strong>
+        <div style="display: flex; justify-content: center; gap: 10px; margin-top: 12px; flex-wrap: wrap;">
+            <span style="font-size: 0.8rem; background: rgba(255,255,255,0.06); padding: 4px 12px; border-radius: 99px; border: 1px solid var(--border-subtle);">
+                <i class="fa-solid @(Model.PaymentMethod == Perfume.Domain.Enums.PaymentMethod.BankTransfer ? "fa-qrcode" : "fa-money-bill-wave")" style="color: var(--gold-primary); margin-right: 4px;"></i>
+                @(Model.PaymentMethod == Perfume.Domain.Enums.PaymentMethod.BankTransfer ? "VietQR Napas247" : "COD (Nhận hàng thu tiền)")
+            </span>
+            <span style="font-size: 0.8rem; background: @(Model.PaymentStatus == Perfume.Domain.Enums.PaymentStatus.Completed ? "rgba(42,157,143,0.15)" : "rgba(245,158,11,0.15)"); color: @(Model.PaymentStatus == Perfume.Domain.Enums.PaymentStatus.Completed ? "#2A9D8F" : "#f59e0b"); padding: 4px 12px; border-radius: 99px; border: 1px solid @(Model.PaymentStatus == Perfume.Domain.Enums.PaymentStatus.Completed ? "rgba(42,157,143,0.3)" : "rgba(245,158,11,0.3)"); font-weight: 600;">
+                <i class="fa-solid @(Model.PaymentStatus == Perfume.Domain.Enums.PaymentStatus.Completed ? "fa-circle-check" : "fa-clock")" style="margin-right: 4px;"></i>
+                @(Model.PaymentStatus == Perfume.Domain.Enums.PaymentStatus.Completed ? "Đã Thanh Toán Thành Công" : "Chờ Thu Tiền Khi Giao Hàng")
+            </span>
         </div>
     </div>
+
+    @if (Model.IsGiftWrapping)
+    {
+        <!-- Luxury Gift Wrapping Showcase Card -->
+        <div style="background: linear-gradient(135deg, rgba(212,175,55,0.1) 0%, rgba(30,25,10,0.5) 100%); border: 1px solid var(--gold-primary); border-radius: var(--radius-md); padding: 20px 24px; margin-bottom: 30px; text-align: left;">
+            <div style="display: flex; align-items: center; gap: 10px; color: var(--gold-primary); font-weight: 700; font-size: 1.05rem; margin-bottom: 6px;">
+                <i class="fa-solid fa-gift"></i> Đã Đăng Ký Gói Quà Hoàng Gia Haute Parfumerie (+50.000₫)
+            </div>
+            <p style="color: var(--text-secondary); font-size: 0.88rem; margin: 0 0 10px; line-height: 1.5;">
+                Đơn hàng của bạn sẽ được đóng hộp nhung cao cấp, thắt nơ ruy băng thủ công và niêm phong sáp khắc chữ nổi.
+            </p>
+            @if (!string.IsNullOrWhiteSpace(Model.GiftMessage))
+            {
+                <div style="background: rgba(0,0,0,0.3); border-left: 3px solid var(--gold-primary); padding: 10px 14px; border-radius: 4px;">
+                    <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--gold-primary); font-weight: 600; display: block; margin-bottom: 2px;">
+                        <i class="fa-solid fa-feather-pointed"></i> Lời chúc trên thiệp mỹ thuật:
+                    </span>
+                    <div style="font-style: italic; color: var(--text-primary); font-size: 0.9rem;">
+                        "@Model.GiftMessage"
+                    </div>
+                </div>
+            }
+        </div>
+    }
 
     <!-- Items Summary -->
     <div style="background: var(--bg-surface); border: 1px solid var(--border-card); border-radius: var(--radius-md); padding: 24px; margin-bottom: 36px; text-align: left;">
@@ -38,15 +69,44 @@
                 </div>
             }
         </div>
-        <div style="display: flex; justify-content: space-between; margin-top: 16px; font-weight: 700; font-size: 1.1rem;">
-            <span>Tổng Thanh Toán:</span>
-            <span style="color: var(--gold-primary);">@Model.TotalAmount.ToString("N0")₫</span>
+        <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 6px; font-size: 0.9rem; color: var(--text-secondary);">
+            <div style="display: flex; justify-content: space-between;">
+                <span>Tạm tính tiền hàng:</span>
+                <span>@Model.SubTotal.ToString("N0")₫</span>
+            </div>
+            @if (Model.DiscountAmount > 0)
+            {
+                <div style="display: flex; justify-content: space-between; color: #E63946;">
+                    <span>Giảm giá Voucher:</span>
+                    <span>-@Model.DiscountAmount.ToString("N0")₫</span>
+                </div>
+            }
+            <div style="display: flex; justify-content: space-between;">
+                <span>Phí vận chuyển:</span>
+                <span>@(Model.ShippingFee == 0 ? "0₫ (Miễn phí)" : Model.ShippingFee.ToString("N0") + "₫")</span>
+            </div>
+            @if (Model.IsGiftWrapping)
+            {
+                <div style="display: flex; justify-content: space-between; color: var(--gold-primary);">
+                    <span>Gói quà hoàng gia:</span>
+                    <span>+@Model.GiftWrappingFee.ToString("N0")₫</span>
+                </div>
+            }
+            <div style="border-top: 1px solid var(--border-card); margin-top: 8px; padding-top: 10px; display: flex; justify-content: space-between; font-weight: 700; font-size: 1.15rem;">
+                <span style="color: var(--text-primary);">Tổng Thanh Toán:</span>
+                <span style="color: var(--gold-primary);">@Model.TotalAmount.ToString("N0")₫</span>
+            </div>
         </div>
     </div>
 
-    <div style="display: flex; gap: 16px; justify-content: center;">
-        <a href="/" class="btn-luxe">Tiếp Tục Mua Sắm</a>
-        @if (ViewBag.IsGuest == true) { <span class="btn-luxe-outline">Hãy lưu liên kết theo dõi an toàn đã gửi vào email</span> }
-        else { <a href="/account/myorders" class="btn-luxe-outline">Xem đơn hàng của tôi</a> }
+    <div style="display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;">
+        <a href="/tra-cuu-don-hang?orderCode=@Model.OrderCode&phone=@Model.CustomerPhone" class="btn-luxe" style="display: inline-flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-truck-fast"></i> Tra Cứu Hành Trình Đơn Hàng
+        </a>
+        <a href="/" class="btn-luxe-outline">Tiếp Tục Mua Sắm</a>
+        @if (ViewBag.IsGuest != true)
+        {
+            <a href="/account/myorders" class="btn-luxe-outline">Xem Đơn Của Tôi</a>
+        }
     </div>
 </div>

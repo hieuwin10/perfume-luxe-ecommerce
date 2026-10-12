@@ -235,6 +235,17 @@ public class StoreManagerController : Controller
     }
 
     [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> ConfirmBankTransferPayment(int orderId)
+    {
+        var order = await _db.Orders.FirstOrDefaultAsync(o => o.Id == orderId);
+        if (order == null) return NotFound();
+        order.PaymentStatus = PaymentStatus.Completed;
+        await _db.SaveChangesAsync();
+        TempData["Success"] = $"Đã xác nhận thanh toán chuyển khoản VietQR cho đơn {order.OrderCode}.";
+        return RedirectToAction("OrderDetails", "AdminDashboard", new { id = orderId });
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> UpdateVariantStock(int variantId, int stockQuantity)
     {
         var variant = await _db.ProductVariants.FindAsync(variantId);

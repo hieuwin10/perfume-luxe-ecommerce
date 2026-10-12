@@ -21,6 +21,59 @@
         </span>
     </div>
 
+    <!-- Advanced Filter Bar -->
+    <div class="luxury-card" style="padding: 18px; margin-bottom: 20px;">
+        <form method="get" action="/admin/admindashboard/orders" style="display: grid; grid-template-columns: 2fr 1.2fr 1.2fr 1.2fr 1.2fr auto; gap: 12px; align-items: end; margin: 0;">
+            <div>
+                <label style="display: block; font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; font-weight: 600;">Tìm kiếm</label>
+                <input type="text" name="search" value="@ViewBag.Search" placeholder="Mã đơn, Tên, Số điện thoại..."
+                       style="width: 100%; padding: 8px 12px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.85rem; outline: none;" />
+            </div>
+
+            <div>
+                <label style="display: block; font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; font-weight: 600;">Trạng thái đơn</label>
+                <select name="status" style="width: 100%; padding: 8px 12px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.85rem; outline: none;">
+                    <option value="">-- Tất cả --</option>
+                    <option value="@((int)OrderStatus.Pending)" selected="@(ViewBag.Status == OrderStatus.Pending)">Chờ duyệt</option>
+                    <option value="@((int)OrderStatus.Confirmed)" selected="@(ViewBag.Status == OrderStatus.Confirmed)">Đã xác nhận</option>
+                    <option value="@((int)OrderStatus.Shipping)" selected="@(ViewBag.Status == OrderStatus.Shipping)">Đang vận chuyển</option>
+                    <option value="@((int)OrderStatus.Delivered)" selected="@(ViewBag.Status == OrderStatus.Delivered)">Giao thành công</option>
+                    <option value="@((int)OrderStatus.Cancelled)" selected="@(ViewBag.Status == OrderStatus.Cancelled)">Đã hủy</option>
+                </select>
+            </div>
+
+            <div>
+                <label style="display: block; font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; font-weight: 600;">Thanh toán</label>
+                <select name="paymentStatus" style="width: 100%; padding: 8px 12px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.85rem; outline: none;">
+                    <option value="">-- Tất cả --</option>
+                    <option value="@((int)PaymentStatus.Pending)" selected="@(ViewBag.PaymentStatus == PaymentStatus.Pending)">Chưa thu tiền (Pending)</option>
+                    <option value="@((int)PaymentStatus.Completed)" selected="@(ViewBag.PaymentStatus == PaymentStatus.Completed)">Đã thu tiền (Completed)</option>
+                </select>
+            </div>
+
+            <div>
+                <label style="display: block; font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; font-weight: 600;">Từ ngày</label>
+                <input type="date" name="from" value="@ViewBag.From"
+                       style="width: 100%; padding: 8px 10px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.85rem; outline: none;" />
+            </div>
+
+            <div>
+                <label style="display: block; font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; font-weight: 600;">Đến ngày</label>
+                <input type="date" name="to" value="@ViewBag.To"
+                       style="width: 100%; padding: 8px 10px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.85rem; outline: none;" />
+            </div>
+
+            <div style="display: flex; gap: 6px;">
+                <button type="submit" class="btn-luxe" style="padding: 8px 16px; font-size: 0.85rem;">
+                    <i class="fa-solid fa-filter"></i> Lọc
+                </button>
+                <a href="/admin/admindashboard/orders" class="btn-luxe-outline" style="padding: 8px 12px; font-size: 0.85rem;" title="Bỏ lọc">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+
     @if (TempData["Success"] != null) { <div class="luxury-card" style="padding:12px;margin-bottom:12px">@TempData["Success"]</div> }
     @if (TempData["Error"] != null) { <div class="luxury-card" style="padding:12px;margin-bottom:12px;color:#f87171">@TempData["Error"]</div> }
     <div class="luxury-card" style="padding: 0; overflow: auto;">

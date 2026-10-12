@@ -1,6 +1,9 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Perfume.Application.Interfaces;
+using Perfume.Domain.Entities;
+using Perfume.Infrastructure.Data;
 using Perfume.Web.Models;
 
 namespace Perfume.Web.Controllers;
@@ -9,15 +12,24 @@ public class HomeController : Controller
 {
     private readonly IPerfumeCatalogService _catalogService;
     private readonly IBlogService _blogService;
+    private readonly PerfumeDbContext _db;
 
-    public HomeController(IPerfumeCatalogService catalogService, IBlogService blogService)
+    public HomeController(IPerfumeCatalogService catalogService, IBlogService blogService, PerfumeDbContext db)
     {
         _catalogService = catalogService;
         _blogService = blogService;
+        _db = db;
     }
 
     public async Task<IActionResult> Index()
     {
+        ViewBag.HeroBanners = await _db.HeroBanners
+            .AsNoTracking()
+            .Where(b => b.IsActive)
+            .OrderBy(b => b.DisplayOrder)
+            .ThenByDescending(b => b.CreatedAt)
+            .ToListAsync();
+
         ViewBag.FeaturedProducts = await _catalogService.GetFeaturedProductsAsync();
         ViewBag.BestSellers = await _catalogService.GetBestSellersAsync();
         ViewBag.NewArrivals = await _catalogService.GetNewArrivalsAsync();

@@ -81,8 +81,11 @@
                                 <button class="btn-luxe" type="submit">Lưu giá / trạng thái</button>
                             </form>
                         </td>
-                        <td style="padding: 14px 20px; text-align: right;">
-                            <a href="/catalog/product/@p.Slug" target="_blank" style="color: var(--gold-primary); margin-right: 12px;" title="Xem sản phẩm ngoài web">
+                        <td style="padding: 14px 20px; text-align: right; white-space: nowrap;">
+                            <a href="/admin/admindashboard/editproduct/@p.Id" style="color: var(--gold-primary); margin-right: 12px; text-decoration: none;" title="Chỉnh sửa sản phẩm & gallery">
+                                <i class="fa-solid fa-pen-to-square"></i> Sửa
+                            </a>
+                            <a href="/catalog/product/@p.Slug" target="_blank" style="color: var(--text-muted); margin-right: 12px;" title="Xem sản phẩm ngoài web">
                                 <i class="fa-solid fa-arrow-up-right-from-square"></i>
                             </a>
                             <form method="post" action="/admin/admindashboard/deleteproduct" style="display: inline; margin: 0;" onsubmit="return confirm('Bạn có chắc muốn xóa sản phẩm này?');">

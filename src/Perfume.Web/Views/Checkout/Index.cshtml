@@ -52,17 +52,74 @@
                     </div>
                     <div>
                         <label asp-for="OrderNotes" style="display:block;font-size:.8rem;font-weight:600;margin-bottom:6px;color:var(--text-secondary)">Ghi chú đơn hàng</label>
-                        <textarea asp-for="OrderNotes" rows="3" placeholder="Ghi chú giao giờ hành chính, đóng gói quà..." style="width:100%;background:var(--bg-surface-elevated);border:1px solid var(--border-card);color:var(--text-primary);padding:10px 14px;border-radius:var(--radius-sm);outline:none;font-size:.88rem"></textarea>
+                        <textarea asp-for="OrderNotes" rows="2" placeholder="Ghi chú giao giờ hành chính, chỉ đường..." style="width:100%;background:var(--bg-surface-elevated);border:1px solid var(--border-card);color:var(--text-primary);padding:10px 14px;border-radius:var(--radius-sm);outline:none;font-size:.88rem"></textarea>
                     </div>
+                </div>
+
+                <!-- Section 2: Luxury Gift Wrapping Experience -->
+                <div style="background: linear-gradient(135deg, rgba(212,175,55,0.08) 0%, rgba(20,20,20,0.6) 100%); border: 1px solid var(--gold-primary); border-radius: var(--radius-md); padding: 22px; position: relative;">
+                    <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 14px;">
+                        <div style="display: flex; gap: 12px; align-items: flex-start;">
+                            <input type="checkbox" asp-for="IsGiftWrapping" id="chkGiftWrapping" onchange="toggleGiftWrapping(this.checked)" style="width: 20px; height: 20px; accent-color: var(--gold-primary); cursor: pointer; margin-top: 2px;" />
+                            <div>
+                                <label for="chkGiftWrapping" style="cursor: pointer; font-weight: 700; font-size: 1rem; color: var(--gold-primary); display: flex; align-items: center; gap: 8px;">
+                                    <i class="fa-solid fa-gift"></i> Dịch Vụ Gói Quà Hoàng Gia Haute Parfumerie
+                                    <span style="font-size: 0.78rem; background: var(--gold-primary); color: #000; padding: 2px 8px; border-radius: 99px; font-weight: 800;">+50.000₫</span>
+                                </label>
+                                <p style="margin: 6px 0 0; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5;">
+                                    Hộp quà nhung đen đặc trưng, thắt nơ ruy-băng lụa vàng kim, niêm phong sáp khắc triện chữ nổi và kèm thiệp chúc mừng viết tay cao cấp.
+                                </p>
+                            </div>
+                        </div>
                     </div>
 
-            <div style="background:rgba(42,157,143,.1);border:1px solid rgba(42,157,143,.35);border-radius:var(--radius-md);padding:16px 20px">
-                <strong><i class="fa-solid fa-money-bill-wave"></i> Thanh toán khi nhận hàng (COD)</strong>
-                <p style="margin:6px 0 0;color:var(--text-muted)">Bạn thanh toán cho nhân viên giao hàng khi nhận đơn. Cửa hàng chỉ ghi nhận đã thanh toán sau khi xác nhận đã thu tiền.</p>
+                    <!-- Gift Message Box (collapsible) -->
+                    <div id="giftMessageBox" style="display: none; margin-top: 16px; padding-top: 16px; border-top: 1px dashed rgba(212,175,55,0.3);">
+                        <label asp-for="GiftMessage" style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--gold-primary); margin-bottom: 6px;">
+                            <i class="fa-solid fa-feather-pointed" style="margin-right: 6px;"></i> Lời Chúc Viết Tay Trên Thiệp Mỹ Thuật
+                        </label>
+                        <textarea asp-for="GiftMessage" id="txtGiftMessage" rows="2" maxlength="500" placeholder="VD: Chúc mừng sinh nhật nàng thơ của anh. Mong em luôn ngát hương và rạng rỡ..." style="width:100%; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); color: var(--text-primary); padding: 10px 14px; border-radius: var(--radius-sm); outline: none; font-size: 0.88rem; font-style: italic;"></textarea>
+                    </div>
+                </div>
+
+                <!-- Section 3: Payment Method Selection -->
+                <div style="background: var(--bg-surface); border: 1px solid var(--border-card); border-radius: var(--radius-md); padding: 24px;">
+                    <h3 style="font-size: 1.25rem; margin-bottom: 16px; color: var(--gold-primary);"><i class="fa-solid fa-credit-card" style="margin-right: 8px;"></i> Phương Thức Thanh Toán</h3>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        <!-- Option 1: COD -->
+                        <label style="display: flex; align-items: flex-start; gap: 14px; padding: 16px; border: 1px solid var(--border-card); border-radius: var(--radius-sm); cursor: pointer; background: var(--bg-surface-elevated);" class="payment-option-label" id="labelCOD">
+                            <input type="radio" asp-for="PaymentMethod" value="@Perfume.Domain.Enums.PaymentMethod.COD" id="radioCOD" checked style="margin-top: 3px; accent-color: var(--gold-primary);" onchange="selectPaymentMethod('COD')" />
+                            <div style="flex-grow: 1;">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <strong style="color: var(--text-primary); font-size: 0.95rem;"><i class="fa-solid fa-money-bill-wave" style="color: #2A9D8F; margin-right: 8px;"></i> Thanh Toán Khi Nhận Hàng (COD)</strong>
+                                    <span style="font-size: 0.75rem; color: var(--text-muted);">Phổ biến</span>
+                                </div>
+                                <p style="margin: 4px 0 0; color: var(--text-secondary); font-size: 0.82rem; line-height: 1.4;">
+                                    Bạn kiểm tra kiện hàng niêm phong và thanh toán tiền mặt cho nhân viên vận chuyển khi nhận hàng.
+                                </p>
+                            </div>
+                        </label>
+
+                        <!-- Option 2: VietQR Napas247 -->
+                        <label style="display: flex; align-items: flex-start; gap: 14px; padding: 16px; border: 1px solid var(--border-card); border-radius: var(--radius-sm); cursor: pointer; background: var(--bg-surface-elevated);" class="payment-option-label" id="labelVietQR">
+                            <input type="radio" asp-for="PaymentMethod" value="@Perfume.Domain.Enums.PaymentMethod.BankTransfer" id="radioVietQR" style="margin-top: 3px; accent-color: var(--gold-primary);" onchange="selectPaymentMethod('VietQR')" />
+                            <div style="flex-grow: 1;">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <strong style="color: var(--text-primary); font-size: 0.95rem;"><i class="fa-solid fa-qrcode" style="color: var(--gold-primary); margin-right: 8px;"></i> Chuyển Khoản Ngân Hàng VietQR Napas247</strong>
+                                    <span style="font-size: 0.72rem; background: rgba(42,157,143,0.15); color: #2A9D8F; border: 1px solid rgba(42,157,143,0.3); padding: 2px 8px; border-radius: 4px; font-weight: 700;">Khuyên dùng</span>
+                                </div>
+                                <p style="margin: 4px 0 0; color: var(--text-secondary); font-size: 0.82rem; line-height: 1.4;">
+                                    Quét mã VietQR động tự điền số tiền &amp; nội dung qua Vietcombank hoặc bất kỳ ứng dụng ngân hàng / ví điện tử 24/7.
+                                </p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
             </div>
-            </div>
+
             <!-- Right: Order Items & Voucher & Place Order Button -->
-            <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 24px; box-shadow: var(--shadow-luxury);">
+            <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 24px; box-shadow: var(--shadow-luxury); position: sticky; top: 20px;">
                 <h3 style="font-size: 1.25rem; margin-bottom: 18px; color: var(--gold-primary);">Đơn Hàng Của Bạn (@cart.Count món)</h3>
 
                 <!-- Items list -->
@@ -100,9 +157,13 @@
                         <span style="color: var(--text-secondary);">Giảm giá:</span>
                         <span id="displayDiscount" style="color: #E63946; font-weight: 600;">-0₫</span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                         <span style="color: var(--text-secondary);">Phí vận chuyển:</span>
                         <span style="color: #52B788; font-weight: 600;">@(subTotal >= 2000000 ? "0₫ (Miễn phí)" : "35.000₫")</span>
+                    </div>
+                    <div id="giftWrappingRow" style="display: none; justify-content: space-between; margin-bottom: 8px; color: var(--gold-primary);">
+                        <span><i class="fa-solid fa-gift" style="margin-right: 4px;"></i> Gói quà hoàng gia:</span>
+                        <span style="font-weight: 600;">+50.000₫</span>
                     </div>
                     <div style="border-top: 1px solid var(--border-card); padding-top: 12px; display: flex; justify-content: space-between; align-items: baseline;">
                         <span style="font-weight: 700;">Tổng thanh toán:</span>
@@ -112,7 +173,7 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn-luxe" style="width: 100%; padding: 14px; font-size: 1rem;">
+                <button type="submit" class="btn-luxe" id="btnPlaceOrder" style="width: 100%; padding: 14px; font-size: 1rem;">
                     <i class="fa-solid fa-check" style="margin-right: 6px;"></i> Xác Nhận Đặt Hàng Ngay
                 </button>
             </div>
@@ -125,16 +186,51 @@
         let baseSubTotal = @subTotal;
         let shippingFee = @(subTotal >= 2000000 ? 0 : 35000);
         let currentDiscount = 0;
+        let giftWrappingFee = 0;
         const checkoutForm = document.getElementById('checkoutForm');
         const checkoutError = document.getElementById('checkoutApiError');
 
+        function toggleGiftWrapping(checked) {
+            giftWrappingFee = checked ? 50000 : 0;
+            const giftBox = document.getElementById('giftMessageBox');
+            const giftRow = document.getElementById('giftWrappingRow');
+            if (giftBox) giftBox.style.display = checked ? 'block' : 'none';
+            if (giftRow) giftRow.style.display = checked ? 'flex' : 'none';
+            recalculateTotal();
+        }
+
+        function selectPaymentMethod(type) {
+            const labelCOD = document.getElementById('labelCOD');
+            const labelVietQR = document.getElementById('labelVietQR');
+            if (type === 'VietQR') {
+                labelVietQR.style.borderColor = 'var(--gold-primary)';
+                labelCOD.style.borderColor = 'var(--border-card)';
+            } else {
+                labelCOD.style.borderColor = 'var(--gold-primary)';
+                labelVietQR.style.borderColor = 'var(--border-card)';
+            }
+        }
+
+        function recalculateTotal() {
+            const total = Math.max(0, baseSubTotal - currentDiscount + shippingFee + giftWrappingFee);
+            document.getElementById('displayTotal').innerText = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(total);
+        }
+
         checkoutForm?.addEventListener('submit', async event => {
+            if (typeof CustomerApi === 'undefined') {
+                return; // Let standard form POST proceed
+            }
             event.preventDefault();
-            const submit = checkoutForm.querySelector('button[type="submit"]');
+            const submit = document.getElementById('btnPlaceOrder');
             checkoutError.hidden = true;
             submit.disabled = true;
             submit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang xác nhận đơn…';
             const values = new FormData(checkoutForm);
+            
+            const isGift = document.getElementById('chkGiftWrapping')?.checked || false;
+            const giftMsg = document.getElementById('txtGiftMessage')?.value || '';
+            const paymentMethod = document.getElementById('radioVietQR')?.checked ? 1 : 0; // 0=COD, 1=BankTransfer
+
             try {
                 const result = await CustomerApi.post('/api/v1/orders', {
                     customerName: values.get('CustomerName'),
@@ -143,7 +239,10 @@
                     shippingAddress: values.get('ShippingAddress'),
                     city: values.get('City'),
                     orderNotes: values.get('OrderNotes'),
-                    voucherCode: values.get('VoucherCode')
+                    voucherCode: values.get('VoucherCode'),
+                    paymentMethod: paymentMethod,
+                    isGiftWrapping: isGift,
+                    giftMessage: giftMsg
                 });
                 window.location.assign(result.successUrl || '/account/myorders');
             } catch (error) {
@@ -168,16 +267,13 @@
                     msgEl.style.color = '#52B788';
                     msgEl.innerText = data.message;
                     document.getElementById('displayDiscount').innerText = '-' + new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(currentDiscount);
-                    
-                    const total = Math.max(0, baseSubTotal - currentDiscount + shippingFee);
-                    document.getElementById('displayTotal').innerText = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(total);
+                    recalculateTotal();
                 } else {
                     currentDiscount = 0;
                     msgEl.style.color = '#E63946';
                     msgEl.innerText = data.message;
                     document.getElementById('displayDiscount').innerText = '-0₫';
-                    const total = baseSubTotal + shippingFee;
-                    document.getElementById('displayTotal').innerText = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(total);
+                    recalculateTotal();
                 }
             } catch (err) {
                 msgEl.style.color = '#E63946';

@@ -34,6 +34,10 @@ public class PerfumeDbContext : IdentityDbContext<AppUser, AppRole, string>
     public DbSet<ShoppingCartItem> ShoppingCartItems => Set<ShoppingCartItem>();
     public DbSet<RefreshTokenRecord> RefreshTokenRecords => Set<RefreshTokenRecord>();
     public DbSet<SystemSetting> SystemSettings => Set<SystemSetting>();
+    public DbSet<HeroBanner> HeroBanners => Set<HeroBanner>();
+    public DbSet<StockAdjustment> StockAdjustments => Set<StockAdjustment>();
+    public DbSet<PrivateTastingBooking> PrivateTastingBookings => Set<PrivateTastingBooking>();
+    public DbSet<BackInStockAlert> BackInStockAlerts => Set<BackInStockAlert>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -253,6 +257,44 @@ public class PerfumeDbContext : IdentityDbContext<AppUser, AppRole, string>
             entity.Property(s => s.Value).HasMaxLength(4000).IsRequired();
             entity.Property(s => s.Description).HasMaxLength(500);
             entity.HasQueryFilter(s => !s.IsDeleted);
+        });
+
+        // Hero Banners
+        builder.Entity<HeroBanner>(entity =>
+        {
+            entity.ToTable("HeroBanners");
+            entity.Property(b => b.Title).HasMaxLength(250).IsRequired();
+            entity.Property(b => b.ImageUrl).HasMaxLength(1000).IsRequired();
+            entity.HasQueryFilter(b => !b.IsDeleted);
+        });
+
+        // Stock Adjustments
+        builder.Entity<StockAdjustment>(entity =>
+        {
+            entity.ToTable("StockAdjustments");
+            entity.Property(a => a.Reason).HasMaxLength(200).IsRequired();
+            entity.Property(a => a.PerformedByName).HasMaxLength(150);
+            entity.HasQueryFilter(a => !a.IsDeleted);
+        });
+
+        // Private Tasting Bookings
+        builder.Entity<PrivateTastingBooking>(entity =>
+        {
+            entity.ToTable("PrivateTastingBookings");
+            entity.Property(b => b.CustomerName).HasMaxLength(150).IsRequired();
+            entity.Property(b => b.PhoneNumber).HasMaxLength(30).IsRequired();
+            entity.Property(b => b.BoutiqueLocation).HasMaxLength(200).IsRequired();
+            entity.Property(b => b.Status).HasMaxLength(50).IsRequired();
+            entity.HasQueryFilter(b => !b.IsDeleted);
+        });
+
+        // Back In Stock Alerts
+        builder.Entity<BackInStockAlert>(entity =>
+        {
+            entity.ToTable("BackInStockAlerts");
+            entity.Property(a => a.CustomerEmail).HasMaxLength(256).IsRequired();
+            entity.Property(a => a.CustomerPhone).HasMaxLength(30);
+            entity.HasQueryFilter(a => !a.IsDeleted);
         });
     }
 

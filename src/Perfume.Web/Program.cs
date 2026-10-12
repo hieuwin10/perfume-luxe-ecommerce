@@ -66,7 +66,7 @@ using (var scope = app.Services.CreateScope())
     await DatabaseSchemaUpgrader.ApplyAsync(db, builder.Configuration, logger, databaseCreated);
 
     var roleManager = services.GetRequiredService<RoleManager<AppRole>>();
-    foreach (var role in new[] { "Admin", "StoreManager", "Customer" })
+    foreach (var role in new[] { "Admin", "StoreManager", "WarehouseStaff", "Concierge", "Customer" })
     {
         if (!await roleManager.RoleExistsAsync(role))
         {

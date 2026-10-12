@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Perfume.Domain.Enums;
 
 namespace Perfume.Application.DTOs;
 
@@ -128,6 +129,9 @@ public sealed class CustomerOrderDto
     public decimal DiscountAmount { get; set; }
     public decimal ShippingFee { get; set; }
     public decimal TotalAmount { get; set; }
+    public bool IsGiftWrapping { get; set; }
+    public decimal GiftWrappingFee { get; set; }
+    public string? GiftMessage { get; set; }
     public string CustomerName { get; set; } = string.Empty;
     public string CustomerPhone { get; set; } = string.Empty;
     public string CustomerEmail { get; set; } = string.Empty;
@@ -165,6 +169,10 @@ public sealed class CustomerOrderRequest
     public string? OrderNotes { get; set; }
     [StringLength(80)]
     public string? VoucherCode { get; set; }
+    public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.COD;
+    public bool IsGiftWrapping { get; set; } = false;
+    [StringLength(1000)]
+    public string? GiftMessage { get; set; }
 }
 
 public sealed class GuestOrderResponse

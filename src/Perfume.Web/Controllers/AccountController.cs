@@ -198,11 +198,13 @@ public class AccountController : Controller
 
     [Authorize]
     [HttpGet]
-    public IActionResult OrderDetails(int id)
+    public async Task<IActionResult> OrderDetails(int id)
     {
         var userId = _userManager.GetUserId(User);
         if (string.IsNullOrEmpty(userId)) return Challenge();
-        return View(new Perfume.Domain.Entities.Order { Id = id });
+        var order = await _db.Orders.FirstOrDefaultAsync(o => o.Id == id && o.UserId == userId);
+        if (order == null) return NotFound();
+        return View(order);
     }
 
     [HttpGet]

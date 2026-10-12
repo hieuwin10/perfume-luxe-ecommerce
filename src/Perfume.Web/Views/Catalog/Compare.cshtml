@@ -1,0 +1,284 @@
+@model List<Perfume.Application.DTOs.ProductDetailDto>
+@{
+    ViewData["Title"] = "So Sánh Mùi Hương - PERFUME LUXE";
+    var allProducts = ViewBag.AllProducts as List<Perfume.Web.Controllers.CompareProductOptionDto> ?? new();
+}
+
+<main style="max-width: 1360px; margin: 40px auto 80px; padding: 0 20px;">
+    <!-- HEADER -->
+    <div style="text-align: center; margin-bottom: 36px;">
+        <span style="font-size: 0.8rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold-primary); font-weight: 700; display: inline-block; margin-bottom: 8px;">
+            <i class="fa-solid fa-scale-balanced" style="margin-right: 6px;"></i> Đối Tác Cố Vấn Mùi Hương
+        </span>
+        <h1 style="font-size: clamp(1.8rem, 4vw, 2.4rem); font-family: var(--font-heading); font-weight: 700; margin: 0 0 12px; color: var(--text-primary);">
+            So Sánh Tuyệt Tác Mùi Hương
+        </h1>
+        <p style="color: var(--text-secondary); max-width: 620px; margin: 0 auto; font-size: 0.95rem; line-height: 1.6;">
+            Đặt lên bàn cân các nốt hương, nồng độ tinh dầu, độ lưu hương và phong cách biểu đạt để chọn ra tuyệt phẩm hoàn hảo nhất cho riêng bạn.
+        </p>
+    </div>
+
+    <!-- COMPARISON SELECTORS -->
+    <div class="luxury-card" style="padding: 20px 24px; margin-bottom: 32px; border: 1px solid var(--border-card); background: var(--bg-surface); border-radius: 12px;">
+        <form method="get" action="/so-sanh" style="display: flex; gap: 16px; align-items: center; justify-content: center; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <label style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">Chai 1:</label>
+                <select name="id1" onchange="this.form.submit()" style="padding: 8px 14px; background: var(--bg-surface-elevated, #1a1a24); border: 1px solid var(--border-card); border-radius: 8px; color: var(--text-primary); font-size: 0.85rem; outline: none; max-width: 260px;">
+                    <option value="">-- Chọn sản phẩm 1 --</option>
+                    @foreach (var p in allProducts)
+                    {
+                        var isSelected = Model.Count > 0 && Model[0].Id == p.Id;
+                        <option value="@p.Id" selected="@isSelected">@p.Name (@p.BrandName)</option>
+                    }
+                </select>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <label style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">Chai 2:</label>
+                <select name="id2" onchange="this.form.submit()" style="padding: 8px 14px; background: var(--bg-surface-elevated, #1a1a24); border: 1px solid var(--border-card); border-radius: 8px; color: var(--text-primary); font-size: 0.85rem; outline: none; max-width: 260px;">
+                    <option value="">-- Chọn sản phẩm 2 --</option>
+                    @foreach (var p in allProducts)
+                    {
+                        var isSelected = Model.Count > 1 && Model[1].Id == p.Id;
+                        <option value="@p.Id" selected="@isSelected">@p.Name (@p.BrandName)</option>
+                    }
+                </select>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <label style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">Chai 3 (Tùy chọn):</label>
+                <select name="id3" onchange="this.form.submit()" style="padding: 8px 14px; background: var(--bg-surface-elevated, #1a1a24); border: 1px solid var(--border-card); border-radius: 8px; color: var(--text-primary); font-size: 0.85rem; outline: none; max-width: 260px;">
+                    <option value="">-- Trống (Thêm chai thứ 3) --</option>
+                    @foreach (var p in allProducts)
+                    {
+                        var isSelected = Model.Count > 2 && Model[2].Id == p.Id;
+                        <option value="@p.Id" selected="@isSelected">@p.Name (@p.BrandName)</option>
+                    }
+                </select>
+            </div>
+        </form>
+    </div>
+
+    @if (Model.Count < 2)
+    {
+        <div class="luxury-card" style="padding: 48px; text-align: center;">
+            <i class="fa-solid fa-scale-unbalanced" style="font-size: 2.5rem; color: var(--gold-primary); opacity: 0.4; margin-bottom: 16px; display: block;"></i>
+            <h3 style="font-size: 1.2rem; color: var(--text-primary); margin-bottom: 8px;">Vui lòng chọn ít nhất 2 chai nước hoa để bắt đầu so sánh</h3>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">Sử dụng thanh chọn ở trên để chọn các chai bạn quan tâm.</p>
+        </div>
+    }
+    else
+    {
+        <!-- COMPARISON MATRIX TABLE -->
+        <div class="luxury-card" style="padding: 0; overflow-x: auto; border: 1px solid var(--border-card); background: var(--bg-surface); border-radius: 14px;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+                <thead>
+                    <tr style="background: var(--bg-surface-elevated); border-bottom: 1px solid var(--border-card);">
+                        <th style="padding: 24px; width: 220px; color: var(--text-muted); font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.05em;">Tiêu Chí Đánh Giá</th>
+                        @foreach (var p in Model)
+                        {
+                            <th style="padding: 24px; text-align: center; vertical-align: top; width: calc((100% - 220px) / @Model.Count);">
+                                <div style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
+                                    <img src="@(string.IsNullOrEmpty(p.MainImageUrl) ? "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=300&q=80" : p.MainImageUrl)" 
+                                         alt="@p.Name" style="width: 120px; height: 120px; object-fit: cover; border-radius: 12px; border: 1px solid var(--border-card); box-shadow: 0 8px 20px rgba(0,0,0,0.3);" />
+                                    <div>
+                                        <span style="font-size: 0.78rem; text-transform: uppercase; color: var(--gold-primary); letter-spacing: 0.1em; font-weight: 700;">@p.BrandName</span>
+                                        <h3 style="margin: 4px 0 6px; font-size: 1.05rem; font-weight: 700; color: var(--text-primary);">@p.Name</h3>
+                                        <div style="font-size: 1.15rem; font-weight: 800; color: var(--gold-primary);">@p.BasePrice.ToString("N0") ₫</div>
+                                    </div>
+                                    <div style="display: flex; gap: 8px; margin-top: 4px;">
+                                        <a href="/catalog/detail/@p.Slug" class="btn-luxe" style="padding: 6px 14px; font-size: 0.8rem; text-decoration: none;">Xem Chi Tiết</a>
+                                        <button type="button" class="btn-luxe-outline" style="padding: 6px 10px; font-size: 0.8rem;" onclick="CartDrawer.addQuick(@p.Id, '@Html.Raw(JavaScriptEncoder.Default.Encode(p.Name))', @p.BasePrice, '@(p.MainImageUrl ?? "")')">
+                                            <i class="fa-solid fa-cart-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Xuất xứ & Thương hiệu -->
+                    <tr style="border-bottom: 1px solid var(--border-card);">
+                        <td style="padding: 16px 24px; font-weight: 600; color: var(--text-muted);"><i class="fa-solid fa-globe" style="width: 20px; color: var(--gold-primary);"></i> Xuất Xứ</td>
+                        @foreach (var p in Model)
+                        {
+                            <td style="padding: 16px 24px; text-align: center; color: var(--text-primary); font-weight: 600;">
+                                @(p.BrandCountry ?? "Pháp (France)")
+                            </td>
+                        }
+                    </tr>
+
+                    <!-- Nhóm hương -->
+                    <tr style="border-bottom: 1px solid var(--border-card); background: rgba(255,255,255,0.015);">
+                        <td style="padding: 16px 24px; font-weight: 600; color: var(--text-muted);"><i class="fa-solid fa-palette" style="width: 20px; color: var(--gold-primary);"></i> Nhóm Hương</td>
+                        @foreach (var p in Model)
+                        {
+                            <td style="padding: 16px 24px; text-align: center;">
+                                <span style="display: inline-block; padding: 4px 12px; border-radius: 99px; font-size: 0.82rem; font-weight: 700; background: rgba(212,175,55,0.15); color: @(p.FamilyColor ?? "var(--gold-primary)"); border: 1px solid rgba(212,175,55,0.3);">
+                                    @(p.FamilyName ?? "Hương Thơm Độc Bản")
+                                </span>
+                            </td>
+                        }
+                    </tr>
+
+                    <!-- Nồng độ tinh dầu -->
+                    <tr style="border-bottom: 1px solid var(--border-card);">
+                        <td style="padding: 16px 24px; font-weight: 600; color: var(--text-muted);"><i class="fa-solid fa-droplet" style="width: 20px; color: var(--gold-primary);"></i> Nồng Độ</td>
+                        @foreach (var p in Model)
+                        {
+                            <td style="padding: 16px 24px; text-align: center; color: var(--gold-primary); font-weight: 700;">
+                                @p.Concentration.ToString()
+                                <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: normal; margin-top: 2px;">
+                                    @(p.Concentration == Perfume.Domain.Enums.Concentration.Parfum ? "15-30% Tinh dầu nguyên chất" : "15-20% Tinh dầu chuẩn mực")
+                                </div>
+                            </td>
+                        }
+                    </tr>
+
+                    <!-- Giới tính -->
+                    <tr style="border-bottom: 1px solid var(--border-card); background: rgba(255,255,255,0.015);">
+                        <td style="padding: 16px 24px; font-weight: 600; color: var(--text-muted);"><i class="fa-solid fa-venus-mars" style="width: 20px; color: var(--gold-primary);"></i> Phong Cách Giới Tính</td>
+                        @foreach (var p in Model)
+                        {
+                            <td style="padding: 16px 24px; text-align: center; color: var(--text-primary); font-weight: 600;">
+                                @(p.Gender switch {
+                                    Perfume.Domain.Enums.GenderTarget.Unisex => "Phi giới tính (Unisex)",
+                                    Perfume.Domain.Enums.GenderTarget.Men => "Dành cho Nam (Masculine)",
+                                    Perfume.Domain.Enums.GenderTarget.Women => "Dành cho Nữ (Feminine)",
+                                    _ => p.Gender.ToString()
+                                })
+                            </td>
+                        }
+                    </tr>
+
+                    <!-- Tầng hương đầu -->
+                    <tr style="border-bottom: 1px solid var(--border-card);">
+                        <td style="padding: 18px 24px; font-weight: 600; color: var(--text-muted); vertical-align: top;">
+                            <i class="fa-solid fa-wind" style="width: 20px; color: var(--gold-primary);"></i> Hương Đầu (Top Notes)
+                            <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;">15 phút đầu sau khi xịt</div>
+                        </td>
+                        @foreach (var p in Model)
+                        {
+                            <td style="padding: 18px 24px; text-align: center; vertical-align: top;">
+                                @if (p.TopNotes.Any())
+                                {
+                                    <div style="display: flex; flex-wrap: wrap; gap: 6px; justify-content: center;">
+                                        @foreach (var note in p.TopNotes)
+                                        {
+                                            <span style="background: rgba(255,255,255,0.06); padding: 3px 10px; border-radius: 6px; font-size: 0.82rem; border: 1px solid var(--border-card);">@note.Name</span>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span style="color: var(--text-muted);">Cam Bergamot, Quả mọng tươi, Tiêu hồng</span>
+                                }
+                            </td>
+                        }
+                    </tr>
+
+                    <!-- Tầng hương giữa -->
+                    <tr style="border-bottom: 1px solid var(--border-card); background: rgba(255,255,255,0.015);">
+                        <td style="padding: 18px 24px; font-weight: 600; color: var(--text-muted); vertical-align: top;">
+                            <i class="fa-solid fa-heart" style="width: 20px; color: #f87171;"></i> Hương Giữa (Heart Notes)
+                            <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;">Linh hồn mùi hương (2-4 giờ)</div>
+                        </td>
+                        @foreach (var p in Model)
+                        {
+                            <td style="padding: 18px 24px; text-align: center; vertical-align: top;">
+                                @if (p.HeartNotes.Any())
+                                {
+                                    <div style="display: flex; flex-wrap: wrap; gap: 6px; justify-content: center;">
+                                        @foreach (var note in p.HeartNotes)
+                                        {
+                                            <span style="background: rgba(248,113,113,0.1); color: #fca5a5; padding: 3px 10px; border-radius: 6px; font-size: 0.82rem; border: 1px solid rgba(248,113,113,0.25);">@note.Name</span>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span style="color: var(--text-muted);">Hoa hồng Grasse, Hoa nhài Sambac, Diên vĩ</span>
+                                }
+                            </td>
+                        }
+                    </tr>
+
+                    <!-- Tầng hương cuối -->
+                    <tr style="border-bottom: 1px solid var(--border-card);">
+                        <td style="padding: 18px 24px; font-weight: 600; color: var(--text-muted); vertical-align: top;">
+                            <i class="fa-solid fa-fire" style="width: 20px; color: #f59e0b;"></i> Hương Cuối (Base Notes)
+                            <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;">Vấn vương trên da (6-12 giờ)</div>
+                        </td>
+                        @foreach (var p in Model)
+                        {
+                            <td style="padding: 18px 24px; text-align: center; vertical-align: top;">
+                                @if (p.BaseNotes.Any())
+                                {
+                                    <div style="display: flex; flex-wrap: wrap; gap: 6px; justify-content: center;">
+                                        @foreach (var note in p.BaseNotes)
+                                        {
+                                            <span style="background: rgba(245,158,11,0.1); color: #fbbf24; padding: 3px 10px; border-radius: 6px; font-size: 0.82rem; border: 1px solid rgba(245,158,11,0.25);">@note.Name</span>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span style="color: var(--text-muted);">Gỗ đàn hương, Vani Bourbon, Hổ phách, Xạ hương</span>
+                                }
+                            </td>
+                        }
+                    </tr>
+
+                    <!-- Độ lưu hương -->
+                    <tr style="border-bottom: 1px solid var(--border-card); background: rgba(255,255,255,0.015);">
+                        <td style="padding: 16px 24px; font-weight: 600; color: var(--text-muted);"><i class="fa-solid fa-hourglass-half" style="width: 20px; color: var(--gold-primary);"></i> Độ Lưu Hương</td>
+                        @foreach (var p in Model)
+                        {
+                            <td style="padding: 16px 24px; text-align: center; color: var(--text-primary); font-weight: 600;">
+                                @(string.IsNullOrEmpty(p.Longevity) ? "Lâu - 7 đến 12 giờ" : p.Longevity)
+                            </td>
+                        }
+                    </tr>
+
+                    <!-- Độ tỏa hương -->
+                    <tr style="border-bottom: 1px solid var(--border-card);">
+                        <td style="padding: 16px 24px; font-weight: 600; color: var(--text-muted);"><i class="fa-solid fa-bullhorn" style="width: 20px; color: var(--gold-primary);"></i> Độ Tỏa Hương</td>
+                        @foreach (var p in Model)
+                        {
+                            <td style="padding: 16px 24px; text-align: center; color: var(--text-primary); font-weight: 600;">
+                                @(string.IsNullOrEmpty(p.Sillage) ? "Toả hương xa - Trong bán kính 2 mét" : p.Sillage)
+                            </td>
+                        }
+                    </tr>
+
+                    <!-- Mùa khuyên dùng -->
+                    <tr style="border-bottom: 1px solid var(--border-card); background: rgba(255,255,255,0.015);">
+                        <td style="padding: 16px 24px; font-weight: 600; color: var(--text-muted);"><i class="fa-solid fa-calendar-check" style="width: 20px; color: var(--gold-primary);"></i> Mùa & Thời Điểm Dùng</td>
+                        @foreach (var p in Model)
+                        {
+                            <td style="padding: 16px 24px; text-align: center; color: var(--text-secondary);">
+                                @(string.IsNullOrEmpty(p.SeasonRecommendation) ? "Bốn mùa, Tiệc tối & Sự kiện sang trọng" : p.SeasonRecommendation)
+                            </td>
+                        }
+                    </tr>
+
+                    <!-- Đánh giá khách hàng -->
+                    <tr>
+                        <td style="padding: 16px 24px; font-weight: 600; color: var(--text-muted);"><i class="fa-solid fa-star" style="width: 20px; color: #fbbf24;"></i> Điểm Đánh Giá</td>
+                        @foreach (var p in Model)
+                        {
+                            <td style="padding: 16px 24px; text-align: center;">
+                                <div style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+                                    <span style="font-weight: 700; color: #fbbf24; font-size: 1.05rem;">@p.RatingAverage.ToString("0.0")</span>
+                                    <span style="color: #fbbf24; font-size: 0.85rem;"><i class="fa-solid fa-star"></i></span>
+                                    <span style="font-size: 0.78rem; color: var(--text-muted);">(@p.RatingCount lượt đánh giá)</span>
+                                </div>
+                            </td>
+                        }
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    }
+</main>
