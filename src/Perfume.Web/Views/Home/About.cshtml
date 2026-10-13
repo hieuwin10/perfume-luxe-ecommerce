@@ -1,0 +1,154 @@
+@{
+    ViewData["Title"] = "Về Chúng Tôi - Di Sản & Triết Lý Haute Parfumerie";
+    ViewData["MetaDescription"] = "Khám phá câu chuyện thương hiệu PERFUME LUXE - Ngôi nhà của những tác phẩm mùi hương Niche độc bản và nghệ thuật thẩm hương chuẩn mực Paris.";
+}
+
+<style>
+    .about-hero {
+        position: relative;
+        padding: 90px 24px;
+        text-align: center;
+        background: radial-gradient(circle at center, rgba(212, 175, 55, 0.15) 0%, rgba(10, 10, 10, 0.98) 70%);
+        border-bottom: 1px solid var(--border-card);
+    }
+    .about-story-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+        gap: 50px;
+        align-items: center;
+        margin: 70px 0;
+    }
+    .core-value-card {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-card);
+        border-radius: var(--radius-md);
+        padding: 36px 28px;
+        text-align: center;
+        transition: all 0.35s ease;
+    }
+    .core-value-card:hover {
+        border-color: var(--gold-primary);
+        transform: translateY(-6px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+    }
+    .core-icon-box {
+        width: 70px;
+        height: 70px;
+        margin: 0 auto 20px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(212, 175, 55, 0.05));
+        border: 1px solid var(--gold-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--gold-primary);
+        font-size: 1.8rem;
+    }
+</style>
+
+<div class="about-hero">
+    <div style="max-width: 860px; margin: 0 auto;">
+        <span style="display: inline-block; padding: 4px 16px; background: rgba(212,175,55,0.12); border: 1px solid rgba(212,175,55,0.3); border-radius: 20px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.25em; color: var(--gold-primary); font-weight: 700; margin-bottom: 16px;">
+            L’Art de la Parfumerie
+        </span>
+        <h1 style="font-size: 3.4rem; font-family: var(--font-serif); font-weight: 700; margin-bottom: 20px; line-height: 1.2;">
+            Di Sản & Câu Chuyện Của <br/><span style="color: var(--gold-primary);">PERFUME LUXE</span>
+        </h1>
+        <p style="font-size: 1.1rem; color: var(--text-secondary); line-height: 1.8; max-width: 720px; margin: 0 auto;">
+            Mỗi giọt hương là một tác phẩm điêu khắc vô hình. Chúng tôi không chỉ bán nước hoa, chúng tôi trao gửi chiếc chìa khóa đánh thức ký ức và khẳng định vị thế quý tộc của riêng bạn.
+        </p>
+    </div>
+</div>
+
+<div style="max-width: 1200px; margin: 0 auto; padding: 0 24px;">
+    <!-- Story Section 1 -->
+    <div class="about-story-grid">
+        <div>
+            <span style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.2em; color: var(--gold-primary); font-weight: 700;">Khởi Nguồn Đam Mê</span>
+            <h2 style="font-size: 2.2rem; font-family: var(--font-serif); margin: 12px 0 20px; line-height: 1.3;">
+                Từ Thủ Phủ Hương Thơm Grasse Đến Trái Tim Người Yêu Hương Việt Nam
+            </h2>
+            <p style="color: var(--text-secondary); line-height: 1.8; margin-bottom: 16px;">
+                Được thành lập từ niềm đam mê thuần khiết với nghệ thuật Haute Parfumerie, PERFUME LUXE bắt đầu từ những chuyến viếng thăm các cánh đồng hoa hồng tháng Năm và hoa nhài tại thị trấn Grasse, miền Nam nước Pháp — nơi sản sinh ra những nhà chế tác nước hoa huyền thoại nhất hành tinh.
+            </p>
+            <p style="color: var(--text-secondary); line-height: 1.8; margin-bottom: 28px;">
+                Nhận thấy thị trường nước hoa cao cấp tại Việt Nam còn nhiều trăn trở về nguồn gốc xuất xứ và thiếu vắng không gian thưởng hương đúng điệu, PERFUME LUXE ra đời với sứ mệnh mang lại trải nghiệm chuẩn quốc tế: 100% chính hãng có xuất xứ minh bạch, bảo quản chuẩn nhiệt độ phòng thí nghiệm và dịch vụ tư vấn cá nhân hóa đỉnh cao.
+            </p>
+            <div style="display: flex; gap: 30px; border-left: 3px solid var(--gold-primary); padding-left: 20px;">
+                <div>
+                    <div style="font-size: 2rem; font-weight: 700; color: var(--gold-primary); font-family: var(--font-serif);">100%</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Chính Hãng Nhập Khẩu</div>
+                </div>
+                <div>
+                    <div style="font-size: 2rem; font-weight: 700; color: var(--gold-primary); font-family: var(--font-serif);">200%</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Cam Kết Bồi Hoàn</div>
+                </div>
+                <div>
+                    <div style="font-size: 2rem; font-weight: 700; color: var(--gold-primary); font-family: var(--font-serif);">15,000+</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Khách Hàng Tinh Hoa</div>
+                </div>
+            </div>
+        </div>
+        <div style="border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--border-card); box-shadow: 0 20px 40px rgba(0,0,0,0.6);">
+            <img src="https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=1000&q=80" alt="Boutique Perfume Luxe" style="width: 100%; height: 480px; object-fit: cover;" />
+        </div>
+    </div>
+
+    <!-- Core Values Section -->
+    <div style="margin: 80px 0;">
+        <div style="text-align: center; margin-bottom: 50px;">
+            <span style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.2em; color: var(--gold-primary); font-weight: 700;">Cam Kết Bất Biến</span>
+            <h2 style="font-size: 2.3rem; font-family: var(--font-serif); margin-top: 10px;">
+                4 Trụ Cột Danh Dự Của PERFUME LUXE
+            </h2>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 28px;">
+            <div class="core-value-card">
+                <div class="core-icon-box"><i class="fa-solid fa-certificate"></i></div>
+                <h3 style="font-size: 1.2rem; margin-bottom: 12px; font-family: var(--font-serif);">100% Auth Hay Hoàn 200%</h3>
+                <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.65;">
+                    Mọi sản phẩm bán ra đều có hóa đơn chứng từ nhập khẩu chính ngạch từ Pháp, Ý, Anh, Mỹ. Đền bù gấp đôi nếu phát hiện hàng không chuẩn.
+                </p>
+            </div>
+            <div class="core-value-card">
+                <div class="core-icon-box"><i class="fa-solid fa-temperature-arrow-down"></i></div>
+                <h3 style="font-size: 1.2rem; margin-bottom: 12px; font-family: var(--font-serif);">Bảo Quản Chuẩn Lab 18°C</h3>
+                <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.65;">
+                    Hệ thống kho bảo quản chuyên dụng giữ nhiệt độ 18-20°C, kiểm soát độ ẩm nghiêm ngặt và không tiếp xúc tia UV để nốt hương nguyên vẹn tuyệt đối.
+                </p>
+            </div>
+            <div class="core-value-card">
+                <div class="core-icon-box"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                <h3 style="font-size: 1.2rem; margin-bottom: 12px; font-family: var(--font-serif);">Chiết Vô Trùng Chuyên Dụng</h3>
+                <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.65;">
+                    Quy trình chiết 10ml thực hiện trong buồng lọc khí vô trùng với kim tiêm y tế chuyên dụng, tuyệt đối không làm bay cồn hay biến chất mùi hương.
+                </p>
+            </div>
+            <div class="core-value-card">
+                <div class="core-icon-box"><i class="fa-solid fa-crown"></i></div>
+                <h3 style="font-size: 1.2rem; margin-bottom: 12px; font-family: var(--font-serif);">Dịch Vụ Concierge 1:1</h3>
+                <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.65;">
+                    Mỗi khách hàng được hỗ trợ bởi chuyên gia thử hương Scent Sommelier, tư vấn mùi hương riêng theo cung hoàng đạo, phong cách và hoàn cảnh sử dụng.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Call to Action -->
+    <div style="background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(15, 15, 15, 0.9)); border: 1px solid var(--gold-primary); border-radius: var(--radius-lg); padding: 50px 30px; text-align: center; margin-bottom: 80px;">
+        <h2 style="font-size: 2rem; font-family: var(--font-serif); margin-bottom: 16px;">
+            Sẵn Sàng Tìm Kiếm Chữ Ký Khứu Giác Của Riêng Bạn?
+        </h2>
+        <p style="color: var(--text-secondary); max-width: 600px; margin: 0 auto 30px; font-size: 0.95rem; line-height: 1.7;">
+            Trải nghiệm công nghệ AI Fragrance Finder của chúng tôi hoặc ghé thăm Flagship Boutique để trực tiếp cảm nhận từng tầng hương.
+        </p>
+        <div style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap;">
+            <a href="/catalog/quiz" class="btn-luxe-primary" style="padding: 12px 28px;">
+                <i class="fa-solid fa-wand-magic-sparkles" style="margin-right: 8px;"></i>Làm Quiz Khám Phá Mùi Hương
+            </a>
+            <a href="/boutique" class="btn-luxe-outline" style="padding: 12px 28px;">
+                <i class="fa-solid fa-store" style="margin-right: 8px;"></i>Ghé Thăm Showroom Flagship
+            </a>
+        </div>
+    </div>
+</div>

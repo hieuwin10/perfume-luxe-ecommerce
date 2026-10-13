@@ -17,12 +17,18 @@
             <p style="color: var(--text-muted); margin: 0; font-size: 0.88rem;">Tổng số: <strong>@total</strong> sản phẩm trong danh mục</p>
         </div>
 
-        <!-- Search box -->
-        <form method="get" action="/admin/admindashboard/products" style="display: flex; gap: 8px; margin: 0;">
-            <input type="text" name="search" value="@search" placeholder="Tìm kiếm sản phẩm, thương hiệu..." 
-                   style="padding: 8px 14px; background: var(--bg-input, rgba(255,255,255,0.06)); border: 1px solid var(--border-card); border-radius: 8px; color: var(--text-primary); font-size: 0.88rem; width: 260px; outline: none;" />
-            <button type="submit" class="btn-luxe" style="padding: 8px 16px; font-size: 0.85rem;">Tìm</button>
-        </form>
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <!-- Search box -->
+            <form method="get" action="/admin/admindashboard/products" style="display: flex; gap: 8px; margin: 0;">
+                <input type="text" name="search" value="@search" placeholder="Tìm kiếm sản phẩm, thương hiệu..." 
+                       style="padding: 8px 14px; background: var(--bg-input, rgba(255,255,255,0.06)); border: 1px solid var(--border-card); border-radius: 8px; color: var(--text-primary); font-size: 0.88rem; width: 240px; outline: none;" />
+                <button type="submit" class="btn-luxe" style="padding: 8px 16px; font-size: 0.85rem;">Tìm</button>
+            </form>
+
+            <a href="/admin/admindashboard/createproduct" class="btn-luxe" style="padding: 8px 16px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px; text-decoration: none;">
+                <i class="fa-solid fa-plus"></i> Thêm Sản Phẩm
+            </a>
+        </div>
     </div>
 
     @if (TempData["Error"] != null)
@@ -75,8 +81,11 @@
                                 <button class="btn-luxe" type="submit">Lưu giá / trạng thái</button>
                             </form>
                         </td>
-                        <td style="padding: 14px 20px; text-align: right;">
-                            <a href="/catalog/product/@p.Slug" target="_blank" style="color: var(--gold-primary); margin-right: 12px;" title="Xem sản phẩm ngoài web">
+                        <td style="padding: 14px 20px; text-align: right; white-space: nowrap;">
+                            <a href="/admin/admindashboard/editproduct/@p.Id" style="color: var(--gold-primary); margin-right: 12px; text-decoration: none;" title="Chỉnh sửa sản phẩm & gallery">
+                                <i class="fa-solid fa-pen-to-square"></i> Sửa
+                            </a>
+                            <a href="/catalog/product/@p.Slug" target="_blank" style="color: var(--text-muted); margin-right: 12px;" title="Xem sản phẩm ngoài web">
                                 <i class="fa-solid fa-arrow-up-right-from-square"></i>
                             </a>
                             <form method="post" action="/admin/admindashboard/deleteproduct" style="display: inline; margin: 0;" onsubmit="return confirm('Bạn có chắc muốn xóa sản phẩm này?');">

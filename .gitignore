@@ -13,3 +13,4 @@ docker_data/
 backups/
 src/Perfume.Web/App_Data/**
 !src/Perfume.Web/App_Data/.gitkeep
+src/Perfume.Web/DataProtection-Keys/

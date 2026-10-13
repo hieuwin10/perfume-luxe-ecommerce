@@ -10,11 +10,12 @@ public interface IPerfumeCatalogService
     Task<List<ProductCardDto>> GetNewArrivalsAsync();
     Task<(List<ProductCardDto> Items, int TotalCount)> GetProductsAsync(ProductFilterParams filter);
     Task<ProductDetailDto?> GetProductBySlugAsync(string slug);
+    Task<ProductDetailDto?> GetProductByIdAsync(int id);
     Task<List<Brand>> GetBrandsAsync();
     Task<List<Category>> GetCategoriesAsync();
     Task<List<FragranceFamily>> GetFragranceFamiliesAsync();
     Task<List<FragranceNote>> GetFragranceNotesAsync();
-    Task<List<ProductCardDto>> GetQuizRecommendationsAsync(QuizAnswerRequest request);
+    Task<QuizRecommendationResultDto> GetQuizRecommendationsAsync(QuizAnswerRequest request);
 }
 
 public interface IOrderService
@@ -22,4 +23,5 @@ public interface IOrderService
     Task<(bool Success, string? Error, Order? Order)> PlaceOrderAsync(CheckoutRequestDto request, string? userId = null);
     Task<Voucher?> ValidateVoucherAsync(string code, decimal currentSubTotal);
     Task<Order?> GetOrderByCodeAsync(string orderCode);
+    Task<bool> ConfirmPaymentAsync(string orderCode);
 }

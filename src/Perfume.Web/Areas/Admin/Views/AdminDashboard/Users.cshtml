@@ -1,82 +1,208 @@
 @model List<(Perfume.Infrastructure.Identity.AppUser User, IList<string> Roles)>
 @{
-    ViewData["Title"] = "Quản Lý Người Dùng & Phân Quyền";
+    ViewData["Title"] = "Quản Lý Nhân Sự & Phân Quyền (RBAC)";
     Layout = "_AdminLayout";
 }
 
-<div style="max-width: 1400px; margin: 0 auto;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+<div style="max-width: 1400px; margin: 0 auto; padding-bottom: 60px;">
+    <!-- HEADER -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
         <div>
-            <h1 style="font-size: 1.6rem; font-weight: 800; margin: 0 0 6px; color: var(--text-primary);">
-                <i class="fa-solid fa-users-gear text-gold-gradient" style="margin-right: 8px;"></i> Quản Lý Tài Khoản & Phân Quyền (RBAC)
+            <span style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.2em; color: var(--gold-primary); font-weight: 700; display: block; margin-bottom: 4px;">
+                <i class="fa-solid fa-shield-halved"></i> Role-Based Access Control
+            </span>
+            <h1 style="font-size: 1.85rem; font-weight: 800; margin: 0; color: var(--text-primary);">
+                Quản Lý Nhân Sự &amp; Phân Quyền Đa Tầng (RBAC)
             </h1>
-            <p style="color: var(--text-muted); margin: 0; font-size: 0.88rem;">Hệ thống hỗ trợ 3 cấp bậc quyền: <strong>Admin</strong> (Toàn quyền), <strong>StoreManager</strong> (Cửa hàng trưởng), và <strong>Customer</strong> (Khách hàng)</p>
+            <p style="color: var(--text-muted); margin: 4px 0 0; font-size: 0.88rem;">
+                Phân bổ quyền hạn chính xác theo cấu trúc tập đoàn: Quản trị tối cao, Giám đốc boutique, Thủ kho vận hành, Chuyên viên tiếp đón VIP và Khách hàng.
+            </p>
         </div>
-        <span style="background: rgba(212,175,55,0.15); border: 1px solid var(--gold-primary); color: var(--gold-primary); padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
-            Tổng: @Model.Count tài khoản
+        <span style="background: rgba(212,175,55,0.15); border: 1px solid var(--gold-primary); color: var(--gold-primary); padding: 8px 18px; border-radius: 20px; font-size: 0.88rem; font-weight: 700;">
+            <i class="fa-solid fa-users" style="margin-right: 6px;"></i> Tổng: @Model.Count tài khoản
         </span>
     </div>
 
+    <!-- NOTIFICATIONS -->
     @if (TempData["Success"] != null)
     {
-        <div style="background: rgba(42,157,143,0.15); border: 1px solid #2A9D8F; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; color: #2A9D8F; font-size: 0.9rem;">
+        <div style="background: rgba(42,157,143,0.15); border: 1px solid #2A9D8F; border-radius: 8px; padding: 12px 18px; margin-bottom: 20px; color: #2A9D8F; font-size: 0.9rem;">
             <i class="fa-solid fa-circle-check" style="margin-right: 6px;"></i> @TempData["Success"]
         </div>
     }
+    @if (TempData["Error"] != null)
+    {
+        <div style="background: rgba(248,113,113,0.15); border: 1px solid #f87171; border-radius: 8px; padding: 12px 18px; margin-bottom: 20px; color: #f87171; font-size: 0.9rem;">
+            <i class="fa-solid fa-circle-exclamation" style="margin-right: 6px;"></i> @TempData["Error"]
+        </div>
+    }
 
-    @if (TempData["Error"] != null) { <div class="luxury-card" style="padding:12px;margin-bottom:12px;color:#f87171">@TempData["Error"]</div> }
+    <!-- RBAC MATRIX OVERVIEW -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-bottom: 24px;">
+        <div class="luxury-card" style="padding: 16px; border-left: 3px solid var(--gold-primary);">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <span class="role-badge role-badge-admin">Admin</span>
+                <strong style="color: var(--text-primary); font-size: 0.88rem;">Tổng Quản Trị</strong>
+            </div>
+            <p style="margin: 0; font-size: 0.78rem; color: var(--text-muted); line-height: 1.4;">
+                Toàn quyền hệ thống: Tài chính P&amp;L, Quản lý DB, Sao lưu &amp; Nhật ký kiểm toán.
+            </p>
+        </div>
+
+        <div class="luxury-card" style="padding: 16px; border-left: 3px solid #2A9D8F;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <span class="role-badge role-badge-manager">StoreManager</span>
+                <strong style="color: var(--text-primary); font-size: 0.88rem;">Giám Đốc Cửa Hàng</strong>
+            </div>
+            <p style="margin: 0; font-size: 0.78rem; color: var(--text-muted); line-height: 1.4;">
+                Quản trị bán hàng, phê duyệt đơn hàng, cấu hình voucher, duyệt review, báo cáo tài chính.
+            </p>
+        </div>
+
+        <div class="luxury-card" style="padding: 16px; border-left: 3px solid #E76F51;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <span class="role-badge role-badge-warehouse">WarehouseStaff</span>
+                <strong style="color: var(--text-primary); font-size: 0.88rem;">Thủ Kho Vận Hành</strong>
+            </div>
+            <p style="margin: 0; font-size: 0.78rem; color: var(--text-muted); line-height: 1.4;">
+                Kiểm soát xuất/nhập kho, điều chỉnh số lượng tồn, lưu giá vốn (COGS), in phiếu xuất kho COD.
+            </p>
+        </div>
+
+        <div class="luxury-card" style="padding: 16px; border-left: 3px solid #A855F7;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <span class="role-badge role-badge-concierge">Concierge</span>
+                <strong style="color: var(--text-primary); font-size: 0.88rem;">Tiếp Đón VIP</strong>
+            </div>
+            <p style="margin: 0; font-size: 0.78rem; color: var(--text-muted); line-height: 1.4;">
+                Tiếp nhận &amp; điều phối lịch hẹn Private Tasting, dịch vụ đóng gói quà và CRM khách thân thiết.
+            </p>
+        </div>
+
+        <div class="luxury-card" style="padding: 16px; border-left: 3px solid #888;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <span class="role-badge role-badge-customer">Customer</span>
+                <strong style="color: var(--text-primary); font-size: 0.88rem;">Khách Hàng</strong>
+            </div>
+            <p style="margin: 0; font-size: 0.78rem; color: var(--text-muted); line-height: 1.4;">
+                Mua sắm, tra cứu hành trình đơn hàng, đặt lịch nếm hương và tích lũy điểm thưởng thành viên.
+            </p>
+        </div>
+    </div>
+
+    <!-- USERS TABLE -->
     <div class="luxury-card" style="padding: 0; overflow: hidden;">
-        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem;">
-            <thead>
-                <tr style="background: var(--bg-surface-elevated); border-bottom: 1px solid var(--border-card); color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">
-                    <th style="padding: 14px 20px;">Họ Tên & Email</th>
-                    <th style="padding: 14px 20px;">Vai Trò Hiện Tại</th>
-                    <th style="padding: 14px 20px;">Thay Đổi Vai Trò</th>
-                    <th style="padding: 14px 20px;">Ngày Đăng Ký</th>
-                    <th style="padding: 14px 20px; text-align: right;">Hành Động</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model)
-                {
-                    <tr style="border-bottom: 1px solid var(--border-subtle); transition: background 0.15s;">
-                        <td style="padding: 14px 20px;">
-                            <div style="font-weight: 600; color: var(--text-primary);">@item.User.FullName</div>
-                            <div style="font-size: 0.78rem; color: var(--text-muted);">@item.User.Email</div>
-                        </td>
-                        <td style="padding: 14px 20px;">
-                            @foreach (var r in item.Roles)
-                            {
-                                <span class="@(r == "Admin" ? "role-badge-admin" : r == "StoreManager" ? "role-badge-manager" : "role-badge-customer")">@r</span>
-                            }
-                        </td>
-                        <td style="padding: 14px 20px;">
-                            <form method="post" action="/admin/admindashboard/changeuserrole" style="display: flex; gap: 8px; align-items: center; margin: 0;">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="userId" value="@item.User.Id" />
-                                <select name="newRole" style="padding: 6px 10px; background: var(--bg-input, rgba(255,255,255,0.06)); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.82rem; outline: none;">
-                                    <option value="Customer" selected="@(item.Roles.Contains("Customer"))">Customer (Khách Hàng)</option>
-                                    <option value="StoreManager" selected="@(item.Roles.Contains("StoreManager"))">StoreManager (Cửa Hàng Trưởng)</option>
-                                    <option value="Admin" selected="@(item.Roles.Contains("Admin"))">Admin (Quản Trị Viên)</option>
-                                </select>
-                                <button type="submit" class="btn-luxe" style="padding: 6px 12px; font-size: 0.78rem;">Lưu</button>
-                            </form>
-                        </td>
-                        <td style="padding: 14px 20px; color: var(--text-muted); font-size: 0.82rem;">
-                            @item.User.CreatedAt.ToString("dd/MM/yyyy HH:mm")
-                        </td>
-                        <td style="padding: 14px 20px; text-align: right;">
-                            <form method="post" action="/admin/admindashboard/deleteuser" style="display: inline; margin: 0;" onsubmit="return confirm('Bạn có chắc muốn xóa tài khoản này?');">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="userId" value="@item.User.Id" />
-                                <button type="submit" style="background: none; border: none; color: #f87171; cursor: pointer; padding: 4px 8px; border-radius: 4px;" title="Xóa">
-                                    <i class="fa-solid fa-trash-can"></i>
-                                </button>
-                            </form>
-                        </td>
+        <div style="padding: 16px 20px; border-bottom: 1px solid var(--border-card); background: var(--bg-surface-elevated); display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="margin: 0; font-size: 1.05rem; font-weight: 700; color: var(--text-primary);">
+                <i class="fa-solid fa-address-book text-gold-gradient" style="margin-right: 8px;"></i> Danh Sách Thành Viên &amp; Phân Vai Trò
+            </h3>
+            <span style="font-size: 0.78rem; color: var(--text-muted);">Thay đổi vai trò có hiệu lực ngay trong phiên làm việc tiếp theo</span>
+        </div>
+
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem;">
+                <thead>
+                    <tr style="border-bottom: 1px solid var(--border-card); color: var(--text-muted); text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.05em;">
+                        <th style="padding: 14px 20px;">Họ Tên &amp; Email</th>
+                        <th style="padding: 14px 20px;">Vai Trò Hiện Tại</th>
+                        <th style="padding: 14px 20px;">Thay Đổi Vai Trò (RBAC)</th>
+                        <th style="padding: 14px 20px;">Ngày Đăng Ký</th>
+                        <th style="padding: 14px 20px; text-align: right;">Hành Động</th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr style="border-bottom: 1px solid var(--border-subtle); transition: background 0.15s;">
+                            <td style="padding: 14px 20px;">
+                                <div style="font-weight: 700; color: var(--text-primary);">@item.User.FullName</div>
+                                <div style="font-size: 0.78rem; color: var(--text-muted);">
+                                    <i class="fa-solid fa-envelope" style="margin-right: 4px;"></i> @item.User.Email
+                                </div>
+                            </td>
+                            <td style="padding: 14px 20px;">
+                                @foreach (var r in item.Roles)
+                                {
+                                    var badgeClass = r switch {
+                                        "Admin" => "role-badge-admin",
+                                        "StoreManager" => "role-badge-manager",
+                                        "WarehouseStaff" => "role-badge-warehouse",
+                                        "Concierge" => "role-badge-concierge",
+                                        _ => "role-badge-customer"
+                                    };
+                                    <span class="role-badge @badgeClass">@r</span>
+                                }
+                            </td>
+                            <td style="padding: 14px 20px;">
+                                <form method="post" action="/admin/admindashboard/changeuserrole" style="display: flex; gap: 8px; align-items: center; margin: 0;">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="userId" value="@item.User.Id" />
+                                    <select name="newRole" style="padding: 6px 12px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.82rem; outline: none; font-weight: 600;">
+                                        <option value="Admin" selected="@(item.Roles.Contains("Admin"))">Admin (Toàn Quyền)</option>
+                                        <option value="StoreManager" selected="@(item.Roles.Contains("StoreManager"))">StoreManager (Cửa Hàng Trưởng)</option>
+                                        <option value="WarehouseStaff" selected="@(item.Roles.Contains("WarehouseStaff"))">WarehouseStaff (Thủ Kho)</option>
+                                        <option value="Concierge" selected="@(item.Roles.Contains("Concierge"))">Concierge (Tiếp Đón VIP)</option>
+                                        <option value="Customer" selected="@(item.Roles.Contains("Customer"))">Customer (Khách Hàng)</option>
+                                    </select>
+                                    <button type="submit" class="btn-luxe" style="padding: 6px 14px; font-size: 0.78rem;">
+                                        <i class="fa-solid fa-check"></i> Lưu
+                                    </button>
+                                </form>
+                            </td>
+                            <td style="padding: 14px 20px; color: var(--text-muted); font-size: 0.82rem;">
+                                @item.User.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                            </td>
+                            <td style="padding: 14px 20px; text-align: right;">
+                                <form method="post" action="/admin/admindashboard/deleteuser" style="display: inline; margin: 0;" onsubmit="return confirm('Bạn có chắc muốn xóa tài khoản này?');">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="userId" value="@item.User.Id" />
+                                    <button type="submit" style="background: none; border: none; color: #f87171; cursor: pointer; padding: 6px 10px; border-radius: 4px;" title="Xóa tài khoản">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
+
+@section Styles {
+    <style>
+        .role-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 99px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+        }
+        .role-badge-admin {
+            background: rgba(212, 175, 55, 0.2);
+            color: var(--gold-primary);
+            border: 1px solid var(--gold-primary);
+        }
+        .role-badge-manager {
+            background: rgba(42, 157, 143, 0.2);
+            color: #2A9D8F;
+            border: 1px solid #2A9D8F;
+        }
+        .role-badge-warehouse {
+            background: rgba(231, 111, 81, 0.2);
+            color: #E76F51;
+            border: 1px solid #E76F51;
+        }
+        .role-badge-concierge {
+            background: rgba(168, 85, 247, 0.2);
+            color: #A855F7;
+            border: 1px solid #A855F7;
+        }
+        .role-badge-customer {
+            background: rgba(255, 255, 255, 0.08);
+            color: #ccc;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+    </style>
+}

@@ -1,0 +1,327 @@
+@model Perfume.Application.DTOs.EditProductDto
+@using Perfume.Domain.Entities
+@using Perfume.Domain.Enums
+@{
+    ViewData["Title"] = $"Chỉnh Sửa Sản Phẩm: {Model.Name}";
+    Layout = "_AdminLayout";
+    var brands = ViewBag.Brands as List<Brand> ?? new List<Brand>();
+    var categories = ViewBag.Categories as List<Category> ?? new List<Category>();
+    var families = ViewBag.FragranceFamilies as List<FragranceFamily> ?? new List<FragranceFamily>();
+}
+
+<div style="max-width: 1200px; margin: 0 auto;">
+    <!-- Top Action Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 6px;">
+                <a href="/admin/admindashboard/products" class="btn-luxe-outline" style="padding: 6px 12px; font-size: 0.82rem;">
+                    <i class="fa-solid fa-arrow-left"></i> Danh sách
+                </a>
+                <h1 style="font-size: 1.6rem; font-weight: 800; margin: 0; color: var(--text-primary);">
+                    Chỉnh Sửa: <span class="text-gold-gradient">@Model.Name</span>
+                </h1>
+            </div>
+            <p style="color: var(--text-muted); margin: 0; font-size: 0.88rem;">
+                SKU: <strong style="color: var(--gold-primary);">@Model.Sku</strong> &bull; Đường dẫn tĩnh (Slug): <code>/catalog/product/@Model.Slug</code>
+            </p>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+            <a href="/catalog/product/@Model.Slug" target="_blank" class="btn-luxe-outline" style="padding: 8px 16px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px;">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i> Xem ngoài Web
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+        <div style="background: rgba(230,57,70,0.12); border: 1px solid #e63946; border-radius: 8px; padding: 12px 18px; margin-bottom: 20px; color: #f87171; font-size: 0.9rem;">
+            <i class="fa-solid fa-triangle-exclamation" style="margin-right: 6px;"></i> @TempData["Error"]
+        </div>
+    }
+    @if (TempData["Success"] != null)
+    {
+        <div style="background: rgba(42,157,143,0.15); border: 1px solid #2A9D8F; border-radius: 8px; padding: 12px 18px; margin-bottom: 20px; color: #2A9D8F; font-size: 0.9rem;">
+            <i class="fa-solid fa-circle-check" style="margin-right: 6px;"></i> @TempData["Success"]
+        </div>
+    }
+
+    <!-- Main Layout Grid -->
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; align-items: start;">
+        <!-- Left: Form Edit Details -->
+        <div>
+            <form method="post" action="/admin/admindashboard/editproduct">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="Id" value="@Model.Id" />
+                <input type="hidden" name="Slug" value="@Model.Slug" />
+
+                <!-- General Info -->
+                <div class="luxury-card" style="padding: 24px; margin-bottom: 24px;">
+                    <h3 style="font-size: 1.15rem; font-weight: 700; margin: 0 0 18px; color: var(--text-primary); border-bottom: 1px solid var(--border-card); padding-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-bottle-droplet text-gold-gradient"></i> Thông Tin Cơ Bản & Định Danh
+                    </h3>
+
+                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px;">
+                        <div style="grid-column: 1 / -1;">
+                            <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+                                Tên Sản Phẩm *
+                            </label>
+                            <input type="text" name="Name" value="@Model.Name" required
+                                   style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.95rem; font-weight: 600; outline: none;" />
+                        </div>
+
+                        <div>
+                            <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+                                Mã SKU Gốc *
+                            </label>
+                            <input type="text" name="Sku" value="@Model.Sku" required
+                                   style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--gold-primary); font-size: 0.95rem; font-weight: 700; outline: none;" />
+                            <span style="font-size: 0.72rem; color: var(--text-muted);">Thay đổi SKU sẽ áp dụng cho các phiên bản tương lai.</span>
+                        </div>
+
+                        <div>
+                            <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+                                Giá Cơ Bản Niêm Yết (VNĐ) *
+                            </label>
+                            <input type="number" name="BasePrice" value="@Model.BasePrice" step="10000" min="0" required
+                                   style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--gold-primary); font-weight: 700; font-size: 0.95rem; outline: none;" />
+                        </div>
+
+                        <div>
+                            <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+                                Thương Hiệu (Brand) *
+                            </label>
+                            <select name="BrandId" required
+                                    style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.9rem; outline: none;">
+                                @foreach (var b in brands)
+                                {
+                                    <option value="@b.Id" selected="@(Model.BrandId == b.Id)">@b.Name (@(b.Country ?? "Global"))</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div>
+                            <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+                                Danh Mục *
+                            </label>
+                            <select name="CategoryId" required
+                                    style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.9rem; outline: none;">
+                                @foreach (var c in categories)
+                                {
+                                    <option value="@c.Id" selected="@(Model.CategoryId == c.Id)">@c.Name</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div>
+                            <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+                                Nhóm Hương
+                            </label>
+                            <select name="FragranceFamilyId"
+                                    style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.9rem; outline: none;">
+                                <option value="">-- Không phân loại --</option>
+                                @foreach (var f in families)
+                                {
+                                    <option value="@f.Id" selected="@(Model.FragranceFamilyId == f.Id)">@f.Name</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div>
+                            <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+                                Nồng Độ Tinh Dầu
+                            </label>
+                            <select name="Concentration"
+                                    style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.9rem; outline: none;">
+                                <option value="@((int)Concentration.EDP)" selected="@(Model.Concentration == Concentration.EDP)">EDP - Eau de Parfum</option>
+                                <option value="@((int)Concentration.EDT)" selected="@(Model.Concentration == Concentration.EDT)">EDT - Eau de Toilette</option>
+                                <option value="@((int)Concentration.Parfum)" selected="@(Model.Concentration == Concentration.Parfum)">Parfum / Extrait</option>
+                                <option value="@((int)Concentration.EDC)" selected="@(Model.Concentration == Concentration.EDC)">EDC - Eau de Cologne</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+                                Giới Tính Mục Tiêu
+                            </label>
+                            <select name="Gender"
+                                    style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.9rem; outline: none;">
+                                <option value="@((int)GenderTarget.Unisex)" selected="@(Model.Gender == GenderTarget.Unisex)">Unisex</option>
+                                <option value="@((int)GenderTarget.Men)" selected="@(Model.Gender == GenderTarget.Men)">Nam (Men)</option>
+                                <option value="@((int)GenderTarget.Women)" selected="@(Model.Gender == GenderTarget.Women)">Nữ (Women)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+                                Năm Phát Hành
+                            </label>
+                            <input type="number" name="ReleaseYear" value="@Model.ReleaseYear"
+                                   style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.9rem; outline: none;" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3 Pyramid Notes -->
+                <div class="luxury-card" style="padding: 24px; margin-bottom: 24px;">
+                    <h3 style="font-size: 1.15rem; font-weight: 700; margin: 0 0 16px; color: var(--text-primary); border-bottom: 1px solid var(--border-card); padding-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-layer-group text-gold-gradient"></i> Kim Tự Tháp Mùi Hương (3 Tầng Hương)
+                    </h3>
+
+                    <div style="display: flex; flex-direction: column; gap: 14px;">
+                        <div>
+                            <label style="display: block; font-size: 0.82rem; font-weight: 600; color: #38bdf8; margin-bottom: 6px; text-transform: uppercase;">
+                                <i class="fa-solid fa-wind"></i> Hương Đầu (Top Notes)
+                            </label>
+                            <input type="text" name="TopNotes" value="@Model.TopNotes"
+                                   style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.88rem; outline: none;" />
+                        </div>
+
+                        <div>
+                            <label style="display: block; font-size: 0.82rem; font-weight: 600; color: #e879f9; margin-bottom: 6px; text-transform: uppercase;">
+                                <i class="fa-solid fa-heart"></i> Hương Giữa (Heart Notes)
+                            </label>
+                            <input type="text" name="HeartNotes" value="@Model.HeartNotes"
+                                   style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.88rem; outline: none;" />
+                        </div>
+
+                        <div>
+                            <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--gold-primary); margin-bottom: 6px; text-transform: uppercase;">
+                                <i class="fa-solid fa-mountain"></i> Hương Cuối (Base Notes)
+                            </label>
+                            <input type="text" name="BaseNotes" value="@Model.BaseNotes"
+                                   style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.88rem; outline: none;" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Descriptions & Flags -->
+                <div class="luxury-card" style="padding: 24px; margin-bottom: 24px;">
+                    <h3 style="font-size: 1.15rem; font-weight: 700; margin: 0 0 16px; color: var(--text-primary); border-bottom: 1px solid var(--border-card); padding-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-feather text-gold-gradient"></i> Mô Tả & Trạng Thái Kinh Doanh
+                    </h3>
+
+                    <div style="display: flex; flex-direction: column; gap: 14px;">
+                        <div>
+                            <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">Mô tả ngắn</label>
+                            <textarea name="ShortDescription" rows="2" style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.88rem; outline: none;">@Model.ShortDescription</textarea>
+                        </div>
+
+                        <div>
+                            <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">Mô tả chi tiết</label>
+                            <textarea name="FullDescription" rows="5" style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.88rem; outline: none;">@Model.FullDescription</textarea>
+                        </div>
+
+                        <div style="display: flex; flex-wrap: wrap; gap: 20px; padding-top: 8px;">
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--text-primary); font-size: 0.88rem;">
+                                <input type="checkbox" name="IsInStock" value="true" checked="@Model.IsInStock" style="accent-color: var(--gold-primary);" /> Đang mở bán
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--text-primary); font-size: 0.88rem;">
+                                <input type="checkbox" name="IsNewArrival" value="true" checked="@Model.IsNewArrival" style="accent-color: var(--gold-primary);" /> Mới về
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--text-primary); font-size: 0.88rem;">
+                                <input type="checkbox" name="IsBestSeller" value="true" checked="@Model.IsBestSeller" style="accent-color: var(--gold-primary);" /> Bán chạy
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--text-primary); font-size: 0.88rem;">
+                                <input type="checkbox" name="IsFeatured" value="true" checked="@Model.IsFeatured" style="accent-color: var(--gold-primary);" /> Nổi bật
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div style="display: flex; justify-content: flex-end; gap: 14px; margin-bottom: 30px;">
+                    <button type="submit" class="btn-luxe" style="padding: 12px 32px; font-size: 0.95rem; font-weight: 700;">
+                        <i class="fa-solid fa-floppy-disk" style="margin-right: 8px;"></i> Lưu Thay Đổi Sản Phẩm
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Right: Gallery & Variant Management -->
+        <div style="display: flex; flex-direction: column; gap: 24px;">
+            <!-- Gallery Manager -->
+            <div class="luxury-card" style="padding: 22px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid var(--border-card); padding-bottom: 10px;">
+                    <h3 style="font-size: 1.05rem; font-weight: 700; margin: 0; color: var(--text-primary);">
+                        <i class="fa-solid fa-images text-gold-gradient" style="margin-right: 6px;"></i> Bộ Sưu Tập Ảnh (@Model.Images.Count/7)
+                    </h3>
+                </div>
+
+                <!-- Add image form -->
+                <form method="post" action="/admin/admindashboard/addproductgalleryimage" style="margin-bottom: 18px;">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="productId" value="@Model.Id" />
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <input type="url" name="imageUrl" placeholder="Dán link ảnh CDN Unsplash..." required
+                               style="width: 100%; padding: 8px 12px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.82rem; outline: none;" />
+                        <input type="text" name="altText" placeholder="Chú thích ảnh (Alt text)..."
+                               style="width: 100%; padding: 8px 12px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.82rem; outline: none;" />
+                        <button type="submit" class="btn-luxe" style="padding: 8px; font-size: 0.82rem;">
+                            <i class="fa-solid fa-plus"></i> Thêm Vào Gallery
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Gallery list -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    @foreach (var img in Model.Images)
+                    {
+                        <div style="position: relative; border-radius: 8px; overflow: hidden; border: 1px solid @(img.IsMain ? "var(--gold-primary)" : "var(--border-card)"); background: rgba(0,0,0,0.3);">
+                            <img src="@img.ImageUrl" alt="@img.AltText" style="width: 100%; height: 110px; object-fit: cover; display: block;" />
+                            @if (img.IsMain)
+                            {
+                                <span style="position: absolute; top: 6px; left: 6px; background: var(--gold-gradient); color: #000; font-size: 0.65rem; font-weight: 800; padding: 2px 6px; border-radius: 4px;">
+                                    ẢNH CHÍNH
+                                </span>
+                            }
+                            <div style="padding: 6px; display: flex; justify-content: space-between; align-items: center; background: var(--bg-surface-elevated);">
+                                @if (!img.IsMain)
+                                {
+                                    <form method="post" action="/admin/admindashboard/setmainproductgalleryimage" style="margin: 0;">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="productId" value="@Model.Id" />
+                                        <input type="hidden" name="imageId" value="@img.Id" />
+                                        <button type="submit" style="background: none; border: none; color: var(--gold-primary); font-size: 0.72rem; cursor: pointer; padding: 2px;">
+                                            Đặt chính
+                                        </button>
+                                    </form>
+                                }
+                                <form method="post" action="/admin/admindashboard/deleteproductgalleryimage" style="margin: 0;" onsubmit="return confirm('Xóa ảnh này?');">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="productId" value="@Model.Id" />
+                                    <input type="hidden" name="imageId" value="@img.Id" />
+                                    <button type="submit" style="background: none; border: none; color: #f87171; font-size: 0.72rem; cursor: pointer; padding: 2px;">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Existing Variants list -->
+            <div class="luxury-card" style="padding: 22px;">
+                <h3 style="font-size: 1.05rem; font-weight: 700; margin: 0 0 14px; color: var(--text-primary); border-bottom: 1px solid var(--border-card); padding-bottom: 10px;">
+                    <i class="fa-solid fa-cubes text-gold-gradient" style="margin-right: 6px;"></i> Phiên Bản Đang Bán (@Model.Variants.Count)
+                </h3>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    @foreach (var v in Model.Variants)
+                    {
+                        <div style="padding: 10px 12px; background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: 6px; font-size: 0.85rem;">
+                            <div style="display: flex; justify-content: space-between; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">
+                                <span>@v.VolumeLabel</span>
+                                <span style="color: var(--gold-primary);">@v.SalePrice.ToString("N0") ₫</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; color: var(--text-muted); font-size: 0.75rem;">
+                                <span>SKU: @v.VariantSku</span>
+                                <span>Tồn kho: <strong style="color: @(v.StockQuantity <= 5 ? "#ef4444" : "#2A9D8F")">@v.StockQuantity</strong></span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

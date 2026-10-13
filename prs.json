@@ -1,0 +1,138 @@
+﻿
+
+url                 : https://api.github.com/repos/hieuwin10/perfume-luxe-ecommerce/pulls/2
+id                  : 4808610301
+node_id             : PR_kwDOVDNeP88AAAABHp2R_Q
+html_url            : https://github.com/hieuwin10/perfume-luxe-ecommerce/pull/2
+diff_url            : https://github.com/hieuwin10/perfume-luxe-ecommerce/pull/2.diff
+patch_url           : https://github.com/hieuwin10/perfume-luxe-ecommerce/pull/2.patch
+issue_url           : https://api.github.com/repos/hieuwin10/perfume-luxe-ecommerce/issues/2
+number              : 2
+state               : open
+locked              : False
+title               : Hoàn thiện phân quyền, vận hành cửa hàng và COD
+user                : @{login=hieuwin10; id=95598247; node_id=U_kgDOBbK2pw; 
+                      avatar_url=https://avatars.githubusercontent.com/u/95598247?v=4; gravatar_id=; 
+                      url=https://api.github.com/users/hieuwin10; html_url=https://github.com/hieuwin10; 
+                      followers_url=https://api.github.com/users/hieuwin10/followers; 
+                      following_url=https://api.github.com/users/hieuwin10/following{/other_user}; 
+                      gists_url=https://api.github.com/users/hieuwin10/gists{/gist_id}; 
+                      starred_url=https://api.github.com/users/hieuwin10/starred{/owner}{/repo}; 
+                      subscriptions_url=https://api.github.com/users/hieuwin10/subscriptions; 
+                      organizations_url=https://api.github.com/users/hieuwin10/orgs; 
+                      repos_url=https://api.github.com/users/hieuwin10/repos; 
+                      events_url=https://api.github.com/users/hieuwin10/events{/privacy}; 
+                      received_events_url=https://api.github.com/users/hieuwin10/received_events; type=User; 
+                      user_view_type=public; site_admin=False}
+body                : ## Tóm tắt
+                      Triển khai kế hoạch hoàn thiện Perfume Luxe trên nhánh tính năng, giữ nguyên nhánh main và 
+                      volume SQL hiện có.
+                      
+                      ## Thay đổi
+                      - **Admin:** Database Console và ERD chỉ dành cho Admin; SQL giới hạn trong PerfumeDb; thao tác 
+                      ghi/xóa cần xác nhận; audit chỉ lưu metadata/hash; backup hoàn tất trước khi thay đổi schema.
+                      - **StoreManager:** thống kê theo ngày, doanh thu COD đã thu, đơn/AOV, sản phẩm bán chạy, cảnh 
+                      báo tồn kho, voucher và CSV; quản lý đơn hàng, sản phẩm/biến thể/tồn kho, voucher và duyệt đánh 
+                      giá.
+                      - **Customer/khách vãng lai:** hoàn thiện giao diện đăng nhập/đăng ký, hồ sơ, đơn hàng, giỏ 
+                      hàng, voucher và checkout COD; API REST dưới `/api/v1` cho catalog, auth, profile, cart, 
+                      vouchers, orders và reviews.
+                      - Giỏ hàng lưu SQL và được gộp khi đăng nhập; web dùng Identity Cookie + antiforgery; API ngoài 
+                      web hỗ trợ JWT access token và refresh token có thể thu hồi.
+                      - Giá, biến thể, tồn kho và voucher được server kiểm tra khi đặt đơn; COD khởi tạo ở trạng thái 
+                      chưa thanh toán; khách vãng lai theo dõi đơn bằng token được bảo vệ.
+                      - Đặt lại mật khẩu và email đơn hàng dùng SMTP cấu hình được; Mailpit phục vụ kiểm tra local. 
+                      Review cần đơn giao thành công, tối đa 3 ảnh, chờ cửa hàng duyệt.
+                      - VNPAY/MoMo chưa bật. Giữ nguyên Blog hiện tại; CMS nháp/xuất bản và SEO để giai đoạn sau. Quiz 
+                      tiếp tục để sau.
+                      
+                      ## Bảo toàn dữ liệu
+                      Schema cập nhật theo hướng cộng thêm, có sao lưu PerfumeDb trước khi migration; giữ volume SQL 
+                      hiện tại. Dữ liệu local không bị xóa.
+                      
+                      ## Kiểm tra
+                      - .NET build: **thành công, 0 warning, 0 error**.
+                      - Trên SQL hiện có, ứng dụng ghi nhận backup hoàn tất rồi áp dụng migration giỏ hàng/refresh 
+                      token thành công.
+                      - Chrome UI smoke cho phần Customer trong lượt này chưa hoàn tất: công cụ điều khiển dừng vì 
+                      không xác định chắc chắn URL Chrome hiện tại. Chưa xác minh gửi/nhận email thực tế trong Mailpit.
+                      - Repository không có project test tự động riêng. PR vẫn ở trạng thái **Draft** để rà soát tiếp.
+created_at          : 2026-10-10T04:14:09Z
+updated_at          : 2026-10-11T02:38:05Z
+closed_at           : 
+merged_at           : 
+merge_commit_sha    : f07506c401c718801b7f242b17e0370d3ff61f9a
+assignees           : {}
+requested_reviewers : {}
+requested_teams     : {}
+labels              : {}
+milestone           : 
+draft               : True
+commits_url         : https://api.github.com/repos/hieuwin10/perfume-luxe-ecommerce/pulls/2/commits
+review_comments_url : https://api.github.com/repos/hieuwin10/perfume-luxe-ecommerce/pulls/2/comments
+review_comment_url  : https://api.github.com/repos/hieuwin10/perfume-luxe-ecommerce/pulls/comments{/number}
+comments_url        : https://api.github.com/repos/hieuwin10/perfume-luxe-ecommerce/issues/2/comments
+statuses_url        : https://api.github.com/repos/hieuwin10/perfume-luxe-ecommerce/statuses/5c1f38195fef48e8b364693da6
+                      18469b13146c99
+head                : @{label=hieuwin10:codex/admin-console-store-analytics; ref=codex/admin-console-store-analytics; 
+                      sha=5c1f38195fef48e8b364693da618469b13146c99; user=; repo=}
+base                : @{label=hieuwin10:main; ref=main; sha=b685154be3580f6623c619cd6d05d17dbb1282f1; user=; repo=}
+_links              : @{self=; html=; issue=; comments=; review_comments=; review_comment=; commits=; statuses=}
+author_association  : OWNER
+auto_merge          : 
+assignee            : 
+active_lock_reason  : 
+
+url                 : https://api.github.com/repos/hieuwin10/perfume-luxe-ecommerce/pulls/1
+id                  : 4808201278
+node_id             : PR_kwDOVDNeP88AAAABHpdUPg
+html_url            : https://github.com/hieuwin10/perfume-luxe-ecommerce/pull/1
+diff_url            : https://github.com/hieuwin10/perfume-luxe-ecommerce/pull/1.diff
+patch_url           : https://github.com/hieuwin10/perfume-luxe-ecommerce/pull/1.patch
+issue_url           : https://api.github.com/repos/hieuwin10/perfume-luxe-ecommerce/issues/1
+number              : 1
+state               : closed
+locked              : False
+title               : Feature/admin auth erd management
+user                : @{login=hieuwin10; id=95598247; node_id=U_kgDOBbK2pw; 
+                      avatar_url=https://avatars.githubusercontent.com/u/95598247?v=4; gravatar_id=; 
+                      url=https://api.github.com/users/hieuwin10; html_url=https://github.com/hieuwin10; 
+                      followers_url=https://api.github.com/users/hieuwin10/followers; 
+                      following_url=https://api.github.com/users/hieuwin10/following{/other_user}; 
+                      gists_url=https://api.github.com/users/hieuwin10/gists{/gist_id}; 
+                      starred_url=https://api.github.com/users/hieuwin10/starred{/owner}{/repo}; 
+                      subscriptions_url=https://api.github.com/users/hieuwin10/subscriptions; 
+                      organizations_url=https://api.github.com/users/hieuwin10/orgs; 
+                      repos_url=https://api.github.com/users/hieuwin10/repos; 
+                      events_url=https://api.github.com/users/hieuwin10/events{/privacy}; 
+                      received_events_url=https://api.github.com/users/hieuwin10/received_events; type=User; 
+                      user_view_type=public; site_admin=False}
+body                : 
+created_at          : 2026-10-10T02:54:07Z
+updated_at          : 2026-10-10T02:55:00Z
+closed_at           : 2026-10-10T02:54:20Z
+merged_at           : 2026-10-10T02:54:20Z
+merge_commit_sha    : b685154be3580f6623c619cd6d05d17dbb1282f1
+assignees           : {}
+requested_reviewers : {}
+requested_teams     : {}
+labels              : {}
+milestone           : 
+draft               : False
+commits_url         : https://api.github.com/repos/hieuwin10/perfume-luxe-ecommerce/pulls/1/commits
+review_comments_url : https://api.github.com/repos/hieuwin10/perfume-luxe-ecommerce/pulls/1/comments
+review_comment_url  : https://api.github.com/repos/hieuwin10/perfume-luxe-ecommerce/pulls/comments{/number}
+comments_url        : https://api.github.com/repos/hieuwin10/perfume-luxe-ecommerce/issues/1/comments
+statuses_url        : https://api.github.com/repos/hieuwin10/perfume-luxe-ecommerce/statuses/a7b0951fc35ad930885c5a867d
+                      059bbff721dcdc
+head                : @{label=hieuwin10:feature/admin-auth-erd-management; ref=feature/admin-auth-erd-management; 
+                      sha=a7b0951fc35ad930885c5a867d059bbff721dcdc; user=; repo=}
+base                : @{label=hieuwin10:main; ref=main; sha=5514e6f137bf93d204b6798ac350593ddbcca6b3; user=; repo=}
+_links              : @{self=; html=; issue=; comments=; review_comments=; review_comment=; commits=; statuses=}
+author_association  : OWNER
+auto_merge          : 
+assignee            : 
+active_lock_reason  : 
+
+
+

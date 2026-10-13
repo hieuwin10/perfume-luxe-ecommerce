@@ -1,0 +1,151 @@
+@model List<Perfume.Domain.Entities.FragranceFamily>
+@using Perfume.Domain.Enums
+@{
+    ViewData["Title"] = "Quản Lý Nhóm Hương (Fragrance Families)";
+    Layout = "_AdminLayout";
+}
+
+<div style="max-width: 1300px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
+        <div>
+            <h1 style="font-size: 1.6rem; font-weight: 800; margin: 0 0 6px; color: var(--text-primary);">
+                <i class="fa-solid fa-palette text-gold-gradient" style="margin-right: 8px;"></i> Nhóm Hương Nước Hoa (Fragrance Families)
+            </h1>
+            <p style="color: var(--text-muted); margin: 0; font-size: 0.88rem;">
+                Phân loại cảm xúc mùi hương: Gỗ trầm ấm, Hoa cỏ thanh lịch, Phương Đông quyến rũ (Tổng: @Model.Count nhóm)
+            </p>
+        </div>
+
+        <button onclick="openFamilyModal(0, '', '#D4AF37', 1, '')" class="btn-luxe" style="padding: 8px 18px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px;">
+            <i class="fa-solid fa-plus"></i> Thêm Nhóm Hương
+        </button>
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+        <div style="background: rgba(230,57,70,0.12); border: 1px solid #e63946; border-radius: 8px; padding: 12px 18px; margin-bottom: 20px; color: #f87171; font-size: 0.9rem;">
+            <i class="fa-solid fa-triangle-exclamation" style="margin-right: 6px;"></i> @TempData["Error"]
+        </div>
+    }
+    @if (TempData["Success"] != null)
+    {
+        <div style="background: rgba(42,157,143,0.15); border: 1px solid #2A9D8F; border-radius: 8px; padding: 12px 18px; margin-bottom: 20px; color: #2A9D8F; font-size: 0.9rem;">
+            <i class="fa-solid fa-circle-check" style="margin-right: 6px;"></i> @TempData["Success"]
+        </div>
+    }
+
+    <!-- Families Grid -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
+        @foreach (var f in Model)
+        {
+            <div class="luxury-card" style="padding: 20px; border-left: 4px solid @(string.IsNullOrWhiteSpace(f.ColorHex) ? "var(--gold-primary)" : f.ColorHex); display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary);">@f.Name</span>
+                        <span style="width: 18px; height: 18px; border-radius: 50%; background: @f.ColorHex; display: inline-block; border: 1px solid rgba(255,255,255,0.2);"></span>
+                    </div>
+
+                    <div style="font-size: 0.78rem; color: var(--gold-primary); margin-bottom: 10px;">
+                        Loại hương gốc: @f.ScentType
+                    </div>
+
+                    <p style="color: var(--text-secondary); font-size: 0.82rem; line-height: 1.4; margin-bottom: 14px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                        @(f.Description ?? "Chưa có mô tả.")
+                    </p>
+                </div>
+
+                <div style="border-top: 1px solid var(--border-card); padding-top: 12px; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.8rem; color: var(--text-muted);">
+                        <strong style="color: var(--text-primary);">@f.Products.Count</strong> sản phẩm
+                    </span>
+
+                    <div style="display: flex; gap: 8px;">
+                        <button onclick="openFamilyModal(@f.Id, '@f.Name', '@f.ColorHex', @((int)f.ScentType), '@(f.Description ?? "")')"
+                                style="background: none; border: none; color: var(--gold-primary); cursor: pointer; padding: 4px; font-size: 0.85rem;" title="Sửa">
+                            <i class="fa-solid fa-pen-to-square"></i> Sửa
+                        </button>
+                        <form method="post" action="/admin/catalogmanager/deletefragrancefamily" style="margin: 0;" onsubmit="return confirm('Bạn có chắc muốn xóa nhóm hương này?');">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@f.Id" />
+                            <button type="submit" style="background: none; border: none; color: #f87171; cursor: pointer; padding: 4px; font-size: 0.85rem;" title="Xóa">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Modal Create / Edit Family -->
+<div id="familyModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 2000; align-items: center; justify-content: center; padding: 20px;">
+    <div class="luxury-card" style="max-width: 500px; width: 100%; padding: 26px; border: 1px solid var(--gold-primary);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+            <h3 id="familyModalTitle" style="margin: 0; font-size: 1.2rem; color: var(--text-primary); font-weight: 700;">Thêm Nhóm Hương</h3>
+            <button onclick="closeFamilyModal()" style="background: none; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer;">&times;</button>
+        </div>
+
+        <form method="post" action="/admin/catalogmanager/savefragrancefamily">
+            @Html.AntiForgeryToken()
+            <input type="hidden" id="familyId" name="id" value="0" />
+
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+                <div>
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase;">Tên Nhóm Hương *</label>
+                    <input type="text" id="familyName" name="name" required placeholder="vd: Gỗ Trầm Ấm (Woody)"
+                           style="width: 100%; padding: 10px 12px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.9rem; outline: none;" />
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div>
+                        <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase;">Mã Màu Đại Diện</label>
+                        <input type="color" id="familyColor" name="colorHex" value="#D4AF37"
+                               style="width: 100%; height: 42px; padding: 2px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; cursor: pointer;" />
+                    </div>
+
+                    <div>
+                        <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase;">Scent Family Enum</label>
+                        <select id="familyScent" name="scentType"
+                                style="width: 100%; padding: 10px 12px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.88rem; outline: none;">
+                            <option value="@((int)ScentFamily.Woody)">Woody (Gỗ)</option>
+                            <option value="@((int)ScentFamily.Floral)">Floral (Hoa cỏ)</option>
+                            <option value="@((int)ScentFamily.Oriental)">Oriental (Phương Đông)</option>
+                            <option value="@((int)ScentFamily.Fresh)">Fresh (Tươi mát)</option>
+                            <option value="@((int)ScentFamily.Citrus)">Citrus (Cam chanh)</option>
+                            <option value="@((int)ScentFamily.Gourmand)">Gourmand (Ngọt ngào)</option>
+                            <option value="@((int)ScentFamily.Leather)">Leather (Da thuộc)</option>
+                            <option value="@((int)ScentFamily.Aromatic)">Aromatic (Thảo mộc)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase;">Mô Tả Cảm Xúc Mùi</label>
+                    <textarea id="familyDesc" name="description" rows="3" placeholder="Mang lại cảm giác ấm áp, trầm tĩnh, sang trọng và quý phái..."
+                              style="width: 100%; padding: 10px 12px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.85rem; outline: none;"></textarea>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+                    <button type="button" onclick="closeFamilyModal()" class="btn-luxe-outline" style="padding: 8px 16px;">Hủy</button>
+                    <button type="submit" class="btn-luxe" style="padding: 8px 20px;">Lưu</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openFamilyModal(id, name, color, scent, desc) {
+        document.getElementById('familyId').value = id;
+        document.getElementById('familyName').value = name;
+        document.getElementById('familyColor').value = color || '#D4AF37';
+        document.getElementById('familyScent').value = scent;
+        document.getElementById('familyDesc').value = desc;
+        document.getElementById('familyModalTitle').innerText = id === 0 ? 'Thêm Nhóm Hương Mới' : 'Sửa Nhóm Hương';
+        document.getElementById('familyModal').style.display = 'flex';
+    }
+    function closeFamilyModal() {
+        document.getElementById('familyModal').style.display = 'none';
+    }
+</script>

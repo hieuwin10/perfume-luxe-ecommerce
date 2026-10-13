@@ -41,6 +41,7 @@ public static class DependencyInjection
         services.AddScoped<IBlogService, BlogService>();
         services.AddScoped<IOrderEmailSender, SmtpOrderEmailSender>();
         services.AddScoped<IFlashSaleService, FlashSaleService>();
+        services.AddScoped<ISystemSettingService, SystemSettingService>();
         return services;
     }
 }

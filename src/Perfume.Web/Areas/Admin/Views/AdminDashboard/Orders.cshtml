@@ -21,6 +21,59 @@
         </span>
     </div>
 
+    <!-- Advanced Filter Bar -->
+    <div class="luxury-card" style="padding: 18px; margin-bottom: 20px;">
+        <form method="get" action="/admin/admindashboard/orders" style="display: grid; grid-template-columns: 2fr 1.2fr 1.2fr 1.2fr 1.2fr auto; gap: 12px; align-items: end; margin: 0;">
+            <div>
+                <label style="display: block; font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; font-weight: 600;">Tìm kiếm</label>
+                <input type="text" name="search" value="@ViewBag.Search" placeholder="Mã đơn, Tên, Số điện thoại..."
+                       style="width: 100%; padding: 8px 12px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.85rem; outline: none;" />
+            </div>
+
+            <div>
+                <label style="display: block; font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; font-weight: 600;">Trạng thái đơn</label>
+                <select name="status" style="width: 100%; padding: 8px 12px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.85rem; outline: none;">
+                    <option value="">-- Tất cả --</option>
+                    <option value="@((int)OrderStatus.Pending)" selected="@(ViewBag.Status == OrderStatus.Pending)">Chờ duyệt</option>
+                    <option value="@((int)OrderStatus.Confirmed)" selected="@(ViewBag.Status == OrderStatus.Confirmed)">Đã xác nhận</option>
+                    <option value="@((int)OrderStatus.Shipping)" selected="@(ViewBag.Status == OrderStatus.Shipping)">Đang vận chuyển</option>
+                    <option value="@((int)OrderStatus.Delivered)" selected="@(ViewBag.Status == OrderStatus.Delivered)">Giao thành công</option>
+                    <option value="@((int)OrderStatus.Cancelled)" selected="@(ViewBag.Status == OrderStatus.Cancelled)">Đã hủy</option>
+                </select>
+            </div>
+
+            <div>
+                <label style="display: block; font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; font-weight: 600;">Thanh toán</label>
+                <select name="paymentStatus" style="width: 100%; padding: 8px 12px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.85rem; outline: none;">
+                    <option value="">-- Tất cả --</option>
+                    <option value="@((int)PaymentStatus.Pending)" selected="@(ViewBag.PaymentStatus == PaymentStatus.Pending)">Chưa thu tiền (Pending)</option>
+                    <option value="@((int)PaymentStatus.Completed)" selected="@(ViewBag.PaymentStatus == PaymentStatus.Completed)">Đã thu tiền (Completed)</option>
+                </select>
+            </div>
+
+            <div>
+                <label style="display: block; font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; font-weight: 600;">Từ ngày</label>
+                <input type="date" name="from" value="@ViewBag.From"
+                       style="width: 100%; padding: 8px 10px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.85rem; outline: none;" />
+            </div>
+
+            <div>
+                <label style="display: block; font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; font-weight: 600;">Đến ngày</label>
+                <input type="date" name="to" value="@ViewBag.To"
+                       style="width: 100%; padding: 8px 10px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.85rem; outline: none;" />
+            </div>
+
+            <div style="display: flex; gap: 6px;">
+                <button type="submit" class="btn-luxe" style="padding: 8px 16px; font-size: 0.85rem;">
+                    <i class="fa-solid fa-filter"></i> Lọc
+                </button>
+                <a href="/admin/admindashboard/orders" class="btn-luxe-outline" style="padding: 8px 12px; font-size: 0.85rem;" title="Bỏ lọc">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+
     @if (TempData["Success"] != null) { <div class="luxury-card" style="padding:12px;margin-bottom:12px">@TempData["Success"]</div> }
     @if (TempData["Error"] != null) { <div class="luxury-card" style="padding:12px;margin-bottom:12px;color:#f87171">@TempData["Error"]</div> }
     <div class="luxury-card" style="padding: 0; overflow: auto;">
@@ -69,31 +122,39 @@
                         <td style="padding: 14px 20px; color: var(--text-muted); font-size: 0.82rem;">
                             @o.CreatedAt.ToString("dd/MM/yyyy HH:mm")
                         </td>
-                        <td style="padding: 12px 16px; min-width: 230px;">
-                            <div style="font-size:.8rem;margin-bottom:6px">@o.PaymentMethod · @o.PaymentStatus</div>
+                        <td style="padding: 12px 16px; min-width: 250px;">
+                            <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                                <a href="/admin/admindashboard/orderdetails/@o.Id" class="btn-luxe-outline" style="padding: 4px 8px; font-size: 0.75rem;" title="Xem chi tiết đơn hàng">
+                                    <i class="fa-solid fa-eye"></i> Chi tiết
+                                </a>
+                                <a href="/admin/admindashboard/printinvoice/@o.Id" target="_blank" class="btn-luxe" style="padding: 4px 8px; font-size: 0.75rem;" title="In phiếu xuất kho COD">
+                                    <i class="fa-solid fa-print"></i> In phiếu
+                                </a>
+                            </div>
+                            <div style="font-size:.8rem;margin-bottom:6px;color:var(--text-secondary)">@o.PaymentMethod &bull; @o.PaymentStatus</div>
                             @if (o.OrderStatus == OrderStatus.Pending)
                             {
                                 <form method="post" action="/admin/storemanager/updateorderstatus" style="display:flex;gap:6px;align-items:center;margin:0 0 6px">
                                     @Html.AntiForgeryToken()<input type="hidden" name="orderId" value="@o.Id" />
-                                    <select name="status"><option value="@((int)OrderStatus.Confirmed)">Xác nhận</option><option value="@((int)OrderStatus.Cancelled)">Hủy</option></select>
-                                    <button class="btn-luxe" type="submit">Cập nhật</button>
+                                    <select name="status" style="padding: 4px 6px; font-size: 0.78rem;"><option value="@((int)OrderStatus.Confirmed)">Xác nhận</option><option value="@((int)OrderStatus.Cancelled)">Hủy</option></select>
+                                    <button class="btn-luxe" type="submit" style="padding: 4px 8px; font-size: 0.78rem;">Cập nhật</button>
                                 </form>
                             }
                             else if (o.OrderStatus == OrderStatus.Confirmed)
                             {
                                 <form method="post" action="/admin/storemanager/updateorderstatus" style="display:flex;gap:6px;align-items:center;margin:0 0 6px">
                                     @Html.AntiForgeryToken()<input type="hidden" name="orderId" value="@o.Id" /><input type="hidden" name="status" value="@((int)OrderStatus.Shipping)" />
-                                    <button class="btn-luxe" type="submit">Bàn giao vận chuyển</button>
+                                    <button class="btn-luxe" type="submit" style="padding: 4px 8px; font-size: 0.78rem;">Bàn giao VC</button>
                                 </form>
-                                <form method="post" action="/admin/storemanager/updateorderstatus" style="margin:0 0 6px">@Html.AntiForgeryToken()<input type="hidden" name="orderId" value="@o.Id" /><input type="hidden" name="status" value="@((int)OrderStatus.Cancelled)" /><button class="btn-luxe-outline" type="submit">Hủy đơn</button></form>
+                                <form method="post" action="/admin/storemanager/updateorderstatus" style="margin:0 0 6px">@Html.AntiForgeryToken()<input type="hidden" name="orderId" value="@o.Id" /><input type="hidden" name="status" value="@((int)OrderStatus.Cancelled)" /><button class="btn-luxe-outline" type="submit" style="padding: 4px 8px; font-size: 0.78rem; color:#f87171;">Hủy đơn</button></form>
                             }
                             else if (o.OrderStatus == OrderStatus.Shipping)
                             {
-                                <form method="post" action="/admin/storemanager/updateorderstatus" style="margin:0 0 6px">@Html.AntiForgeryToken()<input type="hidden" name="orderId" value="@o.Id" /><input type="hidden" name="status" value="@((int)OrderStatus.Delivered)" /><button class="btn-luxe" type="submit">Xác nhận giao</button></form>
+                                <form method="post" action="/admin/storemanager/updateorderstatus" style="margin:0 0 6px">@Html.AntiForgeryToken()<input type="hidden" name="orderId" value="@o.Id" /><input type="hidden" name="status" value="@((int)OrderStatus.Delivered)" /><button class="btn-luxe" type="submit" style="padding: 4px 8px; font-size: 0.78rem;">Xác nhận giao</button></form>
                             }
                             @if (o.OrderStatus == OrderStatus.Delivered && o.PaymentMethod == PaymentMethod.COD && o.PaymentStatus != PaymentStatus.Completed)
                             {
-                                <form method="post" action="/admin/storemanager/confirmcodpayment" style="margin:0">@Html.AntiForgeryToken()<input type="hidden" name="orderId" value="@o.Id" /><button class="btn-luxe" type="submit">Xác nhận đã thu COD</button></form>
+                                <form method="post" action="/admin/storemanager/confirmcodpayment" style="margin:0">@Html.AntiForgeryToken()<input type="hidden" name="orderId" value="@o.Id" /><button class="btn-luxe" type="submit" style="padding: 4px 8px; font-size: 0.78rem; background:#2A9D8F; border-color:#2A9D8F;">Đã thu COD</button></form>
                             }
                         </td>
                     </tr>

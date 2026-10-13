@@ -1,1 +1,119 @@
-GitHub API error 404: {"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}
+@model List<Perfume.Domain.Entities.Review>
+@{
+    ViewData["Title"] = "Duyệt Đánh Giá Khách Hàng";
+    Layout = "_AdminLayout";
+}
+
+<div style="max-width: 1400px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
+        <div>
+            <h1 style="font-size: 1.6rem; font-weight: 800; margin: 0 0 6px; color: var(--text-primary);">
+                <i class="fa-solid fa-star text-gold-gradient" style="margin-right: 8px;"></i> Kiểm Duyệt Đánh Giá Khách Hàng
+            </h1>
+            <p style="color: var(--text-muted); margin: 0; font-size: 0.88rem;">Chỉ các đánh giá được duyệt mới hiển thị công khai trên trang sản phẩm</p>
+        </div>
+        <span style="background: rgba(212,175,55,0.15); border: 1px solid var(--gold-primary); color: var(--gold-primary); padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
+            Chờ duyệt: @Model.Count đánh giá
+        </span>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div style="background: rgba(42,157,143,0.15); border: 1px solid #2A9D8F; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; color: #2A9D8F; font-size: 0.9rem;">
+            <i class="fa-solid fa-circle-check" style="margin-right: 6px;"></i> @TempData["Success"]
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div style="background: rgba(230,57,70,0.12); border: 1px solid #e63946; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; color: #f87171;">
+            @TempData["Error"]
+        </div>
+    }
+
+    <div class="luxury-card" style="padding: 0; overflow: hidden;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem;">
+            <thead>
+                <tr style="background: var(--bg-surface-elevated); border-bottom: 1px solid var(--border-card); color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">
+                    <th style="padding: 14px 20px;">Sản Phẩm</th>
+                    <th style="padding: 14px 20px;">Khách Hàng</th>
+                    <th style="padding: 14px 20px;">Số Sao</th>
+                    <th style="padding: 14px 20px; width: 35%;">Nội Dung Đánh Giá</th>
+                    <th style="padding: 14px 20px;">Hình Ảnh</th>
+                    <th style="padding: 14px 20px;">Thời Gian</th>
+                    <th style="padding: 14px 20px; text-align: right;">Thao Tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Count == 0)
+                {
+                    <tr>
+                        <td colspan="7" style="padding: 40px; text-align: center; color: var(--text-muted);">
+                            <i class="fa-solid fa-circle-check" style="font-size: 2rem; color: #2A9D8F; margin-bottom: 8px; display: block;"></i>
+                            Không có đánh giá nào đang chờ duyệt.
+                        </td>
+                    </tr>
+                }
+                @foreach (var r in Model)
+                {
+                    <tr style="border-bottom: 1px solid var(--border-subtle); vertical-align: top;">
+                        <td style="padding: 14px 20px;">
+                            <div style="font-weight: 600; color: var(--text-primary);">@(r.Product?.Name ?? $"#Product {r.ProductId}")</div>
+                            <a href="/nuoc-hoa/@r.Product?.Slug" target="_blank" style="font-size: 0.75rem; color: var(--gold-primary); text-decoration: none;">Xem trang web &rarr;</a>
+                        </td>
+                        <td style="padding: 14px 20px; color: var(--text-primary); font-weight: 500;">
+                            @r.UserName
+                        </td>
+                        <td style="padding: 14px 20px;">
+                            <span style="color: var(--gold-primary); font-weight: 700;">
+                                @for (int i = 0; i < r.Rating; i++) { <i class="fa-solid fa-star"></i> }
+                            </span>
+                            <span style="color: var(--text-muted); font-size: 0.78rem;">(@r.Rating/5)</span>
+                        </td>
+                        <td style="padding: 14px 20px; color: var(--text-secondary); line-height: 1.5;">
+                            @r.Comment
+                        </td>
+                        <td style="padding: 14px 20px;">
+                            @if (!string.IsNullOrWhiteSpace(r.ImageUrls))
+                            {
+                                var imgNames = System.Text.Json.JsonSerializer.Deserialize<List<string>>(r.ImageUrls) ?? new();
+                                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                                    @foreach (var imgName in imgNames)
+                                    {
+                                        <a href="@Url.Action("Photo", "Reviews", new { area = "", reviewId = r.Id, fileName = imgName })" target="_blank">
+                                            <img src="@Url.Action("Photo", "Reviews", new { area = "", reviewId = r.Id, fileName = imgName })" alt="Ảnh review" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid var(--border-card);" />
+                                        </a>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <span style="color: var(--text-muted); font-size: 0.8rem;">Không có</span>
+                            }
+                        </td>
+                        <td style="padding: 14px 20px; color: var(--text-muted); font-size: 0.8rem;">
+                            @r.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                        </td>
+                        <td style="padding: 14px 20px; text-align: right; white-space: nowrap;">
+                            <form method="post" action="/admin/storemanager/moderatereview" style="display: inline; margin-right: 6px;">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="reviewId" value="@r.Id" />
+                                <input type="hidden" name="approve" value="true" />
+                                <button type="submit" class="btn-luxe" style="padding: 6px 12px; font-size: 0.78rem; background: #2A9D8F; border-color: #2A9D8F; color: #FFF;">
+                                    <i class="fa-solid fa-check" style="margin-right: 4px;"></i> Duyệt
+                                </button>
+                            </form>
+                            <form method="post" action="/admin/storemanager/moderatereview" style="display: inline;" onsubmit="return confirm('Từ chối đánh giá này?');">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="reviewId" value="@r.Id" />
+                                <input type="hidden" name="approve" value="false" />
+                                <button type="submit" class="btn-luxe-outline" style="padding: 6px 12px; font-size: 0.78rem; border-color: #f87171; color: #f87171;">
+                                    <i class="fa-solid fa-xmark" style="margin-right: 4px;"></i> Từ chối
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

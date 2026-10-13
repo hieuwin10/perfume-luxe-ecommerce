@@ -1,0 +1,236 @@
+@model List<Perfume.Web.Controllers.DiscoveryPerfumeItemDto>
+@{
+    ViewData["Title"] = "Hộp Khám Phá Discovery Box 3 Mùi - PERFUME LUXE";
+}
+
+<main style="max-width: 1360px; margin: 40px auto 80px; padding: 0 20px;">
+    <!-- HEADER -->
+    <div style="text-align: center; margin-bottom: 40px;">
+        <span style="font-size: 0.8rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold-primary); font-weight: 700; display: inline-block; margin-bottom: 8px;">
+            <i class="fa-solid fa-gift" style="margin-right: 6px;"></i> Haute Parfumerie Experience
+        </span>
+        <h1 style="font-size: clamp(2rem, 4.5vw, 2.8rem); font-family: var(--font-heading); font-weight: 700; margin: 0 0 12px; color: var(--text-primary);">
+            Discovery Box: Bản Giao Hưởng 3 Tuyệt Phẩm
+        </h1>
+        <p style="color: var(--text-secondary); max-width: 680px; margin: 0 auto; font-size: 1rem; line-height: 1.6;">
+            Tự tay tuyển chọn 3 ống chiết thủy tinh 10ml cao cấp từ các nhà hương lừng danh thế giới. Được đóng gói trong hộp quà lót nhung đen thắt nơ vàng kim hoàng gia.
+        </p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: minmax(0, 1.8fr) minmax(320px, 1fr); gap: 32px; align-items: start;">
+        <!-- LEFT: PERFUME SELECTION CATALOG -->
+        <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+                <h3 style="font-size: 1.2rem; font-weight: 700; margin: 0; color: var(--text-primary);">
+                    <i class="fa-solid fa-bottle-droplet text-gold-gradient" style="margin-right: 8px;"></i> Bước 1: Chọn 3 Mùi Hương Bạn Muốn Trải Nghiệm
+                </h3>
+                <span style="font-size: 0.85rem; color: var(--text-muted);">Đã chọn: <strong id="selectedCountBadge" style="color: var(--gold-primary);">0/3</strong></span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 18px;">
+                @foreach (var item in Model)
+                {
+                    <div class="luxury-card discovery-item-card" id="perfume-card-@item.Id" style="padding: 16px; border: 1px solid var(--border-card); background: var(--bg-surface); border-radius: 12px; transition: all 0.2s; display: flex; flex-direction: column; justify-content: space-between;">
+                        <div>
+                            <div style="position: relative; height: 180px; border-radius: 8px; overflow: hidden; margin-bottom: 12px; background: #111;">
+                                <img src="@(string.IsNullOrEmpty(item.MainImageUrl) ? "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=400&q=80" : item.MainImageUrl)" 
+                                     alt="@item.Name" style="width: 100%; height: 100%; object-fit: cover;" />
+                                <span style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); color: var(--gold-primary); font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 99px;">
+                                    10ml Mini
+                                </span>
+                            </div>
+
+                            <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--gold-primary); font-weight: 700; letter-spacing: 0.05em;">@item.BrandName</span>
+                            <h4 style="margin: 2px 0 6px; font-size: 0.95rem; font-weight: 600; color: var(--text-primary); line-height: 1.3;">@item.Name</h4>
+                            
+                            <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px;">
+                                <span style="background: rgba(212,175,55,0.1); color: var(--gold-primary); font-size: 0.72rem; padding: 2px 6px; border-radius: 4px;">
+                                    @item.FamilyName
+                                </span>
+                                <span style="background: rgba(255,255,255,0.05); color: var(--text-muted); font-size: 0.72rem; padding: 2px 6px; border-radius: 4px;">
+                                    @item.Gender
+                                </span>
+                            </div>
+                        </div>
+
+                        <button type="button" class="btn-luxe-outline select-slot-btn" id="btn-select-@item.Id" style="width: 100%; padding: 8px; font-size: 0.82rem;"
+                                onclick="toggleSelectPerfume(@item.Id, '@Html.Raw(JavaScriptEncoder.Default.Encode(item.Name))', '@Html.Raw(JavaScriptEncoder.Default.Encode(item.BrandName))', '@(item.MainImageUrl ?? "")')">
+                            <i class="fa-solid fa-plus" style="margin-right: 4px;"></i> Chọn Chai Này
+                        </button>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- RIGHT: DISCOVERY BOX TRAY & CHECKOUT -->
+        <div style="position: sticky; top: 100px;">
+            <div class="luxury-card" style="padding: 28px; border: 1px solid var(--border-subtle); background: var(--bg-surface); border-radius: 16px; box-shadow: 0 12px 36px rgba(0,0,0,0.4);">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--gold-primary); font-weight: 700;">Hộp Quà Sang Trọng</span>
+                    <h3 style="font-size: 1.35rem; font-weight: 800; margin: 4px 0; color: var(--text-primary);">Luxe Discovery Box</h3>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0;">3 ống xịt 10ml kèm hộp nhung Haute và thiệp chúc mừng.</p>
+                </div>
+
+                <!-- 3 SLOTS TRAY -->
+                <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;">
+                    <!-- Slot 1 -->
+                    <div id="slot-1" class="discovery-slot" style="display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px dashed var(--border-card); border-radius: 10px; background: rgba(255,255,255,0.02); min-height: 60px;">
+                        <div style="width: 36px; height: 36px; border-radius: 50%; background: rgba(212,175,55,0.1); color: var(--gold-primary); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem;">
+                            1
+                        </div>
+                        <div style="flex: 1; color: var(--text-muted); font-size: 0.85rem;" id="slot-1-text">
+                            Chưa chọn mùi hương 1
+                        </div>
+                        <button type="button" id="slot-1-remove" style="display: none; background: none; border: none; color: #f87171; cursor: pointer;" onclick="removeSlot(0)">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+
+                    <!-- Slot 2 -->
+                    <div id="slot-2" class="discovery-slot" style="display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px dashed var(--border-card); border-radius: 10px; background: rgba(255,255,255,0.02); min-height: 60px;">
+                        <div style="width: 36px; height: 36px; border-radius: 50%; background: rgba(212,175,55,0.1); color: var(--gold-primary); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem;">
+                            2
+                        </div>
+                        <div style="flex: 1; color: var(--text-muted); font-size: 0.85rem;" id="slot-2-text">
+                            Chưa chọn mùi hương 2
+                        </div>
+                        <button type="button" id="slot-2-remove" style="display: none; background: none; border: none; color: #f87171; cursor: pointer;" onclick="removeSlot(1)">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+
+                    <!-- Slot 3 -->
+                    <div id="slot-3" class="discovery-slot" style="display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px dashed var(--border-card); border-radius: 10px; background: rgba(255,255,255,0.02); min-height: 60px;">
+                        <div style="width: 36px; height: 36px; border-radius: 50%; background: rgba(212,175,55,0.1); color: var(--gold-primary); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem;">
+                            3
+                        </div>
+                        <div style="flex: 1; color: var(--text-muted); font-size: 0.85rem;" id="slot-3-text">
+                            Chưa chọn mùi hương 3
+                        </div>
+                        <button type="button" id="slot-3-remove" style="display: none; background: none; border: none; color: #f87171; cursor: pointer;" onclick="removeSlot(2)">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PRICE & PERKS -->
+                <div style="border-top: 1px solid var(--border-card); padding-top: 18px; margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+                        <span style="color: var(--text-muted); font-size: 0.88rem;">Giá gốc trọn gói:</span>
+                        <span style="text-decoration: line-through; color: var(--text-muted); font-size: 0.9rem;">1.250.000 ₫</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                        <span style="font-weight: 700; color: var(--text-primary); font-size: 1rem;">Ưu đãi Discovery:</span>
+                        <strong style="color: var(--gold-primary); font-size: 1.45rem;">950.000 ₫</strong>
+                    </div>
+                    <div style="font-size: 0.78rem; color: #2A9D8F; margin-top: 4px; text-align: right;">
+                        <i class="fa-solid fa-tag"></i> Tiết kiệm 300.000₫ & Miễn phí vận chuyển
+                    </div>
+                </div>
+
+                <!-- ADD TO CART BUTTON -->
+                <button type="button" id="btnOrderDiscovery" class="btn-luxe" disabled style="width: 100%; padding: 14px; font-size: 0.95rem; opacity: 0.5; cursor: not-allowed;" onclick="submitDiscoveryBox()">
+                    <i class="fa-solid fa-gift" style="margin-right: 8px;"></i> Hãy Chọn Đủ 3 Mùi Hương
+                </button>
+
+                <div style="margin-top: 16px; font-size: 0.78rem; color: var(--text-muted); text-align: center; line-height: 1.5;">
+                    <i class="fa-solid fa-shield-halved" style="color: var(--gold-primary); margin-right: 4px;"></i> Được hoàn 100% giá trị hộp vào đơn mua chai Fullsize tiếp theo.
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    let selectedPerfumes = []; // Array of { id, name, brand, image }
+
+    function toggleSelectPerfume(id, name, brand, image) {
+        const existingIdx = selectedPerfumes.findIndex(p => p.id === id);
+        if (existingIdx >= 0) {
+            removeSlot(existingIdx);
+        } else {
+            if (selectedPerfumes.length >= 3) {
+                alert('Hộp Discovery Box chỉ gồm đúng 3 mùi hương. Vui lòng bấm bỏ bớt 1 mùi trước khi chọn mùi khác.');
+                return;
+            }
+            selectedPerfumes.push({ id, name, brand, image });
+            updateSlotsUI();
+        }
+    }
+
+    function removeSlot(index) {
+        if (index >= 0 && index < selectedPerfumes.length) {
+            selectedPerfumes.splice(index, 1);
+            updateSlotsUI();
+        }
+    }
+
+    function updateSlotsUI() {
+        document.getElementById('selectedCountBadge').textContent = selectedPerfumes.length + '/3';
+
+        // Update slots
+        for (let i = 0; i < 3; i++) {
+            const slotEl = document.getElementById('slot-' + (i + 1));
+            const textEl = document.getElementById('slot-' + (i + 1) + '-text');
+            const removeBtn = document.getElementById('slot-' + (i + 1) + '-remove');
+
+            if (i < selectedPerfumes.length) {
+                const p = selectedPerfumes[i];
+                slotEl.style.border = '1px solid var(--gold-primary)';
+                slotEl.style.background = 'rgba(212,175,55,0.06)';
+                textEl.innerHTML = `<strong style="color: var(--text-primary);">${p.name}</strong><div style="font-size: 0.75rem; color: var(--gold-primary);">${p.brand} (10ml)</div>`;
+                removeBtn.style.display = 'block';
+            } else {
+                slotEl.style.border = '1px dashed var(--border-card)';
+                slotEl.style.background = 'rgba(255,255,255,0.02)';
+                textEl.innerHTML = `Chưa chọn mùi hương ${i + 1}`;
+                removeBtn.style.display = 'none';
+            }
+        }
+
+        // Update cards button state
+        document.querySelectorAll('.discovery-item-card').forEach(card => {
+            const id = Number(card.id.replace('perfume-card-', ''));
+            const isSelected = selectedPerfumes.some(p => p.id === id);
+            const btn = document.getElementById('btn-select-' + id);
+            if (isSelected) {
+                card.style.borderColor = 'var(--gold-primary)';
+                card.style.background = 'rgba(212,175,55,0.05)';
+                btn.className = 'btn-luxe';
+                btn.innerHTML = '<i class="fa-solid fa-check" style="margin-right: 4px;"></i> Đã Chọn';
+            } else {
+                card.style.borderColor = 'var(--border-card)';
+                card.style.background = 'var(--bg-surface)';
+                btn.className = 'btn-luxe-outline';
+                btn.innerHTML = '<i class="fa-solid fa-plus" style="margin-right: 4px;"></i> Chọn Chai Này';
+            }
+        });
+
+        // Update order button
+        const orderBtn = document.getElementById('btnOrderDiscovery');
+        if (selectedPerfumes.length === 3) {
+            orderBtn.disabled = false;
+            orderBtn.style.opacity = '1';
+            orderBtn.style.cursor = 'pointer';
+            orderBtn.innerHTML = '<i class="fa-solid fa-gift" style="margin-right: 8px;"></i> Đặt Hộp Quà Discovery Box (950.000₫)';
+        } else {
+            orderBtn.disabled = true;
+            orderBtn.style.opacity = '0.5';
+            orderBtn.style.cursor = 'not-allowed';
+            orderBtn.innerHTML = `<i class="fa-solid fa-gift" style="margin-right: 8px;"></i> Hãy Chọn Đủ 3 Mùi (${selectedPerfumes.length}/3)`;
+        }
+    }
+
+    function submitDiscoveryBox() {
+        if (selectedPerfumes.length !== 3) return;
+        const boxTitle = `Discovery Box 3 Mùi: ${selectedPerfumes[0].name} + ${selectedPerfumes[1].name} + ${selectedPerfumes[2].name}`;
+        
+        // Dùng CartDrawer để thêm sản phẩm tùy biến
+        if (window.CartDrawer && typeof CartDrawer.addQuick === 'function') {
+            CartDrawer.addQuick(selectedPerfumes[0].id, boxTitle, 950000, selectedPerfumes[0].image);
+        } else {
+            alert('Đã thêm Discovery Box vào giỏ hàng thành công! Đang chuyển hướng đến giỏ hàng...');
+            window.location.href = '/cart';
+        }
+    }
+</script>

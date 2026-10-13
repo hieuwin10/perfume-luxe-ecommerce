@@ -19,9 +19,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\Perfume.Domain\Perfume.Domain.csproj" />
     <ProjectReference Include="..\..\src\Perfume.Application\Perfume.Application.csproj" />
     <ProjectReference Include="..\..\src\Perfume.Infrastructure\Perfume.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Perfume.Web\Perfume.Web.csproj" />
   </ItemGroup>
 
 </Project>

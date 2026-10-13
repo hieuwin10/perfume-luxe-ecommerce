@@ -139,12 +139,51 @@ public class CheckoutRequestDto
     public string? OrderNotes { get; set; }
     public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.COD;
     public string? VoucherCode { get; set; }
+    public bool IsGiftWrapping { get; set; } = false;
+    public string? GiftMessage { get; set; }
     public List<CartItemDto> Items { get; set; } = new();
 }
 
 public class QuizAnswerRequest
 {
     public string GenderPreference { get; set; } = "unisex"; // men, women, unisex
-    public string Vibe { get; set; } = "luxury"; // luxury, fresh, romantic, cozy
-    public string SeasonOrOccasion { get; set; } = "all"; // spring_summer, fall_winter, evening
+    public string Vibe { get; set; } = "luxury"; // luxury, fresh, romantic, cozy, mysterious
+    public string SeasonOrOccasion { get; set; } = "all"; // evening, daily, all, special
+    public string IntensityPreference { get; set; } = "strong"; // moderate, strong, intense
+    public string BudgetPreference { get; set; } = "mid"; // sample, mid, high
 }
+
+public class QuizProductRecommendationDto
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Slug { get; set; } = string.Empty;
+    public string Sku { get; set; } = string.Empty;
+    public string BrandName { get; set; } = string.Empty;
+    public string? BrandCountry { get; set; }
+    public string? MainImageUrl { get; set; }
+    public decimal BasePrice { get; set; }
+    public string? FamilyName { get; set; }
+    public string? FamilyColor { get; set; }
+    public Concentration Concentration { get; set; }
+    public GenderTarget Gender { get; set; }
+    public double RatingAverage { get; set; }
+    public int RatingCount { get; set; }
+    public string? Longevity { get; set; }
+    public string? Sillage { get; set; }
+    public int MatchScore { get; set; } // e.g. 98 (%)
+    public string MatchReason { get; set; } = string.Empty;
+    public List<string> TopNotes { get; set; } = new();
+}
+
+public class QuizRecommendationResultDto
+{
+    public string ArchetypeTitle { get; set; } = string.Empty;
+    public string ArchetypeSubtitle { get; set; } = string.Empty;
+    public string ArchetypeDescription { get; set; } = string.Empty;
+    public List<string> DominantAccords { get; set; } = new();
+    public List<string> KeyNotes { get; set; } = new();
+    public string BestOccasions { get; set; } = string.Empty;
+    public List<QuizProductRecommendationDto> Items { get; set; } = new();
+}
+

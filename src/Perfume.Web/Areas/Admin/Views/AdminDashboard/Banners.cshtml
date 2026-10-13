@@ -1,0 +1,288 @@
+@model List<Perfume.Domain.Entities.HeroBanner>
+@{
+    ViewData["Title"] = "Quản Lý Hero Banners & Slider";
+    Layout = "_AdminLayout";
+}
+
+<div style="max-width: 1400px; margin: 0 auto;">
+    <!-- HEADER -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
+        <div>
+            <h1 style="font-size: 1.6rem; font-weight: 800; margin: 0 0 6px; color: var(--text-primary);">
+                <i class="fa-solid fa-images text-gold-gradient" style="margin-right: 8px;"></i> Quản Lý Hero Banners & Slider
+            </h1>
+            <p style="color: var(--text-muted); margin: 0; font-size: 0.88rem;">Điều chỉnh các slide banner chính tại trang chủ, ảnh nền Haute Parfumerie và nút kêu gọi hành động (CTA).</p>
+        </div>
+
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <button type="button" class="btn-luxe" onclick="openCreateBannerModal()" style="padding: 8px 18px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px;">
+                <i class="fa-solid fa-plus"></i> Thêm Banner Mới
+            </button>
+        </div>
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+        <div style="background: rgba(230,57,70,0.12); border: 1px solid #e63946; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; color: #f87171;">
+            <i class="fa-solid fa-triangle-exclamation" style="margin-right: 6px;"></i> @TempData["Error"]
+        </div>
+    }
+    @if (TempData["Success"] != null)
+    {
+        <div style="background: rgba(42,157,143,0.15); border: 1px solid #2A9D8F; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; color: #2A9D8F; font-size: 0.9rem;">
+            <i class="fa-solid fa-circle-check" style="margin-right: 6px;"></i> @TempData["Success"]
+        </div>
+    }
+
+    <!-- BANNERS GRID -->
+    @if (Model.Count == 0)
+    {
+        <div class="luxury-card" style="padding: 60px 20px; text-align: center;">
+            <i class="fa-solid fa-photo-film" style="font-size: 3rem; color: var(--gold-primary); opacity: 0.4; margin-bottom: 16px; display: block;"></i>
+            <h3 style="font-size: 1.2rem; color: var(--text-primary); margin-bottom: 8px;">Chưa có Banner nào được tạo</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem; max-width: 500px; margin: 0 auto 20px;">Trang chủ hiện đang sử dụng banner mặc định. Hãy tạo banner đầu tiên để cá nhân hóa chiến dịch quảng bá.</p>
+            <button type="button" class="btn-luxe" onclick="openCreateBannerModal()" style="padding: 10px 24px;">
+                <i class="fa-solid fa-plus" style="margin-right: 6px;"></i> Tạo Banner Ngay
+            </button>
+        </div>
+    }
+    else
+    {
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 24px;">
+            @foreach (var b in Model)
+            {
+                <div class="luxury-card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column; border: 1px solid @(b.IsActive ? "var(--border-card)" : "rgba(239,68,68,0.2)"); opacity: @(b.IsActive ? "1" : "0.75");">
+                    <!-- BANNER PREVIEW -->
+                    <div style="position: relative; height: 210px; background: url('@b.ImageUrl') center/cover no-repeat; border-bottom: 1px solid var(--border-card);">
+                        <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.85) 100%);"></div>
+                        
+                        <div style="position: absolute; top: 12px; left: 12px; display: flex; gap: 8px;">
+                            <span style="background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); color: var(--gold-primary); border: 1px solid rgba(212,175,55,0.4); padding: 3px 10px; border-radius: 99px; font-size: 0.75rem; font-weight: 700;">
+                                Thứ tự: #@b.DisplayOrder
+                            </span>
+                            @if (b.IsActive)
+                            {
+                                <span style="background: rgba(42,157,143,0.85); color: #FFF; padding: 3px 10px; border-radius: 99px; font-size: 0.75rem; font-weight: 600;">
+                                    Đang Hiển Thị
+                                </span>
+                            }
+                            else
+                            {
+                                <span style="background: rgba(239,68,68,0.85); color: #FFF; padding: 3px 10px; border-radius: 99px; font-size: 0.75rem; font-weight: 600;">
+                                    Đang Ẩn
+                                </span>
+                            }
+                        </div>
+
+                        <div style="position: absolute; bottom: 16px; left: 16px; right: 16px;">
+                            <h3 style="margin: 0 0 4px; font-size: 1.25rem; font-weight: 700; color: #FFF; text-shadow: 0 2px 10px rgba(0,0,0,0.8);">
+                                @b.Title
+                            </h3>
+                            @if (!string.IsNullOrEmpty(b.Subtitle))
+                            {
+                                <p style="margin: 0; font-size: 0.85rem; color: #e2e8f0; text-shadow: 0 1px 4px rgba(0,0,0,0.8); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                    @b.Subtitle
+                                </p>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- BANNER INFO & ACTIONS -->
+                    <div style="padding: 18px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; gap: 14px;">
+                        <div style="font-size: 0.82rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 6px;">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>Liên kết (CTA):</span>
+                                <a href="@b.TargetUrl" target="_blank" style="color: var(--gold-primary); text-decoration: none; font-weight: 600;">
+                                    @(string.IsNullOrEmpty(b.TargetUrl) ? "—" : b.TargetUrl) <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 0.7rem;"></i>
+                                </a>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>Nút bấm:</span>
+                                <span style="color: var(--text-primary); font-weight: 600;">@(string.IsNullOrEmpty(b.ButtonText) ? "Khám Phá Ngay" : b.ButtonText)</span>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-card); padding-top: 14px; gap: 8px;">
+                            <form method="post" action="/admin/admindashboard/togglebanneractive" style="margin: 0;">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@b.Id" />
+                                <button type="submit" class="btn-luxe-outline" style="padding: 6px 12px; font-size: 0.8rem;">
+                                    <i class="fa-solid @(b.IsActive ? "fa-eye-slash" : "fa-eye")" style="margin-right: 4px;"></i> @(b.IsActive ? "Ẩn Banner" : "Hiển Thị")
+                                </button>
+                            </form>
+
+                            <div style="display: flex; gap: 8px;">
+                                <button type="button" class="btn-luxe-outline" style="padding: 6px 14px; font-size: 0.8rem;"
+                                        onclick="openEditBannerModal(@b.Id, '@Html.Raw(JavaScriptEncoder.Default.Encode(b.Title))', '@Html.Raw(JavaScriptEncoder.Default.Encode(b.Subtitle ?? ""))', '@Html.Raw(JavaScriptEncoder.Default.Encode(b.ImageUrl))', '@Html.Raw(JavaScriptEncoder.Default.Encode(b.TargetUrl ?? ""))', '@Html.Raw(JavaScriptEncoder.Default.Encode(b.ButtonText ?? ""))', @b.DisplayOrder, @b.IsActive.ToString().ToLower())">
+                                    <i class="fa-solid fa-pen-to-square"></i> Sửa
+                                </button>
+
+                                <form method="post" action="/admin/admindashboard/deletebanner" style="margin: 0;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa Banner này?');">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@b.Id" />
+                                    <button type="submit" class="btn-luxe-outline" style="padding: 6px 12px; font-size: 0.8rem; border-color: rgba(239,68,68,0.4); color: #f87171;">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<!-- MODAL THÊM / SỬA BANNER -->
+<div id="bannerModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 1050; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+    <div class="luxury-card" style="width: 100%; max-width: 600px; padding: 28px; background: var(--bg-surface); border: 1px solid var(--border-card); border-radius: 12px; box-shadow: 0 16px 40px rgba(0,0,0,0.5);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 id="modalTitle" style="font-size: 1.25rem; font-weight: 700; margin: 0; color: var(--text-primary);">
+                <i class="fa-solid fa-images text-gold-gradient" style="margin-right: 8px;"></i> Thêm Hero Banner Mới
+            </h3>
+            <button type="button" onclick="closeBannerModal()" style="background: none; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer;">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <form method="post" action="/admin/admindashboard/savebanner">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" id="bannerId" />
+
+            <div style="margin-bottom: 14px;">
+                <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px;">
+                    Tiêu Đề Banner <span style="color: #f87171;">*</span>
+                </label>
+                <input type="text" name="title" id="bannerTitleInput" required placeholder="VD: Tuyệt Tác Nước Hoa Hoàng Gia Creed"
+                       style="width: 100%; box-sizing: border-box; padding: 10px 14px; background: var(--bg-input, rgba(255,255,255,0.06)); border: 1px solid var(--border-card); border-radius: 8px; color: var(--text-primary); font-size: 0.9rem; outline: none;" />
+            </div>
+
+            <div style="margin-bottom: 14px;">
+                <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px;">
+                    Phụ Đề / Mô Tả Ngắn
+                </label>
+                <textarea name="subtitle" id="bannerSubtitleInput" rows="2" placeholder="VD: Khám phá những nốt hương độc bản được chưng cất thủ công tại Grasse..."
+                          style="width: 100%; box-sizing: border-box; padding: 10px 14px; background: var(--bg-input, rgba(255,255,255,0.06)); border: 1px solid var(--border-card); border-radius: 8px; color: var(--text-primary); font-size: 0.85rem; outline: none;"></textarea>
+            </div>
+
+            <div style="margin-bottom: 14px;">
+                <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px;">
+                    Link Ảnh Nền CDN (Unsplash / Cloudinary) <span style="color: #f87171;">*</span>
+                </label>
+                <input type="url" name="imageUrl" id="bannerImageUrlInput" required placeholder="https://images.unsplash.com/photo-..."
+                       oninput="updatePreviewImage(this.value)"
+                       style="width: 100%; box-sizing: border-box; padding: 10px 14px; background: var(--bg-input, rgba(255,255,255,0.06)); border: 1px solid var(--border-card); border-radius: 8px; color: var(--text-primary); font-size: 0.85rem; outline: none;" />
+                
+                <!-- Quick CDN presets -->
+                <div style="margin-top: 6px; display: flex; gap: 6px; flex-wrap: wrap;">
+                    <span style="font-size: 0.72rem; color: var(--text-muted);">Gợi ý ảnh:</span>
+                    <button type="button" class="btn-luxe-outline" style="padding: 2px 8px; font-size: 0.72rem;" onclick="setPresetImage('https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=1920&q=80')">Luxury Bottle</button>
+                    <button type="button" class="btn-luxe-outline" style="padding: 2px 8px; font-size: 0.72rem;" onclick="setPresetImage('https://images.unsplash.com/photo-1523293182086-7651a899d37f?auto=format&fit=crop&w=1920&q=80')">Golden Amber</button>
+                    <button type="button" class="btn-luxe-outline" style="padding: 2px 8px; font-size: 0.72rem;" onclick="setPresetImage('https://images.unsplash.com/photo-1615634260167-c8cdede054de?auto=format&fit=crop&w=1920&q=80')">Floral Mist</button>
+                </div>
+            </div>
+
+            <!-- Preview box -->
+            <div id="imagePreviewBox" style="margin-bottom: 14px; height: 110px; border-radius: 8px; background: #111; overflow: hidden; display: none; border: 1px solid var(--border-card);">
+                <img id="imagePreviewElement" src="" alt="Preview" style="width: 100%; height: 100%; object-fit: cover;" />
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+                <div>
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px;">
+                        Đường Dẫn Đích (Target URL)
+                    </label>
+                    <input type="text" name="targetUrl" id="bannerTargetUrlInput" placeholder="/bo-suu-tap" value="/bo-suu-tap"
+                           style="width: 100%; box-sizing: border-box; padding: 10px 14px; background: var(--bg-input, rgba(255,255,255,0.06)); border: 1px solid var(--border-card); border-radius: 8px; color: var(--text-primary); font-size: 0.88rem; outline: none;" />
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px;">
+                        Chữ Trên Nút (CTA Button)
+                    </label>
+                    <input type="text" name="buttonText" id="bannerButtonTextInput" placeholder="Khám Phá Ngay" value="Khám Phá Ngay"
+                           style="width: 100%; box-sizing: border-box; padding: 10px 14px; background: var(--bg-input, rgba(255,255,255,0.06)); border: 1px solid var(--border-card); border-radius: 8px; color: var(--text-primary); font-size: 0.88rem; outline: none;" />
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 24px; align-items: center;">
+                <div>
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px;">
+                        Thứ Tự Hiển Thị (Nhỏ trước)
+                    </label>
+                    <input type="number" name="displayOrder" id="bannerOrderInput" value="0" min="0" step="1"
+                           style="width: 100%; box-sizing: border-box; padding: 10px 14px; background: var(--bg-input, rgba(255,255,255,0.06)); border: 1px solid var(--border-card); border-radius: 8px; color: var(--text-primary); font-size: 0.88rem; outline: none;" />
+                </div>
+                <div>
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin-top: 18px;">
+                        <input type="checkbox" name="isActive" id="bannerIsActiveInput" value="true" checked style="width: 18px; height: 18px; accent-color: var(--gold-primary);" />
+                        <span style="font-size: 0.88rem; color: var(--text-primary); font-weight: 600;">Kích hoạt hiển thị</span>
+                    </label>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" class="btn-luxe-outline" onclick="closeBannerModal()" style="padding: 10px 20px; font-size: 0.88rem;">Hủy</button>
+                <button type="submit" class="btn-luxe" style="padding: 10px 24px; font-size: 0.88rem;">
+                    <i class="fa-solid fa-floppy-disk" style="margin-right: 6px;"></i> Lưu Banner
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function updatePreviewImage(url) {
+        const box = document.getElementById('imagePreviewBox');
+        const img = document.getElementById('imagePreviewElement');
+        if (url && url.trim().length > 10) {
+            img.src = url.trim();
+            box.style.display = 'block';
+        } else {
+            box.style.display = 'none';
+        }
+    }
+
+    function setPresetImage(url) {
+        document.getElementById('bannerImageUrlInput').value = url;
+        updatePreviewImage(url);
+    }
+
+    function openCreateBannerModal() {
+        document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-images text-gold-gradient" style="margin-right: 8px;"></i> Thêm Hero Banner Mới';
+        document.getElementById('bannerId').value = '';
+        document.getElementById('bannerTitleInput').value = '';
+        document.getElementById('bannerSubtitleInput').value = '';
+        document.getElementById('bannerImageUrlInput').value = '';
+        document.getElementById('bannerTargetUrlInput').value = '/bo-suu-tap';
+        document.getElementById('bannerButtonTextInput').value = 'Khám Phá Ngay';
+        document.getElementById('bannerOrderInput').value = '0';
+        document.getElementById('bannerIsActiveInput').checked = true;
+        document.getElementById('imagePreviewBox').style.display = 'none';
+        document.getElementById('bannerModal').style.display = 'flex';
+    }
+
+    function openEditBannerModal(id, title, subtitle, imageUrl, targetUrl, buttonText, displayOrder, isActive) {
+        document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-pen-to-square text-gold-gradient" style="margin-right: 8px;"></i> Chỉnh Sửa Hero Banner #' + id;
+        document.getElementById('bannerId').value = id;
+        document.getElementById('bannerTitleInput').value = title;
+        document.getElementById('bannerSubtitleInput').value = subtitle;
+        document.getElementById('bannerImageUrlInput').value = imageUrl;
+        document.getElementById('bannerTargetUrlInput').value = targetUrl || '/bo-suu-tap';
+        document.getElementById('bannerButtonTextInput').value = buttonText || 'Khám Phá Ngay';
+        document.getElementById('bannerOrderInput').value = displayOrder;
+        document.getElementById('bannerIsActiveInput').checked = isActive;
+        updatePreviewImage(imageUrl);
+        document.getElementById('bannerModal').style.display = 'flex';
+    }
+
+    function closeBannerModal() {
+        document.getElementById('bannerModal').style.display = 'none';
+    }
+
+    window.addEventListener('click', function(e) {
+        const modal = document.getElementById('bannerModal');
+        if (e.target === modal) {
+            closeBannerModal();
+        }
+    });
+</script>

@@ -1,0 +1,170 @@
+@model List<Perfume.Domain.Entities.PrivateTastingBooking>
+@{
+    ViewData["Title"] = "Quản Lý Lịch Hẹn VIP Private Tasting";
+    Layout = "_AdminLayout";
+    string currentStatus = ViewBag.CurrentStatus ?? "all";
+}
+
+<div style="max-width: 1400px; margin: 0 auto;">
+    <!-- HEADER -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
+        <div>
+            <h1 style="font-size: 1.6rem; font-weight: 800; margin: 0 0 6px; color: var(--text-primary);">
+                <i class="fa-solid fa-crown text-gold-gradient" style="margin-right: 8px;"></i> Quản Lý Lịch Hẹn VIP Private Tasting
+            </h1>
+            <p style="color: var(--text-muted); margin: 0; font-size: 0.88rem;">Theo dõi danh sách khách hàng đặt lịch trải nghiệm mùi hương riêng tư tại Boutique Tràng Tiền & Đồng Khởi.</p>
+        </div>
+
+        <a href="/dat-lich-trai-nghiem" target="_blank" class="btn-luxe-outline" style="padding: 8px 16px; font-size: 0.85rem; text-decoration: none;">
+            <i class="fa-solid fa-arrow-up-right-from-square" style="margin-right: 6px;"></i> Xem Trang Đặt Lịch Public
+        </a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div style="background: rgba(42,157,143,0.15); border: 1px solid #2A9D8F; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; color: #2A9D8F; font-size: 0.9rem;">
+            <i class="fa-solid fa-circle-check" style="margin-right: 6px;"></i> @TempData["Success"]
+        </div>
+    }
+
+    <!-- STATS -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px;">
+        <div class="luxury-card" style="padding: 20px; border-left: 4px solid var(--gold-primary);">
+            <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Tổng Lượt Đặt Lịch</span>
+            <div style="font-size: 1.8rem; font-weight: 800; color: var(--text-primary); margin-top: 6px;">@Model.Count</div>
+        </div>
+        <div class="luxury-card" style="padding: 20px; border-left: 4px solid #f59e0b;">
+            <span style="font-size: 0.75rem; text-transform: uppercase; color: #fbbf24; font-weight: 600;">Chờ Tiếp Nhận (Pending)</span>
+            <div style="font-size: 1.8rem; font-weight: 800; color: #f59e0b; margin-top: 6px;">@Model.Count(b => b.Status == "Pending")</div>
+        </div>
+        <div class="luxury-card" style="padding: 20px; border-left: 4px solid #3b82f6;">
+            <span style="font-size: 0.75rem; text-transform: uppercase; color: #60a5fa; font-weight: 600;">Đã Xác Nhận (Confirmed)</span>
+            <div style="font-size: 1.8rem; font-weight: 800; color: #60a5fa; margin-top: 6px;">@Model.Count(b => b.Status == "Confirmed")</div>
+        </div>
+        <div class="luxury-card" style="padding: 20px; border-left: 4px solid #2A9D8F;">
+            <span style="font-size: 0.75rem; text-transform: uppercase; color: #2A9D8F; font-weight: 600;">Đã Đón Tiếp (Completed)</span>
+            <div style="font-size: 1.8rem; font-weight: 800; color: #2A9D8F; margin-top: 6px;">@Model.Count(b => b.Status == "Completed")</div>
+        </div>
+    </div>
+
+    <!-- FILTER BUTTONS -->
+    <div class="luxury-card" style="padding: 14px 20px; margin-bottom: 24px; display: flex; gap: 8px; flex-wrap: wrap;">
+        <a href="/admin/admindashboard/tastings?status=all" class="btn-luxe@(currentStatus == "all" ? "" : "-outline")" style="padding: 6px 14px; font-size: 0.82rem; text-decoration: none;">Tất Cả</a>
+        <a href="/admin/admindashboard/tastings?status=Pending" class="btn-luxe@(currentStatus == "Pending" ? "" : "-outline")" style="padding: 6px 14px; font-size: 0.82rem; text-decoration: none; border-color: rgba(245,158,11,0.5); color: @(currentStatus == "Pending" ? "#000" : "#fbbf24");">Chờ Xác Nhận</a>
+        <a href="/admin/admindashboard/tastings?status=Confirmed" class="btn-luxe@(currentStatus == "Confirmed" ? "" : "-outline")" style="padding: 6px 14px; font-size: 0.82rem; text-decoration: none; border-color: rgba(59,130,246,0.5); color: @(currentStatus == "Confirmed" ? "#000" : "#60a5fa");">Đã Xác Nhận</a>
+        <a href="/admin/admindashboard/tastings?status=Completed" class="btn-luxe@(currentStatus == "Completed" ? "" : "-outline")" style="padding: 6px 14px; font-size: 0.82rem; text-decoration: none; border-color: rgba(42,157,143,0.5); color: @(currentStatus == "Completed" ? "#000" : "#2A9D8F");">Đã Hoàn Tất</a>
+        <a href="/admin/admindashboard/tastings?status=Cancelled" class="btn-luxe@(currentStatus == "Cancelled" ? "" : "-outline")" style="padding: 6px 14px; font-size: 0.82rem; text-decoration: none; border-color: rgba(239,68,68,0.5); color: @(currentStatus == "Cancelled" ? "#000" : "#f87171");">Đã Hủy</a>
+    </div>
+
+    <!-- TABLE -->
+    <div class="luxury-card" style="padding: 0; overflow-x: auto; border: 1px solid var(--border-card); background: var(--bg-surface); border-radius: 12px;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem;">
+            <thead>
+                <tr style="background: var(--bg-surface-elevated); border-bottom: 1px solid var(--border-card); color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">
+                    <th style="padding: 14px 20px;">Mã Lịch Hẹn</th>
+                    <th style="padding: 14px 16px;">Khách Hàng & Liên Hệ</th>
+                    <th style="padding: 14px 16px;">Địa Điểm Salon</th>
+                    <th style="padding: 14px 16px;">Ngày Hẹn & Giờ</th>
+                    <th style="padding: 14px 16px;">Nhóm Hương / Ghi Chú</th>
+                    <th style="padding: 14px 16px; text-align: center;">Trạng Thái</th>
+                    <th style="padding: 14px 20px; text-align: right;">Cập Nhật</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Count == 0)
+                {
+                    <tr>
+                        <td colspan="7" style="padding: 40px; text-align: center; color: var(--text-muted);">
+                            <i class="fa-solid fa-calendar-xmark" style="font-size: 2.2rem; opacity: 0.3; margin-bottom: 12px; display: block;"></i>
+                            Không có lịch hẹn nào phù hợp.
+                        </td>
+                    </tr>
+                }
+                @foreach (var b in Model)
+                {
+                    <tr style="border-bottom: 1px solid var(--border-card);">
+                        <td style="padding: 14px 20px; font-weight: 700; color: var(--gold-primary); white-space: nowrap;">
+                            VIP-@b.Id.ToString("D5")
+                        </td>
+                        <td style="padding: 14px 16px;">
+                            <strong style="color: var(--text-primary); font-size: 0.95rem;">@b.CustomerName</strong>
+                            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
+                                <i class="fa-solid fa-phone" style="font-size: 0.72rem; margin-right: 4px;"></i> @b.PhoneNumber
+                            </div>
+                            @if (!string.IsNullOrEmpty(b.Email))
+                            {
+                                <div style="font-size: 0.75rem; color: var(--text-muted);">
+                                    <i class="fa-solid fa-envelope" style="font-size: 0.72rem; margin-right: 4px;"></i> @b.Email
+                                </div>
+                            }
+                        </td>
+                        <td style="padding: 14px 16px; color: var(--text-primary); font-weight: 500;">
+                            @b.BoutiqueLocation
+                        </td>
+                        <td style="padding: 14px 16px; white-space: nowrap;">
+                            <strong style="color: var(--text-primary);">@b.BookingDate.ToString("dd/MM/yyyy")</strong>
+                            <div style="font-size: 0.8rem; color: var(--gold-primary); margin-top: 2px;">@b.TimeSlot</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">(@b.GuestCount khách)</div>
+                        </td>
+                        <td style="padding: 14px 16px; max-width: 280px;">
+                            @if (!string.IsNullOrEmpty(b.PreferredScentFamilies))
+                            {
+                                <div style="font-size: 0.82rem; color: var(--gold-primary); margin-bottom: 4px;">
+                                    <i class="fa-solid fa-palette" style="margin-right: 4px;"></i> @b.PreferredScentFamilies
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(b.Notes))
+                            {
+                                <div style="font-size: 0.78rem; color: var(--text-muted); font-style: italic;">
+                                    "@b.Notes"
+                                </div>
+                            }
+                        </td>
+                        <td style="padding: 14px 16px; text-align: center;">
+                            @if (b.Status == "Pending")
+                            {
+                                <span style="background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); padding: 4px 12px; border-radius: 99px; font-size: 0.75rem; font-weight: 700;">Chờ xác nhận</span>
+                            }
+                            else if (b.Status == "Confirmed")
+                            {
+                                <span style="background: rgba(59,130,246,0.15); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); padding: 4px 12px; border-radius: 99px; font-size: 0.75rem; font-weight: 700;">Đã xác nhận</span>
+                            }
+                            else if (b.Status == "Completed")
+                            {
+                                <span style="background: rgba(42,157,143,0.15); color: #2A9D8F; border: 1px solid rgba(42,157,143,0.3); padding: 4px 12px; border-radius: 99px; font-size: 0.75rem; font-weight: 700;">Đã đón tiếp</span>
+                            }
+                            else
+                            {
+                                <span style="background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); padding: 4px 12px; border-radius: 99px; font-size: 0.75rem; font-weight: 700;">Đã hủy</span>
+                            }
+                        </td>
+                        <td style="padding: 14px 20px; text-align: right; white-space: nowrap;">
+                            <form method="post" action="/admin/admindashboard/updatetastingstatus" style="display: inline-flex; gap: 6px; margin: 0;">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@b.Id" />
+                                @if (b.Status == "Pending")
+                                {
+                                    <button type="submit" name="status" value="Confirmed" class="btn-luxe" style="padding: 4px 10px; font-size: 0.75rem;">
+                                        <i class="fa-solid fa-check"></i> Xác Nhận
+                                    </button>
+                                }
+                                @if (b.Status == "Confirmed")
+                                {
+                                    <button type="submit" name="status" value="Completed" class="btn-luxe" style="padding: 4px 10px; font-size: 0.75rem; background: #2A9D8F; border-color: #2A9D8F;">
+                                        <i class="fa-solid fa-crown"></i> Hoàn Tất
+                                    </button>
+                                }
+                                @if (b.Status != "Cancelled" && b.Status != "Completed")
+                                {
+                                    <button type="submit" name="status" value="Cancelled" class="btn-luxe-outline" style="padding: 4px 8px; font-size: 0.75rem; border-color: rgba(239,68,68,0.4); color: #f87171;" onclick="return confirm('Hủy lịch hẹn này?');">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </button>
+                                }
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

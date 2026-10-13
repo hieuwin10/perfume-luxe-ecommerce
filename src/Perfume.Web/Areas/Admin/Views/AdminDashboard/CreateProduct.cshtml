@@ -1,0 +1,276 @@
+@model Perfume.Application.DTOs.CreateProductDto
+@using Perfume.Domain.Entities
+@using Perfume.Domain.Enums
+@{
+    ViewData["Title"] = "Thêm Sản Phẩm Nước Hoa Mới";
+    Layout = "_AdminLayout";
+    var brands = ViewBag.Brands as List<Brand> ?? new List<Brand>();
+    var categories = ViewBag.Categories as List<Category> ?? new List<Category>();
+    var families = ViewBag.FragranceFamilies as List<FragranceFamily> ?? new List<FragranceFamily>();
+}
+
+<div style="max-width: 1100px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 6px;">
+                <a href="/admin/admindashboard/products" class="btn-luxe-outline" style="padding: 6px 12px; font-size: 0.82rem;">
+                    <i class="fa-solid fa-arrow-left"></i> Quay lại
+                </a>
+                <h1 style="font-size: 1.6rem; font-weight: 800; margin: 0; color: var(--text-primary);">
+                    <i class="fa-solid fa-plus text-gold-gradient" style="margin-right: 8px;"></i> Thêm Mới Sản Phẩm Nước Hoa
+                </h1>
+            </div>
+            <p style="color: var(--text-muted); margin: 0; font-size: 0.88rem;">
+                Nhập thông tin chi tiết, 3 tầng hương, hình ảnh CDN và phiên bản mặc định
+            </p>
+        </div>
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+        <div style="background: rgba(230,57,70,0.12); border: 1px solid #e63946; border-radius: 8px; padding: 12px 18px; margin-bottom: 20px; color: #f87171; font-size: 0.9rem;">
+            <i class="fa-solid fa-triangle-exclamation" style="margin-right: 6px;"></i> @TempData["Error"]
+        </div>
+    }
+
+    <form method="post" action="/admin/admindashboard/createproduct">
+        @Html.AntiForgeryToken()
+
+        <!-- Section 1: Basic Information -->
+        <div class="luxury-card" style="padding: 24px; margin-bottom: 24px;">
+            <h3 style="font-size: 1.15rem; font-weight: 700; margin: 0 0 18px; color: var(--text-primary); border-bottom: 1px solid var(--border-card); padding-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-bottle-droplet text-gold-gradient"></i> Thông Tin Chung Của Chai Nước Hoa
+            </h3>
+
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 18px;">
+                <div>
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+                        Tên Sản Phẩm *
+                    </label>
+                    <input type="text" name="Name" value="@Model.Name" placeholder="vd: Tom Ford Oud Wood" required
+                           style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.95rem; font-weight: 600; outline: none;" />
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+                        Mã SKU Gốc *
+                    </label>
+                    <input type="text" name="Sku" value="@Model.Sku" placeholder="vd: TF-OUD-WOOD" required
+                           style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--gold-primary); font-size: 0.95rem; font-weight: 700; outline: none;" />
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+                        Thương Hiệu (Brand) *
+                    </label>
+                    <select name="BrandId" required
+                            style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.9rem; outline: none;">
+                        <option value="">-- Chọn thương hiệu --</option>
+                        @foreach (var b in brands)
+                        {
+                            <option value="@b.Id" selected="@(Model.BrandId == b.Id)">@b.Name (@(b.Country ?? "Global"))</option>
+                        }
+                    </select>
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+                        Danh Mục *
+                    </label>
+                    <select name="CategoryId" required
+                            style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.9rem; outline: none;">
+                        <option value="">-- Chọn danh mục --</option>
+                        @foreach (var c in categories)
+                        {
+                            <option value="@c.Id" selected="@(Model.CategoryId == c.Id)">@c.Name</option>
+                        }
+                    </select>
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+                        Nhóm Hương (Fragrance Family)
+                    </label>
+                    <select name="FragranceFamilyId"
+                            style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.9rem; outline: none;">
+                        <option value="">-- Chọn nhóm hương --</option>
+                        @foreach (var f in families)
+                        {
+                            <option value="@f.Id" selected="@(Model.FragranceFamilyId == f.Id)">@f.Name</option>
+                        }
+                    </select>
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+                        Nồng Độ Tinh Dầu
+                    </label>
+                    <select name="Concentration"
+                            style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.9rem; outline: none;">
+                        <option value="@((int)Concentration.EDP)" selected="@(Model.Concentration == Concentration.EDP)">EDP - Eau de Parfum (15-20%)</option>
+                        <option value="@((int)Concentration.EDT)" selected="@(Model.Concentration == Concentration.EDT)">EDT - Eau de Toilette (5-15%)</option>
+                        <option value="@((int)Concentration.Parfum)" selected="@(Model.Concentration == Concentration.Parfum)">Parfum / Extrait de Parfum (20-40%)</option>
+                        <option value="@((int)Concentration.EDC)" selected="@(Model.Concentration == Concentration.EDC)">EDC - Eau de Cologne (2-4%)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+                        Giới Tính Mục Tiêu
+                    </label>
+                    <select name="Gender"
+                            style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.9rem; outline: none;">
+                        <option value="@((int)GenderTarget.Unisex)" selected="@(Model.Gender == GenderTarget.Unisex)">Unisex (Cho cả nam và nữ)</option>
+                        <option value="@((int)GenderTarget.Men)" selected="@(Model.Gender == GenderTarget.Men)">Nam (Men)</option>
+                        <option value="@((int)GenderTarget.Women)" selected="@(Model.Gender == GenderTarget.Women)">Nữ (Women)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+                        Giá Cơ Bản (VNĐ) *
+                    </label>
+                    <input type="number" name="BasePrice" value="@Model.BasePrice" step="10000" min="0" required placeholder="vd: 6500000"
+                           style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--gold-primary); font-weight: 700; font-size: 0.95rem; outline: none;" />
+                </div>
+
+                <div style="grid-column: 1 / -1;">
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+                        Đường Dẫn Ảnh Trực Tuyến CDN (Unsplash / Cloudinary) *
+                    </label>
+                    <input type="url" name="MainImageUrl" value="@Model.MainImageUrl" placeholder="https://images.unsplash.com/photo-..." 
+                           style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.88rem; outline: none;" />
+                    <span style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 4px;">
+                        Gợi ý ảnh đẹp từ Unsplash: <code>https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=800&q=80</code> hoặc <code>https://images.unsplash.com/photo-1523293182086-7651a899d37f?auto=format&fit=crop&w=800&q=80</code>
+                    </span>
+                </div>
+
+                <div style="grid-column: 1 / -1;">
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+                        Mô Tả Ngắn (Hiển thị thẻ bài & tóm tắt)
+                    </label>
+                    <textarea name="ShortDescription" rows="2" placeholder="Một kiệt tác mùi hương đầy mê hoặc kết hợp giữa gỗ trầm ấm và vani phương Đông..."
+                              style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.88rem; outline: none;"></textarea>
+                </div>
+
+                <div style="grid-column: 1 / -1;">
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+                        Mô Tả Chi Tiết (Bài viết giới thiệu đầy đủ)
+                    </label>
+                    <textarea name="FullDescription" rows="4" placeholder="Nội dung chi tiết giới thiệu sản phẩm, cảm xúc mùi hương và phong cách phù hợp..."
+                              style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.88rem; outline: none;"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: 3 Olfactory Pyramid Notes -->
+        <div class="luxury-card" style="padding: 24px; margin-bottom: 24px;">
+            <h3 style="font-size: 1.15rem; font-weight: 700; margin: 0 0 18px; color: var(--text-primary); border-bottom: 1px solid var(--border-card); padding-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-layer-group text-gold-gradient"></i> Kim Tự Tháp Mùi Hương (3 Tầng Hương)
+            </h3>
+            <p style="color: var(--text-muted); font-size: 0.82rem; margin-top: -10px; margin-bottom: 16px;">
+                Nhập danh sách hương cách nhau bởi dấu phẩy <code>,</code> (hệ thống sẽ tự động đối chiếu hoặc tạo mới note hương).
+            </p>
+
+            <div style="display: grid; grid-template-columns: 1fr; gap: 16px;">
+                <div>
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: #38bdf8; margin-bottom: 6px; text-transform: uppercase;">
+                        <i class="fa-solid fa-wind" style="margin-right: 4px;"></i> Hương Đầu (Top Notes - 10-15 phút đầu)
+                    </label>
+                    <input type="text" name="TopNotes" value="@Model.TopNotes" placeholder="vd: Cam Bergamot, Tiêu hồng, Bạch đậu khấu"
+                           style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.88rem; outline: none;" />
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: #e879f9; margin-bottom: 6px; text-transform: uppercase;">
+                        <i class="fa-solid fa-heart" style="margin-right: 4px;"></i> Hương Giữa (Heart / Middle Notes - 2-4 giờ)
+                    </label>
+                    <input type="text" name="HeartNotes" value="@Model.HeartNotes" placeholder="vd: Gỗ tuyết tùng, Gỗ cẩm lai, Cỏ hương bài"
+                           style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.88rem; outline: none;" />
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--gold-primary); margin-bottom: 6px; text-transform: uppercase;">
+                        <i class="fa-solid fa-mountain" style="margin-right: 4px;"></i> Hương Cuối (Base Notes - Lưu hương lâu 6-12h)
+                    </label>
+                    <input type="text" name="BaseNotes" value="@Model.BaseNotes" placeholder="vd: Trầm hương (Oud), Hổ phách, Vani Bourbon, Đậu Tonka"
+                           style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.88rem; outline: none;" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Performance & Default Variant -->
+        <div class="luxury-card" style="padding: 24px; margin-bottom: 24px;">
+            <h3 style="font-size: 1.15rem; font-weight: 700; margin: 0 0 18px; color: var(--text-primary); border-bottom: 1px solid var(--border-card); padding-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-cubes text-gold-gradient"></i> Độ Lưu Toả & Phiên Bản Mặc Định (Variant)
+            </h3>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px;">
+                <div>
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+                        Độ Lưu Hương (Longevity)
+                    </label>
+                    <input type="text" name="Longevity" value="@Model.Longevity" placeholder="vd: 8 - 12 giờ"
+                           style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.88rem; outline: none;" />
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+                        Độ Toả Hương (Sillage)
+                    </label>
+                    <input type="text" name="Sillage" value="@Model.Sillage" placeholder="vd: Bán kính 1 - 2 mét"
+                           style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.88rem; outline: none;" />
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+                        Dung Tích Mặc Định (ml)
+                    </label>
+                    <input type="number" name="InitialVolumeMl" value="@Model.InitialVolumeMl" min="1" max="1000" required
+                           style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.88rem; outline: none;" />
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+                        Tên Phiên Bản Hiển Thị
+                    </label>
+                    <input type="text" name="InitialVolumeLabel" value="@Model.InitialVolumeLabel" placeholder="vd: Chai Full 100ml" required
+                           style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.88rem; outline: none;" />
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+                        Số Lượng Tồn Kho Ban Đầu
+                    </label>
+                    <input type="number" name="InitialStockQuantity" value="@Model.InitialStockQuantity" min="0" max="10000" required
+                           style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--gold-primary); font-weight: 700; font-size: 0.95rem; outline: none;" />
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+                        Huy Hiệu Tiếp Thị
+                    </label>
+                    <div style="display: flex; gap: 16px; padding-top: 10px;">
+                        <label style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: var(--text-secondary); cursor: pointer;">
+                            <input type="checkbox" name="IsNewArrival" value="true" checked="@Model.IsNewArrival" style="accent-color: var(--gold-primary);" /> Mới về
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: var(--text-secondary); cursor: pointer;">
+                            <input type="checkbox" name="IsBestSeller" value="true" checked="@Model.IsBestSeller" style="accent-color: var(--gold-primary);" /> Bán chạy
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: var(--text-secondary); cursor: pointer;">
+                            <input type="checkbox" name="IsFeatured" value="true" checked="@Model.IsFeatured" style="accent-color: var(--gold-primary);" /> Nổi bật
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Bar -->
+        <div style="display: flex; justify-content: flex-end; gap: 14px; margin-bottom: 30px;">
+            <a href="/admin/admindashboard/products" class="btn-luxe-outline" style="padding: 12px 24px; font-size: 0.95rem;">Hủy</a>
+            <button type="submit" class="btn-luxe" style="padding: 12px 32px; font-size: 0.95rem; font-weight: 700;">
+                <i class="fa-solid fa-plus" style="margin-right: 8px;"></i> Hoàn Tất Thêm Sản Phẩm
+            </button>
+        </div>
+    </form>
+</div>

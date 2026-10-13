@@ -25,8 +25,8 @@ public class OrderService : IOrderService
 
     public async Task<(bool Success, string? Error, Order? Order)> PlaceOrderAsync(CheckoutRequestDto request, string? userId = null)
     {
-        if (request.PaymentMethod != PaymentMethod.COD)
-            return (false, "Hiện cửa hàng chỉ hỗ trợ thanh toán COD.", null);
+        if (request.PaymentMethod != PaymentMethod.COD && request.PaymentMethod != PaymentMethod.BankTransfer)
+            return (false, "Phương thức thanh toán chưa được hỗ trợ.", null);
         if (string.IsNullOrWhiteSpace(request.CustomerName) || string.IsNullOrWhiteSpace(request.CustomerPhone) ||
             string.IsNullOrWhiteSpace(request.CustomerEmail) || string.IsNullOrWhiteSpace(request.ShippingAddress))
             return (false, "Vui lòng nhập đầy đủ thông tin giao hàng.", null);
@@ -46,7 +46,7 @@ public class OrderService : IOrderService
             var now = DateTime.UtcNow;
             var order = new Order
             {
-                OrderCode = $"PF-{now:yyyyMMdd}-{Guid.NewGuid():N}"[..25].ToUpperInvariant(),
+                OrderCode = $"LUXE-{now:yyyyMMdd}-{Guid.NewGuid():N}"[..21].ToUpperInvariant(),
                 UserId = userId,
                 CustomerName = request.CustomerName.Trim(),
                 CustomerPhone = request.CustomerPhone.Trim(),
@@ -54,9 +54,12 @@ public class OrderService : IOrderService
                 ShippingAddress = request.ShippingAddress.Trim(),
                 City = request.City?.Trim(),
                 OrderNotes = request.OrderNotes?.Trim(),
-                PaymentMethod = PaymentMethod.COD,
+                PaymentMethod = request.PaymentMethod,
                 PaymentStatus = PaymentStatus.Pending,
                 OrderStatus = OrderStatus.Pending,
+                IsGiftWrapping = request.IsGiftWrapping,
+                GiftWrappingFee = request.IsGiftWrapping ? 50_000 : 0,
+                GiftMessage = request.GiftMessage?.Trim(),
                 CreatedAt = now
             };
 
@@ -122,7 +125,7 @@ public class OrderService : IOrderService
             }
 
             order.ShippingFee = order.SubTotal >= 2_000_000 ? 0 : 35_000;
-            order.TotalAmount = Math.Max(0, order.SubTotal - order.DiscountAmount + order.ShippingFee);
+            order.TotalAmount = Math.Max(0, order.SubTotal - order.DiscountAmount + order.ShippingFee + order.GiftWrappingFee);
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
@@ -137,4 +140,13 @@ public class OrderService : IOrderService
 
     public async Task<Order?> GetOrderByCodeAsync(string orderCode) =>
         await _context.Orders.Include(o => o.Items).FirstOrDefaultAsync(o => o.OrderCode == orderCode);
+
+    public async Task<bool> ConfirmPaymentAsync(string orderCode)
+    {
+        var order = await _context.Orders.FirstOrDefaultAsync(o => o.OrderCode == orderCode);
+        if (order == null) return false;
+        order.PaymentStatus = PaymentStatus.Completed;
+        await _context.SaveChangesAsync();
+        return true;
+    }
 }

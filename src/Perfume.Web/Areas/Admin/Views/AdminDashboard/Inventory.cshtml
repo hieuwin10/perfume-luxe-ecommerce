@@ -1,0 +1,398 @@
+@model Perfume.Web.Areas.Admin.Controllers.InventoryViewModel
+@{
+    ViewData["Title"] = "Quản Trị Tồn Kho & Nhập Hàng";
+    Layout = "_AdminLayout";
+}
+
+<div style="max-width: 1400px; margin: 0 auto;">
+    <!-- HEADER -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+        <div>
+            <h1 style="font-size: 1.6rem; font-weight: 800; margin: 0 0 6px; color: var(--text-primary);">
+                <i class="fa-solid fa-warehouse text-gold-gradient" style="margin-right: 8px;"></i> Quản Trị Tồn Kho & Nhập Hàng
+            </h1>
+            <p style="color: var(--text-muted); margin: 0; font-size: 0.88rem;">Theo dõi lượng lưu kho theo từng dung tích, cảnh báo ngưỡng an toàn và quản lý giá vốn nhập kho (COGS).</p>
+        </div>
+
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <a href="/admin/admindashboard/products" class="btn-luxe-outline" style="padding: 8px 16px; font-size: 0.85rem; text-decoration: none;">
+                <i class="fa-solid fa-bottle-droplet" style="margin-right: 6px;"></i> Danh Sách Sản Phẩm
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+        <div style="background: rgba(230,57,70,0.12); border: 1px solid #e63946; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; color: #f87171;">
+            <i class="fa-solid fa-triangle-exclamation" style="margin-right: 6px;"></i> @TempData["Error"]
+        </div>
+    }
+    @if (TempData["Success"] != null)
+    {
+        <div style="background: rgba(42,157,143,0.15); border: 1px solid #2A9D8F; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; color: #2A9D8F; font-size: 0.9rem;">
+            <i class="fa-solid fa-circle-check" style="margin-right: 6px;"></i> @TempData["Success"]
+        </div>
+    }
+
+    <!-- KPI STATS CARDS -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px;">
+        <div class="luxury-card" style="padding: 20px; border-left: 4px solid var(--gold-primary);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                    <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em; font-weight: 600;">Tổng Mã Sản Phẩm</span>
+                    <div style="font-size: 1.8rem; font-weight: 800; color: var(--text-primary); margin-top: 6px;">@Model.TotalProducts</div>
+                </div>
+                <div style="width: 42px; height: 42px; border-radius: 8px; background: rgba(212,175,55,0.12); display: flex; align-items: center; justify-content: center; color: var(--gold-primary); font-size: 1.1rem;">
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="luxury-card" style="padding: 20px; border-left: 4px solid #3b82f6;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                    <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em; font-weight: 600;">Tổng Tồn Kho Thực Tế</span>
+                    <div style="font-size: 1.8rem; font-weight: 800; color: #60a5fa; margin-top: 6px;">@Model.TotalStockUnits.ToString("N0") <span style="font-size: 0.9rem; font-weight: 400; color: var(--text-muted);">chai</span></div>
+                </div>
+                <div style="width: 42px; height: 42px; border-radius: 8px; background: rgba(59,130,246,0.12); display: flex; align-items: center; justify-content: center; color: #3b82f6; font-size: 1.1rem;">
+                    <i class="fa-solid fa-cube"></i>
+                </div>
+            </div>
+        </div>
+
+        <a href="/admin/admindashboard/inventory?filter=low" style="text-decoration: none; color: inherit;">
+            <div class="luxury-card" style="padding: 20px; border-left: 4px solid #f59e0b; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <span style="font-size: 0.75rem; text-transform: uppercase; color: #fbbf24; letter-spacing: 0.05em; font-weight: 600;">Cảnh Báo Sắp Hết (≤ 5)</span>
+                        <div style="font-size: 1.8rem; font-weight: 800; color: #f59e0b; margin-top: 6px;">@Model.LowStockCount <span style="font-size: 0.9rem; font-weight: 400; color: var(--text-muted);">SKU</span></div>
+                    </div>
+                    <div style="width: 42px; height: 42px; border-radius: 8px; background: rgba(245,158,11,0.12); display: flex; align-items: center; justify-content: center; color: #f59e0b; font-size: 1.1rem;">
+                        <i class="fa-solid fa-bell"></i>
+                    </div>
+                </div>
+            </div>
+        </a>
+
+        <a href="/admin/admindashboard/inventory?filter=out" style="text-decoration: none; color: inherit;">
+            <div class="luxury-card" style="padding: 20px; border-left: 4px solid #ef4444; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <span style="font-size: 0.75rem; text-transform: uppercase; color: #f87171; letter-spacing: 0.05em; font-weight: 600;">Hết Hàng Trong Kho (0)</span>
+                        <div style="font-size: 1.8rem; font-weight: 800; color: #ef4444; margin-top: 6px;">@Model.OutOfStockCount <span style="font-size: 0.9rem; font-weight: 400; color: var(--text-muted);">SKU</span></div>
+                    </div>
+                    <div style="width: 42px; height: 42px; border-radius: 8px; background: rgba(239,68,68,0.12); display: flex; align-items: center; justify-content: center; color: #ef4444; font-size: 1.1rem;">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- FILTER & SEARCH BAR -->
+    <div class="luxury-card" style="padding: 16px 20px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+            <a href="/admin/admindashboard/inventory?filter=all@(string.IsNullOrEmpty(Model.SearchQuery) ? "" : $"&search={Model.SearchQuery}")" 
+               class="btn-luxe@(Model.CurrentFilter == "all" ? "" : "-outline")" style="padding: 6px 14px; font-size: 0.82rem; text-decoration: none;">
+                Tất Cả (@Model.TotalProducts)
+            </a>
+            <a href="/admin/admindashboard/inventory?filter=low@(string.IsNullOrEmpty(Model.SearchQuery) ? "" : $"&search={Model.SearchQuery}")" 
+               class="btn-luxe@(Model.CurrentFilter == "low" ? "" : "-outline")" style="padding: 6px 14px; font-size: 0.82rem; text-decoration: none; border-color: rgba(245,158,11,0.5); color: @(Model.CurrentFilter == "low" ? "#000" : "#fbbf24");">
+                <i class="fa-solid fa-bell" style="margin-right: 4px;"></i> Sắp Hết Hàng (@Model.LowStockCount)
+            </a>
+            <a href="/admin/admindashboard/inventory?filter=out@(string.IsNullOrEmpty(Model.SearchQuery) ? "" : $"&search={Model.SearchQuery}")" 
+               class="btn-luxe@(Model.CurrentFilter == "out" ? "" : "-outline")" style="padding: 6px 14px; font-size: 0.82rem; text-decoration: none; border-color: rgba(239,68,68,0.5); color: @(Model.CurrentFilter == "out" ? "#000" : "#f87171");">
+                <i class="fa-solid fa-circle-exclamation" style="margin-right: 4px;"></i> Đã Hết Hàng (@Model.OutOfStockCount)
+            </a>
+        </div>
+
+        <form method="get" action="/admin/admindashboard/inventory" style="display: flex; gap: 8px; margin: 0;">
+            <input type="hidden" name="filter" value="@Model.CurrentFilter" />
+            <input type="text" name="search" value="@Model.SearchQuery" placeholder="Tìm kiếm tên sản phẩm, thương hiệu..." 
+                   style="padding: 8px 14px; background: var(--bg-input, rgba(255,255,255,0.06)); border: 1px solid var(--border-card); border-radius: 8px; color: var(--text-primary); font-size: 0.88rem; width: 280px; outline: none;" />
+            <button type="submit" class="btn-luxe" style="padding: 8px 16px; font-size: 0.85rem;">Tìm Kiếm</button>
+            @if (!string.IsNullOrEmpty(Model.SearchQuery))
+            {
+                <a href="/admin/admindashboard/inventory?filter=@Model.CurrentFilter" class="btn-luxe-outline" style="padding: 8px 12px; font-size: 0.85rem; text-decoration: none;">Xóa Lọc</a>
+            }
+        </form>
+    </div>
+
+    <!-- INVENTORY TABLE -->
+    <div class="luxury-card" style="padding: 0; overflow: hidden; margin-bottom: 32px;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem;">
+            <thead>
+                <tr style="background: var(--bg-surface-elevated); border-bottom: 1px solid var(--border-card); color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">
+                    <th style="padding: 14px 20px;">Sản Phẩm Nước Hoa</th>
+                    <th style="padding: 14px 16px;">Thương Hiệu</th>
+                    <th style="padding: 14px 16px;">Phiên Bản (Dung Tích - SKU)</th>
+                    <th style="padding: 14px 16px; text-align: center;">Tồn Kho</th>
+                    <th style="padding: 14px 16px; text-align: center;">Trạng Thái</th>
+                    <th style="padding: 14px 20px; text-align: right;">Hành Động</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Items.Count == 0)
+                {
+                    <tr>
+                        <td colspan="6" style="padding: 40px; text-align: center; color: var(--text-muted);">
+                            <i class="fa-solid fa-box-open" style="font-size: 2.5rem; opacity: 0.4; margin-bottom: 12px; display: block;"></i>
+                            Không có sản phẩm nào phù hợp với bộ lọc hiện tại.
+                        </td>
+                    </tr>
+                }
+                @foreach (var p in Model.Items)
+                {
+                    <tr style="border-bottom: 1px solid var(--border-card);">
+                        <td style="padding: 14px 20px;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <img src="@(string.IsNullOrEmpty(p.ImageUrl) ? "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=100&q=80" : p.ImageUrl)" 
+                                     alt="@p.ProductName" style="width: 48px; height: 48px; border-radius: 6px; object-fit: cover; border: 1px solid var(--border-card);" />
+                                <div>
+                                    <a href="/admin/admindashboard/editproduct/@p.ProductId" style="font-weight: 600; color: var(--text-primary); text-decoration: none;" onmouseover="this.style.color='var(--gold-primary)'" onmouseout="this.style.color='var(--text-primary)'">
+                                        @p.ProductName
+                                    </a>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">Mã: #@p.ProductId</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td style="padding: 14px 16px; color: var(--gold-primary); font-weight: 500;">
+                            @(p.BrandName ?? "—")
+                        </td>
+                        <td style="padding: 14px 16px;" colspan="4">
+                            @if (p.Variants.Any())
+                            {
+                                <div style="display: flex; flex-direction: column; gap: 8px;">
+                                    @foreach (var v in p.Variants)
+                                    {
+                                        <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.02); padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-card);">
+                                            <div style="min-width: 180px;">
+                                                <span style="font-weight: 600; color: var(--text-primary);">@v.VolumeLabel</span>
+                                                <span style="font-size: 0.75rem; color: var(--text-muted); margin-left: 8px;">SKU: @(string.IsNullOrEmpty(v.VariantSku) ? "—" : v.VariantSku)</span>
+                                                <div style="font-size: 0.8rem; color: var(--text-muted);">Giá: @v.SalePrice.ToString("N0") ₫</div>
+                                            </div>
+
+                                            <div style="text-align: center; min-width: 90px;">
+                                                <span style="font-size: 1.1rem; font-weight: 700; color: @(v.StockQuantity <= 0 ? "#ef4444" : v.StockQuantity <= 5 ? "#f59e0b" : "var(--text-primary)");">
+                                                    @v.StockQuantity
+                                                </span>
+                                                <span style="font-size: 0.75rem; color: var(--text-muted);"> chai</span>
+                                            </div>
+
+                                            <div style="text-align: center; min-width: 120px;">
+                                                @if (v.StockQuantity <= 0)
+                                                {
+                                                    <span style="background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); padding: 3px 10px; border-radius: 99px; font-size: 0.75rem; font-weight: 600;">Hết hàng</span>
+                                                }
+                                                else if (v.StockQuantity <= 5)
+                                                {
+                                                    <span style="background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); padding: 3px 10px; border-radius: 99px; font-size: 0.75rem; font-weight: 600;">Sắp hết (≤ 5)</span>
+                                                }
+                                                else
+                                                {
+                                                    <span style="background: rgba(42,157,143,0.15); color: #2A9D8F; border: 1px solid rgba(42,157,143,0.3); padding: 3px 10px; border-radius: 99px; font-size: 0.75rem; font-weight: 600;">Sẵn sàng</span>
+                                                }
+                                            </div>
+
+                                            <div style="text-align: right;">
+                                                <button type="button" class="btn-luxe" style="padding: 5px 12px; font-size: 0.78rem;" 
+                                                        onclick="openAdjustStockModal(@v.VariantId, '@Html.Raw(JavaScriptEncoder.Default.Encode(p.ProductName))', '@Html.Raw(JavaScriptEncoder.Default.Encode(v.VolumeLabel))', @v.StockQuantity, @v.SalePrice)">
+                                                    <i class="fa-solid fa-dolly" style="margin-right: 4px;"></i> Nhập / Xuất Kho
+                                                </button>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.02); padding: 8px 12px; border-radius: 6px;">
+                                    <span style="color: var(--text-muted); font-size: 0.85rem;">Chưa cấu hình phiên bản dung tích (Variant)</span>
+                                    <a href="/admin/admindashboard/editproduct/@p.ProductId" class="btn-luxe-outline" style="padding: 4px 10px; font-size: 0.78rem;">
+                                        Thêm Phiên Bản
+                                    </a>
+                                </div>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- RECENT STOCK ADJUSTMENT AUDIT LOGS -->
+    <div class="luxury-card" style="padding: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+            <h3 style="font-size: 1.15rem; font-weight: 700; margin: 0; color: var(--text-primary);">
+                <i class="fa-solid fa-clock-rotate-left text-gold-gradient" style="margin-right: 8px;"></i> Lịch Sử Điều Chỉnh & Nhập Hàng Gần Đây
+            </h3>
+            <span style="font-size: 0.8rem; color: var(--text-muted);">Hiển thị 25 giao dịch kho mới nhất</span>
+        </div>
+
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.84rem;">
+                <thead>
+                    <tr style="border-bottom: 1px solid var(--border-card); color: var(--text-muted); text-transform: uppercase; font-size: 0.72rem;">
+                        <th style="padding: 10px 14px; text-align: left;">Thời Gian</th>
+                        <th style="padding: 10px 14px; text-align: left;">Sản Phẩm & Phiên Bản</th>
+                        <th style="padding: 10px 14px; text-align: center;">Biến Động</th>
+                        <th style="padding: 10px 14px; text-align: center;">Tồn Cũ → Mới</th>
+                        <th style="padding: 10px 14px; text-align: right;">Giá Vốn (COGS)</th>
+                        <th style="padding: 10px 14px; text-align: left;">Lý Do & Ghi Chú</th>
+                        <th style="padding: 10px 14px; text-align: left;">Người Thực Hiện</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.RecentAdjustments.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="7" style="padding: 24px; text-align: center; color: var(--text-muted);">
+                                Chưa có ghi nhận điều chỉnh kho nào.
+                            </td>
+                        </tr>
+                    }
+                    @foreach (var log in Model.RecentAdjustments)
+                    {
+                        <tr style="border-bottom: 1px solid var(--border-card);">
+                            <td style="padding: 10px 14px; color: var(--text-muted); white-space: nowrap;">
+                                @log.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                            </td>
+                            <td style="padding: 10px 14px; font-weight: 600; color: var(--text-primary);">
+                                @(log.Variant?.Product?.Name ?? "—") <span style="color: var(--gold-primary); font-weight: normal;">(@(log.Variant?.VolumeLabel ?? "—"))</span>
+                            </td>
+                            <td style="padding: 10px 14px; text-align: center;">
+                                @if (log.AdjustedQuantity > 0)
+                                {
+                                    <span style="color: #2A9D8F; font-weight: 700;">+@log.AdjustedQuantity</span>
+                                }
+                                else
+                                {
+                                    <span style="color: #ef4444; font-weight: 700;">@log.AdjustedQuantity</span>
+                                }
+                            </td>
+                            <td style="padding: 10px 14px; text-align: center; color: var(--text-secondary);">
+                                @log.OldQuantity → <strong style="color: var(--text-primary);">@log.NewQuantity</strong>
+                            </td>
+                            <td style="padding: 10px 14px; text-align: right; color: var(--gold-primary);">
+                                @(log.UnitCost.HasValue ? log.UnitCost.Value.ToString("N0") + " ₫" : "—")
+                            </td>
+                            <td style="padding: 10px 14px;">
+                                <div style="font-weight: 500;">@log.Reason</div>
+                                @if (!string.IsNullOrEmpty(log.Note))
+                                {
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);">@log.Note</div>
+                                }
+                            </td>
+                            <td style="padding: 10px 14px; color: var(--text-secondary);">
+                                <i class="fa-solid fa-user-tie" style="margin-right: 4px; font-size: 0.75rem;"></i> @(log.PerformedByName ?? "Admin")
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL ĐIỀU CHỈNH / NHẬP KHO -->
+<div id="adjustStockModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 1050; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+    <div class="luxury-card" style="width: 100%; max-width: 520px; padding: 28px; background: var(--bg-surface); border: 1px solid var(--border-card); border-radius: 12px; box-shadow: 0 16px 40px rgba(0,0,0,0.5);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 style="font-size: 1.25rem; font-weight: 700; margin: 0; color: var(--text-primary);">
+                <i class="fa-solid fa-dolly text-gold-gradient" style="margin-right: 8px;"></i> Nhập Hàng / Điều Chỉnh Tồn Kho
+            </h3>
+            <button type="button" onclick="closeAdjustStockModal()" style="background: none; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer;">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <form method="post" action="/admin/admindashboard/adjuststock">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="variantId" id="modalVariantId" />
+
+            <div style="background: rgba(212,175,55,0.06); border: 1px solid rgba(212,175,55,0.2); padding: 14px; border-radius: 8px; margin-bottom: 18px;">
+                <div style="font-size: 0.85rem; color: var(--text-muted);">Sản phẩm:</div>
+                <div id="modalProductName" style="font-weight: 700; color: var(--text-primary); font-size: 1rem;"></div>
+                <div style="display: flex; justify-content: space-between; margin-top: 6px; font-size: 0.85rem;">
+                    <span>Dung tích: <strong id="modalVolume" style="color: var(--gold-primary);"></strong></span>
+                    <span>Tồn hiện tại: <strong id="modalCurrentStock" style="color: #60a5fa;"></strong> chai</span>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 14px;">
+                <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px;">
+                    Số Lượng Thay Đổi (+ Nhập thêm, - Xuất bớt) <span style="color: #f87171;">*</span>
+                </label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="number" name="adjustedQuantity" id="modalQuantityChange" required step="1" 
+                           placeholder="VD: 10 (nhập thêm) hoặc -2 (xuất bớt)"
+                           style="flex: 1; padding: 10px 14px; background: var(--bg-input, rgba(255,255,255,0.06)); border: 1px solid var(--border-card); border-radius: 8px; color: var(--text-primary); font-size: 0.95rem; font-weight: 700; outline: none;" />
+                    <button type="button" class="btn-luxe-outline" style="padding: 0 12px;" onclick="document.getElementById('modalQuantityChange').value = '10'">+10</button>
+                    <button type="button" class="btn-luxe-outline" style="padding: 0 12px;" onclick="document.getElementById('modalQuantityChange').value = '50'">+50</button>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 14px;">
+                <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px;">
+                    Giá Vốn Nhập Kho (COGS - Đơn giá/chai)
+                </label>
+                <input type="number" name="unitCost" id="modalUnitCost" step="1000" min="0" placeholder="VD: 1800000"
+                       style="width: 100%; box-sizing: border-box; padding: 10px 14px; background: var(--bg-input, rgba(255,255,255,0.06)); border: 1px solid var(--border-card); border-radius: 8px; color: var(--text-primary); font-size: 0.9rem; outline: none;" />
+                <span style="font-size: 0.72rem; color: var(--text-muted);">Dùng cho báo cáo lợi nhuận gộp và định giá kho.</span>
+            </div>
+
+            <div style="margin-bottom: 14px;">
+                <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px;">
+                    Lý Do Điều Chỉnh <span style="color: #f87171;">*</span>
+                </label>
+                <select name="reason" required style="width: 100%; box-sizing: border-box; padding: 10px 14px; background: var(--bg-input, #1a1a24); border: 1px solid var(--border-card); border-radius: 8px; color: var(--text-primary); font-size: 0.9rem; outline: none;">
+                    <option value="Nhập hàng mới từ nhà cung cấp">Nhập hàng mới từ nhà cung cấp</option>
+                    <option value="Kiểm kê kho định kỳ phát hiện lệch">Kiểm kê kho định kỳ phát hiện lệch</option>
+                    <option value="Khách hàng hoàn trả hàng">Khách hàng hoàn trả hàng</option>
+                    <option value="Xuất chai chiết / Hàng mẫu dùng thử (Tester)">Xuất chai chiết / Hàng mẫu dùng thử (Tester)</option>
+                    <option value="Hàng lỗi vỡ / Hư hỏng trong vận chuyển">Hàng lỗi vỡ / Hư hỏng trong vận chuyển</option>
+                    <option value="Điều chỉnh khác">Điều chỉnh khác</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px;">
+                    Ghi Chú Chi Tiết
+                </label>
+                <textarea name="note" rows="2" placeholder="Số hóa đơn nhập, mã lô hàng, tình trạng tem seal..." 
+                          style="width: 100%; box-sizing: border-box; padding: 10px 14px; background: var(--bg-input, rgba(255,255,255,0.06)); border: 1px solid var(--border-card); border-radius: 8px; color: var(--text-primary); font-size: 0.85rem; outline: none;"></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" class="btn-luxe-outline" onclick="closeAdjustStockModal()" style="padding: 10px 20px; font-size: 0.88rem;">Hủy</button>
+                <button type="submit" class="btn-luxe" style="padding: 10px 24px; font-size: 0.88rem;">
+                    <i class="fa-solid fa-check" style="margin-right: 6px;"></i> Xác Nhận Cập Nhật
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openAdjustStockModal(variantId, productName, volume, currentStock, price) {
+        document.getElementById('modalVariantId').value = variantId;
+        document.getElementById('modalProductName').textContent = productName;
+        document.getElementById('modalVolume').textContent = volume;
+        document.getElementById('modalCurrentStock').textContent = currentStock;
+        document.getElementById('modalQuantityChange').value = '';
+        document.getElementById('modalUnitCost').value = Math.round(price * 0.65); // Gợi ý giá vốn mặc định ~65%
+        const modal = document.getElementById('adjustStockModal');
+        modal.style.display = 'flex';
+    }
+
+    function closeAdjustStockModal() {
+        document.getElementById('adjustStockModal').style.display = 'none';
+    }
+
+    window.addEventListener('click', function(e) {
+        const modal = document.getElementById('adjustStockModal');
+        if (e.target === modal) {
+            closeAdjustStockModal();
+        }
+    });
+</script>

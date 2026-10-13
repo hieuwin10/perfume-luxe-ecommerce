@@ -1,0 +1,189 @@
+@model Perfume.Web.Controllers.TastingBookingRequestModel
+@{
+    ViewData["Title"] = "Đặt Lịch Thử Mùi VIP Private Tasting - PERFUME LUXE";
+    var families = ViewBag.Families as List<Perfume.Domain.Entities.FragranceFamily> ?? new();
+}
+
+<main style="max-width: 1100px; margin: 40px auto 80px; padding: 0 20px;">
+    <!-- HEADER -->
+    <div style="text-align: center; margin-bottom: 40px;">
+        <span style="font-size: 0.8rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold-primary); font-weight: 700; display: inline-block; margin-bottom: 8px;">
+            <i class="fa-solid fa-crown" style="margin-right: 6px;"></i> Đặc Quyền Trải Nghiệm Thượng Lưu
+        </span>
+        <h1 style="font-size: clamp(2rem, 4.5vw, 2.8rem); font-family: var(--font-heading); font-weight: 700; margin: 0 0 14px; color: var(--text-primary);">
+            Private Scent Tasting & Salon
+        </h1>
+        <p style="color: var(--text-secondary); max-width: 700px; margin: 0 auto; font-size: 1rem; line-height: 1.7;">
+            Không gian thử mùi riêng tư cách biệt, nơi quý khách được dẫn lối bởi Chuyên gia mùi hương (Sommelier du Parfum) qua những bản hòa ca khứu giác độc bản và thưởng thức trà chiều thanh tao.
+        </p>
+    </div>
+
+    @if (ViewBag.Error != null)
+    {
+        <div class="luxury-card" style="padding: 16px 20px; border-left: 4px solid #f87171; margin-bottom: 24px; color: #f87171;">
+            <i class="fa-solid fa-triangle-exclamation" style="margin-right: 8px;"></i> @ViewBag.Error
+        </div>
+    }
+
+    <div style="display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(320px, 1fr); gap: 36px; align-items: start;">
+        <!-- BOOKING FORM -->
+        <div class="luxury-card" style="padding: 32px; border: 1px solid var(--border-card); background: var(--bg-surface); border-radius: 16px;">
+            <h3 style="font-size: 1.25rem; font-weight: 700; margin: 0 0 20px; color: var(--text-primary);">
+                <i class="fa-solid fa-calendar-check text-gold-gradient" style="margin-right: 8px;"></i> Thông Tin Đặt Lịch Hẹn VIP
+            </h3>
+
+            <form method="post" action="/dat-lich-trai-nghiem">
+                @Html.AntiForgeryToken()
+
+                <!-- Boutique Location -->
+                <div style="margin-bottom: 18px;">
+                    <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 8px;">
+                        Lựa Chọn Boutique Đón Tiếp <span style="color: #f87171;">*</span>
+                    </label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <label style="display: flex; align-items: center; gap: 10px; padding: 12px 14px; border: 1px solid var(--border-card); border-radius: 8px; cursor: pointer; background: rgba(255,255,255,0.02);">
+                            <input type="radio" name="BoutiqueLocation" value="Flagship 88 Tràng Tiền, Hà Nội" checked style="accent-color: var(--gold-primary);" />
+                            <div>
+                                <strong style="font-size: 0.9rem; color: var(--text-primary); display: block;">Hà Nội Boutique</strong>
+                                <span style="font-size: 0.75rem; color: var(--text-muted);">88 Tràng Tiền, Hoàn Kiếm</span>
+                            </div>
+                        </label>
+
+                        <label style="display: flex; align-items: center; gap: 10px; padding: 12px 14px; border: 1px solid var(--border-card); border-radius: 8px; cursor: pointer; background: rgba(255,255,255,0.02);">
+                            <input type="radio" name="BoutiqueLocation" value="Luxe Lounge 128 Đồng Khởi, TP. HCM" style="accent-color: var(--gold-primary);" />
+                            <div>
+                                <strong style="font-size: 0.9rem; color: var(--text-primary); display: block;">Sài Gòn Lounge</strong>
+                                <span style="font-size: 0.75rem; color: var(--text-muted);">128 Đồng Khởi, Quận 1</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Date & Time Slot -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px;">
+                    <div>
+                        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px;">
+                            Ngày Hẹn <span style="color: #f87171;">*</span>
+                        </label>
+                        <input type="date" name="BookingDate" value="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")" min="@DateTime.Today.ToString("yyyy-MM-dd")" required
+                               style="width: 100%; box-sizing: border-box; padding: 11px 14px; background: var(--bg-input, rgba(255,255,255,0.06)); border: 1px solid var(--border-card); border-radius: 8px; color: var(--text-primary); font-size: 0.9rem; outline: none;" />
+                    </div>
+
+                    <div>
+                        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px;">
+                            Khung Giờ Đón Tiếp <span style="color: #f87171;">*</span>
+                        </label>
+                        <select name="TimeSlot" required style="width: 100%; box-sizing: border-box; padding: 11px 14px; background: var(--bg-input, #1a1a24); border: 1px solid var(--border-card); border-radius: 8px; color: var(--text-primary); font-size: 0.9rem; outline: none;">
+                            <option value="10:00 - 11:30 (Sáng)">10:00 - 11:30 (Sáng thanh tĩnh)</option>
+                            <option value="14:00 - 15:30 (Chiều)" selected>14:00 - 15:30 (Trà chiều hoàng gia)</option>
+                            <option value="16:30 - 18:00 (Hoàng hôn)">16:30 - 18:00 (Hoàng hôn lãng mạn)</option>
+                            <option value="19:30 - 21:00 (Tối)">19:30 - 21:00 (Đêm tiệc dạ vũ)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Personal Info -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px;">
+                    <div>
+                        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px;">
+                            Danh Xưng & Họ Tên <span style="color: #f87171;">*</span>
+                        </label>
+                        <input type="text" name="CustomerName" required placeholder="VD: Quý Cô Mai Linh"
+                               style="width: 100%; box-sizing: border-box; padding: 11px 14px; background: var(--bg-input, rgba(255,255,255,0.06)); border: 1px solid var(--border-card); border-radius: 8px; color: var(--text-primary); font-size: 0.9rem; outline: none;" />
+                    </div>
+
+                    <div>
+                        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px;">
+                            Số Điện Thoại Liên Hệ <span style="color: #f87171;">*</span>
+                        </label>
+                        <input type="tel" name="PhoneNumber" required placeholder="VD: 0901234567"
+                               style="width: 100%; box-sizing: border-box; padding: 11px 14px; background: var(--bg-input, rgba(255,255,255,0.06)); border: 1px solid var(--border-card); border-radius: 8px; color: var(--text-primary); font-size: 0.9rem; outline: none;" />
+                    </div>
+                </div>
+
+                <!-- Email & Guests -->
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 18px;">
+                    <div>
+                        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px;">
+                            Địa Chỉ Email (Nhận thư mời xác nhận)
+                        </label>
+                        <input type="email" name="Email" placeholder="concierge@example.com"
+                               style="width: 100%; box-sizing: border-box; padding: 11px 14px; background: var(--bg-input, rgba(255,255,255,0.06)); border: 1px solid var(--border-card); border-radius: 8px; color: var(--text-primary); font-size: 0.9rem; outline: none;" />
+                    </div>
+
+                    <div>
+                        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px;">
+                            Số Khách Đi Cùng
+                        </label>
+                        <select name="GuestCount" style="width: 100%; box-sizing: border-box; padding: 11px 14px; background: var(--bg-input, #1a1a24); border: 1px solid var(--border-card); border-radius: 8px; color: var(--text-primary); font-size: 0.9rem; outline: none;">
+                            <option value="1">1 Người (Riêng tư)</option>
+                            <option value="2" selected>2 Người (Cặp đôi)</option>
+                            <option value="3">3 Người</option>
+                            <option value="4">4 Người (Nhóm bạn)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Scent Preference & Notes -->
+                <div style="margin-bottom: 18px;">
+                    <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px;">
+                        Nhóm Hương Quý Khách Đang Quan Tâm
+                    </label>
+                    <select name="PreferredScentFamilies" style="width: 100%; box-sizing: border-box; padding: 11px 14px; background: var(--bg-input, #1a1a24); border: 1px solid var(--border-card); border-radius: 8px; color: var(--text-primary); font-size: 0.9rem; outline: none;">
+                        <option value="Tất cả các nhóm hương (Khám phá toàn diện)">Tất cả các nhóm hương (Khám phá toàn diện)</option>
+                        <option value="Gỗ Trầm & Hổ Phách Hoàng Gia">Gỗ Trầm & Hổ Phách Hoàng Gia (Woody & Amber)</option>
+                        <option value="Hoa Cỏ & Diên Vĩ Sang Trọng">Hoa Cỏ & Diên Vĩ Sang Trọng (Floral & Powdery)</option>
+                        <option value="Phương Đông Quyến Rũ & Vani">Phương Đông Quyến Rũ & Vani (Oriental & Gourmand)</option>
+                        <option value="Citrus Tươi Mát & Thảo Mộc Địa Trung Hải">Citrus Tươi Mát & Thảo Mộc Địa Trung Hải (Fresh & Aromatic)</option>
+                    </select>
+                </div>
+
+                <div style="margin-bottom: 24px;">
+                    <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px;">
+                        Yêu Cầu Đặc Biệt Hoặc Dịp Kỷ Niệm
+                    </label>
+                    <textarea name="Notes" rows="2" placeholder="VD: Tìm hương nước hoa ngày cưới, quà sinh nhật, mong muốn thử dòng Creed Aventus hoặc Tom Ford Private Blend..."
+                              style="width: 100%; box-sizing: border-box; padding: 11px 14px; background: var(--bg-input, rgba(255,255,255,0.06)); border: 1px solid var(--border-card); border-radius: 8px; color: var(--text-primary); font-size: 0.88rem; outline: none;"></textarea>
+                </div>
+
+                <button type="submit" class="btn-luxe" style="width: 100%; padding: 14px; font-size: 1rem; letter-spacing: 0.05em;">
+                    <i class="fa-solid fa-crown" style="margin-right: 8px;"></i> Xác Nhận Đăng Ký Lịch Hẹn VIP
+                </button>
+            </form>
+        </div>
+
+        <!-- RIGHT: PRIVILEGES & EXPERIENCE CARD -->
+        <div>
+            <div class="luxury-card" style="padding: 28px; border: 1px solid var(--border-card); background: var(--bg-surface); border-radius: 16px; margin-bottom: 24px;">
+                <h4 style="font-size: 1.15rem; font-weight: 700; margin: 0 0 16px; color: var(--gold-primary);">
+                    <i class="fa-solid fa-sparkles" style="margin-right: 8px;"></i> Đặc Quyền Buổi Thử Mùi VIP
+                </h4>
+                <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 14px; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6;">
+                    <li style="display: flex; gap: 12px;">
+                        <i class="fa-solid fa-check text-gold-gradient" style="margin-top: 4px;"></i>
+                        <div><strong>Không gian Salon biệt lập:</strong> Phòng thử mùi chuẩn âm học & ánh sáng nhiệt độ bảo quản Haute Parfumerie.</div>
+                    </li>
+                    <li style="display: flex; gap: 12px;">
+                        <i class="fa-solid fa-check text-gold-gradient" style="margin-top: 4px;"></i>
+                        <div><strong>Tư vấn chuyên sâu 1-1:</strong> Đồng hành cùng Chuyên gia định hình chữ ký mùi hương (Scent Signature).</div>
+                    </li>
+                    <li style="display: flex; gap: 12px;">
+                        <i class="fa-solid fa-check text-gold-gradient" style="margin-top: 4px;"></i>
+                        <div><strong>Bộ sưu tập Vault kín:</strong> Thử các sáng tạo Extrait de Parfum và mẫu hiếm giới hạn toàn cầu.</div>
+                    </li>
+                    <li style="display: flex; gap: 12px;">
+                        <i class="fa-solid fa-check text-gold-gradient" style="margin-top: 4px;"></i>
+                        <div><strong>Trà chiều thượng hạng:</strong> Phục vụ bánh macaron thủ công và trà hoa hồng Damask miễn phí.</div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- HOTLINE CARD -->
+            <div class="luxury-card" style="padding: 22px; border: 1px solid rgba(212,175,55,0.25); background: rgba(212,175,55,0.04); border-radius: 14px; text-align: center;">
+                <span style="font-size: 0.78rem; text-transform: uppercase; color: var(--gold-primary); font-weight: 700;">Hỗ Trợ Đặt Lịch Hỏa Tốc Trong Ngày</span>
+                <div style="font-size: 1.4rem; font-weight: 800; color: var(--text-primary); margin: 6px 0;">024.3828.9999</div>
+                <div style="font-size: 0.82rem; color: var(--text-muted);">Concierge tiếp nhận 08:30 – 21:30 hàng ngày</div>
+            </div>
+        </div>
+    </div>
+</main>

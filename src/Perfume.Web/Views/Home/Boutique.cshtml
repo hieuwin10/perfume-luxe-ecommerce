@@ -1,0 +1,195 @@
+@{
+    ViewData["Title"] = "Flagship Boutique & VIP Concierge Experience - PERFUME LUXE";
+    ViewData["MetaDescription"] = "Không gian thử hương độc bản tại Hà Nội & Sài Gòn. Đặt lịch trải nghiệm VIP Concierge 1:1 cùng chuyên gia thẩm hương.";
+}
+
+<style>
+    .boutique-card {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-card);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        transition: all 0.35s ease;
+    }
+    .boutique-card:hover {
+        border-color: var(--gold-primary);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+    }
+    .vip-perk-item {
+        display: flex;
+        gap: 16px;
+        align-items: flex-start;
+        margin-bottom: 20px;
+    }
+    .vip-perk-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: rgba(212, 175, 55, 0.15);
+        border: 1px solid var(--gold-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--gold-primary);
+        flex-shrink: 0;
+        font-size: 1.1rem;
+    }
+    .form-control-luxe {
+        width: 100%;
+        padding: 12px 16px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid var(--border-card);
+        border-radius: var(--radius-sm);
+        color: var(--text-primary);
+        font-size: 0.95rem;
+        outline: none;
+        transition: border-color 0.2s ease;
+    }
+    .form-control-luxe:focus {
+        border-color: var(--gold-primary);
+        box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+    }
+</style>
+
+<div style="background: radial-gradient(circle at center, rgba(212, 175, 55, 0.12) 0%, rgba(10, 10, 10, 0.98) 75%); padding: 80px 24px; text-align: center; border-bottom: 1px solid var(--border-card);">
+    <div style="max-width: 800px; margin: 0 auto;">
+        <span style="display: inline-block; padding: 4px 16px; background: rgba(212,175,55,0.12); border: 1px solid rgba(212,175,55,0.3); border-radius: 20px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.25em; color: var(--gold-primary); font-weight: 700; margin-bottom: 16px;">
+            Không Gian Trải Nghiệm Xa Xỉ
+        </span>
+        <h1 style="font-size: 3.2rem; font-family: var(--font-serif); font-weight: 700; margin-bottom: 16px;">
+            Hệ Thống Flagship Boutique
+        </h1>
+        <p style="font-size: 1.05rem; color: var(--text-secondary); line-height: 1.8;">
+            Bước vào không gian được thiết kế theo cảm hứng phòng thẩm hương Paris thế kỷ 19, nơi âm nhạc cổ điển và ánh sáng ấm áp đánh thức mọi giác quan của bạn.
+        </p>
+    </div>
+</div>
+
+<div style="max-width: 1200px; margin: 60px auto; padding: 0 24px;">
+    <!-- 2 Boutiques Grid -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 36px; margin-bottom: 70px;">
+        <!-- Hà Nội -->
+        <div class="boutique-card">
+            <div style="height: 280px; overflow: hidden; position: relative;">
+                <img src="https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=800&q=80" style="width: 100%; height: 100%; object-fit: cover;" alt="Boutique Tràng Tiền Hà Nội" />
+                <span style="position: absolute; top: 16px; left: 16px; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); border: 1px solid var(--gold-primary); color: var(--gold-primary); padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">
+                    Flagship Store 01
+                </span>
+            </div>
+            <div style="padding: 30px;">
+                <h2 style="font-size: 1.5rem; font-family: var(--font-serif); margin-bottom: 12px;">Hà Nội • Tràng Tiền Boutique</h2>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6; margin-bottom: 20px;">
+                    Tọa lạc ngay trung tâm thủ đô hoa lệ, phòng thử hương riêng tư với hơn 200 mẫu Niche hiếm có cùng quầy chiết vô trùng hiện đại.
+                </p>
+                <div style="display: flex; flex-direction: column; gap: 10px; font-size: 0.88rem; color: var(--text-secondary); border-top: 1px solid var(--border-card); padding-top: 16px;">
+                    <div><i class="fa-solid fa-location-dot" style="color: var(--gold-primary); width: 20px;"></i> 24 Phố Tràng Tiền, Quận Hoàn Kiếm, Hà Nội</div>
+                    <div><i class="fa-solid fa-phone" style="color: var(--gold-primary); width: 20px;"></i> 024.3828.9999 (Hotline VIP)</div>
+                    <div><i class="fa-solid fa-clock" style="color: var(--gold-primary); width: 20px;"></i> 09:30 - 21:30 (Mở cửa tất cả các ngày trong tuần)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TP Hồ Chí Minh -->
+        <div class="boutique-card">
+            <div style="height: 280px; overflow: hidden; position: relative;">
+                <img src="https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=800&q=80" style="width: 100%; height: 100%; object-fit: cover;" alt="Boutique Đồng Khởi TP.HCM" />
+                <span style="position: absolute; top: 16px; left: 16px; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); border: 1px solid var(--gold-primary); color: var(--gold-primary); padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">
+                    Flagship Store 02
+                </span>
+            </div>
+            <div style="padding: 30px;">
+                <h2 style="font-size: 1.5rem; font-family: var(--font-serif); margin-bottom: 12px;">TP. HCM • Đồng Khởi Boutique</h2>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6; margin-bottom: 20px;">
+                    Không gian kiến trúc đương đại kết hợp cổ điển Pháp giữa lòng Sài Gòn, nơi bạn thưởng thức champagne và đắm chìm trong nốt hương say đắm.
+                </p>
+                <div style="display: flex; flex-direction: column; gap: 10px; font-size: 0.88rem; color: var(--text-secondary); border-top: 1px solid var(--border-card); padding-top: 16px;">
+                    <div><i class="fa-solid fa-location-dot" style="color: var(--gold-primary); width: 20px;"></i> 68 Đường Đồng Khởi, Phường Bến Nghé, Quận 1, TP. HCM</div>
+                    <div><i class="fa-solid fa-phone" style="color: var(--gold-primary); width: 20px;"></i> 028.3822.8888 (Hotline VIP)</div>
+                    <div><i class="fa-solid fa-clock" style="color: var(--gold-primary); width: 20px;"></i> 09:30 - 22:00 (Mở cửa tất cả các ngày trong tuần)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIP Concierge Form & Perks Section -->
+    <div style="background: linear-gradient(135deg, rgba(26,26,26,0.95), rgba(15,15,15,0.95)); border: 1px solid var(--gold-primary); border-radius: var(--radius-lg); padding: 50px 40px; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 50px;">
+            <!-- Perks -->
+            <div>
+                <span style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.2em; color: var(--gold-primary); font-weight: 700;">Đặc Quyền Riêng Tư</span>
+                <h2 style="font-size: 2rem; font-family: var(--font-serif); margin: 10px 0 24px; line-height: 1.3;">
+                    Trải Nghiệm Dịch Vụ VIP Concierge 1:1
+                </h2>
+                <div class="vip-perk-item">
+                    <div class="vip-perk-icon"><i class="fa-solid fa-wine-glass"></i></div>
+                    <div>
+                        <h3 style="font-size: 1rem; margin-bottom: 4px; color: var(--text-primary);">Trà Hoa & Champagne Chào Đón</h3>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5;">Thư giãn tinh thần với tách trà thảo mộc làm sạch vị giác trước khi thẩm hương.</p>
+                    </div>
+                </div>
+                <div class="vip-perk-item">
+                    <div class="vip-perk-icon"><i class="fa-solid fa-user-tie"></i></div>
+                    <div>
+                        <h3 style="font-size: 1rem; margin-bottom: 4px; color: var(--text-primary);">Scent Sommelier Riêng Biệt</h3>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5;">Chuyên gia thử hương được đào tạo tại Pháp đồng hành suốt 60 phút trải nghiệm.</p>
+                    </div>
+                </div>
+                <div class="vip-perk-item">
+                    <div class="vip-perk-icon"><i class="fa-solid fa-pen-nib"></i></div>
+                    <div>
+                        <h3 style="font-size: 1rem; margin-bottom: 4px; color: var(--text-primary);">Khắc Tên Laser Lên Thân Chai Miễn Phí</h3>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5;">Cá nhân hóa chai nước hoa của bạn bằng tên hoặc thông điệp ý nghĩa độc bản.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Booking Form -->
+            <div style="background: rgba(0,0,0,0.4); padding: 32px; border-radius: var(--radius-md); border: 1px solid var(--border-card);">
+                <h3 style="font-size: 1.3rem; font-family: var(--font-serif); margin-bottom: 20px; color: var(--gold-primary);">
+                    <i class="fa-regular fa-calendar-check" style="margin-right: 8px;"></i>Đặt Lịch Hẹn Thử Hương
+                </h3>
+                <form id="boutiqueBookingForm" onsubmit="handleBooking(event)">
+                    <div style="display: flex; flex-direction: column; gap: 16px;">
+                        <div>
+                            <label style="display: block; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 6px;">Họ và Tên</label>
+                            <input type="text" id="bookName" class="form-control-luxe" placeholder="Ví dụ: Nguyễn Hoàng Long" required />
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 6px;">Số Điện Thoại</label>
+                            <input type="tel" id="bookPhone" class="form-control-luxe" placeholder="0912 345 678" required />
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 6px;">Địa Điểm Boutique</label>
+                            <select id="bookLocation" class="form-control-luxe" style="background: #1a1a1a;">
+                                <option value="HN">Hà Nội • Tràng Tiền Boutique</option>
+                                <option value="HCM">TP. HCM • Đồng Khởi Boutique</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 6px;">Ngày & Giờ Dự Kiến</label>
+                            <input type="datetime-local" id="bookTime" class="form-control-luxe" style="background: #1a1a1a;" required />
+                        </div>
+                        <button type="submit" class="btn-luxe-primary" style="width: 100%; padding: 14px; margin-top: 10px; font-weight: 700;">
+                            Xác Nhận Đặt Lịch VIP Concierge
+                        </button>
+                    </div>
+                </form>
+                <div id="bookingSuccessBox" style="display: none; margin-top: 20px; padding: 16px; background: rgba(46, 204, 113, 0.15); border: 1px solid #2ecc71; border-radius: var(--radius-sm); text-align: center; color: #2ecc71;">
+                    <i class="fa-solid fa-circle-check" style="font-size: 1.5rem; margin-bottom: 8px;"></i>
+                    <p style="margin: 0; font-size: 0.9rem; font-weight: 600;">Lịch hẹn của quý khách đã được ghi nhận thành công!</p>
+                    <p style="margin: 4px 0 0; font-size: 0.8rem; color: var(--text-secondary);">Chuyên gia Sommelier sẽ liên hệ qua điện thoại để hoàn tất chuẩn bị trước buổi đón tiếp.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function handleBooking(e) {
+        e.preventDefault();
+        var form = document.getElementById('boutiqueBookingForm');
+        var successBox = document.getElementById('bookingSuccessBox');
+        form.style.display = 'none';
+        successBox.style.display = 'block';
+    }
+</script>

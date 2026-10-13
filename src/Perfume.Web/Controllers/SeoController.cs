@@ -34,6 +34,8 @@ public class SeoController : Controller
         // Static routes
         AddUrl(sb, baseUrl, "daily", "1.0");
         AddUrl(sb, $"{baseUrl}/bo-suu-tap", "daily", "0.9");
+        AddUrl(sb, $"{baseUrl}/bo-suu-tap?gender=Men", "weekly", "0.85");
+        AddUrl(sb, $"{baseUrl}/bo-suu-tap?gender=Women", "weekly", "0.85");
         AddUrl(sb, $"{baseUrl}/blog", "weekly", "0.8");
         AddUrl(sb, $"{baseUrl}/catalog/quiz", "monthly", "0.7");
 
@@ -67,7 +69,17 @@ public class SeoController : Controller
         sb.AppendLine("Disallow: /admin/");
         sb.AppendLine("Disallow: /cart/");
         sb.AppendLine("Disallow: /checkout/");
+        sb.AppendLine("Disallow: /api/");
         sb.AppendLine("Allow: /");
+        sb.AppendLine();
+        sb.AppendLine("# AI & Answer Engine Crawlers (AEO / GEO)");
+        sb.AppendLine("User-agent: GPTBot");
+        sb.AppendLine("Allow: /");
+        sb.AppendLine("User-agent: PerplexityBot");
+        sb.AppendLine("Allow: /");
+        sb.AppendLine("User-agent: ClaudeBot");
+        sb.AppendLine("Allow: /");
+        sb.AppendLine();
         sb.AppendLine($"Sitemap: {baseUrl}/sitemap.xml");
 
         return Content(sb.ToString(), "text/plain", Encoding.UTF8);

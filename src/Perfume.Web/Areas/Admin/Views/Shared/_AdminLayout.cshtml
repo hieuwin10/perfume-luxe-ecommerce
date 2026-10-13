@@ -35,14 +35,35 @@
                 <a href="/admin/storemanager" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
                     <i class="fa-solid fa-chart-line" style="margin-right: 4px;"></i> Thống Kê
                 </a>
+                <a href="/admin/admindashboard/financialreport" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; color: var(--gold-primary);">
+                    <i class="fa-solid fa-coins" style="margin-right: 4px;"></i> Tài Chính P&amp;L
+                </a>
                 <a href="/admin/admindashboard/products" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
                     <i class="fa-solid fa-bottle-droplet" style="margin-right: 4px;"></i> Sản Phẩm
+                </a>
+                <a href="/admin/catalogmanager/brands" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
+                    <i class="fa-solid fa-copyright" style="margin-right: 4px;"></i> Thương Hiệu
+                </a>
+                <a href="/admin/catalogmanager/fragrancefamilies" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
+                    <i class="fa-solid fa-palette" style="margin-right: 4px;"></i> Nhóm Hương
+                </a>
+                <a href="/admin/catalogmanager/fragrancenotes" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
+                    <i class="fa-solid fa-leaf" style="margin-right: 4px;"></i> Nốt Hương
+                </a>
+                <a href="/admin/admindashboard/inventory" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
+                    <i class="fa-solid fa-warehouse" style="margin-right: 4px;"></i> Tồn Kho
+                </a>
+                <a href="/admin/admindashboard/banners" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
+                    <i class="fa-solid fa-images" style="margin-right: 4px;"></i> Banners
                 </a>
                 <a href="/admin/admindashboard/orders" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
                     <i class="fa-solid fa-boxes-stacked" style="margin-right: 4px;"></i> Đơn Hàng
                 </a>
                 <a href="/admin/admindashboard/flashsales" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; color: #f59e0b;">
                     <i class="fa-solid fa-bolt" style="margin-right: 4px;"></i> Flash Sale
+                </a>
+                <a href="/admin/admindashboard/tastings" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
+                    <i class="fa-solid fa-crown" style="margin-right: 4px; color: var(--gold-primary);"></i> Lịch Hẹn VIP
                 </a>
                 @if (User.IsInRole("Admin"))
                 {
@@ -56,10 +77,22 @@
                 <a href="/admin/storemanager/reviews" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
                     <i class="fa-solid fa-star" style="margin-right: 4px;"></i> Đánh Giá
                 </a>
+                <a href="/admin/admindashboard/blogs" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
+                    <i class="fa-solid fa-feather-pointed" style="margin-right: 4px; color: var(--gold-primary);"></i> Tạp Chí / Blog
+                </a>
                 @if (User.IsInRole("Admin"))
                 {
+                    <a href="/admin/admindashboard/auditlogs" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
+                        <i class="fa-solid fa-clipboard-check" style="margin-right: 4px;"></i> Audit Logs
+                    </a>
+                    <a href="/admin/admindashboard/databasebackup" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
+                        <i class="fa-solid fa-cloud-arrow-up" style="margin-right: 4px;"></i> Sao Lưu DB
+                    </a>
                     <a href="/admin/admindashboard/erd" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; color: var(--gold-primary);">
                         <i class="fa-solid fa-diagram-project" style="margin-right: 4px;"></i> Sơ Đồ ERD
+                    </a>
+                    <a href="/admin/admindashboard/settings" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
+                        <i class="fa-solid fa-gear" style="margin-right: 4px;"></i> Cài Đặt
                     </a>
                     <a href="/admin/databaseconsole" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.25);">
                         <i class="fa-solid fa-database" style="margin-right: 4px;"></i> DB Console

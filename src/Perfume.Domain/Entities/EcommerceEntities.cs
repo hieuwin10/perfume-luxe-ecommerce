@@ -28,6 +28,10 @@ public class Order : BaseEntity
     public string? VoucherCode { get; set; }
     public string? TrackingNumber { get; set; }
 
+    public bool IsGiftWrapping { get; set; } = false;
+    public decimal GiftWrappingFee { get; set; } = 0;
+    public string? GiftMessage { get; set; }
+
     public ICollection<OrderItem> Items { get; set; } = new List<OrderItem>();
 }
 

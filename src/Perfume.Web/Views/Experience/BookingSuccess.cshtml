@@ -1,0 +1,69 @@
+@model Perfume.Domain.Entities.PrivateTastingBooking
+@{
+    ViewData["Title"] = "Xác Nhận Lịch Hẹn VIP - PERFUME LUXE";
+}
+
+<main style="max-width: 720px; margin: 60px auto 100px; padding: 0 20px; text-align: center;">
+    <div class="luxury-card" style="padding: 48px 36px; border: 1px solid var(--border-subtle); background: var(--bg-surface); border-radius: 16px; box-shadow: 0 16px 48px rgba(0,0,0,0.4);">
+        <div style="width: 72px; height: 72px; border-radius: 50%; background: rgba(212,175,55,0.15); border: 2px solid var(--gold-primary); display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; color: var(--gold-primary); font-size: 2rem; box-shadow: 0 0 25px rgba(212,175,55,0.35);">
+            <i class="fa-solid fa-crown"></i>
+        </div>
+
+        <span style="font-size: 0.8rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold-primary); font-weight: 700; display: inline-block; margin-bottom: 8px;">
+            Trân Trọng Đón Tiếp Quý Khách
+        </span>
+        <h1 style="font-size: clamp(1.8rem, 4vw, 2.2rem); font-family: var(--font-heading); font-weight: 700; margin: 0 0 16px; color: var(--text-primary);">
+            Lịch Hẹn Private Tasting Đã Được Ghi Nhận
+        </h1>
+        <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6; margin: 0 0 28px;">
+            Cảm ơn quý khách <strong>@Model.CustomerName</strong> đã tin tưởng lựa chọn dịch vụ trải nghiệm độc bản tại hệ thống PERFUME LUXE.
+        </p>
+
+        <!-- BOOKING DETAILS CARD -->
+        <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-card); border-radius: 12px; padding: 22px; text-align: left; margin-bottom: 28px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-card); padding-bottom: 12px; margin-bottom: 14px;">
+                <span style="font-size: 0.85rem; color: var(--text-muted);">Mã Lịch Hẹn VIP:</span>
+                <strong style="color: var(--gold-primary); font-size: 1.1rem; letter-spacing: 0.05em;">VIP-@Model.Id.ToString("D5")</strong>
+            </div>
+
+            <div style="display: grid; gap: 10px; font-size: 0.9rem; color: var(--text-secondary);">
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Địa điểm Salon:</span>
+                    <strong style="color: var(--text-primary);">@Model.BoutiqueLocation</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Thời gian đón tiếp:</span>
+                    <strong style="color: var(--text-primary);">@Model.BookingDate.ToString("dd/MM/yyyy") (@Model.TimeSlot)</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Số lượng khách:</span>
+                    <span style="color: var(--text-primary);">@Model.GuestCount người</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Số điện thoại:</span>
+                    <span style="color: var(--text-primary);">@Model.PhoneNumber</span>
+                </div>
+                @if (!string.IsNullOrEmpty(Model.PreferredScentFamilies))
+                {
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Nhóm hương quan tâm:</span>
+                        <span style="color: var(--gold-primary);">@Model.PreferredScentFamilies</span>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div style="padding: 14px; background: rgba(42,157,143,0.1); border: 1px solid rgba(42,157,143,0.3); border-radius: 8px; font-size: 0.88rem; color: #2A9D8F; margin-bottom: 32px;">
+            <i class="fa-solid fa-circle-check" style="margin-right: 6px;"></i> Quản lý Salon sẽ liên hệ qua điện thoại trong vòng 30 phút để xác nhận yêu cầu đặc biệt của quý khách.
+        </div>
+
+        <div style="display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;">
+            <a href="/" class="btn-luxe-outline" style="padding: 12px 28px; font-size: 0.9rem; text-decoration: none;">
+                <i class="fa-solid fa-house" style="margin-right: 6px;"></i> Trang Chủ
+            </a>
+            <a href="/bo-suu-tap" class="btn-luxe" style="padding: 12px 28px; font-size: 0.9rem; text-decoration: none;">
+                <i class="fa-solid fa-bottle-droplet" style="margin-right: 6px;"></i> Khám Phá Nước Hoa
+            </a>
+        </div>
+    </div>
+</main>

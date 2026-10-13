@@ -13,11 +13,23 @@
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="@(ViewData["CanonicalUrl"] ?? $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}")" />
 
-    <meta property="og:type" content="website" />
+    <!-- Open Graph / Facebook -->
+    <meta property="og:site_name" content="PERFUME LUXE" />
+    <meta property="og:type" content="@(ViewData["OgType"] ?? "website")" />
     <meta property="og:title" content="@(ViewData["Title"] ?? "PERFUME LUXE - Nước Hoa Xa Xỉ Chính Hãng")" />
     <meta property="og:description" content="@(ViewData["MetaDescription"] ?? "Bộ sưu tập nước hoa cao cấp, chiết 10ml và fullbox với 3 tầng hương độc bản.")" />
     <meta property="og:image" content="@(ViewData["OgImage"] ?? "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=1200&q=80")" />
     <meta property="og:url" content="@($"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}")" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="@(ViewData["Title"] ?? "PERFUME LUXE - Nước Hoa Xa Xỉ Chính Hãng")" />
+    <meta name="twitter:description" content="@(ViewData["MetaDescription"] ?? "Bộ sưu tập nước hoa cao cấp, chiết 10ml và fullbox với 3 tầng hương độc bản.")" />
+    <meta name="twitter:image" content="@(ViewData["OgImage"] ?? "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=1200&q=80")" />
+
+    <!-- Favicon & Brand Theme -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💎</text></svg>" />
+    <meta name="theme-color" content="#0B0B0E" />
 
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
@@ -47,10 +59,13 @@
                 <ul class="nav-links">
                     <li><a href="/" class="nav-link">Trang Chủ</a></li>
                     <li><a href="/bo-suu-tap" class="nav-link">Bộ Sưu Tập</a></li>
-                    <li><a href="/bo-suu-tap?gender=Men" class="nav-link">Nước Hoa Nam</a></li>
-                    <li><a href="/bo-suu-tap?gender=Women" class="nav-link">Nước Hoa Nữ</a></li>
                     <li><a href="/catalog/quiz" class="nav-link" style="color: var(--gold-primary);"><i class="fa-solid fa-wand-magic-sparkles" style="margin-right: 4px;"></i> Trắc Nghiệm Mùi</a></li>
-                    <li><a href="/blog" class="nav-link">Cẩm Nang</a></li>
+                    <li><a href="/blog" class="nav-link">Tạp Chí Mùi Hương</a></li>
+                    <li><a href="/ve-chung-toi" class="nav-link">Về Chúng Tôi</a></li>
+                    <li><a href="/discovery-box" class="nav-link" style="color: var(--gold-primary);"><i class="fa-solid fa-gift" style="margin-right: 4px;"></i> Discovery Box</a></li>
+                    <li><a href="/so-sanh" class="nav-link"><i class="fa-solid fa-scale-balanced" style="margin-right: 4px;"></i> So Sánh</a></li>
+                    <li><a href="/dat-lich-trai-nghiem" class="nav-link"><i class="fa-solid fa-crown" style="margin-right: 4px; color: var(--gold-primary);"></i> Thử Mùi VIP</a></li>
+                    <li><a href="/tra-cuu-don-hang" class="nav-link" style="color: var(--gold-primary);"><i class="fa-solid fa-truck-fast" style="margin-right: 4px;"></i> Tra Cứu Đơn</a></li>
 
                     @if (SignInManager.IsSignedIn(User))
                     {
@@ -98,6 +113,7 @@
                                 <i class="fa-solid fa-user-circle"></i> Tài Khoản Của Tôi
                             </a>
                             <a href="/account/myorders" class="dropdown-item-luxe"><i class="fa-solid fa-box"></i> Đơn hàng của tôi</a>
+                            <a href="/tra-cuu-don-hang" class="dropdown-item-luxe"><i class="fa-solid fa-truck-fast"></i> Tra Cứu Đơn Hàng</a>
                             @if (User.IsInRole("Admin"))
                             {
                                 <a href="/admin/admindashboard" class="dropdown-item-luxe"><i class="fa-solid fa-gauge-high"></i> Admin Dashboard</a>
@@ -174,44 +190,46 @@
             </div>
 
             <div>
-                <h4 style="font-size: 1.15rem; margin-bottom: 20px; color: var(--gold-primary);">Danh Mục Nổi Bật</h4>
+                <h4 style="font-size: 1.15rem; margin-bottom: 20px; color: var(--gold-primary);">Trải Nghiệm & Khám Phá</h4>
                 <ul style="list-style: none; display: flex; flex-direction: column; gap: 10px; font-size: 0.9rem; color: var(--text-secondary);">
-                    <li><a href="/bo-suu-tap" class="nav-link">Tất Cả Sản Phẩm</a></li>
-                    <li><a href="/bo-suu-tap?gender=Men" class="nav-link">Nước Hoa Nam Lịch Lãm</a></li>
-                    <li><a href="/bo-suu-tap?gender=Women" class="nav-link">Nước Hoa Nữ Quyến Rũ</a></li>
-                    <li><a href="/bo-suu-tap?familySlug=huong-go-woody" class="nav-link">Hương Gỗ Trầm Ấm (Woody)</a></li>
-                    <li><a href="/catalog/quiz" class="nav-link">Trắc Nghiệm Tìm Mùi Hương</a></li>
+                    <li><a href="/bo-suu-tap" class="nav-link"><i class="fa-solid fa-angle-right" style="color: var(--gold-primary); font-size: 0.75rem; margin-right: 6px;"></i> Tất Cả Sản Phẩm</a></li>
+                    <li><a href="/catalog/quiz" class="nav-link" style="color: var(--gold-primary);"><i class="fa-solid fa-wand-magic-sparkles" style="font-size: 0.8rem; margin-right: 6px;"></i> AI Fragrance Finder</a></li>
+                    <li><a href="/blog" class="nav-link"><i class="fa-solid fa-angle-right" style="color: var(--gold-primary); font-size: 0.75rem; margin-right: 6px;"></i> Tạp Chí Mùi Hương (12 bài viết)</a></li>
+                    <li><a href="/ve-chung-toi" class="nav-link"><i class="fa-solid fa-angle-right" style="color: var(--gold-primary); font-size: 0.75rem; margin-right: 6px;"></i> Câu Chuyện Thương Hiệu</a></li>
+                    <li><a href="/boutique" class="nav-link"><i class="fa-solid fa-angle-right" style="color: var(--gold-primary); font-size: 0.75rem; margin-right: 6px;"></i> Hệ Thống Flagship Boutique</a></li>
                 </ul>
             </div>
 
             <div>
-                <h4 style="font-size: 1.15rem; margin-bottom: 20px; color: var(--gold-primary);">Hỗ Trợ Khách Hàng</h4>
+                <h4 style="font-size: 1.15rem; margin-bottom: 20px; color: var(--gold-primary);">Chính Sách & Hỗ Trợ</h4>
                 <ul style="list-style: none; display: flex; flex-direction: column; gap: 10px; font-size: 0.9rem; color: var(--text-secondary);">
-                    <li><i class="fa-solid fa-phone" style="width: 20px; color: var(--gold-primary);"></i> Hotline: 1900 8888 (8:00 - 22:00)</li>
-                    <li><i class="fa-solid fa-envelope" style="width: 20px; color: var(--gold-primary);"></i> Email: concierge@perfumeluxe.vn</li>
-                    <li><i class="fa-solid fa-location-dot" style="width: 20px; color: var(--gold-primary);"></i> Boutique: 88 Đồng Khởi, Quận 1, TP. HCM</li>
-                    @if (User.IsInRole("Admin"))
-                    {
-                        <li><a href="/admin/databaseconsole" class="nav-link" style="color: var(--gold-primary);"><i class="fa-solid fa-terminal" style="width: 20px;"></i> Console Quản Trị CSDL (AWS Style)</a></li>
-                    }
+                    <li><a href="/tra-cuu-don-hang" class="nav-link"><i class="fa-solid fa-truck-fast" style="color: var(--gold-primary); width: 18px;"></i> Tra Cứu Hành Trình Đơn</a></li>
+                    <li><a href="/chinh-sach-doi-tra" class="nav-link"><i class="fa-solid fa-shield-halved" style="color: var(--gold-primary); width: 18px;"></i> Đổi Trả 7 Ngày & Hoàn 200%</a></li>
+                    <li><a href="/huong-dan-mua-hang" class="nav-link"><i class="fa-solid fa-cart-shopping" style="color: var(--gold-primary); width: 18px;"></i> Hướng Dẫn Mua Hàng & COD</a></li>
+                    <li><a href="/privacy" class="nav-link"><i class="fa-solid fa-lock" style="color: var(--gold-primary); width: 18px;"></i> Chính Sách Bảo Mật Dữ Liệu</a></li>
+                    <li><span style="color: var(--text-muted);"><i class="fa-solid fa-phone" style="width: 18px; color: var(--gold-primary);"></i> Hotline VIP: 024.3828.9999</span></li>
+                    <li><span style="color: var(--text-muted);"><i class="fa-solid fa-envelope" style="width: 18px; color: var(--gold-primary);"></i> concierge@perfumeluxe.com</span></li>
                 </ul>
             </div>
 
             <div>
                 <h4 style="font-size: 1.15rem; margin-bottom: 20px; color: var(--gold-primary);">Đặc Quyền Thành Viên</h4>
-                <p style="color: var(--text-secondary); font-size: 0.88rem; margin-bottom: 14px;">Đăng ký nhận mã giảm giá 10% cho đơn hàng đầu tiên:</p>
-                <div style="display: flex; gap: 8px;">
-                    <input type="email" placeholder="Email của bạn..." style="background: var(--bg-surface-elevated); border: 1px solid var(--border-card); color: var(--text-primary); padding: 10px 14px; border-radius: var(--radius-sm); flex-grow: 1; outline: none; font-size: 0.85rem;" />
-                    <button class="btn-luxe" style="padding: 10px 18px; font-size: 0.8rem;">Gửi</button>
+                <p style="color: var(--text-secondary); font-size: 0.88rem; margin-bottom: 14px;">Đăng ký gia nhập Haute Parfumerie Club để nhận voucher <strong style="color: var(--gold-primary);">LUXE2026</strong> giảm 10%:</p>
+                <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                    <input type="email" id="footerNewsletterEmail" placeholder="Nhập địa chỉ email..." style="background: var(--bg-surface-elevated); border: 1px solid var(--border-card); color: var(--text-primary); padding: 10px 14px; border-radius: var(--radius-sm); flex-grow: 1; outline: none; font-size: 0.85rem;" />
+                    <button type="button" onclick="handleNewsletterSubscribe()" class="btn-luxe-primary" style="padding: 10px 18px; font-size: 0.82rem; white-space: nowrap;">Đăng Ký</button>
                 </div>
+                <div id="newsletterNotice" style="display: none; font-size: 0.82rem; padding: 10px; border-radius: var(--radius-sm);"></div>
             </div>
         </div>
 
         <div style="max-width: 1360px; margin: 0 auto; border-top: 1px solid var(--border-card); padding-top: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; font-size: 0.8rem; color: var(--text-muted);">
             <div>&copy; @DateTime.UtcNow.Year PERFUME LUXE. Haute Parfumerie Enterprise System. All rights reserved.</div>
-            <div style="display: flex; gap: 16px;">
+            <div style="display: flex; gap: 16px; align-items: center;">
                 <span>Thanh toán:</span>
-                <span><i class="fa-solid fa-money-bill-wave" style="color: #2A9D8F;"></i> COD (Thanh toán khi nhận hàng)</span>
+                <span><i class="fa-solid fa-money-bill-wave" style="color: #2A9D8F; margin-right: 4px;"></i> COD (Kiểm hàng thanh toán)</span>
+                <span><i class="fa-solid fa-qrcode" style="color: var(--gold-primary); margin-right: 4px;"></i> VNPAY-QR</span>
+                <span><i class="fa-solid fa-building-columns" style="color: #3b82f6; margin-right: 4px;"></i> Chuyển khoản 24/7</span>
             </div>
         </div>
     </footer>
@@ -392,6 +410,55 @@
             <text>
             setTimeout(() => showToast('@Html.Raw(TempData["Success"])', 'success'), 300);
             </text>
+        }
+
+        // Newsletter subscription AJAX
+        async function handleNewsletterSubscribe() {
+            const input = document.getElementById('footerNewsletterEmail');
+            const notice = document.getElementById('newsletterNotice');
+            if (!input || !notice) return;
+            const email = input.value.trim();
+
+            if (!email || !email.includes('@@') || !email.includes('.')) {
+                notice.style.display = 'block';
+                notice.style.background = 'rgba(239, 68, 68, 0.15)';
+                notice.style.color = '#f87171';
+                notice.style.border = '1px solid #ef4444';
+                notice.innerText = 'Vui lòng nhập địa chỉ email hợp lệ.';
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/newsletter/subscribe', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email })
+                });
+                const data = await res.json();
+                notice.style.display = 'block';
+                if (data.success) {
+                    notice.style.background = 'rgba(46, 204, 113, 0.15)';
+                    notice.style.color = '#2ecc71';
+                    notice.style.border = '1px solid #2ecc71';
+                    notice.innerHTML = `<i class="fa-solid fa-gift" style="margin-right: 6px;"></i> ${data.message}`;
+                    input.value = '';
+                    if (typeof showToast === 'function') {
+                        showToast(`Mã ưu đãi LUXE2026 đã kích hoạt cho ${email}!`, 'success');
+                    }
+                } else {
+                    notice.style.background = 'rgba(239, 68, 68, 0.15)';
+                    notice.style.color = '#f87171';
+                    notice.style.border = '1px solid #ef4444';
+                    notice.innerText = data.message;
+                }
+            } catch (err) {
+                console.error(err);
+                notice.style.display = 'block';
+                notice.style.background = 'rgba(239, 68, 68, 0.15)';
+                notice.style.color = '#f87171';
+                notice.style.border = '1px solid #ef4444';
+                notice.innerText = 'Có lỗi xảy ra, vui lòng thử lại sau.';
+            }
         }
     </script>
 
