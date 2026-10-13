@@ -6,15 +6,15 @@ services:
     container_name: perfume_web_app
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__DefaultConnection: "Server=sqlserver,1433;Database=PerfumeDb;User Id=sa;Password=${MSSQL_SA_PASSWORD:?Set MSSQL_SA_PASSWORD in .env};TrustServerCertificate=True;"
+      ConnectionStrings__DefaultConnection: "Server=sqlserver,1433;Database=PerfumeDb;User Id=sa;Password=${MSSQL_SA_PASSWORD:-PerfumePass@2026!};TrustServerCertificate=True;MultipleActiveResultSets=True;"
       ConnectionStrings__Redis: redis:6379
       Database__BackupPath: /var/opt/mssql/backup
       Storage__RootPath: /app/App_Data
-      InitialAdmin__Email: ${INITIAL_ADMIN_EMAIL:-}
-      InitialAdmin__Password: ${INITIAL_ADMIN_PASSWORD:-}
+      InitialAdmin__Email: ${INITIAL_ADMIN_EMAIL:-admin@perfumeluxe.vn}
+      InitialAdmin__Password: ${INITIAL_ADMIN_PASSWORD:-AdminPassword123!}
       Jwt__Issuer: ${JWT_ISSUER:-PerfumeLuxe}
       Jwt__Audience: ${JWT_AUDIENCE:-PerfumeLuxe.Clients}
-      Jwt__SigningKey: ${JWT_SIGNING_KEY:-}
+      Jwt__SigningKey: ${JWT_SIGNING_KEY:-SuperSecretPerfumeLuxeKeyWithAtLeast32BytesLength!}
       Smtp__Enabled: "true"
       Smtp__Host: mailpit
       Smtp__Port: 1025
@@ -22,7 +22,7 @@ services:
       Smtp__FromEmail: noreply@perfumeluxe.local
       Smtp__FromName: PERFUME LUXE
     ports:
-      - "5000:8080"
+      - "${DOCKER_WEB_PORT:-5000}:8080"
     volumes:
       - app_data:/app/App_Data
     depends_on:
@@ -39,15 +39,15 @@ services:
     container_name: perfume_sqlserver
     environment:
       ACCEPT_EULA: "Y"
-      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:?Set MSSQL_SA_PASSWORD in .env}
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:-PerfumePass@2026!}
       MSSQL_PID: Developer
     ports:
-      - "1433:1433"
+      - "${DOCKER_SQL_PORT:-1433}:1433"
     volumes:
       - sqlserver_data:/var/opt/mssql
       - sqlserver_backups:/var/opt/mssql/backup
     healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$${MSSQL_SA_PASSWORD}\" -C -Q 'SELECT 1' || /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P \"$${MSSQL_SA_PASSWORD}\" -Q 'SELECT 1'"]
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$${MSSQL_SA_PASSWORD:-PerfumePass@2026!}\" -C -Q 'SELECT 1' || /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P \"$${MSSQL_SA_PASSWORD:-PerfumePass@2026!}\" -Q 'SELECT 1'"]
       interval: 10s
       timeout: 5s
       retries: 10
