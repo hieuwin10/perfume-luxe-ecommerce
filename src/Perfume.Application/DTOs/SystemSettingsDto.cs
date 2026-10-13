@@ -18,4 +18,10 @@ public class SystemSettingsDto
     public string SmtpFromName { get; set; } = "PERFUME LUXE";
     public string? SmtpUserName { get; set; }
     public string? SmtpPassword { get; set; }
+
+    // Enterprise Maintenance Mode Settings
+    public bool IsMaintenanceMode { get; set; } = false;
+    public string MaintenanceMessage { get; set; } = "PerfumeLuxe đang nâng cấp trải nghiệm Hoàng Gia. Hệ thống sẽ sớm mở lại.";
+    public string? ExpectedEndTime { get; set; }
+    public string? AllowedBypassIps { get; set; }
 }

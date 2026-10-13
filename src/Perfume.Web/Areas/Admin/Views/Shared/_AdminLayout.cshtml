@@ -82,6 +82,12 @@
                 </a>
                 @if (User.IsInRole("Admin"))
                 {
+                    <a href="/admin/admindashboard/systemhealth" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; color: #10b981; font-weight: 600;">
+                        <i class="fa-solid fa-heart-pulse" style="margin-right: 4px;"></i> Sức Khỏe HT
+                    </a>
+                    <a href="/admin/admindashboard/errorlogs" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; color: #ef4444; font-weight: 600;">
+                        <i class="fa-solid fa-triangle-exclamation" style="margin-right: 4px;"></i> Error Logs
+                    </a>
                     <a href="/admin/admindashboard/auditlogs" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
                         <i class="fa-solid fa-clipboard-check" style="margin-right: 4px;"></i> Audit Logs
                     </a>

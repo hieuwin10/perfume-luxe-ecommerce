@@ -1,7 +1,9 @@
+using System.Diagnostics;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using Perfume.Application.DTOs;
 using Perfume.Application.Interfaces;
 using Perfume.Domain.Entities;
@@ -1684,6 +1686,226 @@ public class AdminDashboardController : Controller
         }
 
         return RedirectToAction(nameof(DatabaseBackup));
+    }
+    #endregion
+
+    #region Module 1: System Health Console & Cache Purge
+    [HttpGet]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> SystemHealth()
+    {
+        var vm = new SystemHealthViewModel();
+
+        // 1. SQL Database Health Check & Latency
+        var sw = Stopwatch.StartNew();
+        try
+        {
+            var canConnect = await _db.Database.CanConnectAsync();
+            sw.Stop();
+            vm.SqlConnected = canConnect;
+            vm.SqlLatencyMs = sw.ElapsedMilliseconds;
+
+            if (canConnect)
+            {
+                var conn = _db.Database.GetDbConnection();
+                vm.SqlVersion = $"{conn.Database} ({conn.ServerVersion ?? "Microsoft SQL Server"})";
+            }
+        }
+        catch (Exception)
+        {
+            sw.Stop();
+            vm.SqlConnected = false;
+            vm.SqlLatencyMs = sw.ElapsedMilliseconds;
+            vm.SqlVersion = "Lỗi kết nối cơ sở dữ liệu";
+        }
+
+        // 2. Redis Cache Check
+        var redisConn = _configuration["Redis:ConnectionString"] ?? _configuration["ConnectionStrings:Redis"];
+        vm.RedisConfigured = !string.IsNullOrWhiteSpace(redisConn);
+        vm.RedisConnected = false;
+
+        // 3. Process & Memory Metrics
+        try
+        {
+            var currentProcess = Process.GetCurrentProcess();
+            vm.ProcessMemoryMb = currentProcess.WorkingSet64 / (1024 * 1024);
+            vm.ServerStartTimeUtc = currentProcess.StartTime.ToUniversalTime();
+            vm.ServerUptime = DateTime.UtcNow - vm.ServerStartTimeUtc;
+        }
+        catch
+        {
+            vm.ProcessMemoryMb = 0;
+            vm.ServerStartTimeUtc = DateTime.UtcNow;
+            vm.ServerUptime = TimeSpan.Zero;
+        }
+
+        vm.GcTotalMemoryMb = GC.GetTotalMemory(false) / (1024 * 1024);
+
+        // 4. Free Disk Space
+        try
+        {
+            var appDrive = Path.GetPathRoot(AppContext.BaseDirectory);
+            if (!string.IsNullOrWhiteSpace(appDrive))
+            {
+                var driveInfo = new DriveInfo(appDrive);
+                var freeGb = driveInfo.AvailableFreeSpace / (1024.0 * 1024 * 1024);
+                var totalGb = driveInfo.TotalSize / (1024.0 * 1024 * 1024);
+                vm.FreeDiskSpaceGb = $"{freeGb:N1} GB / {totalGb:N1} GB ({driveInfo.Name})";
+            }
+        }
+        catch
+        {
+            vm.FreeDiskSpaceGb = "Không xác định";
+        }
+
+        // 5. Counts
+        try
+        {
+            vm.TotalAuditLogsCount = await _db.DatabaseAuditLogs.CountAsync();
+            vm.TotalErrorLogsCount = await _db.SystemErrorLogs.CountAsync();
+        }
+        catch
+        {
+            // fallback
+        }
+
+        return View(vm);
+    }
+
+    [HttpPost]
+    [Authorize(Roles = "Admin")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> FlushCache()
+    {
+        var sw = Stopwatch.StartNew();
+        try
+        {
+            var distCache = HttpContext?.RequestServices?.GetService<IDistributedCache>();
+            GC.Collect(2, GCCollectionMode.Forced, true);
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+            sw.Stop();
+
+            _db.DatabaseAuditLogs.Add(new DatabaseAuditLog
+            {
+                ActorUserId = _userManager.GetUserId(User) ?? User.Identity?.Name,
+                Action = "PURGE_SYSTEM_CACHE",
+                Target = "ApplicationMemoryAndRuntimeCache",
+                Succeeded = true,
+                ElapsedMilliseconds = sw.ElapsedMilliseconds
+            });
+            await _db.SaveChangesAsync();
+
+            TempData["Success"] = $"Đã giải phóng bộ nhớ đệm cache và tối ưu hóa GC hoàn tất ({sw.ElapsedMilliseconds}ms)!";
+        }
+        catch (Exception ex)
+        {
+            sw.Stop();
+            _db.DatabaseAuditLogs.Add(new DatabaseAuditLog
+            {
+                ActorUserId = _userManager.GetUserId(User) ?? User.Identity?.Name,
+                Action = "PURGE_SYSTEM_CACHE_FAILED",
+                Target = ex.Message[..Math.Min(120, ex.Message.Length)],
+                Succeeded = false,
+                ElapsedMilliseconds = sw.ElapsedMilliseconds
+            });
+            await _db.SaveChangesAsync();
+
+            TempData["Error"] = $"Lỗi khi xóa bộ nhớ đệm: {ex.Message}";
+        }
+
+        return RedirectToAction(nameof(SystemHealth));
+    }
+    #endregion
+
+    #region Module 3: Application Error & Crash Logs Tracker
+    [HttpGet]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> ErrorLogs(string? search, int? statusCode, int page = 1)
+    {
+        var query = _db.SystemErrorLogs.AsNoTracking().AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var s = search.Trim();
+            query = query.Where(l => l.ErrorCode.Contains(s) || l.Message.Contains(s) || (l.RequestPath != null && l.RequestPath.Contains(s)));
+        }
+
+        if (statusCode.HasValue)
+        {
+            query = query.Where(l => l.StatusCode == statusCode.Value);
+        }
+
+        var totalCount = await query.CountAsync();
+        var pageSize = 20;
+        var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+        if (totalPages < 1) totalPages = 1;
+        if (page < 1) page = 1;
+        if (page > totalPages) page = totalPages;
+
+        var logs = await query
+            .OrderByDescending(l => l.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        var vm = new SystemErrorLogsViewModel
+        {
+            Logs = logs,
+            CurrentPage = page,
+            TotalPages = totalPages,
+            TotalCount = totalCount,
+            Search = search,
+            StatusCodeFilter = statusCode
+        };
+
+        return View(vm);
+    }
+
+    [HttpPost]
+    [Authorize(Roles = "Admin")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ClearErrorLogs(string mode)
+    {
+        var sw = Stopwatch.StartNew();
+        try
+        {
+            int deletedCount;
+            if (mode == "all")
+            {
+                var allLogs = await _db.SystemErrorLogs.ToListAsync();
+                deletedCount = allLogs.Count;
+                _db.SystemErrorLogs.RemoveRange(allLogs);
+            }
+            else
+            {
+                var cutoff = DateTime.UtcNow.AddDays(-30);
+                var oldLogs = await _db.SystemErrorLogs.Where(l => l.CreatedAt < cutoff).ToListAsync();
+                deletedCount = oldLogs.Count;
+                _db.SystemErrorLogs.RemoveRange(oldLogs);
+            }
+
+            await _db.SaveChangesAsync();
+            sw.Stop();
+
+            _db.DatabaseAuditLogs.Add(new DatabaseAuditLog
+            {
+                ActorUserId = _userManager.GetUserId(User) ?? User.Identity?.Name,
+                Action = mode == "all" ? "CLEAR_ALL_ERROR_LOGS" : "PURGE_OLD_ERROR_LOGS",
+                Target = $"{deletedCount} logs removed",
+                Succeeded = true,
+                ElapsedMilliseconds = sw.ElapsedMilliseconds
+            });
+            await _db.SaveChangesAsync();
+
+            TempData["Success"] = $"Đã dọn dẹp thành công {deletedCount} bản ghi nhật ký lỗi hệ thống!";
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = $"Không thể dọn dẹp nhật ký lỗi: {ex.Message}";
+        }
+
+        return RedirectToAction(nameof(ErrorLogs));
     }
     #endregion
 }

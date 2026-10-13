@@ -134,8 +134,13 @@ public sealed class CustomerApiController : ControllerBase
         if (current == null || current.ExpiresAt <= DateTime.UtcNow || current.RevokedAt.HasValue)
         {
             if (current?.RevokedAt != null)
-                await _db.RefreshTokenRecords.Where(t => t.UserId == current.UserId && t.RevokedAt == null)
-                    .ExecuteUpdateAsync(setters => setters.SetProperty(t => t.RevokedAt, DateTime.UtcNow), cancellationToken);
+            {
+                var tokensToRevoke = await _db.RefreshTokenRecords
+                    .Where(t => t.UserId == current.UserId && t.RevokedAt == null)
+                    .ToListAsync(cancellationToken);
+                foreach (var t in tokensToRevoke) t.RevokedAt = DateTime.UtcNow;
+                await _db.SaveChangesAsync(cancellationToken);
+            }
             await transaction.CommitAsync(cancellationToken);
             return Unauthorized(new { message = "Refresh token không hợp lệ hoặc đã hết hạn." });
         }
@@ -316,7 +321,8 @@ public sealed class CustomerApiController : ControllerBase
         if (order.UserId == null)
         {
             trackingToken = _guestOrderProtector.Protect(order.OrderCode);
-            trackingUrl = Url.Action("Success", "Checkout", new { token = trackingToken }, Request.Scheme);
+            trackingUrl = Url?.Action("Success", "Checkout", new { token = trackingToken }, Request.Scheme)
+                ?? $"/checkout/success?token={trackingToken}";
         }
         await _email.SendOrderConfirmationAsync(order, trackingUrl);
         var targetAction = order.PaymentMethod == PaymentMethod.BankTransfer ? "VietQR" : "Success";
@@ -325,8 +331,8 @@ public sealed class CustomerApiController : ControllerBase
             Order = ToOrderDto(order),
             TrackingToken = trackingToken,
             SuccessUrl = order.UserId == null
-                ? Url.Action(targetAction, "Checkout", new { token = trackingToken }, Request.Scheme)
-                : Url.Action(targetAction, "Checkout", new { orderCode = order.OrderCode }, Request.Scheme)
+                ? (Url?.Action(targetAction, "Checkout", new { token = trackingToken }, Request.Scheme) ?? $"/checkout/{targetAction.ToLowerInvariant()}?token={trackingToken}")
+                : (Url?.Action(targetAction, "Checkout", new { orderCode = order.OrderCode }, Request.Scheme) ?? $"/checkout/{targetAction.ToLowerInvariant()}?orderCode={order.OrderCode}")
         };
         return Ok(response);
     }

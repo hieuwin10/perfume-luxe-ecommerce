@@ -40,6 +40,7 @@ public class PerfumeDbContext : IdentityDbContext<AppUser, AppRole, string>
     public DbSet<StockAdjustment> StockAdjustments => Set<StockAdjustment>();
     public DbSet<PrivateTastingBooking> PrivateTastingBookings => Set<PrivateTastingBooking>();
     public DbSet<BackInStockAlert> BackInStockAlerts => Set<BackInStockAlert>();
+    public DbSet<SystemErrorLog> SystemErrorLogs => Set<SystemErrorLog>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -342,7 +343,10 @@ public class PerfumeDbContext : IdentityDbContext<AppUser, AppRole, string>
         {
             if (entry.State == EntityState.Added)
             {
-                entry.Entity.CreatedAt = DateTime.UtcNow;
+                if (entry.Entity.CreatedAt == default)
+                {
+                    entry.Entity.CreatedAt = DateTime.UtcNow;
+                }
             }
             else if (entry.State == EntityState.Modified)
             {

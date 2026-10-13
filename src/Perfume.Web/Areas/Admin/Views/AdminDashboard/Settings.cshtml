@@ -189,6 +189,58 @@
             </div>
         </div>
 
+        <!-- Section 4: Enterprise Maintenance Mode -->
+        <div id="maintenanceSection" class="luxury-card" style="padding: 24px; margin-bottom: 24px; border: 1px solid rgba(245, 158, 11, 0.3); background: rgba(245, 158, 11, 0.02);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--border-card); padding-bottom: 12px; margin-bottom: 18px; flex-wrap: wrap; gap: 10px;">
+                <h3 style="font-size: 1.15rem; font-weight: 700; margin: 0; color: #fbbf24; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-screwdriver-wrench"></i> Chế Độ Bảo Trì Nền Tảng (Enterprise Maintenance Mode)
+                </h3>
+                <span style="padding: 4px 12px; border-radius: 99px; font-size: 0.78rem; font-weight: 700; @(Model.IsMaintenanceMode ? "background: rgba(239,68,68,0.2); color: #f87171; border: 1px solid rgba(239,68,68,0.4);" : "background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3);")">
+                    @(Model.IsMaintenanceMode ? "● Đang Bật Bảo Trì (503 Active)" : "● Hoạt Động Bình Thường")
+                </span>
+            </div>
+
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 18px; line-height: 1.5;">
+                Khi kích hoạt, toàn bộ khách truy cập và API bên ngoài sẽ nhận phản hồi <strong>HTTP 503 Service Unavailable</strong> với giao diện thông báo bảo trì Hoàng Gia. 
+                <span style="color: #fbbf24;"><i class="fa-solid fa-shield-halved" style="margin-right: 4px;"></i>Tài khoản Quản Trị Viên (Admin) và các IP trong danh sách ngoại lệ được phép truy cập bình thường (Bypass).</span>
+            </p>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px;">
+                <div style="grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--bg-surface-elevated); border-radius: 8px; border: 1px solid var(--border-card);">
+                    <input type="checkbox" id="IsMaintenanceMode" name="IsMaintenanceMode" value="true" @(Model.IsMaintenanceMode ? "checked" : "")
+                           style="width: 20px; height: 20px; accent-color: #f59e0b; cursor: pointer;" />
+                    <input type="hidden" name="IsMaintenanceMode" value="false" />
+                    <label for="IsMaintenanceMode" style="font-size: 0.95rem; font-weight: 700; color: var(--text-primary); cursor: pointer;">
+                        Kích Hoạt Chế Độ Bảo Trì Hệ Thống Toàn Sàn (Enable Maintenance Mode)
+                    </label>
+                </div>
+
+                <div style="grid-column: 1 / -1;">
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+                        Thông Điệp Bảo Trì Gửi Tới Khách Hàng
+                    </label>
+                    <textarea name="MaintenanceMessage" rows="2" required
+                              style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.9rem; outline: none; font-family: inherit;">@Model.MaintenanceMessage</textarea>
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+                        Thời Gian Dự Kiến Hoàn Tất (Expected End Time)
+                    </label>
+                    <input type="text" name="ExpectedEndTime" value="@Model.ExpectedEndTime" placeholder="Ví dụ: 06:00 sáng ngày 14/10/2026..."
+                           style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.9rem; outline: none;" />
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+                        Danh Sách Địa Chỉ IP Ngoại Lệ (Bypass IPs, phân cách bằng dấu phẩy)
+                    </label>
+                    <input type="text" name="AllowedBypassIps" value="@Model.AllowedBypassIps" placeholder="Ví dụ: 127.0.0.1, ::1, 118.69.12.34..."
+                           style="width: 100%; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: 6px; color: var(--text-primary); font-size: 0.9rem; outline: none;" />
+                </div>
+            </div>
+        </div>
+
         <!-- Submit Button -->
         <div style="display: flex; justify-content: flex-end; gap: 14px; margin-bottom: 30px;">
             <button type="submit" class="btn-luxe" style="padding: 12px 28px; font-size: 0.95rem; font-weight: 700;">

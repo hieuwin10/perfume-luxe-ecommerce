@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Perfume.Infrastructure;
 using Perfume.Infrastructure.Data;
 using Perfume.Infrastructure.Identity;
+using Perfume.Web.Middlewares;
 using Perfume.Web.Security;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -100,6 +101,8 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
+app.UseMiddleware<SystemExceptionLoggingMiddleware>();
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -110,6 +113,7 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseMiddleware<MaintenanceMiddleware>();
 app.UseSession();
 app.MapControllerRoute("productDetail", "nuoc-hoa/{slug}", new { controller = "Catalog", action = "Detail" });
 app.MapControllerRoute("catalogFilter", "bo-suu-tap", new { controller = "Catalog", action = "Index" });
