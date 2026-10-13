@@ -37,6 +37,9 @@ public class ProductCardDto
     public int RatingCount { get; set; }
     public bool IsNewArrival { get; set; }
     public bool IsBestSeller { get; set; }
+    public bool IsFlashSale { get; set; }
+    public decimal? FlashSalePrice { get; set; }
+    public int FlashSaleDiscountPercent { get; set; }
     public List<string> TopNotes { get; set; } = new();
 }
 
@@ -65,6 +68,12 @@ public class ProductDetailDto
     public double RatingAverage { get; set; }
     public int RatingCount { get; set; }
     public bool IsInStock { get; set; }
+    public bool IsFlashSale { get; set; }
+    public decimal? FlashSalePrice { get; set; }
+    public int FlashSaleDiscountPercent { get; set; }
+    public DateTime? FlashSaleEndTime { get; set; }
+    public int FlashSaleStockLimit { get; set; }
+    public int FlashSaleSoldQuantity { get; set; }
 
     // SEO
     public string? MetaTitle { get; set; }

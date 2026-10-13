@@ -112,7 +112,7 @@ public class PerfumeCatalogService : IPerfumeCatalogService
 
         if (product == null) return null;
 
-        return new ProductDetailDto
+        var dto = new ProductDetailDto
         {
             Id = product.Id,
             Name = product.Name,
@@ -164,6 +164,32 @@ public class PerfumeCatalogService : IPerfumeCatalogService
             }).ToList(),
             GalleryImages = product.Images.Select(i => i.ImageUrl).ToList()
         };
+
+        var now = DateTime.UtcNow;
+        var activeFlashItem = await _context.FlashSaleItems
+            .Include(i => i.FlashSale)
+            .Where(i => i.ProductId == product.Id
+                && i.FlashSale != null
+                && i.FlashSale.IsActive
+                && i.FlashSale.StartTime <= now
+                && i.FlashSale.EndTime > now
+                && i.SoldQuantity < i.StockLimit)
+            .OrderBy(i => i.FlashSalePrice)
+            .FirstOrDefaultAsync();
+
+        if (activeFlashItem != null)
+        {
+            dto.IsFlashSale = true;
+            dto.FlashSalePrice = activeFlashItem.FlashSalePrice;
+            dto.FlashSaleDiscountPercent = dto.BasePrice > 0
+                ? (int)Math.Round((1m - (activeFlashItem.FlashSalePrice / dto.BasePrice)) * 100m)
+                : 0;
+            dto.FlashSaleEndTime = activeFlashItem.FlashSale?.EndTime;
+            dto.FlashSaleStockLimit = activeFlashItem.StockLimit;
+            dto.FlashSaleSoldQuantity = activeFlashItem.SoldQuantity;
+        }
+
+        return dto;
     }
 
     public async Task<List<Brand>> GetBrandsAsync()
@@ -212,7 +238,7 @@ public class PerfumeCatalogService : IPerfumeCatalogService
 
     private async Task<List<ProductCardDto>> QueryProductCards(IQueryable<Product> query)
     {
-        return await query
+        var cards = await query
             .Select(p => new ProductCardDto
             {
                 Id = p.Id,
@@ -238,5 +264,35 @@ public class PerfumeCatalogService : IPerfumeCatalogService
                     .ToList()
             })
             .ToListAsync();
+
+        if (cards.Any())
+        {
+            var now = DateTime.UtcNow;
+            var productIds = cards.Select(c => c.Id).ToList();
+            var activeItems = await _context.FlashSaleItems
+                .Include(i => i.FlashSale)
+                .Where(i => productIds.Contains(i.ProductId)
+                    && i.FlashSale != null
+                    && i.FlashSale.IsActive
+                    && i.FlashSale.StartTime <= now
+                    && i.FlashSale.EndTime > now
+                    && i.SoldQuantity < i.StockLimit)
+                .ToListAsync();
+
+            foreach (var card in cards)
+            {
+                var flashItem = activeItems.FirstOrDefault(i => i.ProductId == card.Id);
+                if (flashItem != null)
+                {
+                    card.IsFlashSale = true;
+                    card.FlashSalePrice = flashItem.FlashSalePrice;
+                    card.FlashSaleDiscountPercent = card.BasePrice > 0
+                        ? (int)Math.Round((1m - (flashItem.FlashSalePrice / card.BasePrice)) * 100m)
+                        : 0;
+                }
+            }
+        }
+
+        return cards;
     }
 }

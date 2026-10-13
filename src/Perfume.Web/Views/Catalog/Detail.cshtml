@@ -60,12 +60,41 @@
                 </span>
             </div>
 
+            <!-- Flash Sale Alert & Countdown -->
+            @if (Model.IsFlashSale && Model.FlashSalePrice.HasValue)
+            {
+                <div id="detailFlashSaleBanner" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(245, 158, 11, 0.2)); border: 1px solid rgba(245, 158, 11, 0.5); border-radius: var(--radius-md); padding: 14px 18px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="background: linear-gradient(135deg, #ef4444, #f59e0b); color: #FFF; font-size: 0.75rem; font-weight: 700; padding: 3px 10px; border-radius: 20px;">
+                            <i class="fa-solid fa-bolt"></i> FLASH SALE -@Model.FlashSaleDiscountPercent%
+                        </span>
+                        <span style="font-size: 0.82rem; color: #f59e0b; font-weight: 600;">
+                            Đã bán: @Model.FlashSaleSoldQuantity/@Model.FlashSaleStockLimit
+                        </span>
+                    </div>
+                    @if (Model.FlashSaleEndTime.HasValue)
+                    {
+                        <div style="font-size: 0.8rem; color: var(--text-secondary); display: flex; align-items: center; gap: 6px;">
+                            <i class="fa-regular fa-clock" style="color: var(--gold-primary);"></i>
+                            <span>Kết thúc sau:</span>
+                            <strong id="detailCountdownDisplay" style="color: #f59e0b; font-family: monospace; font-size: 0.95rem;">--:--:--</strong>
+                        </div>
+                    }
+                </div>
+            }
+
             <!-- Price Display -->
             <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 18px 24px; margin-bottom: 24px; display: flex; align-items: baseline; gap: 14px;">
-                <span id="activePrice" style="font-size: 2rem; font-weight: 700; color: var(--gold-primary);">
-                    @((defaultVariant?.SalePrice ?? Model.BasePrice).ToString("N0"))₫
+                <span id="activePrice" style="font-size: 2rem; font-weight: 700; color: @(Model.IsFlashSale ? "#f59e0b" : "var(--gold-primary)");">
+                    @((Model.IsFlashSale && Model.FlashSalePrice.HasValue ? Model.FlashSalePrice.Value : (defaultVariant?.SalePrice ?? Model.BasePrice)).ToString("N0"))₫
                 </span>
-                @if (defaultVariant != null && defaultVariant.OriginalPrice > defaultVariant.SalePrice)
+                @if (Model.IsFlashSale && Model.FlashSalePrice.HasValue)
+                {
+                    <span id="activeOriginalPrice" style="font-size: 1.1rem; text-decoration: line-through; color: var(--text-muted);">
+                        @Model.BasePrice.ToString("N0")₫
+                    </span>
+                }
+                else if (defaultVariant != null && defaultVariant.OriginalPrice > defaultVariant.SalePrice)
                 {
                     <span id="activeOriginalPrice" style="font-size: 1.1rem; text-decoration: line-through; color: var(--text-muted);">
                         @defaultVariant.OriginalPrice.ToString("N0")₫
@@ -256,28 +285,6 @@
     }
 </section>
 
-@section Scripts {
-<script>
-document.getElementById('customerReviewForm')?.addEventListener('submit', async event => {
-    event.preventDefault();
-    const form = event.currentTarget;
-    const button = form.querySelector('button[type="submit"]');
-    const message = document.getElementById('reviewApiMessage');
-    button.disabled = true;
-    message.hidden = true;
-    try {
-        const result = await CustomerApi.post(`/api/v1/products/${form.dataset.productId}/reviews`, new FormData(form));
-        message.textContent = result.message;
-        message.style.cssText = 'margin:12px 0;padding:12px;border-radius:8px;color:#52b788;background:rgba(82,183,136,.12)';
-        form.reset();
-    } catch (error) {
-        message.textContent = error.message || 'Chưa gửi được đánh giá.';
-        message.style.cssText = 'margin:12px 0;padding:12px;border-radius:8px;color:#f87171;background:rgba(239,68,68,.12)';
-    } finally { message.hidden = false; button.disabled = false; }
-});
-</script>
-}
-
 <!-- GOOGLE STRUCTURED DATA (JSON-LD) FOR SEO -->
 <script type="application/ld+json">
 {
@@ -351,5 +358,60 @@ document.getElementById('customerReviewForm')?.addEventListener('submit', async 
             const qty = parseInt(document.getElementById('buyQty').value) || 1;
             addToCart('@Model.Slug', selectedVariantId, qty);
         }
+
+        const flashEndTimeStr = '@(Model.IsFlashSale && Model.FlashSaleEndTime.HasValue ? Model.FlashSaleEndTime.Value.ToString("o") : "")';
+        if (flashEndTimeStr) {
+            (function() {
+                const endTime = new Date(flashEndTimeStr).getTime();
+                const timerEl = document.getElementById('detailCountdownDisplay');
+                const bannerEl = document.getElementById('detailFlashSaleBanner');
+                const priceEl = document.getElementById('activePrice');
+                const origEl = document.getElementById('activeOriginalPrice');
+                const basePrice = @Model.BasePrice;
+
+                function updateDetailTimer() {
+                    const now = new Date().getTime();
+                    const diff = endTime - now;
+                    if (diff <= 0) {
+                        clearInterval(interval);
+                        if (bannerEl) bannerEl.style.display = 'none';
+                        if (priceEl) {
+                            priceEl.innerText = basePrice.toLocaleString('vi-VN') + '₫';
+                            priceEl.style.color = 'var(--gold-primary)';
+                        }
+                        if (origEl) origEl.style.display = 'none';
+                        return;
+                    }
+
+                    const hours = Math.floor(diff / (1000 * 60 * 60));
+                    const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                    const secs = Math.floor((diff % (1000 * 60)) / 1000);
+                    if (timerEl) {
+                        timerEl.innerText = `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+                    }
+                }
+
+                updateDetailTimer();
+                const interval = setInterval(updateDetailTimer, 1000);
+            })();
+        }
+
+        document.getElementById('customerReviewForm')?.addEventListener('submit', async event => {
+            event.preventDefault();
+            const form = event.currentTarget;
+            const button = form.querySelector('button[type="submit"]');
+            const message = document.getElementById('reviewApiMessage');
+            button.disabled = true;
+            message.hidden = true;
+            try {
+                const result = await CustomerApi.post(`/api/v1/products/${form.dataset.productId}/reviews`, new FormData(form));
+                message.textContent = result.message;
+                message.style.cssText = 'margin:12px 0;padding:12px;border-radius:8px;color:#52b788;background:rgba(82,183,136,.12)';
+                form.reset();
+            } catch (error) {
+                message.textContent = error.message || 'Chưa gửi được đánh giá.';
+                message.style.cssText = 'margin:12px 0;padding:12px;border-radius:8px;color:#f87171;background:rgba(239,68,68,.12)';
+            } finally { message.hidden = false; button.disabled = false; }
+        });
     </script>
 }

@@ -16,6 +16,8 @@ public class Order : BaseEntity
 
     public decimal SubTotal { get; set; }
     public decimal DiscountAmount { get; set; } = 0;
+    public decimal LoyaltyDiscountAmount { get; set; } = 0;
+    public UserTier? AppliedLoyaltyTier { get; set; }
     public decimal ShippingFee { get; set; } = 0;
     public decimal TotalAmount { get; set; }
 
@@ -47,6 +49,9 @@ public class OrderItem : BaseEntity
     public decimal UnitPrice { get; set; }
     public int Quantity { get; set; } = 1;
     public decimal TotalPrice => UnitPrice * Quantity;
+
+    public bool IsCustomBox { get; set; } = false;
+    public string? CustomBoxConfigJson { get; set; }
 }
 
 public class Voucher : BaseEntity
@@ -112,4 +117,32 @@ public class UserLoyalty : BaseEntity
     public int Points { get; set; } = 0;
     public UserTier Tier { get; set; } = UserTier.Bronze;
     public decimal TotalSpent { get; set; } = 0;
+}
+
+public class FlashSale : BaseEntity
+{
+    public string Name { get; set; } = string.Empty;
+    public string? Description { get; set; }
+    public DateTime StartTime { get; set; }
+    public DateTime EndTime { get; set; }
+    public bool IsActive { get; set; } = true;
+    public string? BannerUrl { get; set; }
+
+    public ICollection<FlashSaleItem> Items { get; set; } = new List<FlashSaleItem>();
+}
+
+public class FlashSaleItem : BaseEntity
+{
+    public int FlashSaleId { get; set; }
+    public FlashSale? FlashSale { get; set; }
+
+    public int ProductId { get; set; }
+    public Product? Product { get; set; }
+
+    public int? VariantId { get; set; }
+    public ProductVariant? Variant { get; set; }
+
+    public decimal FlashSalePrice { get; set; }
+    public int StockLimit { get; set; }
+    public int SoldQuantity { get; set; } = 0;
 }

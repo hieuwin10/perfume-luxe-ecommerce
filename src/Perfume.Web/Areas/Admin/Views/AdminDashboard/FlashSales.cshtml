@@ -1,0 +1,274 @@
+@model List<Perfume.Application.DTOs.FlashSaleDto>
+@{
+    ViewData["Title"] = "Quản Lý Chiến Dịch Flash Sale";
+    var products = ViewBag.Products as List<Perfume.Domain.Entities.Product> ?? new List<Perfume.Domain.Entities.Product>();
+}
+
+<div style="max-width: 1400px; margin: 0 auto;">
+    <!-- Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+        <div>
+            <span style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--gold-primary); font-weight: 700;">
+                <i class="fa-solid fa-bolt" style="margin-right: 6px;"></i> Marketing & Revenue Engine
+            </span>
+            <h1 style="font-size: 2rem; margin: 4px 0 0; color: #FFF;">Quản Lý Chiến Dịch Flash Sale</h1>
+        </div>
+        <div>
+            <button type="button" class="btn-luxe" onclick="document.getElementById('createFlashSaleModal').style.display='flex';" style="padding: 10px 24px; font-size: 0.85rem;">
+                <i class="fa-solid fa-plus" style="margin-right: 6px;"></i> Tạo Chiến Dịch Flash Sale Mới
+            </button>
+        </div>
+    </div>
+
+    <!-- Notifications -->
+    @if (TempData["Success"] != null)
+    {
+        <div style="background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.4); color: #4ade80; padding: 12px 18px; border-radius: var(--radius-sm); margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>@TempData["Success"]</span>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #f87171; padding: 12px 18px; border-radius: var(--radius-sm); margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span>@TempData["Error"]</span>
+        </div>
+    }
+
+    <!-- Campaigns List -->
+    <div class="luxury-card" style="padding: 24px; margin-bottom: 30px;">
+        <h2 style="font-size: 1.25rem; margin-bottom: 20px; color: var(--gold-primary); display: flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-list-check"></i> Danh Sách Chiến Dịch Flash Sale (@Model.Count)
+        </h2>
+
+        @if (Model.Any())
+        {
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                @foreach (var fs in Model)
+                {
+                    bool isOngoing = fs.IsOngoing;
+                    bool isUpcoming = fs.IsActive && fs.StartTime > DateTime.UtcNow;
+                    bool isExpired = fs.EndTime <= DateTime.UtcNow;
+
+                    <div style="background: var(--bg-surface-elevated); border: 1px solid @(isOngoing ? "rgba(245, 158, 11, 0.5)" : "var(--border-card)"); border-radius: var(--radius-md); padding: 20px; position: relative; overflow: hidden;">
+                        @if (isOngoing)
+                        {
+                            <div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--gold-gradient);"></div>
+                        }
+
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; margin-bottom: 16px;">
+                            <div>
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+                                    <h3 style="font-size: 1.2rem; color: #FFF; margin: 0;">@fs.Name</h3>
+                                    @if (isOngoing)
+                                    {
+                                        <span style="font-size: 0.72rem; padding: 3px 10px; border-radius: 20px; background: rgba(34, 197, 94, 0.2); border: 1px solid rgba(34, 197, 94, 0.5); color: #4ade80; font-weight: 700;">
+                                            <i class="fa-solid fa-circle-play" style="margin-right: 4px;"></i> Đang Diễn Ra
+                                        </span>
+                                    }
+                                    else if (isUpcoming)
+                                    {
+                                        <span style="font-size: 0.72rem; padding: 3px 10px; border-radius: 20px; background: rgba(234, 179, 8, 0.2); border: 1px solid rgba(234, 179, 8, 0.5); color: #facc15; font-weight: 700;">
+                                            <i class="fa-solid fa-clock" style="margin-right: 4px;"></i> Sắp Diễn Ra
+                                        </span>
+                                    }
+                                    else if (isExpired)
+                                    {
+                                        <span style="font-size: 0.72rem; padding: 3px 10px; border-radius: 20px; background: rgba(100, 116, 139, 0.2); border: 1px solid rgba(100, 116, 139, 0.4); color: #94a3b8; font-weight: 600;">
+                                            <i class="fa-solid fa-flag-checkered" style="margin-right: 4px;"></i> Đã Kết Thúc
+                                        </span>
+                                    }
+
+                                    @if (!fs.IsActive)
+                                    {
+                                        <span style="font-size: 0.72rem; padding: 3px 10px; border-radius: 20px; background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.4); color: #f87171; font-weight: 600;">
+                                            Tạm Dừng
+                                        </span>
+                                    }
+                                </div>
+                                <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0 0 8px;">@(fs.Description ?? "Không có mô tả")</p>
+                                <div style="display: flex; gap: 20px; font-size: 0.8rem; color: var(--text-muted); flex-wrap: wrap;">
+                                    <span><i class="fa-regular fa-calendar-check" style="margin-right: 4px; color: var(--gold-primary);"></i> Bắt đầu: <strong>@fs.StartTime.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</strong></span>
+                                    <span><i class="fa-regular fa-calendar-xmark" style="margin-right: 4px; color: #f87171;"></i> Kết thúc: <strong>@fs.EndTime.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</strong></span>
+                                    <span><i class="fa-solid fa-box-open" style="margin-right: 4px;"></i> <strong>@fs.Items.Count</strong> sản phẩm</span>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; gap: 8px;">
+                                <form method="post" action="/admin/admindashboard/toggleflashsalestatus" style="margin: 0;">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@fs.Id" />
+                                    <button type="submit" class="btn-luxe-outline" style="padding: 6px 14px; font-size: 0.78rem;">
+                                        @(fs.IsActive ? "Tạm Dừng" : "Kích Hoạt")
+                                    </button>
+                                </form>
+                                <form method="post" action="/admin/admindashboard/deleteflashsale" onsubmit="return confirm('Bạn có chắc chắn muốn xóa chiến dịch này không?');" style="margin: 0;">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@fs.Id" />
+                                    <button type="submit" class="btn-luxe-outline" style="padding: 6px 12px; font-size: 0.78rem; border-color: rgba(239, 68, 68, 0.4); color: #f87171;">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Items Table -->
+                        @if (fs.Items.Any())
+                        {
+                            <div style="overflow-x: auto; border-top: 1px solid var(--border-subtle); padding-top: 14px;">
+                                <table style="width: 100%; border-collapse: collapse; font-size: 0.82rem;">
+                                    <thead>
+                                        <tr style="color: var(--text-muted); text-align: left; border-bottom: 1px solid var(--border-card);">
+                                            <th style="padding: 8px 10px;">Sản Phẩm</th>
+                                            <th style="padding: 8px 10px;">Thương Hiệu</th>
+                                            <th style="padding: 8px 10px;">Giá Gốc</th>
+                                            <th style="padding: 8px 10px;">Giá Flash Sale</th>
+                                            <th style="padding: 8px 10px;">Tiến Trình Bán</th>
+                                            <th style="padding: 8px 10px;">Còn Lại</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in fs.Items)
+                                        {
+                                            var pct = item.StockLimit > 0 ? (int)Math.Min(100, Math.Round((double)item.SoldQuantity / item.StockLimit * 100)) : 0;
+                                            <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.04);">
+                                                <td style="padding: 10px; display: flex; align-items: center; gap: 10px;">
+                                                    @if (!string.IsNullOrEmpty(item.ProductImageUrl))
+                                                    {
+                                                        <img src="@item.ProductImageUrl" alt="@item.ProductName" style="width: 32px; height: 32px; object-fit: cover; border-radius: 4px;" />
+                                                    }
+                                                    <span style="font-weight: 600; color: #FFF;">@item.ProductName</span>
+                                                </td>
+                                                <td style="padding: 10px; color: var(--text-secondary);">@(item.BrandName ?? "-")</td>
+                                                <td style="padding: 10px; text-decoration: line-through; color: var(--text-muted);">@item.OriginalPrice.ToString("N0")₫</td>
+                                                <td style="padding: 10px; color: #f59e0b; font-weight: 700; font-size: 0.9rem;">
+                                                    @item.FlashSalePrice.ToString("N0")₫
+                                                    <span style="font-size: 0.7rem; color: #ef4444; margin-left: 4px;">(-@item.DiscountPercent%)</span>
+                                                </td>
+                                                <td style="padding: 10px; min-width: 140px;">
+                                                    <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted); margin-bottom: 4px;">
+                                                        <span>@item.SoldQuantity/@item.StockLimit chai</span>
+                                                        <span>@pct%</span>
+                                                    </div>
+                                                    <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+                                                        <div style="width: @pct%; height: 100%; background: var(--gold-gradient); border-radius: 3px;"></div>
+                                                    </div>
+                                                </td>
+                                                <td style="padding: 10px; font-weight: 600; color: @(item.RemainingQuantity > 0 ? "#4ade80" : "#ef4444");">
+                                                    @(item.RemainingQuantity > 0 ? $"{item.RemainingQuantity} chai" : "Hết hàng")
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
+                <i class="fa-solid fa-bolt" style="font-size: 2.5rem; margin-bottom: 12px; color: var(--gold-primary); opacity: 0.5;"></i>
+                <p>Chưa có chiến dịch Flash Sale nào được tạo.</p>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Modal Tạo Chiến Dịch Flash Sale Mới -->
+<div id="createFlashSaleModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); width: 100%; max-width: 800px; max-height: 90vh; overflow-y: auto; padding: 32px; box-shadow: var(--shadow-luxury);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 1px solid var(--border-card); padding-bottom: 16px;">
+            <h2 style="font-size: 1.4rem; color: var(--gold-primary); margin: 0; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-bolt"></i> Tạo Chiến Dịch Flash Sale Mới
+            </h2>
+            <button type="button" onclick="document.getElementById('createFlashSaleModal').style.display='none';" style="background: none; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer;">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <form method="post" action="/admin/admindashboard/createflashsale">
+            @Html.AntiForgeryToken()
+
+            <div style="margin-bottom: 18px;">
+                <label style="display: block; font-size: 0.82rem; font-weight: 600; text-transform: uppercase; margin-bottom: 6px; color: var(--text-secondary);">Tên Chiến Dịch *</label>
+                <input type="text" name="name" required placeholder="Ví dụ: Giờ Vàng Haute Parfumerie - Giảm đến 40%" style="width: 100%; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); color: #FFF; padding: 10px 14px; border-radius: var(--radius-sm); font-size: 0.9rem; outline: none;" />
+            </div>
+
+            <div style="margin-bottom: 18px;">
+                <label style="display: block; font-size: 0.82rem; font-weight: 600; text-transform: uppercase; margin-bottom: 6px; color: var(--text-secondary);">Mô Tả</label>
+                <textarea name="description" rows="2" placeholder="Thông điệp ưu đãi gửi tới quý khách hàng..." style="width: 100%; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); color: #FFF; padding: 10px 14px; border-radius: var(--radius-sm); font-size: 0.85rem; outline: none;"></textarea>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px;">
+                <div>
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; text-transform: uppercase; margin-bottom: 6px; color: var(--text-secondary);">Thời Gian Bắt Đầu *</label>
+                    <input type="datetime-local" name="startTime" required value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" style="width: 100%; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); color: #FFF; padding: 10px 14px; border-radius: var(--radius-sm); font-size: 0.85rem; outline: none;" />
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.82rem; font-weight: 600; text-transform: uppercase; margin-bottom: 6px; color: var(--text-secondary);">Thời Gian Kết Thúc *</label>
+                    <input type="datetime-local" name="endTime" required value="@DateTime.Now.AddDays(2).ToString("yyyy-MM-ddTHH:mm")" style="width: 100%; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); color: #FFF; padding: 10px 14px; border-radius: var(--radius-sm); font-size: 0.85rem; outline: none;" />
+                </div>
+            </div>
+
+            <div style="margin-bottom: 24px;">
+                <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; cursor: pointer; color: #FFF;">
+                    <input type="checkbox" name="isActive" value="true" checked style="accent-color: var(--gold-primary); width: 16px; height: 16px;" />
+                    <span>Kích hoạt chiến dịch ngay sau khi tạo</span>
+                </label>
+            </div>
+
+            <!-- Product Selection Section -->
+            <div style="margin-bottom: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <label style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; color: var(--gold-primary);">
+                        Danh Sách Sản Phẩm Áp Dụng Flash Sale
+                    </label>
+                    <button type="button" onclick="addProductRow()" class="btn-luxe-outline" style="padding: 4px 12px; font-size: 0.78rem;">
+                        <i class="fa-solid fa-plus" style="margin-right: 4px;"></i> Thêm Sản Phẩm
+                    </button>
+                </div>
+
+                <div id="productRowsContainer" style="display: flex; flex-direction: column; gap: 12px;">
+                    <!-- Default Row 1 -->
+                    <div class="product-row" style="display: grid; grid-template-columns: 2fr 1fr 1fr 40px; gap: 10px; align-items: center; background: var(--bg-surface-elevated); padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-card);">
+                        <select name="productIds" required style="background: var(--bg-surface); border: 1px solid var(--border-card); color: #FFF; padding: 8px 10px; border-radius: var(--radius-sm); font-size: 0.82rem; outline: none;">
+                            <option value="">-- Chọn sản phẩm --</option>
+                            @foreach (var p in products)
+                            {
+                                <option value="@p.Id" data-price="@p.BasePrice">@p.Name (@p.BasePrice.ToString("N0")₫)</option>
+                            }
+                        </select>
+                        <input type="number" name="flashSalePrices" placeholder="Giá Flash Sale" min="1000" step="10000" style="background: var(--bg-surface); border: 1px solid var(--border-card); color: #FFF; padding: 8px 10px; border-radius: var(--radius-sm); font-size: 0.82rem; outline: none;" />
+                        <input type="number" name="stockLimits" value="20" min="1" placeholder="Số lượng" style="background: var(--bg-surface); border: 1px solid var(--border-card); color: #FFF; padding: 8px 10px; border-radius: var(--radius-sm); font-size: 0.82rem; outline: none;" />
+                        <button type="button" onclick="this.closest('.product-row').remove()" style="background: none; border: none; color: #f87171; cursor: pointer; font-size: 0.9rem;" title="Xóa dòng">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border-card); padding-top: 20px;">
+                <button type="button" onclick="document.getElementById('createFlashSaleModal').style.display='none';" class="btn-luxe-outline" style="padding: 10px 24px;">Hủy Bỏ</button>
+                <button type="submit" class="btn-luxe" style="padding: 10px 28px;">Lưu & Khởi Chạy</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function addProductRow() {
+        const container = document.getElementById('productRowsContainer');
+        const firstRow = container.querySelector('.product-row');
+        if (firstRow) {
+            const clone = firstRow.cloneNode(true);
+            clone.querySelector('select').selectedIndex = 0;
+            clone.querySelector('input[name="flashSalePrices"]').value = '';
+            clone.querySelector('input[name="stockLimits"]').value = '20';
+            container.appendChild(clone);
+        }
+    }
+</script>

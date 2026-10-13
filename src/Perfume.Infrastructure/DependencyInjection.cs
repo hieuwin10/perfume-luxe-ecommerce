@@ -40,6 +40,7 @@ public static class DependencyInjection
         services.AddScoped<ICustomerCartService, CustomerCartService>();
         services.AddScoped<IBlogService, BlogService>();
         services.AddScoped<IOrderEmailSender, SmtpOrderEmailSender>();
+        services.AddScoped<IFlashSaleService, FlashSaleService>();
         return services;
     }
 }

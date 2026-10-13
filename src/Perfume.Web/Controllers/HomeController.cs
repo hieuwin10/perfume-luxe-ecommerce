@@ -9,15 +9,18 @@ public class HomeController : Controller
 {
     private readonly IPerfumeCatalogService _catalogService;
     private readonly IBlogService _blogService;
+    private readonly IFlashSaleService _flashSaleService;
 
-    public HomeController(IPerfumeCatalogService catalogService, IBlogService blogService)
+    public HomeController(IPerfumeCatalogService catalogService, IBlogService blogService, IFlashSaleService flashSaleService)
     {
         _catalogService = catalogService;
         _blogService = blogService;
+        _flashSaleService = flashSaleService;
     }
 
     public async Task<IActionResult> Index()
     {
+        ViewBag.ActiveFlashSale = await _flashSaleService.GetActiveFlashSaleAsync();
         ViewBag.FeaturedProducts = await _catalogService.GetFeaturedProductsAsync();
         ViewBag.BestSellers = await _catalogService.GetBestSellersAsync();
         ViewBag.NewArrivals = await _catalogService.GetNewArrivalsAsync();

@@ -33,6 +33,8 @@ public class PerfumeDbContext : IdentityDbContext<AppUser, AppRole, string>
     public DbSet<ShoppingCart> ShoppingCarts => Set<ShoppingCart>();
     public DbSet<ShoppingCartItem> ShoppingCartItems => Set<ShoppingCartItem>();
     public DbSet<RefreshTokenRecord> RefreshTokenRecords => Set<RefreshTokenRecord>();
+    public DbSet<FlashSale> FlashSales => Set<FlashSale>();
+    public DbSet<FlashSaleItem> FlashSaleItems => Set<FlashSaleItem>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -152,6 +154,7 @@ public class PerfumeDbContext : IdentityDbContext<AppUser, AppRole, string>
             entity.HasIndex(o => o.OrderCode).IsUnique();
             entity.Property(o => o.SubTotal).HasPrecision(18, 2);
             entity.Property(o => o.DiscountAmount).HasPrecision(18, 2);
+            entity.Property(o => o.LoyaltyDiscountAmount).HasPrecision(18, 2);
             entity.Property(o => o.ShippingFee).HasPrecision(18, 2);
             entity.Property(o => o.TotalAmount).HasPrecision(18, 2);
             entity.HasQueryFilter(o => !o.IsDeleted);
@@ -228,6 +231,7 @@ public class PerfumeDbContext : IdentityDbContext<AppUser, AppRole, string>
         builder.Entity<ShoppingCartItem>(entity =>
         {
             entity.HasIndex(i => new { i.ShoppingCartId, i.ProductId, i.VariantId });
+            entity.Property(i => i.CustomUnitPrice).HasPrecision(18, 2);
             entity.HasOne<Product>().WithMany().HasForeignKey(i => i.ProductId).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne<ProductVariant>().WithMany().HasForeignKey(i => i.VariantId).OnDelete(DeleteBehavior.Restrict);
             entity.HasQueryFilter(i => !i.IsDeleted);
@@ -241,6 +245,39 @@ public class PerfumeDbContext : IdentityDbContext<AppUser, AppRole, string>
             entity.HasIndex(t => t.TokenHash).IsUnique();
             entity.HasIndex(t => new { t.UserId, t.ExpiresAt });
             entity.HasQueryFilter(t => !t.IsDeleted);
+        });
+
+        builder.Entity<UserLoyalty>(entity =>
+        {
+            entity.Property(u => u.UserId).HasMaxLength(450).IsRequired();
+            entity.Property(u => u.TotalSpent).HasPrecision(18, 2);
+            entity.HasIndex(u => u.UserId).IsUnique();
+            entity.HasQueryFilter(u => !u.IsDeleted);
+        });
+
+        builder.Entity<FlashSale>(entity =>
+        {
+            entity.Property(f => f.Name).HasMaxLength(200).IsRequired();
+            entity.Property(f => f.BannerUrl).HasMaxLength(500);
+            entity.HasMany(f => f.Items)
+                  .WithOne(i => i.FlashSale)
+                  .HasForeignKey(i => i.FlashSaleId)
+                  .OnDelete(DeleteBehavior.Cascade);
+            entity.HasQueryFilter(f => !f.IsDeleted);
+        });
+
+        builder.Entity<FlashSaleItem>(entity =>
+        {
+            entity.Property(i => i.FlashSalePrice).HasPrecision(18, 2);
+            entity.HasOne(i => i.Product)
+                  .WithMany()
+                  .HasForeignKey(i => i.ProductId)
+                  .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(i => i.Variant)
+                  .WithMany()
+                  .HasForeignKey(i => i.VariantId)
+                  .OnDelete(DeleteBehavior.SetNull);
+            entity.HasQueryFilter(i => !i.IsDeleted);
         });
     }
 
