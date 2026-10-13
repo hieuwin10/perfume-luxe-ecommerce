@@ -1,12 +1,71 @@
 @model Perfume.Infrastructure.Identity.AppUser
+@using System.Globalization
 @{
-    ViewData["Title"] = "Tài Khoản Của Tôi";
+    ViewData["Title"] = "Tài Khoản Của Tôi & Thẻ Thành Viên VIP";
     var roles = ViewBag.Roles as IList<string> ?? new List<string>();
+    var loyalty = ViewBag.LoyaltyStatus as LoyaltyStatusDto ?? new LoyaltyStatusDto
+    {
+        UserId = Model.Id,
+        CurrentTier = Model.Tier,
+        TierName = Model.Tier.ToString(),
+        NextTier = Model.Tier == UserTier.Diamond ? null : (UserTier?)((int)Model.Tier + 1),
+        NextTierName = Model.Tier == UserTier.Diamond ? null : ((UserTier)((int)Model.Tier + 1)).ToString(),
+        TotalSpent = 0m,
+        LoyaltyPoints = Model.LoyaltyPoints,
+        DiscountPercent = Model.Tier switch
+        {
+            UserTier.Diamond => 12m,
+            UserTier.Gold => 7m,
+            UserTier.Silver => 3m,
+            _ => 0m
+        },
+        ProgressPercent = Model.Tier == UserTier.Diamond ? 100m : 0m,
+        AmountToNextTier = Model.Tier switch
+        {
+            UserTier.Diamond => 0m,
+            UserTier.Gold => 15_000_000m,
+            UserTier.Silver => 10_000_000m,
+            _ => 5_000_000m
+        }
+    };
+
+    string tierDisplayVi = loyalty.CurrentTier switch
+    {
+        UserTier.Diamond => "KIM CƯƠNG (DIAMOND PRIVÉ)",
+        UserTier.Gold => "VÀNG HOÀNG GIA (GOLD PRESTIGE)",
+        UserTier.Silver => "BẠC TINH HOA (SILVER ÉLITE)",
+        _ => "ĐỒNG KHỞI ĐẦU (BRONZE CLASSIC)"
+    };
+
+    string cardGradient = loyalty.CurrentTier switch
+    {
+        UserTier.Diamond => "linear-gradient(135deg, #0f172a 0%, #1e293b 45%, #38bdf8 100%)",
+        UserTier.Gold => "linear-gradient(135deg, #1c1917 0%, #422006 50%, #d4af37 100%)",
+        UserTier.Silver => "linear-gradient(135deg, #18181b 0%, #3f3f46 50%, #a1a1aa 100%)",
+        _ => "linear-gradient(135deg, #1c1917 0%, #292524 55%, #78350f 100%)"
+    };
+
+    string accentBorder = loyalty.CurrentTier switch
+    {
+        UserTier.Diamond => "#38bdf8",
+        UserTier.Gold => "#d4af37",
+        UserTier.Silver => "#e4e4e7",
+        _ => "#b45309"
+    };
+
+    string progressCssWidth = Math.Clamp(loyalty.ProgressPercent, 0m, 100m).ToString("0.##", CultureInfo.InvariantCulture);
 }
 
-<div style="max-width: 900px; margin: 40px auto; padding: 0 20px;">
-    @if (TempData["Success"] != null) { <div class="luxury-card" style="padding:12px;margin-bottom:16px">@TempData["Success"]</div> }
-    <div class="luxury-card" style="padding: 32px; margin-bottom: 24px;">
+<div style="max-width: 1020px; margin: 40px auto; padding: 0 20px;">
+    @if (TempData["Success"] != null)
+    {
+        <div class="luxury-card" style="padding: 14px 20px; margin-bottom: 20px; border-left: 4px solid var(--gold-primary); color: var(--gold-primary);">
+            <i class="fa-solid fa-circle-check" style="margin-right: 8px;"></i>@TempData["Success"]
+        </div>
+    }
+
+    <!-- Profile Header Card -->
+    <div class="luxury-card" style="padding: 32px; margin-bottom: 28px;">
         <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px;">
             <div style="display: flex; align-items: center; gap: 18px;">
                 <div style="width: 72px; height: 72px; border-radius: 50%; background: var(--gold-gradient); display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 800; color: #000; box-shadow: 0 4px 15px rgba(212,175,55,0.3);">
@@ -14,17 +73,22 @@
                 </div>
                 <div>
                     <h2 style="margin: 0 0 6px; font-size: 1.5rem; color: var(--text-primary);">@Model.FullName</h2>
-                    <p style="margin: 0 0 6px; color: var(--text-muted); font-size: 0.9rem;"><i class="fa-solid fa-envelope" style="margin-right: 6px;"></i>@Model.Email</p>
-                    <div style="display: flex; gap: 8px; align-items: center;">
+                    <p style="margin: 0 0 6px; color: var(--text-muted); font-size: 0.9rem;">
+                        <i class="fa-solid fa-envelope" style="margin-right: 6px;"></i>@Model.Email
+                    </p>
+                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
                         @foreach (var r in roles)
                         {
                             <span class="@(r == "Admin" ? "role-badge-admin" : r == "StoreManager" ? "role-badge-manager" : "role-badge-customer")">@r</span>
                         }
+                        <span style="font-size: 0.75rem; padding: 3px 10px; border-radius: 99px; background: rgba(212,175,55,0.16); border: 1px solid var(--gold-primary); color: var(--gold-primary); font-weight: 700;">
+                            <i class="fa-solid fa-crown" style="margin-right: 4px;"></i>VIP @loyalty.CurrentTier (-@loyalty.DiscountPercent.ToString("0")%)
+                        </span>
                     </div>
                 </div>
             </div>
 
-            <div style="display: flex; gap: 10px;">
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                 <a href="/account/editprofile" class="btn-luxe-outline" style="font-size: 0.85rem; padding: 10px 18px;">Sửa hồ sơ</a>
                 @if (roles.Contains("Admin"))
                 {
@@ -48,12 +112,210 @@
         </div>
     </div>
 
+    <!-- Digital Metallic VIP Membership Card & Spending Progress Section -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 24px; margin-bottom: 28px; align-items: stretch;">
+        <!-- Metallic Card -->
+        <div id="vipDigitalCard" style="background: @cardGradient; border: 1px solid @accentBorder; border-radius: 18px; padding: 28px; position: relative; overflow: hidden; box-shadow: 0 18px 40px rgba(0,0,0,0.55); display: flex; flex-direction: column; justify-content: space-between; min-height: 245px;">
+            <div style="position: absolute; top: -40px; right: -40px; width: 160px; height: 160px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,0.14) 0%, transparent 70%); pointer-events: none;"></div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
+                <div>
+                    <div style="font-size: 0.72rem; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.75); font-weight: 600;">
+                        PERFUME LUXE • HAUTE PARFUMERIE PRIVÉ
+                    </div>
+                    <div style="font-size: 1.35rem; font-weight: 800; color: #fff; margin-top: 6px; letter-spacing: 0.8px;">
+                        <i class="fa-solid fa-crown" style="color: var(--gold-primary); margin-right: 8px;"></i>@tierDisplayVi
+                    </div>
+                </div>
+                <div style="background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.25); padding: 6px 14px; border-radius: 99px; font-size: 0.82rem; font-weight: 800; color: var(--gold-primary);">
+                    Ưu đãi VIP -@loyalty.DiscountPercent.ToString("0")%
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 22px 0;">
+                <div style="background: rgba(0,0,0,0.32); padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);">
+                    <div style="font-size: 0.73rem; color: rgba(255,255,255,0.7); text-transform: uppercase;">Chi tiêu tích lũy</div>
+                    <div id="vipCardTotalSpent" style="font-size: 1.18rem; font-weight: 800; color: #fff; margin-top: 4px;">@loyalty.TotalSpent.ToString("N0")₫</div>
+                </div>
+                <div style="background: rgba(0,0,0,0.32); padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);">
+                    <div style="font-size: 0.73rem; color: rgba(255,255,255,0.7); text-transform: uppercase;">Điểm thưởng Luxury</div>
+                    <div id="vipCardPoints" style="font-size: 1.18rem; font-weight: 800; color: var(--gold-primary); margin-top: 4px;">@loyalty.LoyaltyPoints.ToString("N0") pts</div>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; font-size: 0.82rem; color: rgba(255,255,255,0.85);">
+                <div>
+                    <div style="font-size: 0.68rem; text-transform: uppercase; letter-spacing: 1.5px; opacity: 0.7;">Chủ thẻ thành viên</div>
+                    <div style="font-weight: 700; letter-spacing: 1px; text-transform: uppercase;">@Model.FullName</div>
+                </div>
+                <div style="text-align: right;">
+                    <span style="font-family: monospace; font-size: 0.8rem; opacity: 0.85;">TIER: @loyalty.CurrentTier.ToString().ToUpperInvariant()</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Animated Gold Spending Progress Bar & Live API Checker -->
+        <div class="luxury-card" style="padding: 28px; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <h3 style="margin: 0; font-size: 1.15rem; color: var(--gold-primary);">
+                        <i class="fa-solid fa-chart-simple" style="margin-right: 8px;"></i>Tiến Trình Thăng Hạng Thành Viên VIP
+                    </h3>
+                    <span id="vipProgressBadge" style="font-weight: 800; font-size: 0.9rem; color: var(--gold-primary);">@loyalty.ProgressPercent.ToString("0.##")%</span>
+                </div>
+
+                @if (loyalty.CurrentTier == UserTier.Diamond || loyalty.NextTier == null)
+                {
+                    <p style="font-size: 0.9rem; color: #52B788; margin: 0 0 14px; font-weight: 600;">
+                        <i class="fa-solid fa-gem" style="margin-right: 6px;"></i>Chúc mừng! Quý khách đã đạt đỉnh cao <strong>Hạng Diamond (Chiết khấu tự động -12% mọi đơn hàng)</strong>.
+                    </p>
+                }
+                else
+                {
+                    <p style="font-size: 0.88rem; color: var(--text-secondary); margin: 0 0 14px;">
+                        Chi tiêu thêm <strong style="color: var(--gold-primary);">@loyalty.AmountToNextTier.ToString("N0")₫</strong> (Đơn hoàn tất) để thăng hạng <strong style="color: #fff;">@loyalty.NextTierName</strong>.
+                    </p>
+                }
+
+                <!-- Animated Progress Track -->
+                <div style="width: 100%; height: 14px; background: rgba(255,255,255,0.08); border-radius: 99px; overflow: hidden; border: 1px solid rgba(212,175,55,0.35); margin-bottom: 12px;">
+                    <div id="vipSpendingProgressBar"
+                         role="progressbar"
+                         aria-valuenow="@loyalty.ProgressPercent"
+                         aria-valuemin="0"
+                         aria-valuemax="100"
+                         style="width: @(progressCssWidth)%; height: 100%; background: linear-gradient(90deg, #b45309 0%, #d4af37 55%, #fef08a 100%); border-radius: 99px; transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1); box-shadow: 0 0 12px rgba(212,175,55,0.6);">
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; font-size: 0.74rem; color: var(--text-muted); margin-bottom: 18px;">
+                    <span>Bronze (0₫)</span>
+                    <span>Silver (5M₫)</span>
+                    <span>Gold (15M₫)</span>
+                    <span>Diamond (30M₫)</span>
+                </div>
+            </div>
+
+            <!-- Live API Verification Control -->
+            <div style="border-top: 1px dashed var(--border-card); padding-top: 16px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
+                    <button type="button" id="btnVerifyLoyaltyApi" onclick="verifyLoyaltyStatusApi()" class="btn-luxe-outline" style="font-size: 0.8rem; padding: 8px 14px;">
+                        <i class="fa-solid fa-satellite-dish" style="margin-right: 6px;"></i>Kiểm Tra Trực Tuyến API Hạng VIP (<code>GET /api/v1/loyalty/status</code>)
+                    </button>
+                    <a href="/checkout" style="font-size: 0.8rem; color: var(--gold-primary); text-decoration: underline;">
+                        Áp dụng ưu đãi -@loyalty.DiscountPercent.ToString("0")% tại Thanh Toán &rarr;
+                    </a>
+                </div>
+                <div id="loyaltyApiLiveResult" style="display: none; margin-top: 12px; padding: 12px; border-radius: 8px; background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(212,175,55,0.4); font-family: monospace; font-size: 0.78rem; color: #e2e8f0; white-space: pre-wrap; word-break: break-word;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4-Tier VIP Privileges Matrix Table -->
+    <div class="luxury-card" style="padding: 28px; margin-bottom: 28px;">
+        <h3 style="margin: 0 0 6px; font-size: 1.2rem; color: var(--gold-primary);">
+            <i class="fa-solid fa-award" style="margin-right: 8px;"></i>Bảng Đặc Quyền 4 Hạng Thành Viên VIP (Loyalty Privileges Matrix)
+        </h3>
+        <p style="margin: 0 0 18px; font-size: 0.86rem; color: var(--text-muted);">
+            Hệ thống tự động đồng bộ tổng chi tiêu từ các đơn hàng hoàn tất và kích hoạt chiết khấu trực tiếp tại bước Thanh Toán (Checkout).
+        </p>
+
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem; text-align: left;">
+                <thead>
+                    <tr style="border-bottom: 1px solid var(--border-card); color: var(--gold-primary); text-transform: uppercase; font-size: 0.76rem; letter-spacing: 1px;">
+                        <th style="padding: 12px 10px;">Hạng Thành Viên</th>
+                        <th style="padding: 12px 10px;">Mốc Chi Tiêu Tích Lũy</th>
+                        <th style="padding: 12px 10px;">Chiết Khấu Tự Động</th>
+                        <th style="padding: 12px 10px;">Quyền Lợi Đặc Quyền Haute Parfumerie</th>
+                        <th style="padding: 12px 10px;">Trạng Thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom: 1px solid var(--border-card); @(loyalty.CurrentTier == UserTier.Bronze ? "background: rgba(212,175,55,0.08);" : "")">
+                        <td style="padding: 12px 10px; font-weight: 700;">Bronze (Đồng)</td>
+                        <td style="padding: 12px 10px;">0₫</td>
+                        <td style="padding: 12px 10px; font-weight: 700;">0%</td>
+                        <td style="padding: 12px 10px; color: var(--text-secondary);">Tích điểm 1 pt / 10.000₫, tư vấn AI Scent Matchmaker</td>
+                        <td style="padding: 12px 10px;">
+                            @if (loyalty.CurrentTier == UserTier.Bronze)
+                            {
+                                <span style="color: var(--gold-primary); font-weight: 700;"><i class="fa-solid fa-circle-check"></i> Hạng hiện tại</span>
+                            }
+                            else
+                            {
+                                <span style="color: #52B788;"><i class="fa-solid fa-check"></i> Đã đạt</span>
+                            }
+                        </td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--border-card); @(loyalty.CurrentTier == UserTier.Silver ? "background: rgba(212,175,55,0.08);" : "")">
+                        <td style="padding: 12px 10px; font-weight: 700; color: #e4e4e7;">Silver (Bạc)</td>
+                        <td style="padding: 12px 10px;">5.000.000₫</td>
+                        <td style="padding: 12px 10px; font-weight: 700; color: #52B788;">-3%</td>
+                        <td style="padding: 12px 10px; color: var(--text-secondary);">Giảm tự động 3% mọi đơn hàng + Ưu tiên thông báo Flash Sale</td>
+                        <td style="padding: 12px 10px;">
+                            @if (loyalty.CurrentTier == UserTier.Silver)
+                            {
+                                <span style="color: var(--gold-primary); font-weight: 700;"><i class="fa-solid fa-circle-check"></i> Hạng hiện tại</span>
+                            }
+                            else if (loyalty.CurrentTier > UserTier.Silver)
+                            {
+                                <span style="color: #52B788;"><i class="fa-solid fa-check"></i> Đã đạt</span>
+                            }
+                            else
+                            {
+                                <span style="color: var(--text-muted);">Mốc 5M₫</span>
+                            }
+                        </td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--border-card); @(loyalty.CurrentTier == UserTier.Gold ? "background: rgba(212,175,55,0.08);" : "")">
+                        <td style="padding: 12px 10px; font-weight: 700; color: var(--gold-primary);">Gold (Vàng)</td>
+                        <td style="padding: 12px 10px;">15.000.000₫</td>
+                        <td style="padding: 12px 10px; font-weight: 700; color: var(--gold-primary);">-7%</td>
+                        <td style="padding: 12px 10px; color: var(--text-secondary);">Giảm tự động 7% mọi đơn hàng + Quà tặng ống mẫu Niche định kỳ</td>
+                        <td style="padding: 12px 10px;">
+                            @if (loyalty.CurrentTier == UserTier.Gold)
+                            {
+                                <span style="color: var(--gold-primary); font-weight: 700;"><i class="fa-solid fa-circle-check"></i> Hạng hiện tại</span>
+                            }
+                            else if (loyalty.CurrentTier > UserTier.Gold)
+                            {
+                                <span style="color: #52B788;"><i class="fa-solid fa-check"></i> Đã đạt</span>
+                            }
+                            else
+                            {
+                                <span style="color: var(--text-muted);">Mốc 15M₫</span>
+                            }
+                        </td>
+                    </tr>
+                    <tr style="@(loyalty.CurrentTier == UserTier.Diamond ? "background: rgba(56,189,248,0.1);" : "")">
+                        <td style="padding: 12px 10px; font-weight: 800; color: #38bdf8;">Diamond (Kim Cương)</td>
+                        <td style="padding: 12px 10px;">30.000.000₫</td>
+                        <td style="padding: 12px 10px; font-weight: 800; color: #38bdf8;">-12%</td>
+                        <td style="padding: 12px 10px; color: var(--text-secondary);">Giảm tự động 12% trọn đời + Đặc quyền Haute Parfumerie Privé</td>
+                        <td style="padding: 12px 10px;">
+                            @if (loyalty.CurrentTier == UserTier.Diamond)
+                            {
+                                <span style="color: #38bdf8; font-weight: 800;"><i class="fa-solid fa-crown"></i> Đỉnh cao VIP</span>
+                            }
+                            else
+                            {
+                                <span style="color: var(--text-muted);">Mốc 30M₫</span>
+                            }
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Summary Cards Row -->
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px;">
         <div class="luxury-card" style="padding: 24px;">
             <div style="color: var(--gold-primary); font-size: 1.3rem; margin-bottom: 10px;"><i class="fa-solid fa-gem"></i></div>
             <h4 style="margin: 0 0 6px; font-size: 1.1rem; color: var(--text-primary);">Hạng Thành Viên</h4>
-            <div style="font-size: 1.4rem; font-weight: 700; color: var(--gold-primary); margin-bottom: 6px;">@Model.Tier</div>
-            <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">Điểm thưởng tích lũy: <strong style="color: var(--text-primary);">@Model.LoyaltyPoints</strong> pts</p>
+            <div style="font-size: 1.4rem; font-weight: 700; color: var(--gold-primary); margin-bottom: 6px;">@loyalty.CurrentTier (-@loyalty.DiscountPercent.ToString("0")%)</div>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">Điểm thưởng tích lũy: <strong style="color: var(--text-primary);">@loyalty.LoyaltyPoints.ToString("N0")</strong> pts</p>
         </div>
 
         <div class="luxury-card" style="padding: 24px;">
@@ -66,8 +328,44 @@
         <div class="luxury-card" style="padding: 24px;">
             <div style="color: var(--gold-primary); font-size: 1.3rem; margin-bottom: 10px;"><i class="fa-solid fa-bag-shopping"></i></div>
             <h4 style="margin: 0 0 6px; font-size: 1.1rem; color: var(--text-primary);">Lịch Sử Mua Hàng</h4>
-            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 14px;">Theo dõi và kiểm tra trạng thái đơn hàng</p>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 14px;">Theo dõi và kiểm tra trạng thái đơn hàng (@loyalty.QualifyingOrderCount đơn hoàn tất)</p>
             <a href="/account/myorders" class="btn-luxe-outline" style="font-size: 0.8rem; padding: 6px 14px;">Xem đơn hàng</a>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        async function verifyLoyaltyStatusApi() {
+            const btn = document.getElementById('btnVerifyLoyaltyApi');
+            const out = document.getElementById('loyaltyApiLiveResult');
+            if (!out) return;
+
+            out.style.display = 'block';
+            out.style.borderColor = 'rgba(212,175,55,0.4)';
+            out.textContent = 'Đang kết nối GET /api/v1/loyalty/status ...';
+            if (btn) btn.disabled = true;
+
+            try {
+                const resp = await fetch('/api/v1/loyalty/status', {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' },
+                    credentials: 'same-origin'
+                });
+                const payload = await resp.json();
+                if (!resp.ok) {
+                    out.style.borderColor = '#f87171';
+                    out.textContent = `HTTP ${resp.status}: ` + JSON.stringify(payload, null, 2);
+                    return;
+                }
+                out.style.borderColor = '#52B788';
+                out.textContent = `✓ Đồng bộ trực tuyến thành công (HTTP ${resp.status}):\n` + JSON.stringify(payload, null, 2);
+            } catch (err) {
+                out.style.borderColor = '#f87171';
+                out.textContent = 'Lỗi kết nối API: ' + (err?.message || err);
+            } finally {
+                if (btn) btn.disabled = false;
+            }
+        }
+    </script>
+}

@@ -2,9 +2,11 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 using Perfume.Application.DTOs;
 using Perfume.Application.Interfaces;
 using Perfume.Domain.Enums;
+using Perfume.Infrastructure.Data;
 using Perfume.Infrastructure.Identity;
 using Perfume.Infrastructure.Services;
 
@@ -29,6 +31,45 @@ public class CheckoutController : Controller
         _guestOrderProtector = protectionProvider.CreateProtector("PerfumeLuxe.GuestOrderTracking.v1");
     }
 
+    private async Task<LoyaltyStatusDto?> ResolveUserLoyaltyStatusAsync(AppUser? user, CancellationToken cancellationToken)
+    {
+        var userId = user?.Id ?? CurrentUserId();
+        if (string.IsNullOrWhiteSpace(userId)) return null;
+
+        var loyaltyService = HttpContext?.RequestServices?.GetService<ILoyaltyTierService>();
+        if (loyaltyService == null)
+        {
+            var db = HttpContext?.RequestServices?.GetService<PerfumeDbContext>();
+            if (db != null)
+            {
+                loyaltyService = new LoyaltyTierService(db);
+            }
+        }
+
+        if (loyaltyService != null)
+        {
+            return await loyaltyService.GetOrSyncUserLoyaltyAsync(userId, cancellationToken);
+        }
+
+        if (user == null) return null;
+        var tier = user.Tier;
+        var discountPercent = tier switch
+        {
+            UserTier.Diamond => 12m,
+            UserTier.Gold => 7m,
+            UserTier.Silver => 3m,
+            _ => 0m
+        };
+        return new LoyaltyStatusDto
+        {
+            UserId = user.Id,
+            CurrentTier = tier,
+            TierName = tier.ToString(),
+            LoyaltyPoints = user.LoyaltyPoints,
+            DiscountPercent = discountPercent
+        };
+    }
+
     [HttpGet]
     public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
@@ -37,6 +78,7 @@ public class CheckoutController : Controller
         ViewBag.Cart = state.Items;
         ViewBag.SubTotal = state.SubTotal;
         var user = await _users.GetUserAsync(User);
+        ViewBag.LoyaltyStatus = await ResolveUserLoyaltyStatusAsync(user, cancellationToken);
         return View(new CheckoutRequestDto
         {
             PaymentMethod = PaymentMethod.COD,
@@ -61,6 +103,8 @@ public class CheckoutController : Controller
         }
         if (!ModelState.IsValid)
         {
+            var currentUser = await _users.GetUserAsync(User);
+            ViewBag.LoyaltyStatus = await ResolveUserLoyaltyStatusAsync(currentUser, cancellationToken);
             ViewBag.Cart = cart.Items;
             ViewBag.SubTotal = cart.SubTotal;
             ViewBag.Error = "Vui lòng kiểm tra lại thông tin giao hàng.";
@@ -70,6 +114,8 @@ public class CheckoutController : Controller
         var (success, error, order) = await _orderService.PlaceOrderAsync(model, userId);
         if (!success || order == null)
         {
+            var currentUser = await _users.GetUserAsync(User);
+            ViewBag.LoyaltyStatus = await ResolveUserLoyaltyStatusAsync(currentUser, cancellationToken);
             ViewBag.Cart = cart.Items;
             ViewBag.SubTotal = cart.SubTotal;
             ViewBag.Error = error ?? "Không thể đặt hàng, vui lòng thử lại.";

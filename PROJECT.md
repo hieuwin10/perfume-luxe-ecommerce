@@ -38,11 +38,11 @@ Clean Architecture with .NET 8.0:
 ## Milestones
 | # | Name | Scope | Dependencies | Status |
 |---|------|-------|-------------|--------|
-| M1 | Flash Sale Engine & Additive Schema | Feature 1, 2, 3, 4, 17: Entities, Upgrader v2, Admin UI, Storefront countdown banner & badges | none | IN_PROGRESS (ce82102d) |
-| M2 | Loyalty Tier Engine & VIP Privileges | Feature 5, 6, 7: Spending accumulation, auto tier promotion, digital card & progress bar, checkout VIP discount | M1 | PLANNED |
-| M3 | Custom Discovery Gift Box Builder | Feature 8, 9, 10: 3-step builder, Cart/Order persistence, Cart & Admin display | M1 | PLANNED |
-| M4 | RESTful API Suite & Swagger UI Portal | Feature 11, 12, 13, 14, 15, 16: OpenAPI configuration, Swagger UI at `/swagger`, 5 endpoints under `api/v1/...` | M1, M2, M3 | PLANNED |
-| M5 | Automated Testing & Live Verification | Feature 18, 19: xUnit suite (`tests/Perfume.Tests`), Live Kestrel test runner, build 0 warnings/errors, 100% test pass | M4 | PLANNED |
+| M1 | Flash Sale Engine & Additive Schema | Feature 1, 2, 3, 4, 17: Entities, Upgrader v2, Admin UI, Storefront countdown banner & badges | none | COMPLETED (Verified 362/362 xUnit Tests & Live Kestrel 200 OK) |
+| M2 | Loyalty Tier Engine & VIP Privileges | Feature 5, 6, 7: Spending accumulation, auto tier promotion, digital card & progress bar, checkout VIP discount | M1 | COMPLETED (Verified 362/362 xUnit Tests & Live Kestrel 200 OK) |
+| M3 | Custom Discovery Gift Box Builder | Feature 8, 9, 10: 3-step builder, Cart/Order persistence, Cart & Admin display | M1 | COMPLETED (Verified 362/362 xUnit Tests & Live Kestrel 200 OK) |
+| M4 | RESTful API Suite & Swagger UI Portal | Feature 11, 12, 13, 14, 15, 16: OpenAPI configuration, Swagger UI at `/swagger`, 5 endpoints under `api/v1/...` | M1, M2, M3 | COMPLETED (Verified 362/362 xUnit Tests & Live Kestrel 200 OK) |
+| M5 | Automated Testing & Live Verification | Feature 18, 19: xUnit suite (`tests/Perfume.Tests`), Live Kestrel test runner, build 0 warnings/errors, 100% test pass | M4 | COMPLETED (Verified 362/362 xUnit Tests & Live Kestrel 200 OK) |
 
 ## Interface Contracts
 

@@ -1,140 +1,412 @@
 @model List<Perfume.Web.Controllers.DiscoveryPerfumeItemDto>
+@using System.Text.Encodings.Web
 @{
-    ViewData["Title"] = "Hộp Khám Phá Discovery Box 3 Mùi - PERFUME LUXE";
+    ViewData["Title"] = "Thiết Kế Hộp Quà Discovery Box 3 Bước - PERFUME LUXE";
+
+    decimal CalcVialPrice(decimal basePrice, int volumeMl)
+    {
+        var safeBase = Math.Max(0m, basePrice);
+        if (volumeMl == 2)
+        {
+            var prop = Math.Round((safeBase * 0.03m) / 1000m, 0, MidpointRounding.AwayFromZero) * 1000m;
+            return Math.Max(150_000m, prop);
+        }
+        else
+        {
+            var prop = Math.Round((safeBase * 0.06m) / 1000m, 0, MidpointRounding.AwayFromZero) * 1000m;
+            return Math.Max(280_000m, prop);
+        }
+    }
+}
+
+@section Styles {
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,600&family=Dancing+Script:wght@600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+    <style>
+        .discovery-step-card {
+            padding: 24px;
+            border: 1px solid var(--border-card);
+            background: var(--bg-surface);
+            border-radius: 16px;
+            margin-bottom: 28px;
+        }
+        .box-style-option {
+            cursor: pointer;
+            padding: 18px;
+            border-radius: 12px;
+            border: 1px solid var(--border-card);
+            background: var(--bg-surface-elevated);
+            transition: all 0.25s ease;
+            position: relative;
+        }
+        .box-style-option:hover {
+            border-color: rgba(212, 175, 55, 0.5);
+            transform: translateY(-2px);
+        }
+        .box-style-option.active {
+            border: 2px solid var(--gold-primary);
+            background: linear-gradient(145deg, rgba(212, 175, 55, 0.12), rgba(20, 20, 26, 0.9));
+            box-shadow: 0 8px 24px rgba(212, 175, 55, 0.15);
+        }
+        .vial-size-pill {
+            padding: 4px 10px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border-radius: 6px;
+            border: 1px solid var(--border-card);
+            background: rgba(255,255,255,0.03);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .vial-size-pill.active {
+            background: var(--gold-primary);
+            color: #000;
+            border-color: var(--gold-primary);
+        }
+        .font-choice-btn {
+            padding: 8px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border-card);
+            background: var(--bg-surface-elevated);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+        .font-choice-btn.active {
+            border-color: var(--gold-primary);
+            background: rgba(212, 175, 55, 0.14);
+            color: var(--gold-primary);
+            font-weight: 600;
+        }
+        .gold-foil-card {
+            background: radial-gradient(circle at top right, rgba(212, 175, 55, 0.18), #0c0c10 70%);
+            border: 1px solid var(--gold-primary);
+            border-radius: 12px;
+            padding: 24px;
+            position: relative;
+            box-shadow: inset 0 0 24px rgba(212, 175, 55, 0.08), 0 10px 30px rgba(0,0,0,0.45);
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .gold-foil-text {
+            background: linear-gradient(135deg, #FFF3B0 0%, #D4AF37 50%, #AA7C11 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 10px rgba(212, 175, 55, 0.15);
+        }
+        @@media (max-width: 960px) {
+            #discoveryBuilderGrid {
+                grid-template-columns: 1fr !important;
+            }
+        }
+    </style>
 }
 
 <main style="max-width: 1360px; margin: 40px auto 80px; padding: 0 20px;">
     <!-- HEADER -->
     <div style="text-align: center; margin-bottom: 40px;">
         <span style="font-size: 0.8rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold-primary); font-weight: 700; display: inline-block; margin-bottom: 8px;">
-            <i class="fa-solid fa-gift" style="margin-right: 6px;"></i> Haute Parfumerie Experience
+            <i class="fa-solid fa-wand-magic-sparkles" style="margin-right: 6px;"></i> Haute Parfumerie Bespoke Atelier
         </span>
         <h1 style="font-size: clamp(2rem, 4.5vw, 2.8rem); font-family: var(--font-heading); font-weight: 700; margin: 0 0 12px; color: var(--text-primary);">
-            Discovery Box: Bản Giao Hưởng 3 Tuyệt Phẩm
+            Custom Discovery Gift Box — Thiết Kế 3 Bước
         </h1>
-        <p style="color: var(--text-secondary); max-width: 680px; margin: 0 auto; font-size: 1rem; line-height: 1.6;">
-            Tự tay tuyển chọn 3 ống chiết thủy tinh 10ml cao cấp từ các nhà hương lừng danh thế giới. Được đóng gói trong hộp quà lót nhung đen thắt nơ vàng kim hoàng gia.
+        <p style="color: var(--text-secondary); max-width: 760px; margin: 0 auto; font-size: 1rem; line-height: 1.6;">
+            Chế tác hộp quà khám phá độc bản: Tự chọn vỏ hộp thủ công hoàng gia, phối từ <strong>3 đến 5 ống chiết (2ml hoặc 5ml)</strong> cùng thiệp ép kim vàng 24K cá nhân hóa.
         </p>
+        <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-top: 16px;">
+            <span style="background: rgba(212,175,55,0.12); border: 1px solid rgba(212,175,55,0.35); color: var(--gold-primary); padding: 6px 14px; border-radius: 99px; font-size: 0.82rem; font-weight: 600;">
+                <i class="fa-solid fa-boxes-packing" style="margin-right: 5px;"></i> Bước 1: Chọn Vỏ Hộp Hoàng Gia
+            </span>
+            <span style="background: rgba(42,157,143,0.15); border: 1px solid rgba(42,157,143,0.4); color: #52B788; padding: 6px 14px; border-radius: 99px; font-size: 0.82rem; font-weight: 700;">
+                <i class="fa-solid fa-tags" style="margin-right: 5px;"></i> 4 ống: Giảm 5% &bull; 5 ống: Giảm 10%
+            </span>
+            <span style="background: rgba(232,121,249,0.12); border: 1px solid rgba(232,121,249,0.35); color: #e879f9; padding: 6px 14px; border-radius: 99px; font-size: 0.82rem; font-weight: 600;">
+                <i class="fa-solid fa-feather-pointed" style="margin-right: 5px;"></i> Bước 3: Thiệp Ép Kim 24K
+            </span>
+        </div>
     </div>
 
-    <div style="display: grid; grid-template-columns: minmax(0, 1.8fr) minmax(320px, 1fr); gap: 32px; align-items: start;">
-        <!-- LEFT: PERFUME SELECTION CATALOG -->
+    <div id="discoveryBuilderGrid" style="display: grid; grid-template-columns: minmax(0, 1.85fr) minmax(360px, 1fr); gap: 32px; align-items: start;">
+        <!-- LEFT COLUMN: 3-STEP INTERACTIVE BUILDER -->
         <div>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
-                <h3 style="font-size: 1.2rem; font-weight: 700; margin: 0; color: var(--text-primary);">
-                    <i class="fa-solid fa-bottle-droplet text-gold-gradient" style="margin-right: 8px;"></i> Bước 1: Chọn 3 Mùi Hương Bạn Muốn Trải Nghiệm
-                </h3>
-                <span style="font-size: 0.85rem; color: var(--text-muted);">Đã chọn: <strong id="selectedCountBadge" style="color: var(--gold-primary);">0/3</strong></span>
-            </div>
+            <!-- BƯỚC 1: CHỌN VỎ HỘP HOÀNG GIA (BoxStyle) -->
+            <section class="discovery-step-card" id="step-1-box-style">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
+                    <h2 style="font-size: 1.25rem; font-weight: 700; margin: 0; color: var(--text-primary);">
+                        <span style="display: inline-flex; width: 28px; height: 28px; border-radius: 50%; background: var(--gold-primary); color: #000; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 800; margin-right: 8px;">1</span>
+                        Bước 1: Chọn Vỏ Hộp Hoàng Gia (<code style="color: var(--gold-primary);">BoxStyle</code>)
+                    </h2>
+                    <span style="font-size: 0.82rem; color: var(--gold-primary); font-weight: 600;" id="selectedBoxStyleLabel">
+                        Đang chọn: Hộp Gỗ Sơn Mài Hoàng Gia (250.000 ₫)
+                    </span>
+                </div>
 
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 18px;">
-                @foreach (var item in Model)
-                {
-                    <div class="luxury-card discovery-item-card" id="perfume-card-@item.Id" style="padding: 16px; border: 1px solid var(--border-card); background: var(--bg-surface); border-radius: 12px; transition: all 0.2s; display: flex; flex-direction: column; justify-content: space-between;">
-                        <div>
-                            <div style="position: relative; height: 180px; border-radius: 8px; overflow: hidden; margin-bottom: 12px; background: #111;">
-                                <img src="@(string.IsNullOrEmpty(item.MainImageUrl) ? "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=400&q=80" : item.MainImageUrl)" 
-                                     alt="@item.Name" style="width: 100%; height: 100%; object-fit: cover;" />
-                                <span style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); color: var(--gold-primary); font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 99px;">
-                                    10ml Mini
-                                </span>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
+                    <!-- ClassicWood -->
+                    <div class="box-style-option active" id="box-option-ClassicWood" data-style="ClassicWood" data-name="Hộp Gỗ Sơn Mài Hoàng Gia" data-price="250000" onclick="selectBoxStyle('ClassicWood', 'Hộp Gỗ Sơn Mài Hoàng Gia', 250000)">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <span style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold-primary); font-weight: 700;">
+                                <i class="fa-solid fa-crown"></i> ClassicWood
+                            </span>
+                            <span style="background: rgba(212,175,55,0.18); color: var(--gold-primary); padding: 2px 8px; border-radius: 99px; font-size: 0.78rem; font-weight: 700;">
+                                250.000 ₫
+                            </span>
+                        </div>
+                        <h3 style="font-size: 1rem; font-weight: 700; color: var(--text-primary); margin: 0 0 6px;">Hộp Gỗ Sơn Mài Hoàng Gia</h3>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0; line-height: 1.45;">
+                            Chế tác từ gỗ óc chó phủ sơn mài bóng, lót lụa tơ tằm vàng kim sang trọng.
+                        </p>
+                    </div>
+
+                    <!-- RoyalVelvet -->
+                    <div class="box-style-option" id="box-option-RoyalVelvet" data-style="RoyalVelvet" data-name="Hộp Nhung Đen Huyền Bí" data-price="200000" onclick="selectBoxStyle('RoyalVelvet', 'Hộp Nhung Đen Huyền Bí', 200000)">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <span style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold-primary); font-weight: 700;">
+                                <i class="fa-solid fa-gem"></i> RoyalVelvet
+                            </span>
+                            <span style="background: rgba(212,175,55,0.18); color: var(--gold-primary); padding: 2px 8px; border-radius: 99px; font-size: 0.78rem; font-weight: 700;">
+                                200.000 ₫
+                            </span>
+                        </div>
+                        <h3 style="font-size: 1rem; font-weight: 700; color: var(--text-primary); margin: 0 0 6px;">Hộp Nhung Đen Huyền Bí</h3>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0; line-height: 1.45;">
+                            Hộp nhung đen tuyền thắt nơ ruy-băng lụa mạ vàng 24K đẳng cấp.
+                        </p>
+                    </div>
+
+                    <!-- ArtisanLeather -->
+                    <div class="box-style-option" id="box-option-ArtisanLeather" data-style="ArtisanLeather" data-name="Túi Da Thủ Công Viền Vàng" data-price="180000" onclick="selectBoxStyle('ArtisanLeather', 'Túi Da Thủ Công Viền Vàng', 180000)">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <span style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold-primary); font-weight: 700;">
+                                <i class="fa-solid fa-briefcase"></i> ArtisanLeather
+                            </span>
+                            <span style="background: rgba(212,175,55,0.18); color: var(--gold-primary); padding: 2px 8px; border-radius: 99px; font-size: 0.78rem; font-weight: 700;">
+                                180.000 ₫
+                            </span>
+                        </div>
+                        <h3 style="font-size: 1rem; font-weight: 700; color: var(--text-primary); margin: 0 0 6px;">Túi Da Thủ Công Viền Vàng</h3>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0; line-height: 1.45;">
+                            Bao da thủ công khâu tay tinh xảo, tiện lợi mang theo du lịch & công tác.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- BƯỚC 2: TUYỂN CHỌN 3 – 5 ỐNG CHIẾT (Vials) & DUNG TÍCH (2ml hoặc 5ml) -->
+            <section class="discovery-step-card" id="step-2-vials">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+                    <div>
+                        <h2 style="font-size: 1.25rem; font-weight: 700; margin: 0 0 4px; color: var(--text-primary);">
+                            <span style="display: inline-flex; width: 28px; height: 28px; border-radius: 50%; background: var(--gold-primary); color: #000; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 800; margin-right: 8px;">2</span>
+                            Bước 2: Tuyển Chọn 3 – 5 Ống Chiết (<code style="color: var(--gold-primary);">2ml</code> hoặc <code style="color: var(--gold-primary);">5ml</code>)
+                        </h2>
+                        <p style="margin: 0; font-size: 0.82rem; color: var(--text-muted);">
+                            Chọn từ 3 đến 5 mùi hương yêu thích. Bạn có thể tùy chỉnh dung tích <strong>2ml</strong> hoặc <strong>5ml</strong> cho từng ống chiết.
+                        </p>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                        <span style="background: rgba(42,157,143,0.15); border: 1px solid #2A9D8F; color: #52B788; font-size: 0.76rem; font-weight: 700; padding: 4px 10px; border-radius: 99px;">
+                            4 ống: Giảm 5%
+                        </span>
+                        <span style="background: rgba(212,175,55,0.18); border: 1px solid var(--gold-primary); color: var(--gold-primary); font-size: 0.76rem; font-weight: 700; padding: 4px 10px; border-radius: 99px;">
+                            5 ống: Giảm 10%
+                        </span>
+                        <span style="font-size: 0.88rem; color: var(--text-secondary);">
+                            Đã chọn: <strong id="selectedCountBadge" style="color: var(--gold-primary); font-size: 1rem;">0/5</strong> <small style="color: var(--text-muted);">(Tối thiểu 3)</small>
+                        </span>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px;">
+                    @foreach (var item in Model)
+                    {
+                        var price2ml = CalcVialPrice(item.BasePrice, 2);
+                        var price5ml = CalcVialPrice(item.BasePrice, 5);
+                        <div class="luxury-card discovery-item-card" id="perfume-card-@item.Id"
+                             data-id="@item.Id"
+                             data-price-2ml="@price2ml"
+                             data-price-5ml="@price5ml"
+                             style="padding: 14px; border: 1px solid var(--border-card); background: var(--bg-surface-elevated); border-radius: 12px; transition: all 0.2s; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <div style="position: relative; height: 165px; border-radius: 8px; overflow: hidden; margin-bottom: 10px; background: #111;">
+                                    <img src="@(string.IsNullOrEmpty(item.MainImageUrl) ? "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=400&q=80" : item.MainImageUrl)" 
+                                         alt="@item.Name" style="width: 100%; height: 100%; object-fit: cover;" />
+                                    <span style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.75); backdrop-filter: blur(4px); color: var(--gold-primary); font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 99px;">
+                                        2ml / 5ml Vial
+                                    </span>
+                                </div>
+
+                                <span style="font-size: 0.72rem; text-transform: uppercase; color: var(--gold-primary); font-weight: 700; letter-spacing: 0.05em;">@item.BrandName</span>
+                                <h4 style="margin: 2px 0 6px; font-size: 0.92rem; font-weight: 600; color: var(--text-primary); line-height: 1.3;">@item.Name</h4>
+                                
+                                <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px;">
+                                    <span style="background: rgba(212,175,55,0.1); color: var(--gold-primary); font-size: 0.7rem; padding: 2px 6px; border-radius: 4px;">
+                                        @item.FamilyName
+                                    </span>
+                                    <span style="background: rgba(255,255,255,0.05); color: var(--text-muted); font-size: 0.7rem; padding: 2px 6px; border-radius: 4px;">
+                                        @item.Gender
+                                    </span>
+                                </div>
+
+                                <div style="display: flex; justify-content: space-between; font-size: 0.74rem; color: var(--text-secondary); margin-bottom: 10px; padding: 6px 8px; background: rgba(0,0,0,0.2); border-radius: 6px;">
+                                    <span><strong>2ml:</strong> @price2ml.ToString("N0")₫</span>
+                                    <span style="color: var(--gold-primary);"><strong>5ml:</strong> @price5ml.ToString("N0")₫</span>
+                                </div>
                             </div>
 
-                            <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--gold-primary); font-weight: 700; letter-spacing: 0.05em;">@item.BrandName</span>
-                            <h4 style="margin: 2px 0 6px; font-size: 0.95rem; font-weight: 600; color: var(--text-primary); line-height: 1.3;">@item.Name</h4>
-                            
-                            <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px;">
-                                <span style="background: rgba(212,175,55,0.1); color: var(--gold-primary); font-size: 0.72rem; padding: 2px 6px; border-radius: 4px;">
-                                    @item.FamilyName
-                                </span>
-                                <span style="background: rgba(255,255,255,0.05); color: var(--text-muted); font-size: 0.72rem; padding: 2px 6px; border-radius: 4px;">
-                                    @item.Gender
-                                </span>
+                            <div style="display: flex; gap: 6px;">
+                                <button type="button" class="btn-luxe-outline select-slot-btn" id="btn-select-@item.Id" style="flex: 1; padding: 8px; font-size: 0.8rem;"
+                                        onclick="toggleSelectPerfume(@item.Id, '@Html.Raw(JavaScriptEncoder.Default.Encode(item.Name))', '@Html.Raw(JavaScriptEncoder.Default.Encode(item.BrandName))', '@(item.MainImageUrl ?? "")', '@Html.Raw(JavaScriptEncoder.Default.Encode(item.Slug))', @price2ml, @price5ml)">
+                                    <i class="fa-solid fa-plus" style="margin-right: 4px;"></i> Chọn Chai Này
+                                </button>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </section>
+
+            <!-- BƯỚC 3: THIỆP ÉP KIM VÀNG CÁ NHÂN HÓA (GreetingMessage & GreetingFont) -->
+            <section class="discovery-step-card" id="step-3-greeting-card" style="margin-bottom: 0;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
+                    <h2 style="font-size: 1.25rem; font-weight: 700; margin: 0; color: var(--text-primary);">
+                        <span style="display: inline-flex; width: 28px; height: 28px; border-radius: 50%; background: var(--gold-primary); color: #000; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 800; margin-right: 8px;">3</span>
+                        Bước 3: Thiệp Ép Kim Vàng Cá Nhân Hóa (<code style="color: var(--gold-primary);">GreetingMessage</code> &amp; <code style="color: var(--gold-primary);">GreetingFont</code>)
+                    </h2>
+                    <span style="font-size: 0.78rem; color: var(--text-muted);">Miễn phí chế tác thiệp ép kim 24K</span>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; align-items: stretch;">
+                    <!-- Left: Controls -->
+                    <div style="display: flex; flex-direction: column; gap: 14px;">
+                        <div>
+                            <label style="display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px;">
+                                Người nhận món quà (Tùy chọn):
+                            </label>
+                            <input type="text" id="recipientNameInput" maxlength="100" placeholder="VD: Quý cô Thanh Hằng..."
+                                   oninput="updateGreetingPreview()"
+                                   style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border-card); background: var(--bg-surface-elevated); color: var(--text-primary); font-size: 0.88rem; outline: none;" />
+                        </div>
+
+                        <div>
+                            <label style="display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px;">
+                                Chọn kiểu chữ nghệ thuật (<code style="color: var(--gold-primary);">GreetingFont</code>):
+                            </label>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;" id="fontSelectorGroup">
+                                <button type="button" class="font-choice-btn active" data-font="Playfair Display" style="font-family: 'Playfair Display', serif;" onclick="selectGreetingFont('Playfair Display')">
+                                    Playfair Display
+                                </button>
+                                <button type="button" class="font-choice-btn" data-font="Dancing Script" style="font-family: 'Dancing Script', cursive; font-size: 1rem;" onclick="selectGreetingFont('Dancing Script')">
+                                    Dancing Script
+                                </button>
+                                <button type="button" class="font-choice-btn" data-font="Cormorant Garamond" style="font-family: 'Cormorant Garamond', serif; font-size: 1rem;" onclick="selectGreetingFont('Cormorant Garamond')">
+                                    Cormorant Garamond
+                                </button>
                             </div>
                         </div>
 
-                        <button type="button" class="btn-luxe-outline select-slot-btn" id="btn-select-@item.Id" style="width: 100%; padding: 8px; font-size: 0.82rem;"
-                                onclick="toggleSelectPerfume(@item.Id, '@Html.Raw(JavaScriptEncoder.Default.Encode(item.Name))', '@Html.Raw(JavaScriptEncoder.Default.Encode(item.BrandName))', '@(item.MainImageUrl ?? "")')">
-                            <i class="fa-solid fa-plus" style="margin-right: 4px;"></i> Chọn Chai Này
-                        </button>
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <label for="greetingMessageInput" style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary);">
+                                    Thông điệp ép kim vàng (<code style="color: var(--gold-primary);">GreetingMessage</code>):
+                                </label>
+                                <span id="greetingCharCount" style="font-size: 0.78rem; color: var(--gold-primary); font-weight: 700;">0/250</span>
+                            </div>
+                            <textarea id="greetingMessageInput" rows="4" maxlength="250"
+                                      placeholder="Nhập lời chúc chân thành gửi đến người thương yêu (tối đa 250 ký tự)..."
+                                      oninput="updateGreetingPreview()"
+                                      style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border-card); background: var(--bg-surface-elevated); color: var(--text-primary); font-size: 0.88rem; outline: none; resize: vertical;"></textarea>
+                        </div>
                     </div>
-                }
-            </div>
+
+                    <!-- Right: Live Gold-Foil Card Preview -->
+                    <div class="gold-foil-card" id="goldFoilCardPreview">
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(212,175,55,0.25); padding-bottom: 10px;">
+                            <span style="font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-primary); font-weight: 700;">
+                                PERFUME LUXE &bull; PARIS
+                            </span>
+                            <span style="font-size: 0.72rem; color: var(--text-muted);" id="previewFontBadge">
+                                Font: Playfair Display
+                            </span>
+                        </div>
+
+                        <div style="padding: 18px 8px; text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: center;">
+                            <div id="previewRecipientLine" style="font-size: 0.85rem; color: var(--gold-primary); margin-bottom: 8px; font-style: italic;">
+                                Kính gửi: Người thương yêu
+                            </div>
+                            <div id="previewGreetingText" class="gold-foil-text" style="font-family: 'Playfair Display', serif; font-size: 1.2rem; line-height: 1.55; word-break: break-word;">
+                                “Mỗi giọt hương là một bản giao hưởng lưu giữ khoảnh khắc quý giá nhất.”
+                            </div>
+                        </div>
+
+                        <div style="text-align: right; font-size: 0.72rem; color: rgba(212,175,55,0.75); border-top: 1px dashed rgba(212,175,55,0.2); padding-top: 8px;">
+                            <i class="fa-solid fa-stamp" style="margin-right: 4px;"></i> Haute Parfumerie Gold-Foil Seal
+                        </div>
+                    </div>
+                </div>
+            </section>
         </div>
 
-        <!-- RIGHT: DISCOVERY BOX TRAY & CHECKOUT -->
-        <div style="position: sticky; top: 100px;">
-            <div class="luxury-card" style="padding: 28px; border: 1px solid var(--border-subtle); background: var(--bg-surface); border-radius: 16px; box-shadow: 0 12px 36px rgba(0,0,0,0.4);">
-                <div style="text-align: center; margin-bottom: 20px;">
-                    <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--gold-primary); font-weight: 700;">Hộp Quà Sang Trọng</span>
-                    <h3 style="font-size: 1.35rem; font-weight: 800; margin: 4px 0; color: var(--text-primary);">Luxe Discovery Box</h3>
-                    <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0;">3 ống xịt 10ml kèm hộp nhung Haute và thiệp chúc mừng.</p>
+        <!-- RIGHT COLUMN: STICKY TRAY, PRICING BREAKDOWN & LIVE API VALIDATION -->
+        <div style="position: sticky; top: 96px;">
+            <div class="luxury-card" style="padding: 26px; border: 1px solid var(--border-subtle); background: var(--bg-surface); border-radius: 16px; box-shadow: 0 12px 36px rgba(0,0,0,0.45);">
+                <div style="text-align: center; margin-bottom: 18px;">
+                    <span style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.16em; color: var(--gold-primary); font-weight: 700;">Bespoke Discovery Tray</span>
+                    <h3 style="font-size: 1.35rem; font-weight: 800; margin: 4px 0; color: var(--text-primary);">Hộp Quà Discovery Của Bạn</h3>
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;" id="traySubtitle">
+                        Vỏ hộp: Hộp Gỗ Sơn Mài Hoàng Gia &bull; Chọn 3–5 ống chiết
+                    </p>
                 </div>
 
-                <!-- 3 SLOTS TRAY -->
-                <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;">
-                    <!-- Slot 1 -->
-                    <div id="slot-1" class="discovery-slot" style="display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px dashed var(--border-card); border-radius: 10px; background: rgba(255,255,255,0.02); min-height: 60px;">
-                        <div style="width: 36px; height: 36px; border-radius: 50%; background: rgba(212,175,55,0.1); color: var(--gold-primary); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem;">
-                            1
-                        </div>
-                        <div style="flex: 1; color: var(--text-muted); font-size: 0.85rem;" id="slot-1-text">
-                            Chưa chọn mùi hương 1
-                        </div>
-                        <button type="button" id="slot-1-remove" style="display: none; background: none; border: none; color: #f87171; cursor: pointer;" onclick="removeSlot(0)">
-                            <i class="fa-solid fa-xmark"></i>
-                        </button>
-                    </div>
-
-                    <!-- Slot 2 -->
-                    <div id="slot-2" class="discovery-slot" style="display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px dashed var(--border-card); border-radius: 10px; background: rgba(255,255,255,0.02); min-height: 60px;">
-                        <div style="width: 36px; height: 36px; border-radius: 50%; background: rgba(212,175,55,0.1); color: var(--gold-primary); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem;">
-                            2
-                        </div>
-                        <div style="flex: 1; color: var(--text-muted); font-size: 0.85rem;" id="slot-2-text">
-                            Chưa chọn mùi hương 2
-                        </div>
-                        <button type="button" id="slot-2-remove" style="display: none; background: none; border: none; color: #f87171; cursor: pointer;" onclick="removeSlot(1)">
-                            <i class="fa-solid fa-xmark"></i>
-                        </button>
-                    </div>
-
-                    <!-- Slot 3 -->
-                    <div id="slot-3" class="discovery-slot" style="display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px dashed var(--border-card); border-radius: 10px; background: rgba(255,255,255,0.02); min-height: 60px;">
-                        <div style="width: 36px; height: 36px; border-radius: 50%; background: rgba(212,175,55,0.1); color: var(--gold-primary); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem;">
-                            3
-                        </div>
-                        <div style="flex: 1; color: var(--text-muted); font-size: 0.85rem;" id="slot-3-text">
-                            Chưa chọn mùi hương 3
-                        </div>
-                        <button type="button" id="slot-3-remove" style="display: none; background: none; border: none; color: #f87171; cursor: pointer;" onclick="removeSlot(2)">
-                            <i class="fa-solid fa-xmark"></i>
-                        </button>
-                    </div>
+                <!-- 5 VIAL SLOTS TRAY -->
+                <div id="vialSlotsContainer" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+                    <!-- Populated dynamically by updateSlotsUI() -->
                 </div>
 
-                <!-- PRICE & PERKS -->
-                <div style="border-top: 1px solid var(--border-card); padding-top: 18px; margin-bottom: 20px;">
-                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
-                        <span style="color: var(--text-muted); font-size: 0.88rem;">Giá gốc trọn gói:</span>
-                        <span style="text-decoration: line-through; color: var(--text-muted); font-size: 0.9rem;">1.250.000 ₫</span>
+                <!-- BUNDLE DISCOUNT CALLOUT -->
+                <div id="bundleDiscountBanner" style="padding: 10px 12px; border-radius: 8px; background: rgba(42,157,143,0.12); border: 1px dashed #2A9D8F; color: #52B788; font-size: 0.8rem; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between;">
+                    <span><i class="fa-solid fa-sparkles" style="margin-right: 6px;"></i> Ưu đãi chọn nhiều ống:</span>
+                    <strong id="bundleDiscountStatusText">Chọn 4 ống (-5%) | 5 ống (-10%)</strong>
+                </div>
+
+                <!-- LIVE PRICE BREAKDOWN -->
+                <div style="border-top: 1px solid var(--border-card); padding-top: 16px; margin-bottom: 18px; display: flex; flex-direction: column; gap: 8px; font-size: 0.88rem;">
+                    <div style="display: flex; justify-content: space-between; color: var(--text-secondary);">
+                        <span>Vỏ hộp (<strong id="summaryBoxCode" style="color: var(--gold-primary);">ClassicWood</strong>):</span>
+                        <span id="summaryBoxPrice">250.000 ₫</span>
                     </div>
+                    <div style="display: flex; justify-content: space-between; color: var(--text-secondary);">
+                        <span>Ống chiết (<span id="summaryVialCount">0</span> ống):</span>
+                        <span id="summaryVialsPrice">0 ₫</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; color: #52B788;" id="summaryDiscountRow">
+                        <span>Chiết khấu Bundle (<span id="summaryDiscountRate">0%</span>):</span>
+                        <span id="summaryDiscountAmount">-0 ₫</span>
+                    </div>
+                    <div style="border-top: 1px dashed var(--border-card); margin: 4px 0;"></div>
                     <div style="display: flex; justify-content: space-between; align-items: baseline;">
-                        <span style="font-weight: 700; color: var(--text-primary); font-size: 1rem;">Ưu đãi Discovery:</span>
-                        <strong style="color: var(--gold-primary); font-size: 1.45rem;">950.000 ₫</strong>
-                    </div>
-                    <div style="font-size: 0.78rem; color: #2A9D8F; margin-top: 4px; text-align: right;">
-                        <i class="fa-solid fa-tag"></i> Tiết kiệm 300.000₫ & Miễn phí vận chuyển
+                        <span style="font-weight: 700; color: var(--text-primary); font-size: 1rem;">Tổng cộng tạm tính:</span>
+                        <strong id="summaryTotalPrice" style="color: var(--gold-primary); font-size: 1.45rem;">250.000 ₫</strong>
                     </div>
                 </div>
 
-                <!-- ADD TO CART BUTTON -->
-                <button type="button" id="btnOrderDiscovery" class="btn-luxe" disabled style="width: 100%; padding: 14px; font-size: 0.95rem; opacity: 0.5; cursor: not-allowed;" onclick="submitDiscoveryBox()">
-                    <i class="fa-solid fa-gift" style="margin-right: 8px;"></i> Hãy Chọn Đủ 3 Mùi Hương
+                <!-- VALIDATE API & ADD TO CART BUTTON -->
+                <button type="button" id="btnOrderDiscovery" class="btn-luxe" disabled
+                        style="width: 100%; padding: 14px; font-size: 0.92rem; opacity: 0.5; cursor: not-allowed;"
+                        onclick="submitDiscoveryBox()">
+                    <i class="fa-solid fa-shield-check" style="margin-right: 6px;"></i> Hãy Chọn Từ 3 Đến 5 Mùi Hương (0/3)
                 </button>
 
-                <div style="margin-top: 16px; font-size: 0.78rem; color: var(--text-muted); text-align: center; line-height: 1.5;">
-                    <i class="fa-solid fa-shield-halved" style="color: var(--gold-primary); margin-right: 4px;"></i> Được hoàn 100% giá trị hộp vào đơn mua chai Fullsize tiếp theo.
+                <!-- LIVE API VALIDATION RESULT BOX -->
+                <div id="apiValidationResultBox" style="display: none; margin-top: 16px; padding: 14px; border-radius: 10px; font-size: 0.82rem; line-height: 1.5;"></div>
+
+                <div style="margin-top: 14px; font-size: 0.76rem; color: var(--text-muted); text-align: center; line-height: 1.5;">
+                    <i class="fa-solid fa-shield-halved" style="color: var(--gold-primary); margin-right: 4px;"></i> Hoàn 100% giá trị hộp Discovery vào đơn đặt mua chai Fullsize tiếp theo.
                 </div>
             </div>
         </div>
@@ -142,18 +414,93 @@
 </main>
 
 <script>
-    let selectedPerfumes = []; // Array of { id, name, brand, image }
+    let currentBoxStyle = {
+        code: 'ClassicWood',
+        name: 'Hộp Gỗ Sơn Mài Hoàng Gia',
+        price: 250000
+    };
+    let currentGreetingFont = 'Playfair Display';
+    let selectedPerfumes = []; // Array of { id, name, brand, image, slug, volumeMl: 2 | 5, price2ml, price5ml }
 
-    function toggleSelectPerfume(id, name, brand, image) {
+    function formatVnd(amount) {
+        return new Intl.NumberFormat('vi-VN').format(Math.round(amount || 0)) + ' ₫';
+    }
+
+    function selectBoxStyle(code, name, price) {
+        currentBoxStyle = { code, name, price };
+        document.querySelectorAll('.box-style-option').forEach(el => {
+            el.classList.toggle('active', el.getAttribute('data-style') === code);
+        });
+        document.getElementById('selectedBoxStyleLabel').textContent = `Đang chọn: ${name} (${formatVnd(price)})`;
+        document.getElementById('traySubtitle').textContent = `Vỏ hộp: ${name} • Chọn 3–5 ống chiết`;
+        updateSlotsUI();
+    }
+
+    function selectGreetingFont(fontName) {
+        currentGreetingFont = fontName;
+        document.querySelectorAll('#fontSelectorGroup .font-choice-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.getAttribute('data-font') === fontName);
+        });
+        updateGreetingPreview();
+    }
+
+    function updateGreetingPreview() {
+        const recipient = document.getElementById('recipientNameInput')?.value.trim() || '';
+        const message = document.getElementById('greetingMessageInput')?.value || '';
+        const charCountEl = document.getElementById('greetingCharCount');
+        if (charCountEl) {
+            charCountEl.textContent = `${message.length}/250`;
+        }
+
+        const recipientEl = document.getElementById('previewRecipientLine');
+        if (recipientEl) {
+            recipientEl.textContent = recipient ? `Kính gửi: ${recipient}` : 'Kính gửi: Người thương yêu';
+        }
+
+        const previewTextEl = document.getElementById('previewGreetingText');
+        if (previewTextEl) {
+            previewTextEl.style.fontFamily = `'${currentGreetingFont}', serif`;
+            previewTextEl.textContent = message.trim()
+                ? `“${message.trim()}”`
+                : '“Mỗi giọt hương là một bản giao hưởng lưu giữ khoảnh khắc quý giá nhất.”';
+        }
+
+        const fontBadgeEl = document.getElementById('previewFontBadge');
+        if (fontBadgeEl) {
+            fontBadgeEl.textContent = `Font: ${currentGreetingFont}`;
+        }
+    }
+
+    function toggleSelectPerfume(id, name, brand, image, slug, price2ml, price5ml) {
         const existingIdx = selectedPerfumes.findIndex(p => p.id === id);
         if (existingIdx >= 0) {
             removeSlot(existingIdx);
         } else {
-            if (selectedPerfumes.length >= 3) {
-                alert('Hộp Discovery Box chỉ gồm đúng 3 mùi hương. Vui lòng bấm bỏ bớt 1 mùi trước khi chọn mùi khác.');
+            if (selectedPerfumes.length >= 5) {
+                if (typeof showToast === 'function') {
+                    showToast('Hộp Discovery Box tối đa 5 ống chiết. Vui lòng bỏ bớt trước khi chọn thêm.', 'error');
+                } else {
+                    alert('Hộp Discovery Box chỉ cho phép tối đa 5 ống chiết.');
+                }
                 return;
             }
-            selectedPerfumes.push({ id, name, brand, image });
+            selectedPerfumes.push({
+                id,
+                name,
+                brand,
+                image,
+                slug,
+                volumeMl: 2,
+                price2ml: Number(price2ml) || 150000,
+                price5ml: Number(price5ml) || 280000
+            });
+            updateSlotsUI();
+        }
+    }
+
+    function setVialVolume(index, volumeMl) {
+        if (index >= 0 && index < selectedPerfumes.length) {
+            selectedPerfumes[index].volumeMl = volumeMl === 5 ? 5 : 2;
             updateSlotsUI();
         }
     }
@@ -165,72 +512,242 @@
         }
     }
 
+    function calculatePricing() {
+        const vialsSubtotal = selectedPerfumes.reduce((sum, p) => {
+            return sum + (p.volumeMl === 5 ? p.price5ml : p.price2ml);
+        }, 0);
+        const boxPrice = currentBoxStyle.price;
+        const rawSubTotal = boxPrice + vialsSubtotal;
+
+        let discountRate = 0;
+        if (selectedPerfumes.length === 4) discountRate = 0.05;
+        else if (selectedPerfumes.length === 5) discountRate = 0.10;
+
+        const discountAmount = Math.round(rawSubTotal * discountRate);
+        const finalTotal = rawSubTotal - discountAmount;
+
+        return {
+            boxPrice,
+            vialsSubtotal,
+            rawSubTotal,
+            discountRate,
+            discountAmount,
+            finalTotal
+        };
+    }
+
     function updateSlotsUI() {
-        document.getElementById('selectedCountBadge').textContent = selectedPerfumes.length + '/3';
+        const count = selectedPerfumes.length;
+        const badgeEl = document.getElementById('selectedCountBadge');
+        if (badgeEl) badgeEl.textContent = `${count}/5`;
 
-        // Update slots
-        for (let i = 0; i < 3; i++) {
-            const slotEl = document.getElementById('slot-' + (i + 1));
-            const textEl = document.getElementById('slot-' + (i + 1) + '-text');
-            const removeBtn = document.getElementById('slot-' + (i + 1) + '-remove');
-
-            if (i < selectedPerfumes.length) {
-                const p = selectedPerfumes[i];
-                slotEl.style.border = '1px solid var(--gold-primary)';
-                slotEl.style.background = 'rgba(212,175,55,0.06)';
-                textEl.innerHTML = `<strong style="color: var(--text-primary);">${p.name}</strong><div style="font-size: 0.75rem; color: var(--gold-primary);">${p.brand} (10ml)</div>`;
-                removeBtn.style.display = 'block';
-            } else {
-                slotEl.style.border = '1px dashed var(--border-card)';
-                slotEl.style.background = 'rgba(255,255,255,0.02)';
-                textEl.innerHTML = `Chưa chọn mùi hương ${i + 1}`;
-                removeBtn.style.display = 'none';
+        const container = document.getElementById('vialSlotsContainer');
+        if (container) {
+            let html = '';
+            for (let i = 0; i < 5; i++) {
+                if (i < count) {
+                    const p = selectedPerfumes[i];
+                    const activePrice = p.volumeMl === 5 ? p.price5ml : p.price2ml;
+                    html += `
+                        <div class="discovery-slot" style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--gold-primary); border-radius: 10px; background: rgba(212,175,55,0.06);">
+                            <div style="width: 30px; height: 30px; border-radius: 50%; background: var(--gold-primary); color: #000; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.8rem; flex-shrink: 0;">
+                                ${i + 1}
+                            </div>
+                            <div style="flex: 1; min-width: 0;">
+                                <div style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.name}</div>
+                                <div style="font-size: 0.74rem; color: var(--gold-primary);">${p.brand} &bull; <strong>${formatVnd(activePrice)}</strong></div>
+                            </div>
+                            <div style="display: flex; gap: 4px; align-items: center;">
+                                <button type="button" class="vial-size-pill ${p.volumeMl === 2 ? 'active' : ''}" onclick="setVialVolume(${i}, 2)">2ml</button>
+                                <button type="button" class="vial-size-pill ${p.volumeMl === 5 ? 'active' : ''}" onclick="setVialVolume(${i}, 5)">5ml</button>
+                            </div>
+                            <button type="button" style="background: none; border: none; color: #f87171; cursor: pointer; padding: 4px;" onclick="removeSlot(${i})" title="Bỏ mùi hương này">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>`;
+                } else {
+                    const slotHint = i < 3
+                        ? `Ống chiết bắt buộc #${i + 1}`
+                        : (i === 3 ? 'Ống thứ 4 (Kích hoạt Giảm 5%)' : 'Ống thứ 5 (Kích hoạt Giảm 10%)');
+                    html += `
+                        <div class="discovery-slot" style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px dashed var(--border-card); border-radius: 10px; background: rgba(255,255,255,0.015);">
+                            <div style="width: 30px; height: 30px; border-radius: 50%; background: rgba(212,175,55,0.1); color: var(--gold-primary); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; flex-shrink: 0;">
+                                ${i + 1}
+                            </div>
+                            <div style="flex: 1; color: var(--text-muted); font-size: 0.8rem;">
+                                ${slotHint}
+                            </div>
+                        </div>`;
+                }
             }
+            container.innerHTML = html;
         }
 
-        // Update cards button state
+        // Update product cards state
         document.querySelectorAll('.discovery-item-card').forEach(card => {
-            const id = Number(card.id.replace('perfume-card-', ''));
-            const isSelected = selectedPerfumes.some(p => p.id === id);
+            const id = Number(card.getAttribute('data-id'));
+            const selectedItem = selectedPerfumes.find(p => p.id === id);
             const btn = document.getElementById('btn-select-' + id);
-            if (isSelected) {
+            if (!btn) return;
+            if (selectedItem) {
                 card.style.borderColor = 'var(--gold-primary)';
-                card.style.background = 'rgba(212,175,55,0.05)';
-                btn.className = 'btn-luxe';
-                btn.innerHTML = '<i class="fa-solid fa-check" style="margin-right: 4px;"></i> Đã Chọn';
+                card.style.background = 'rgba(212,175,55,0.06)';
+                btn.className = 'btn-luxe select-slot-btn';
+                btn.innerHTML = `<i class="fa-solid fa-check" style="margin-right: 4px;"></i> Đã Chọn (${selectedItem.volumeMl}ml)`;
             } else {
                 card.style.borderColor = 'var(--border-card)';
-                card.style.background = 'var(--bg-surface)';
-                btn.className = 'btn-luxe-outline';
+                card.style.background = 'var(--bg-surface-elevated)';
+                btn.className = 'btn-luxe-outline select-slot-btn';
                 btn.innerHTML = '<i class="fa-solid fa-plus" style="margin-right: 4px;"></i> Chọn Chai Này';
             }
         });
 
-        // Update order button
+        // Update pricing summary
+        const pricing = calculatePricing();
+        document.getElementById('summaryBoxCode').textContent = currentBoxStyle.code;
+        document.getElementById('summaryBoxPrice').textContent = formatVnd(pricing.boxPrice);
+        document.getElementById('summaryVialCount').textContent = count.toString();
+        document.getElementById('summaryVialsPrice').textContent = formatVnd(pricing.vialsSubtotal);
+        document.getElementById('summaryDiscountRate').textContent = `${Math.round(pricing.discountRate * 100)}%`;
+        document.getElementById('summaryDiscountAmount').textContent = `-${formatVnd(pricing.discountAmount)}`;
+        document.getElementById('summaryTotalPrice').textContent = formatVnd(pricing.finalTotal);
+
+        const discountStatusText = document.getElementById('bundleDiscountStatusText');
+        if (discountStatusText) {
+            if (count === 5) discountStatusText.textContent = 'Đang áp dụng: Giảm 10% (5 ống)';
+            else if (count === 4) discountStatusText.textContent = 'Đang áp dụng: Giảm 5% (4 ống)';
+            else discountStatusText.textContent = 'Chọn 4 ống (-5%) | 5 ống (-10%)';
+        }
+
+        // Update CTA button
         const orderBtn = document.getElementById('btnOrderDiscovery');
-        if (selectedPerfumes.length === 3) {
+        if (count >= 3 && count <= 5) {
             orderBtn.disabled = false;
             orderBtn.style.opacity = '1';
             orderBtn.style.cursor = 'pointer';
-            orderBtn.innerHTML = '<i class="fa-solid fa-gift" style="margin-right: 8px;"></i> Đặt Hộp Quà Discovery Box (950.000₫)';
+            orderBtn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles" style="margin-right: 8px;"></i> Xác Thực API & Thêm Hộp Quà Vào Giỏ (${formatVnd(pricing.finalTotal)})`;
         } else {
             orderBtn.disabled = true;
             orderBtn.style.opacity = '0.5';
             orderBtn.style.cursor = 'not-allowed';
-            orderBtn.innerHTML = `<i class="fa-solid fa-gift" style="margin-right: 8px;"></i> Hãy Chọn Đủ 3 Mùi (${selectedPerfumes.length}/3)`;
+            orderBtn.innerHTML = `<i class="fa-solid fa-gift" style="margin-right: 8px;"></i> Hãy Chọn Từ 3 Đến 5 Mùi Hương (${count}/3)`;
         }
     }
 
-    function submitDiscoveryBox() {
-        if (selectedPerfumes.length !== 3) return;
-        const boxTitle = `Discovery Box 3 Mùi: ${selectedPerfumes[0].name} + ${selectedPerfumes[1].name} + ${selectedPerfumes[2].name}`;
-        
-        // Dùng CartDrawer để thêm sản phẩm tùy biến
-        if (window.CartDrawer && typeof CartDrawer.addQuick === 'function') {
-            CartDrawer.addQuick(selectedPerfumes[0].id, boxTitle, 950000, selectedPerfumes[0].image);
-        } else {
-            alert('Đã thêm Discovery Box vào giỏ hàng thành công! Đang chuyển hướng đến giỏ hàng...');
-            window.location.href = '/cart';
+    async function submitDiscoveryBox() {
+        if (selectedPerfumes.length < 3 || selectedPerfumes.length > 5) return;
+
+        const greetingMessage = document.getElementById('greetingMessageInput')?.value.trim() || '';
+        const recipientName = document.getElementById('recipientNameInput')?.value.trim() || '';
+        const apiResultBox = document.getElementById('apiValidationResultBox');
+        const orderBtn = document.getElementById('btnOrderDiscovery');
+
+        const payload = {
+            boxStyle: currentBoxStyle.code,
+            greetingMessage: greetingMessage,
+            greetingFont: currentGreetingFont,
+            recipientName: recipientName,
+            vials: selectedPerfumes.map(p => ({
+                productId: p.id,
+                vialSize: `${p.volumeMl}ml`
+            }))
+        };
+
+        try {
+            orderBtn.disabled = true;
+            orderBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="margin-right: 8px;"></i> Đang xác thực cấu hình qua API...';
+
+            const response = await fetch('/api/v1/discovery-box/validate-and-add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.valid) {
+                if (apiResultBox) {
+                    apiResultBox.style.display = 'block';
+                    apiResultBox.style.background = 'rgba(239, 68, 68, 0.14)';
+                    apiResultBox.style.border = '1px solid #ef4444';
+                    apiResultBox.style.color = '#f87171';
+                    apiResultBox.innerHTML = `<strong><i class="fa-solid fa-circle-exclamation"></i> Lỗi xác thực:</strong> ${data.message || 'Cấu hình Discovery Box không hợp lệ.'}`;
+                }
+                updateSlotsUI();
+                return;
+            }
+
+            // Persist custom box metadata in localStorage so Cart page can also display the bespoke summary
+            const customBoxSummary = {
+                boxStyleCode: data.boxStyle || currentBoxStyle.code,
+                boxStyleName: currentBoxStyle.name,
+                vialCount: data.vialCount || selectedPerfumes.length,
+                vials: selectedPerfumes.map(v => ({
+                    productId: v.id,
+                    productName: v.name,
+                    brandName: v.brand,
+                    volumeMl: v.volumeMl
+                })),
+                recipientName: recipientName,
+                greetingMessage: data.greetingMessage || greetingMessage,
+                greetingFont: currentGreetingFont,
+                subTotal: data.subTotal,
+                discountAmount: data.discountAmount,
+                totalPrice: data.totalPrice,
+                savedAt: new Date().toISOString()
+            };
+            localStorage.setItem('plx_last_discovery_box', JSON.stringify(customBoxSummary));
+
+            if (apiResultBox) {
+                const vialsListHtml = selectedPerfumes.map(v => `<span style="display:inline-block; background:rgba(212,175,55,0.12); color:var(--gold-primary); padding:2px 8px; border-radius:4px; margin:2px;">${v.name} (${v.volumeMl}ml)</span>`).join(' ');
+                apiResultBox.style.display = 'block';
+                apiResultBox.style.background = 'rgba(42, 157, 143, 0.14)';
+                apiResultBox.style.border = '1px solid #2A9D8F';
+                apiResultBox.style.color = 'var(--text-primary)';
+                apiResultBox.innerHTML = `
+                    <div style="color: #52B788; font-weight: 700; margin-bottom: 6px;">
+                        <i class="fa-solid fa-circle-check"></i> ${data.message}
+                    </div>
+                    <div style="font-size: 0.78rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 4px;">
+                        <div><strong>Vỏ hộp:</strong> ${currentBoxStyle.name} (<code>${data.boxStyle}</code>)</div>
+                        <div><strong>Ống chiết (${data.vialCount}):</strong> ${vialsListHtml}</div>
+                        <div><strong>Thiệp ép kim (${currentGreetingFont}):</strong> ${greetingMessage ? `“${greetingMessage}”` : 'Mặc định hoàng gia'}</div>
+                        <div><strong>Tổng thanh toán API:</strong> <span style="color: var(--gold-primary); font-weight: 700;">${formatVnd(data.totalPrice)}</span> (Tiết kiệm: ${formatVnd(data.discountAmount)})</div>
+                    </div>
+                `;
+            }
+
+            // Also add representative item into server cart so CartDrawer / Cart page has the item
+            const firstPerfume = selectedPerfumes[0];
+            if (window.CustomerApi && firstPerfume && firstPerfume.slug) {
+                try {
+                    await CustomerApi.post('/api/v1/cart/items', {
+                        productSlug: firstPerfume.slug,
+                        variantId: null,
+                        quantity: 1
+                    });
+                    if (typeof openCart === 'function') openCart();
+                } catch (_) {
+                    // Ignore if variant stock check differs
+                }
+            }
+            if (typeof showToast === 'function') {
+                showToast('Đã xác thực & thêm Hộp Quà Discovery Box vào giỏ hàng!', 'success');
+            }
+        } catch (err) {
+            if (apiResultBox) {
+                apiResultBox.style.display = 'block';
+                apiResultBox.style.background = 'rgba(239, 68, 68, 0.14)';
+                apiResultBox.style.border = '1px solid #ef4444';
+                apiResultBox.style.color = '#f87171';
+                apiResultBox.textContent = err.message || 'Không thể kết nối máy chủ xác thực Discovery Box.';
+            }
+        } finally {
+            updateSlotsUI();
         }
     }
+
+    // Initialize UI on page load
+    updateSlotsUI();
+    updateGreetingPreview();
 </script>

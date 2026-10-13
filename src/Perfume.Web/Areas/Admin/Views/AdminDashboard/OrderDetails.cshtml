@@ -1,5 +1,6 @@
 @model Perfume.Domain.Entities.Order
 @using Perfume.Domain.Enums
+@using System.Text.Json
 @{
     ViewData["Title"] = $"Chi Tiết Đơn Hàng #{Model.OrderCode}";
     Layout = "_AdminLayout";
@@ -85,13 +86,66 @@
                     {
                         <tr style="border-bottom: 1px solid var(--border-subtle);">
                             <td style="padding: 14px 20px;">
-                                <div style="display: flex; align-items: center; gap: 12px;">
+                                <div style="display: flex; align-items: flex-start; gap: 12px;">
                                     <img src="@(item.ProductImageUrl ?? "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=150&q=80")" 
                                          alt="@item.ProductName" 
-                                         style="width: 48px; height: 48px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border-card);" />
-                                    <div>
+                                         style="width: 48px; height: 48px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border-card); flex-shrink: 0;" />
+                                    <div style="flex: 1;">
                                         <div style="font-weight: 600; color: var(--text-primary);">@item.ProductName</div>
                                         <div style="font-size: 0.75rem; color: var(--text-muted);">Mã SP: #@item.ProductId</div>
+
+                                        @if (item.IsCustomBox && !string.IsNullOrWhiteSpace(item.CustomBoxConfigJson))
+                                        {
+                                            <div style="margin-top: 8px; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--gold-primary); background: linear-gradient(135deg, rgba(212,175,55,0.14) 0%, rgba(18,18,24,0.92) 100%); font-size: 0.78rem;">
+                                                <div style="display: inline-flex; align-items: center; gap: 6px; background: var(--gold-primary); color: #000; font-weight: 800; font-size: 0.68rem; padding: 2px 8px; border-radius: 99px; letter-spacing: 0.05em; margin-bottom: 6px;">
+                                                    <i class="fa-solid fa-crown"></i> HỘP QUÀ DISCOVERY TÙY CHỈNH
+                                                </div>
+                                                @{
+                                                    try
+                                                    {
+                                                        using var doc = JsonDocument.Parse(item.CustomBoxConfigJson);
+                                                        var root = doc.RootElement;
+                                                        var boxStyleName = root.TryGetProperty("boxStyleName", out var bsn) ? bsn.GetString() : null;
+                                                        var boxStyleCode = root.TryGetProperty("boxStyleCode", out var bsc) ? bsc.GetString() : (root.TryGetProperty("boxStyle", out var bs) ? bs.GetString() : "ClassicWood");
+                                                        var greetingMsg = root.TryGetProperty("greetingMessage", out var gm) ? gm.GetString() : null;
+                                                        var greetingFont = root.TryGetProperty("greetingFont", out var gf) ? gf.GetString() : "Playfair Display";
+                                                        var recipientName = root.TryGetProperty("recipientName", out var rn) ? rn.GetString() : null;
+
+                                                        <div style="color: var(--text-primary); line-height: 1.5;">
+                                                            <div><strong style="color: var(--gold-primary);">Vỏ hộp:</strong> @(string.IsNullOrWhiteSpace(boxStyleName) ? boxStyleCode : $"{boxStyleName} ({boxStyleCode})")</div>
+                                                            @if (root.TryGetProperty("vials", out var vialsEl) && vialsEl.ValueKind == JsonValueKind.Array)
+                                                            {
+                                                                <div style="margin-top: 4px;">
+                                                                    <strong style="color: var(--gold-primary);">Ống chiết đã chọn:</strong>
+                                                                    <ul style="margin: 4px 0 0 16px; padding: 0; color: var(--text-secondary);">
+                                                                        @foreach (var v in vialsEl.EnumerateArray())
+                                                                        {
+                                                                            var pName = v.TryGetProperty("productName", out var pn) ? pn.GetString() : $"SP #{(v.TryGetProperty("productId", out var pid) ? pid.ToString() : "?")}";
+                                                                            var vol = v.TryGetProperty("volumeMl", out var vm) ? $"{vm}ml" : (v.TryGetProperty("vialSize", out var vs) ? vs.GetString() : "2ml");
+                                                                            <li>@pName <span style="color: var(--gold-primary); font-weight: 600;">(@vol)</span></li>
+                                                                        }
+                                                                    </ul>
+                                                                </div>
+                                                            }
+                                                            @if (!string.IsNullOrWhiteSpace(recipientName))
+                                                            {
+                                                                <div style="margin-top: 4px;"><strong style="color: var(--gold-primary);">Người nhận thiệp:</strong> @recipientName</div>
+                                                            }
+                                                            @if (!string.IsNullOrWhiteSpace(greetingMsg))
+                                                            {
+                                                                <div style="margin-top: 4px; font-style: italic; color: var(--text-primary);">
+                                                                    <strong style="color: var(--gold-primary); font-style: normal;">Thiệp ép kim (@greetingFont):</strong> “@greetingMsg”
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                    }
+                                                    catch
+                                                    {
+                                                        <div style="color: var(--text-secondary); word-break: break-all;">@item.CustomBoxConfigJson</div>
+                                                    }
+                                                }
+                                            </div>
+                                        }
                                     </div>
                                 </div>
                             </td>

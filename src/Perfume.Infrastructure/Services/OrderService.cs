@@ -40,7 +40,10 @@ public class OrderService : IOrderService
         if (lines.Count == 0 || lines.Any(i => i.Quantity > 50))
             return (false, "Số lượng mỗi phiên bản không được vượt quá 50.", null);
 
-        await using var transaction = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
+        var isRelational = _context.Database.IsRelational();
+        await using var transaction = isRelational
+            ? await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable)
+            : null;
         try
         {
             var now = DateTime.UtcNow;
@@ -79,10 +82,19 @@ public class OrderService : IOrderService
                         ? product.Variants.FirstOrDefault(v => v.Id == line.VariantId.Value)
                         : product.Variants.FirstOrDefault(v => v.IsDefault) ?? product.Variants.FirstOrDefault();
                     if (variant == null) return (false, "Phiên bản sản phẩm không hợp lệ.", null);
-                    var reserved = await _context.ProductVariants
-                        .Where(v => v.Id == variant.Id && v.StockQuantity >= line.Quantity)
-                        .ExecuteUpdateAsync(s => s.SetProperty(v => v.StockQuantity, v => v.StockQuantity - line.Quantity));
-                    if (reserved != 1) return (false, $"Không đủ tồn kho cho {product.Name} - {variant.VolumeLabel}.", null);
+                    if (isRelational)
+                    {
+                        var reserved = await _context.ProductVariants
+                            .Where(v => v.Id == variant.Id && v.StockQuantity >= line.Quantity)
+                            .ExecuteUpdateAsync(s => s.SetProperty(v => v.StockQuantity, v => v.StockQuantity - line.Quantity));
+                        if (reserved != 1) return (false, $"Không đủ tồn kho cho {product.Name} - {variant.VolumeLabel}.", null);
+                    }
+                    else
+                    {
+                        if (variant.StockQuantity < line.Quantity)
+                            return (false, $"Không đủ tồn kho cho {product.Name} - {variant.VolumeLabel}.", null);
+                        variant.StockQuantity -= line.Quantity;
+                    }
                     unitPrice = variant.SalePrice > 0 ? variant.SalePrice : variant.OriginalPrice;
                     if (unitPrice <= 0) unitPrice = product.BasePrice;
                     variantLabel = variant.VolumeLabel;
@@ -111,10 +123,19 @@ public class OrderService : IOrderService
             {
                 var voucher = await ValidateVoucherAsync(request.VoucherCode, order.SubTotal);
                 if (voucher == null) return (false, "Mã ưu đãi không hợp lệ, đã hết lượt hoặc không đủ điều kiện.", null);
-                var used = await _context.Vouchers
-                    .Where(v => v.Id == voucher.Id && v.UsedCount < v.UsageLimit && v.IsActive && v.ValidFrom <= now && v.ValidTo >= now)
-                    .ExecuteUpdateAsync(s => s.SetProperty(v => v.UsedCount, v => v.UsedCount + 1));
-                if (used != 1) return (false, "Mã ưu đãi vừa hết lượt sử dụng. Vui lòng thử mã khác.", null);
+                if (isRelational)
+                {
+                    var used = await _context.Vouchers
+                        .Where(v => v.Id == voucher.Id && v.UsedCount < v.UsageLimit && v.IsActive && v.ValidFrom <= now && v.ValidTo >= now)
+                        .ExecuteUpdateAsync(s => s.SetProperty(v => v.UsedCount, v => v.UsedCount + 1));
+                    if (used != 1) return (false, "Mã ưu đãi vừa hết lượt sử dụng. Vui lòng thử mã khác.", null);
+                }
+                else
+                {
+                    if (voucher.UsedCount >= voucher.UsageLimit || !voucher.IsActive || voucher.ValidFrom > now || voucher.ValidTo < now)
+                        return (false, "Mã ưu đãi vừa hết lượt sử dụng. Vui lòng thử mã khác.", null);
+                    voucher.UsedCount += 1;
+                }
 
                 var discount = voucher.DiscountPercent.HasValue
                     ? order.SubTotal * voucher.DiscountPercent.Value / 100m
@@ -128,12 +149,12 @@ public class OrderService : IOrderService
             order.TotalAmount = Math.Max(0, order.SubTotal - order.DiscountAmount + order.ShippingFee + order.GiftWrappingFee);
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
-            await transaction.CommitAsync();
+            if (transaction != null) await transaction.CommitAsync();
             return (true, null, order);
         }
         catch
         {
-            await transaction.RollbackAsync();
+            if (transaction != null) await transaction.RollbackAsync();
             return (false, "Không thể hoàn tất đơn hàng. Tồn kho có thể vừa thay đổi; vui lòng kiểm tra giỏ hàng và thử lại.", null);
         }
     }

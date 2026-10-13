@@ -169,7 +169,7 @@ public class PerfumeCatalogService : IPerfumeCatalogService
                 .Where(fn => fn.NoteLevel == NoteLevel.Base && fn.FragranceNote != null)
                 .Select(fn => new FragranceNoteDto { Id = fn.FragranceNote!.Id, Name = fn.FragranceNote.Name, Description = fn.FragranceNote.Description })
                 .ToList(),
-            Variants = product.Variants.Select(v => new ProductVariantDto
+            Variants = product.Variants.OrderBy(v => v.VolumeMl).Select(v => new ProductVariantDto
             {
                 Id = v.Id,
                 VolumeMl = v.VolumeMl,
@@ -180,7 +180,7 @@ public class PerfumeCatalogService : IPerfumeCatalogService
                 StockQuantity = v.StockQuantity,
                 IsDefault = v.IsDefault
             }).ToList(),
-            GalleryImages = product.Images.Select(i => i.ImageUrl).ToList()
+            GalleryImages = product.Images.OrderBy(i => i.DisplayOrder).Select(i => i.ImageUrl).ToList()
         };
 
         var now = DateTime.UtcNow;

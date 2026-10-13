@@ -42,6 +42,9 @@ public static class DependencyInjection
         services.AddScoped<IOrderEmailSender, SmtpOrderEmailSender>();
         services.AddScoped<IFlashSaleService, FlashSaleService>();
         services.AddScoped<ISystemSettingService, SystemSettingService>();
+        services.AddScoped<ICustomerAccountService, CustomerAccountService>();
+        services.AddScoped<ILoyaltyTierService, LoyaltyTierService>();
+        services.AddScoped<IDiscoveryBoxService, DiscoveryBoxService>();
         return services;
     }
 }

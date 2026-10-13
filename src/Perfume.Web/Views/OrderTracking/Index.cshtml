@@ -44,12 +44,29 @@
                 </div>
             </div>
 
-            <div style="text-align: center;">
-                <button type="submit" class="btn-luxe" style="padding: 12px 36px; font-size: 0.95rem; letter-spacing: 0.05em;">
+            <div style="display: flex; justify-content: center; gap: 14px; flex-wrap: wrap;">
+                <button type="submit" class="btn-luxe" style="padding: 12px 32px; font-size: 0.95rem; letter-spacing: 0.05em;">
                     <i class="fa-solid fa-magnifying-glass" style="margin-right: 8px;"></i> Tra Cứu Tiến Độ
+                </button>
+                <button type="button" id="btnLiveApiTrack" onclick="trackOrderViaLiveApi()" class="btn-luxe-outline" style="padding: 12px 26px; font-size: 0.9rem; border-color: rgba(45, 212, 191, 0.5); color: #2dd4bf;">
+                    <i class="fa-solid fa-bolt" style="margin-right: 6px;"></i> Tra Cứu Nhanh Qua Live API (GET /api/v1/orders/track)
                 </button>
             </div>
         </form>
+    </div>
+
+    <!-- LIVE API TRACKING TIMELINE PANEL -->
+    <div id="liveApiTrackPanel" class="luxury-card" style="display: none; padding: 26px; margin-bottom: 32px; border: 1px solid rgba(45, 212, 191, 0.35); background: linear-gradient(145deg, rgba(17, 24, 39, 0.92), rgba(15, 23, 42, 0.85)); border-radius: 14px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; border-bottom: 1px solid var(--border-card); padding-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="background: rgba(45, 212, 191, 0.15); color: #2dd4bf; border: 1px solid rgba(45, 212, 191, 0.4); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; font-family: monospace;">
+                    GET /api/v1/orders/track
+                </span>
+                <strong style="color: var(--text-primary); font-size: 1rem;">Kết Quả Tra Cứu Thời Gian Thực (Live RESTful API)</strong>
+            </div>
+            <span id="liveApiStatusBadge" style="font-size: 0.8rem; font-weight: 700; padding: 4px 12px; border-radius: 99px;"></span>
+        </div>
+        <div id="liveApiTrackContent"></div>
     </div>
 
     <!-- ERROR MESSAGE -->
@@ -300,3 +317,86 @@
         </div>
     }
 </main>
+
+@section Scripts {
+    <script>
+        async function trackOrderViaLiveApi() {
+            const codeInput = document.querySelector('input[name="orderCode"]');
+            const phoneInput = document.querySelector('input[name="phone"]');
+            const panel = document.getElementById('liveApiTrackPanel');
+            const badge = document.getElementById('liveApiStatusBadge');
+            const content = document.getElementById('liveApiTrackContent');
+
+            const code = (codeInput?.value || '').trim();
+            const phone = (phoneInput?.value || '').trim();
+
+            panel.style.display = 'block';
+
+            if (!code) {
+                badge.style.background = 'rgba(239,68,68,0.15)';
+                badge.style.color = '#f87171';
+                badge.innerText = 'HTTP 400 Bad Request';
+                content.innerHTML = `<div style="color: #f87171; font-size: 0.92rem;"><i class="fa-solid fa-circle-exclamation" style="margin-right: 6px;"></i> Vui lòng nhập Mã Đơn Hàng (Order Code) trước khi gọi API.</div>`;
+                return;
+            }
+
+            badge.style.background = 'rgba(212,175,55,0.15)';
+            badge.style.color = 'var(--gold-primary)';
+            badge.innerText = 'Đang truy vấn...';
+            content.innerHTML = `<div style="color: var(--text-muted); font-size: 0.9rem;"><i class="fa-solid fa-spinner fa-spin" style="margin-right: 6px;"></i> Đang gọi <code>GET /api/v1/orders/track?orderCode=${encodeURIComponent(code)}</code>...</div>`;
+
+            try {
+                let url = '/api/v1/orders/track?orderCode=' + encodeURIComponent(code);
+                if (phone) {
+                    url += '&phone=' + encodeURIComponent(phone);
+                }
+
+                const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+                const data = await res.json();
+
+                if (!res.ok) {
+                    badge.style.background = 'rgba(239,68,68,0.15)';
+                    badge.style.color = '#f87171';
+                    badge.innerText = `HTTP ${res.status}`;
+                    content.innerHTML = `<div style="color: #f87171; font-size: 0.92rem;"><i class="fa-solid fa-triangle-exclamation" style="margin-right: 6px;"></i> ${data.message || 'Không tìm thấy đơn hàng.'}</div>`;
+                    return;
+                }
+
+                badge.style.background = 'rgba(45, 212, 191, 0.15)';
+                badge.style.color = '#2dd4bf';
+                badge.innerText = `HTTP ${res.status} OK · ${data.orderStatus}`;
+
+                const fmtVnd = v => new Intl.NumberFormat('vi-VN').format(v || 0) + ' ₫';
+                const steps = Array.isArray(data.timeline) ? data.timeline : [];
+
+                const timelineHtml = steps.map(s => `
+                    <div style="padding: 14px; border-radius: 10px; border: 1px solid ${s.completed ? 'rgba(212,175,55,0.45)' : 'var(--border-card)'}; background: ${s.completed ? 'rgba(212,175,55,0.08)' : 'rgba(255,255,255,0.02)'}; text-align: center;">
+                        <div style="width: 34px; height: 34px; border-radius: 50%; margin: 0 auto 8px; display: flex; align-items: center; justify-content: center; background: ${s.completed ? 'var(--gold-primary)' : 'var(--bg-surface-elevated)'}; color: ${s.completed ? '#000' : 'var(--text-muted)'}; font-weight: 700;">
+                            <i class="fa-solid ${s.completed ? 'fa-check' : 'fa-hourglass-half'}"></i>
+                        </div>
+                        <div style="font-size: 0.78rem; font-family: monospace; color: ${s.completed ? 'var(--gold-primary)' : 'var(--text-muted)'}; font-weight: 700;">${s.stage}</div>
+                        <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary); margin-top: 2px;">${s.title}</div>
+                    </div>
+                `).join('');
+
+                content.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 18px; font-size: 0.9rem;">
+                        <div>Mã đơn: <strong style="color: var(--gold-primary);">${data.orderCode}</strong> · Khách hàng: <strong>${data.customerName || 'Khách VIP'}</strong></div>
+                        <div>Tổng thanh toán: <strong style="color: var(--gold-primary); font-size: 1.05rem;">${fmtVnd(data.totalAmount)}</strong> (${data.paymentMethod} / ${data.paymentStatus})</div>
+                    </div>
+                    <div style="margin-bottom: 10px; font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700;">
+                        Timeline Trạng Thái (Pending &rarr; Confirmed &rarr; Shipping &rarr; Delivered)
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px;">
+                        ${timelineHtml}
+                    </div>
+                `;
+            } catch (err) {
+                badge.style.background = 'rgba(239,68,68,0.15)';
+                badge.style.color = '#f87171';
+                badge.innerText = 'Network Error';
+                content.innerHTML = `<div style="color: #f87171; font-size: 0.9rem;">Không thể kết nối tới API: ${err.message}</div>`;
+            }
+        }
+    </script>
+}

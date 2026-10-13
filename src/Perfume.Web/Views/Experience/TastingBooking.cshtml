@@ -146,10 +146,26 @@
                               style="width: 100%; box-sizing: border-box; padding: 11px 14px; background: var(--bg-input, rgba(255,255,255,0.06)); border: 1px solid var(--border-card); border-radius: 8px; color: var(--text-primary); font-size: 0.88rem; outline: none;"></textarea>
                 </div>
 
-                <button type="submit" class="btn-luxe" style="width: 100%; padding: 14px; font-size: 1rem; letter-spacing: 0.05em;">
-                    <i class="fa-solid fa-crown" style="margin-right: 8px;"></i> Xác Nhận Đăng Ký Lịch Hẹn VIP
-                </button>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <button type="submit" class="btn-luxe" style="width: 100%; padding: 14px; font-size: 1rem; letter-spacing: 0.05em;">
+                        <i class="fa-solid fa-crown" style="margin-right: 8px;"></i> Xác Nhận Đăng Ký Lịch Hẹn VIP
+                    </button>
+                    <button type="button" id="btnApiTastingBooking" onclick="submitTastingBookingViaApi()" class="btn-luxe-outline" style="width: 100%; padding: 12px; font-size: 0.9rem; border-color: rgba(45, 212, 191, 0.5); color: #2dd4bf;">
+                        <i class="fa-solid fa-bolt" style="margin-right: 6px;"></i> Đặt Lịch Nhanh Qua API (POST /api/v1/experience/tasting-booking)
+                    </button>
+                </div>
             </form>
+
+            <!-- LIVE API BOOKING FEEDBACK -->
+            <div id="apiTastingResultPanel" style="display: none; margin-top: 20px; padding: 18px; border-radius: 12px; border: 1px solid rgba(45, 212, 191, 0.4); background: rgba(15, 23, 42, 0.85);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <span style="font-family: monospace; font-size: 0.75rem; color: #2dd4bf; background: rgba(45, 212, 191, 0.12); padding: 3px 8px; border-radius: 4px; font-weight: 700;">
+                        POST /api/v1/experience/tasting-booking
+                    </span>
+                    <span id="apiTastingStatusBadge" style="font-size: 0.78rem; font-weight: 700; padding: 3px 10px; border-radius: 99px;"></span>
+                </div>
+                <div id="apiTastingResultBody" style="font-size: 0.88rem; line-height: 1.6;"></div>
+            </div>
         </div>
 
         <!-- RIGHT: PRIVILEGES & EXPERIENCE CARD -->
@@ -187,3 +203,80 @@
         </div>
     </div>
 </main>
+
+@section Scripts {
+    <script>
+        async function submitTastingBookingViaApi() {
+            const panel = document.getElementById('apiTastingResultPanel');
+            const badge = document.getElementById('apiTastingStatusBadge');
+            const body = document.getElementById('apiTastingResultBody');
+
+            const locationEl = document.querySelector('input[name="BoutiqueLocation"]:checked');
+            const dateEl = document.querySelector('input[name="BookingDate"]');
+            const slotEl = document.querySelector('select[name="TimeSlot"]');
+            const nameEl = document.querySelector('input[name="CustomerName"]');
+            const phoneEl = document.querySelector('input[name="PhoneNumber"]');
+            const emailEl = document.querySelector('input[name="Email"]');
+            const guestEl = document.querySelector('select[name="GuestCount"]');
+            const scentEl = document.querySelector('select[name="PreferredScentFamilies"]');
+            const notesEl = document.querySelector('textarea[name="Notes"]');
+
+            const payload = {
+                boutiqueLocation: locationEl ? locationEl.value : 'Flagship 88 Tràng Tiền, Hà Nội',
+                bookingDate: dateEl?.value || new Date(Date.now() + 86400000).toISOString().split('T')[0],
+                timeSlot: slotEl?.value || '14:00 - 15:30',
+                customerName: (nameEl?.value || '').trim(),
+                phoneNumber: (phoneEl?.value || '').trim(),
+                email: (emailEl?.value || '').trim() || null,
+                guestCount: parseInt(guestEl?.value || '2', 10),
+                preferredScentFamilies: scentEl?.value || null,
+                notes: (notesEl?.value || '').trim() || null
+            };
+
+            panel.style.display = 'block';
+            badge.style.background = 'rgba(212,175,55,0.15)';
+            badge.style.color = 'var(--gold-primary)';
+            badge.innerText = 'Đang gửi yêu cầu...';
+            body.innerHTML = `<div style="color: var(--text-muted);"><i class="fa-solid fa-spinner fa-spin" style="margin-right: 6px;"></i> Đang gửi dữ liệu tới <code>POST /api/v1/experience/tasting-booking</code>...</div>`;
+
+            try {
+                const res = await fetch('/api/v1/experience/tasting-booking', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+
+                if (!res.ok) {
+                    badge.style.background = 'rgba(239,68,68,0.15)';
+                    badge.style.color = '#f87171';
+                    badge.innerText = `HTTP ${res.status} Bad Request`;
+                    body.innerHTML = `<div style="color: #f87171;"><i class="fa-solid fa-triangle-exclamation" style="margin-right: 6px;"></i> ${data.message || 'Thông tin đặt lịch chưa hợp lệ.'}</div>`;
+                    return;
+                }
+
+                badge.style.background = 'rgba(45, 212, 191, 0.15)';
+                badge.style.color = '#2dd4bf';
+                badge.innerText = `HTTP ${res.status} Created`;
+                body.innerHTML = `
+                    <div style="color: #2ecc71; font-weight: 700; margin-bottom: 6px;">
+                        <i class="fa-solid fa-circle-check" style="margin-right: 6px;"></i> Đặt lịch thử mùi VIP thành công qua RESTful API!
+                    </div>
+                    <div style="color: var(--text-secondary);">
+                        Mã lịch hẹn: <strong style="color: var(--gold-primary);">${data.bookingCode}</strong> · Trạng thái: <strong>${data.status}</strong><br/>
+                        Khách hàng: <strong>${data.customerName}</strong> (${data.phoneNumber}) · Số khách: <strong>${data.guestCount}</strong><br/>
+                        Địa điểm: <strong>${data.boutiqueLocation}</strong> · Khung giờ: <strong>${data.timeSlot}</strong>
+                    </div>
+                `;
+            } catch (err) {
+                badge.style.background = 'rgba(239,68,68,0.15)';
+                badge.style.color = '#f87171';
+                badge.innerText = 'Network Error';
+                body.innerHTML = `<div style="color: #f87171;">Lỗi kết nối API: ${err.message}</div>`;
+            }
+        }
+    </script>
+}

@@ -2,8 +2,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Perfume.Application.Interfaces;
 using Perfume.Infrastructure.Identity;
 using Perfume.Infrastructure.Data;
+using Perfume.Infrastructure.Services;
 
 namespace Perfume.Web.Controllers;
 
@@ -19,6 +22,9 @@ public class AccountController : Controller
         _signInManager = signInManager;
         _db = db;
     }
+
+    private ILoyaltyTierService ResolveLoyaltyService()
+        => HttpContext?.RequestServices?.GetService<ILoyaltyTierService>() ?? new LoyaltyTierService(_db);
 
     // ─── LOGIN ────────────────────────────────────────────────
     [HttpGet]
@@ -123,6 +129,7 @@ public class AccountController : Controller
         if (result.Succeeded)
         {
             await _userManager.AddToRoleAsync(user, "Customer");
+            await ResolveLoyaltyService().GetOrSyncUserLoyaltyAsync(user.Id);
             await _signInManager.SignInAsync(user, isPersistent: false);
             TempData["Success"] = $"Chào mừng {fullName} đến với PERFUME LUXE! 🌸";
             return RedirectToAction("Index", "Home");
@@ -149,7 +156,9 @@ public class AccountController : Controller
         var user = await _userManager.GetUserAsync(User);
         if (user == null) return RedirectToAction("Login");
         var roles = await _userManager.GetRolesAsync(user);
+        var loyaltyStatus = await ResolveLoyaltyService().GetOrSyncUserLoyaltyAsync(user.Id);
         ViewBag.Roles = roles;
+        ViewBag.LoyaltyStatus = loyaltyStatus;
         return View(user);
     }
 
@@ -190,10 +199,16 @@ public class AccountController : Controller
 
     [Authorize]
     [HttpGet]
-    public IActionResult MyOrders()
+    public async Task<IActionResult> MyOrders()
     {
-        if (string.IsNullOrEmpty(_userManager.GetUserId(User))) return Challenge();
-        return View(new List<Perfume.Domain.Entities.Order>());
+        var userId = _userManager.GetUserId(User);
+        if (string.IsNullOrEmpty(userId)) return Challenge();
+        var orders = await _db.Orders
+            .Include(o => o.Items)
+            .Where(o => o.UserId == userId)
+            .OrderByDescending(o => o.CreatedAt)
+            .ToListAsync();
+        return View(orders);
     }
 
     [Authorize]
@@ -202,7 +217,9 @@ public class AccountController : Controller
     {
         var userId = _userManager.GetUserId(User);
         if (string.IsNullOrEmpty(userId)) return Challenge();
-        var order = await _db.Orders.FirstOrDefaultAsync(o => o.Id == id && o.UserId == userId);
+        var order = await _db.Orders
+            .Include(o => o.Items)
+            .FirstOrDefaultAsync(o => o.Id == id && o.UserId == userId);
         if (order == null) return NotFound();
         return View(order);
     }

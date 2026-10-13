@@ -123,11 +123,13 @@ public class CatalogController : Controller
             {
                 Id = p.Id,
                 Name = p.Name,
+                Slug = p.Slug,
                 BrandName = p.Brand != null ? p.Brand.Name : "",
                 MainImageUrl = p.MainImageUrl,
                 FamilyName = p.FragranceFamily != null ? p.FragranceFamily.Name : "Đa dạng",
                 FamilyColor = p.FragranceFamily != null ? p.FragranceFamily.ColorHex : "#D4AF37",
-                Gender = p.Gender.ToString()
+                Gender = p.Gender.ToString(),
+                BasePrice = p.BasePrice
             })
             .ToListAsync();
 
@@ -146,9 +148,11 @@ public class DiscoveryPerfumeItemDto
 {
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
+    public string Slug { get; set; } = string.Empty;
     public string BrandName { get; set; } = string.Empty;
     public string? MainImageUrl { get; set; }
     public string FamilyName { get; set; } = string.Empty;
     public string? FamilyColor { get; set; } = "#D4AF37";
     public string Gender { get; set; } = "Unisex";
+    public decimal BasePrice { get; set; }
 }
