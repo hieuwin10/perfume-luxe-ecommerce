@@ -15,6 +15,7 @@ services:
       Jwt__Issuer: ${JWT_ISSUER:-PerfumeLuxe}
       Jwt__Audience: ${JWT_AUDIENCE:-PerfumeLuxe.Clients}
       Jwt__SigningKey: ${JWT_SIGNING_KEY:-SuperSecretPerfumeLuxeKeyWithAtLeast32BytesLength!}
+      Seo__SiteBaseUrl: ${SEO_SITE_BASE_URL:-}
       Smtp__Enabled: "true"
       Smtp__Host: mailpit
       Smtp__Port: 1025

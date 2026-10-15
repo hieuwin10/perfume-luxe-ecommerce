@@ -378,13 +378,52 @@ public sealed class ApiV1ExtensionsController : ControllerBase
                 ["/api/v1/auth/login"] = CreatePathItem("post", "Auth", "Đăng nhập phiên khách hàng", false, "200", "401"),
                 ["/api/v1/auth/token"] = CreatePathItem("post", "Auth", "Cấp cặp JWT Access Token & Refresh Token", false, "200", "401"),
                 ["/api/v1/auth/refresh"] = CreatePathItem("post", "Auth", "Làm mới JWT Access Token bằng Refresh Token", false, "200", "401"),
-                ["/api/v1/customer/profile"] = CreatePathItem("get", "Customer", "Xem thông tin hồ sơ cá nhân & hạng VIP", true, "200", "401"),
+                ["/api/v1/auth/revoke"] = CreatePathItem("post", "Auth", "Thu hồi refresh token", false, "204"),
+                ["/api/v1/auth/logout"] = CreatePathItem("post", "Auth", "Đăng xuất phiên cookie", true, "204", "401"),
+                ["/api/v1/auth/password/forgot"] = CreatePathItem("post", "Auth", "Gửi hướng dẫn đặt lại mật khẩu", false, "200"),
+                ["/api/v1/auth/password/reset"] = CreatePathItem("post", "Auth", "Đặt lại mật khẩu bằng token", false, "200", "400"),
+                ["/api/v1/customer/profile"] = MergePathItems(
+                    CreatePathItem("get", "Customer", "Xem thông tin hồ sơ cá nhân & hạng VIP", true, "200", "401"),
+                    CreatePathItem("put", "Customer", "Cập nhật hồ sơ cá nhân", true, "200", "400", "401")),
                 ["/api/v1/customer/orders"] = CreatePathItem("get", "Customer", "Danh sách đơn hàng của tài khoản đang đăng nhập", true, "200", "401"),
+                ["/api/v1/customer/orders/{id}"] = CreatePathItem("get", "Customer", "Xem chi tiết đơn thuộc tài khoản đang đăng nhập", true, "200", "401", "404"),
                 ["/api/v1/cart"] = CreatePathItem("get", "Cart", "Xem trạng thái giỏ hàng hiện tại", false, "200"),
-                ["/api/v1/cart/items"] = CreatePathItem("post", "Cart", "Thêm sản phẩm nước hoa vào giỏ hàng", false, "200", "400", "404"),
+                ["/api/v1/cart/items"] = MergePathItems(
+                    CreatePathItem("post", "Cart", "Thêm sản phẩm nước hoa vào giỏ hàng", false, "200", "400", "404"),
+                    CreatePathItem("put", "Cart", "Cập nhật số lượng sản phẩm trong giỏ", false, "200", "400")),
+                ["/api/v1/cart/items/{productId}"] = CreatePathItem("delete", "Cart", "Xóa sản phẩm khỏi giỏ", false, "200"),
+                ["/api/v1/cart/merge"] = CreatePathItem("post", "Cart", "Gộp giỏ khách vãng lai sau khi đăng nhập", true, "200", "401"),
                 ["/api/v1/vouchers/validate"] = CreatePathItem("post", "Vouchers", "Kiểm tra tính hợp lệ và mức giảm của mã ưu đãi Voucher", false, "200"),
                 ["/api/v1/orders"] = CreatePathItem("post", "Orders", "Đặt đơn hàng mới (hỗ trợ gói quà, lời chúc, VietQR, COD)", false, "200", "400"),
+                ["/api/v1/orders/guest"] = CreatePathItem("get", "Orders", "Theo dõi đơn khách vãng lai bằng token", false, "200", "404"),
                 ["/api/v1/orders/track"] = CreatePathItem("get", "Orders", "Tra cứu hành trình đơn hàng theo mã đơn (orderCode)", false, "200", "400", "404"),
+                ["/api/v1/products/{productId}/reviews"] = MergePathItems(
+                    CreatePathItem("get", "Reviews", "Xem đánh giá đã được duyệt", false, "200"),
+                    CreatePathItem("post", "Reviews", "Gửi đánh giá sản phẩm đã nhận", true, "200", "400", "403")),
+                ["/api/v1/store-manager/dashboard"] = CreatePathItem("get", "StoreManager", "Thống kê doanh thu, đơn hàng, tồn kho và voucher", true, "200", "401", "403"),
+                ["/api/v1/store-manager/orders"] = CreatePathItem("get", "StoreManager", "Lọc và phân trang đơn hàng", true, "200", "401", "403"),
+                ["/api/v1/store-manager/orders/{id}"] = CreatePathItem("get", "StoreManager", "Xem chi tiết đơn hàng", true, "200", "404"),
+                ["/api/v1/store-manager/orders/{id}/status"] = CreatePathItem("put", "StoreManager", "Cập nhật trạng thái đơn và hoàn kho khi hủy", true, "200", "401", "403", "409"),
+                ["/api/v1/store-manager/orders/{id}/confirm-payment"] = CreatePathItem("post", "StoreManager", "Xác nhận đã thu COD hoặc đối soát chuyển khoản", true, "200", "401", "403", "409"),
+                ["/api/v1/store-manager/products"] = MergePathItems(
+                    CreatePathItem("get", "StoreManager", "Tìm kiếm và phân trang sản phẩm", true, "200", "401", "403"),
+                    CreatePathItem("post", "StoreManager", "Tạo sản phẩm với phiên bản đầu tiên", true, "201", "400", "409")),
+                ["/api/v1/store-manager/products/{id}"] = MergePathItems(
+                    CreatePathItem("get", "StoreManager", "Xem sản phẩm và các phiên bản", true, "200", "404"),
+                    CreatePathItem("put", "StoreManager", "Cập nhật thông tin sản phẩm", true, "200", "400", "404")),
+                ["/api/v1/store-manager/products/{id}/availability"] = CreatePathItem("put", "StoreManager", "Cập nhật giá cơ sở và trạng thái bán", true, "200", "409"),
+                ["/api/v1/store-manager/products/{productId}/variants"] = CreatePathItem("post", "StoreManager", "Thêm phiên bản và giá bán", true, "201", "400", "409"),
+                ["/api/v1/store-manager/variants/{variantId}"] = MergePathItems(
+                    CreatePathItem("put", "StoreManager", "Cập nhật phiên bản sản phẩm", true, "200", "400", "409"),
+                    CreatePathItem("delete", "StoreManager", "Ẩn phiên bản không còn được sử dụng", true, "204", "404", "409")),
+                ["/api/v1/store-manager/inventory"] = CreatePathItem("get", "StoreManager", "Xem và lọc tồn kho theo ngưỡng", true, "200"),
+                ["/api/v1/store-manager/inventory/{variantId}"] = CreatePathItem("put", "StoreManager", "Điều chỉnh tồn kho phiên bản", true, "200", "400", "404"),
+                ["/api/v1/store-manager/vouchers"] = MergePathItems(
+                    CreatePathItem("get", "StoreManager", "Danh sách voucher", true, "200"),
+                    CreatePathItem("post", "StoreManager", "Tạo voucher", true, "201", "400", "409")),
+                ["/api/v1/store-manager/vouchers/{id}"] = CreatePathItem("put", "StoreManager", "Cập nhật voucher", true, "200", "400", "404", "409"),
+                ["/api/v1/store-manager/reviews"] = CreatePathItem("get", "StoreManager", "Danh sách đánh giá và trạng thái duyệt", true, "200"),
+                ["/api/v1/store-manager/reviews/{reviewId}/moderation"] = CreatePathItem("put", "StoreManager", "Duyệt hoặc từ chối đánh giá", true, "200", "404"),
                 ["/api/v1/flashsales/active"] = CreatePathItem("get", "FlashSales", "Lấy chiến dịch Flash Sale đang hoạt động kèm bộ đếm ngược", false, "200", "404"),
                 ["/api/v1/loyalty/status"] = CreatePathItem("get", "Loyalty", "Tra cứu hạng VIP (Bronze/Silver/Gold/Diamond), điểm thưởng & tiến trình nâng hạng", true, "200", "401"),
                 ["/api/v1/discovery-box/validate-and-add"] = CreatePathItem("post", "DiscoveryBox", "Xác thực & tính giá hộp quà Discovery Box (3-5 ống chiết 2ml/5ml)", false, "200", "400"),
@@ -552,6 +591,9 @@ public sealed class ApiV1ExtensionsController : ControllerBase
             [method] = operation
         };
     }
+
+    private static Dictionary<string, object?> MergePathItems(params Dictionary<string, object?>[] items) =>
+        items.SelectMany(item => item).ToDictionary(entry => entry.Key, entry => entry.Value, StringComparer.OrdinalIgnoreCase);
 }
 
 // ─── API v1 EXTENSION DTOs ────────────────────────────────────────────────────

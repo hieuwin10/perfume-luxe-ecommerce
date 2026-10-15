@@ -1,3 +1,4 @@
+using System.Data;
 using System.Globalization;
 using System.Text;
 using Microsoft.AspNetCore.Authorization;
@@ -185,6 +186,9 @@ public class StoreManagerController : Controller
     [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> UpdateOrderStatus(int orderId, OrderStatus status)
     {
+        await using var transaction = _db.Database.IsRelational()
+            ? await _db.Database.BeginTransactionAsync(IsolationLevel.Serializable)
+            : null;
         var order = await _db.Orders.Include(o => o.Items).FirstOrDefaultAsync(o => o.Id == orderId);
         if (order == null) return NotFound();
         var valid = status == order.OrderStatus ||
@@ -192,8 +196,12 @@ public class StoreManagerController : Controller
             (order.OrderStatus == OrderStatus.Confirmed && status is OrderStatus.Shipping or OrderStatus.Cancelled) ||
             (order.OrderStatus == OrderStatus.Shipping && status == OrderStatus.Delivered);
         if (!valid) { TempData["Error"] = "Trạng thái đơn không hợp lệ."; return RedirectToAction("Orders", "AdminDashboard"); }
+        if (status == OrderStatus.Cancelled && order.PaymentStatus == PaymentStatus.Completed)
+        {
+            TempData["Error"] = "Đơn đã thanh toán; cần xử lý hoàn tiền trước khi hủy.";
+            return RedirectToAction("Orders", "AdminDashboard");
+        }
 
-        await using var transaction = await _db.Database.BeginTransactionAsync();
         try
         {
             if (status == OrderStatus.Cancelled && order.OrderStatus != OrderStatus.Cancelled)
@@ -201,18 +209,20 @@ public class StoreManagerController : Controller
                 foreach (var item in order.Items.Where(i => i.VariantId.HasValue))
                     await _db.ProductVariants.Where(v => v.Id == item.VariantId!.Value)
                         .ExecuteUpdateAsync(s => s.SetProperty(v => v.StockQuantity, v => v.StockQuantity + item.Quantity));
+                foreach (var productId in order.Items.Where(i => i.VariantId.HasValue).Select(i => i.ProductId).Distinct())
+                    await RefreshProductStockAsync(productId);
                 if (!string.IsNullOrEmpty(order.VoucherCode))
                     await _db.Vouchers.Where(v => v.Code == order.VoucherCode && v.UsedCount > 0)
                         .ExecuteUpdateAsync(s => s.SetProperty(v => v.UsedCount, v => v.UsedCount - 1));
             }
             order.OrderStatus = status;
             await _db.SaveChangesAsync();
-            await transaction.CommitAsync();
+            if (transaction != null) await transaction.CommitAsync();
             TempData["Success"] = $"Đã cập nhật đơn {order.OrderCode}.";
         }
         catch
         {
-            await transaction.RollbackAsync();
+            if (transaction != null) await transaction.RollbackAsync();
             TempData["Error"] = "Không thể cập nhật đơn hàng.";
         }
         return RedirectToAction("Orders", "AdminDashboard");
@@ -239,6 +249,11 @@ public class StoreManagerController : Controller
     {
         var order = await _db.Orders.FirstOrDefaultAsync(o => o.Id == orderId);
         if (order == null) return NotFound();
+        if (order.PaymentMethod != PaymentMethod.BankTransfer || order.PaymentStatus != PaymentStatus.Pending || order.OrderStatus == OrderStatus.Cancelled)
+        {
+            TempData["Error"] = "Chỉ xác nhận chuyển khoản đang chờ đối soát cho đơn chưa bị hủy.";
+            return RedirectToAction("Orders", "AdminDashboard");
+        }
         order.PaymentStatus = PaymentStatus.Completed;
         await _db.SaveChangesAsync();
         TempData["Success"] = $"Đã xác nhận thanh toán chuyển khoản VietQR cho đơn {order.OrderCode}.";
@@ -251,6 +266,7 @@ public class StoreManagerController : Controller
         var variant = await _db.ProductVariants.FindAsync(variantId);
         if (variant == null) return NotFound();
         variant.StockQuantity = Math.Clamp(stockQuantity, 0, 100000);
+        await RefreshProductStockAsync(variant.ProductId);
         await _db.SaveChangesAsync();
         TempData["Success"] = "Đã cập nhật tồn kho phiên bản.";
         return RedirectToAction("Products", "AdminDashboard");
@@ -262,6 +278,12 @@ public class StoreManagerController : Controller
         var product = await _db.Products.FindAsync(productId);
         if (product == null) return NotFound();
         if (basePrice < 0) { TempData["Error"] = "Giá sản phẩm không hợp lệ."; return RedirectToAction("Products", "AdminDashboard"); }
+        if (isInStock && await _db.ProductVariants.AnyAsync(v => v.ProductId == productId) &&
+            !await _db.ProductVariants.AnyAsync(v => v.ProductId == productId && v.StockQuantity > 0))
+        {
+            TempData["Error"] = "Không thể bật bán khi tất cả phiên bản đều hết hàng.";
+            return RedirectToAction("Products", "AdminDashboard");
+        }
         product.BasePrice = basePrice;
         product.IsInStock = isInStock;
         await _db.SaveChangesAsync();
@@ -296,6 +318,7 @@ public class StoreManagerController : Controller
         variant.OriginalPrice = originalPrice;
         variant.SalePrice = salePrice;
         variant.StockQuantity = stockQuantity;
+        await RefreshProductStockAsync(variant.ProductId);
         await _db.SaveChangesAsync();
         TempData["Success"] = "Đã cập nhật phiên bản sản phẩm.";
         return RedirectToAction("Products", "AdminDashboard");
@@ -326,6 +349,8 @@ public class StoreManagerController : Controller
             IsDefault = isDefault || !await _db.ProductVariants.AnyAsync(v => v.ProductId == productId)
         });
         await _db.SaveChangesAsync();
+        await RefreshProductStockAsync(productId);
+        await _db.SaveChangesAsync();
         TempData["Success"] = "Đã thêm phiên bản sản phẩm.";
         return RedirectToAction("Products", "AdminDashboard");
     }
@@ -344,6 +369,7 @@ public class StoreManagerController : Controller
         code = (code ?? "").Trim().ToUpperInvariant();
         if (code.Length is < 3 or > 40 || usageLimit < 1 || validTo <= validFrom ||
             (discountPercent.HasValue == discountAmount.HasValue) ||
+            (discountPercent.GetValueOrDefault() <= 0 && discountAmount.GetValueOrDefault() <= 0) ||
             (discountPercent.HasValue && (discountPercent < 0 || discountPercent > 100)) ||
             (discountAmount.HasValue && discountAmount < 0))
         {
@@ -392,21 +418,27 @@ public class StoreManagerController : Controller
         var review = await _db.Reviews.FindAsync(reviewId);
         if (review == null) return NotFound();
         review.IsApproved = approve;
-        if (approve)
+        var product = await _db.Products.FirstOrDefaultAsync(p => p.Id == review.ProductId);
+        if (product != null)
         {
-            var product = await _db.Products.FirstOrDefaultAsync(p => p.Id == review.ProductId);
-            if (product != null)
-            {
-                var approved = _db.Reviews.Where(r => r.ProductId == review.ProductId && r.IsApproved && r.Id != review.Id);
-                var count = await approved.CountAsync() + 1;
-                var sum = await approved.SumAsync(r => (int?)r.Rating) ?? 0;
-                product.RatingCount = count;
-                product.RatingAverage = (sum + review.Rating) / (double)count;
-            }
+            var approved = _db.Reviews.Where(r => r.ProductId == review.ProductId && r.IsApproved && r.Id != review.Id);
+            var count = await approved.CountAsync() + (approve ? 1 : 0);
+            var sum = await approved.SumAsync(r => (int?)r.Rating) ?? 0;
+            product.RatingCount = count;
+            product.RatingAverage = count == 0 ? 0 : (sum + (approve ? review.Rating : 0)) / (double)count;
+            product.UpdatedAt = DateTime.UtcNow;
         }
         await _db.SaveChangesAsync();
         TempData["Success"] = approve ? "Đánh giá đã được duyệt." : "Đánh giá đã bị từ chối.";
         return RedirectToAction(nameof(Reviews));
+    }
+
+    private async Task RefreshProductStockAsync(int productId)
+    {
+        var product = await _db.Products.Include(p => p.Variants).FirstOrDefaultAsync(p => p.Id == productId);
+        if (product == null) return;
+        product.IsInStock = product.Variants.Any(v => !v.IsDeleted && v.StockQuantity > 0);
+        product.UpdatedAt = DateTime.UtcNow;
     }
 }
 

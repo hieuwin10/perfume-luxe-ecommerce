@@ -35,11 +35,21 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.AddSingleton<JwtTokenService>();
 builder.Services.AddAuthentication()
     .AddScheme<AuthenticationSchemeOptions, BearerTokenHandler>("Bearer", _ => { });
-builder.Services.AddAuthorization(options => options.AddPolicy("CustomerApi", policy =>
+builder.Services.AddAuthorization(options =>
 {
-    policy.AddAuthenticationSchemes(IdentityConstants.ApplicationScheme, "Bearer");
-    policy.RequireAuthenticatedUser();
-}));
+    options.AddPolicy("CustomerApi", policy =>
+    {
+        policy.AddAuthenticationSchemes(IdentityConstants.ApplicationScheme, "Bearer");
+        policy.RequireAuthenticatedUser();
+        policy.RequireRole("Customer");
+    });
+    options.AddPolicy("StoreManagerApi", policy =>
+    {
+        policy.AddAuthenticationSchemes(IdentityConstants.ApplicationScheme, "Bearer");
+        policy.RequireAuthenticatedUser();
+        policy.RequireRole("Admin", "StoreManager");
+    });
+});
 
 var dataPath = builder.Configuration["Storage:RootPath"] ?? Path.Combine(builder.Environment.ContentRootPath, "App_Data");
 Directory.CreateDirectory(Path.Combine(dataPath, "DataProtection-Keys"));
@@ -112,6 +122,23 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();
+app.Use(async (context, next) =>
+{
+    if (context.Request.Path.StartsWithSegments("/api/v1", StringComparison.OrdinalIgnoreCase) &&
+        context.Request.Headers.Authorization.ToString().StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+    {
+        var bearer = await context.AuthenticateAsync("Bearer");
+        if (!bearer.Succeeded || bearer.Principal == null)
+        {
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            return;
+        }
+
+        context.User = bearer.Principal;
+    }
+
+    await next();
+});
 app.UseAuthorization();
 app.UseMiddleware<MaintenanceMiddleware>();
 app.UseSession();

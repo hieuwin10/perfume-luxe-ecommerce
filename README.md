@@ -35,7 +35,7 @@ dotnet/
    ```bash
    docker compose -f docker-compose.infra.yml up -d
    ```
-3. Cấu hình các biến môi trường cho ứng dụng trước khi chạy: `ConnectionStrings__DefaultConnection` trỏ tới SQL Server tại `localhost,1433`; đặt `Database__BackupPath=/var/opt/mssql/backup`, `Storage__RootPath=src/Perfume.Web/App_Data`, `InitialAdmin__Email` và `InitialAdmin__Password` để tạo Admin lần đầu; đặt `Smtp__Enabled=true`, `Smtp__Host=localhost`, `Smtp__Port=1025`.
+3. Cấu hình các biến môi trường cho ứng dụng trước khi chạy: `ConnectionStrings__DefaultConnection` trỏ tới SQL Server tại `localhost,1433`; đặt `Database__BackupPath=/var/opt/mssql/backup`, `Storage__RootPath=src/Perfume.Web/App_Data`, `InitialAdmin__Email` và `InitialAdmin__Password` để tạo Admin lần đầu; đặt `Smtp__Enabled=true`, `Smtp__Host=localhost`, `Smtp__Port=1025`. Khi deploy, đặt `Seo__SiteBaseUrl` (hoặc `SEO_SITE_BASE_URL` trong `.env` Docker) thành domain HTTPS chính để canonical, Open Graph và sitemap dùng thống nhất một host.
 4. Chạy `dotnet watch --project src/Perfume.Web run`.
 5. Truy cập cửa hàng ở cổng ứng dụng, Adminer tại `http://localhost:8088`, Mailpit tại `http://localhost:8025`.
 

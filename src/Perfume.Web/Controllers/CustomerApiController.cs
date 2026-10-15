@@ -36,10 +36,12 @@ public sealed class CustomerApiController : ControllerBase
     private readonly IAntiforgery _antiforgery;
     private readonly JwtTokenService _jwt;
     private readonly IDataProtector _guestOrderProtector;
+    private readonly ILogger<CustomerApiController>? _logger;
 
     public CustomerApiController(IPerfumeCatalogService catalog, ICustomerCartService carts, IOrderService orders,
         IOrderEmailSender email, PerfumeDbContext db, UserManager<AppUser> users, SignInManager<AppUser> signIn,
-        IAntiforgery antiforgery, JwtTokenService jwt, IDataProtectionProvider protectionProvider)
+        IAntiforgery antiforgery, JwtTokenService jwt, IDataProtectionProvider protectionProvider,
+        ILogger<CustomerApiController>? logger = null)
     {
         _catalog = catalog;
         _carts = carts;
@@ -51,6 +53,7 @@ public sealed class CustomerApiController : ControllerBase
         _antiforgery = antiforgery;
         _jwt = jwt;
         _guestOrderProtector = protectionProvider.CreateProtector("PerfumeLuxe.GuestOrderTracking.v1");
+        _logger = logger;
     }
 
     [HttpGet("catalog/products")]
@@ -324,7 +327,14 @@ public sealed class CustomerApiController : ControllerBase
             trackingUrl = Url?.Action("Success", "Checkout", new { token = trackingToken }, Request.Scheme)
                 ?? $"/checkout/success?token={trackingToken}";
         }
-        await _email.SendOrderConfirmationAsync(order, trackingUrl);
+        try
+        {
+            await _email.SendOrderConfirmationAsync(order, trackingUrl);
+        }
+        catch
+        {
+            _logger?.LogWarning("Order {OrderCode} was saved, but its confirmation email could not be sent.", order.OrderCode);
+        }
         var targetAction = order.PaymentMethod == PaymentMethod.BankTransfer ? "VietQR" : "Success";
         var response = new GuestOrderResponse
         {
