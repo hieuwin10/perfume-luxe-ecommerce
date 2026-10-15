@@ -147,6 +147,6 @@ app.MapControllerRoute("catalogFilter", "bo-suu-tap", new { controller = "Catalo
 app.MapControllerRoute("blogDetail", "blog/{slug}", new { controller = "Blog", action = "Detail" });
 app.MapControllerRoute("sitemap", "sitemap.xml", new { controller = "Seo", action = "Sitemap" });
 app.MapControllerRoute("robots", "robots.txt", new { controller = "Seo", action = "Robots" });
-app.MapControllerRoute("areas", "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");
+app.MapControllerRoute("areas", "{area:exists}/{controller=AdminDashboard}/{action=Index}/{id?}");
 app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
 app.Run();
