@@ -29,6 +29,15 @@
     <!-- Google Search Console Verification -->
     <meta name="google-site-verification" content="Qh9rEGR7zfGddcqbtlF1p2H9s544wnJg2TOfQeLgNJs" />
 
+    <!-- Google Analytics 4 (GA4) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-KCWE7ENDEJ"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-KCWE7ENDEJ');
+    </script>
+
     <!-- Performance Preconnect & DNS-Prefetch -->
     <link rel="preconnect" href="https://images.unsplash.com" crossorigin />
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
@@ -56,10 +65,15 @@
 
     <!-- Favicon & Brand Theme -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💎</text></svg>" />
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💎</text></svg>" />
     <meta name="theme-color" content="#0B0B0E" />
 
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <!-- LCP Hero Image Preload -->
+    <link rel="preload" as="image" href="https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=1920&q=80" fetchpriority="high" />
+
+    <!-- Font Awesome Icons (Non-render-blocking) -->
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" /></noscript>
 
     <!-- Luxury Theme Stylesheet -->
     <link rel="stylesheet" href="~/css/luxury-perfume.css" asp-append-version="true" />
@@ -125,7 +139,7 @@
                 {
                     var currentUser = await UserManager.GetUserAsync(User);
                     <div class="user-avatar-dropdown" id="userDropdown">
-                        <button type="button" id="userAvatarBtn" class="icon-btn" title="Tài khoản của bạn" style="width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, var(--gold-primary), #8B6914); font-weight: 700; font-size: 0.85rem; color: #000;">
+                        <button type="button" id="userAvatarBtn" class="icon-btn" title="Tài khoản của bạn" aria-label="Tài khoản cá nhân" style="width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, var(--gold-primary), #8B6914); font-weight: 700; font-size: 0.85rem; color: #000;">
                             @((currentUser?.FullName ?? "U").Substring(0, 1).ToUpper())
                         </button>
                         <div class="user-dropdown-menu" id="userDropdownMenu">
@@ -162,7 +176,7 @@
                 }
                 else
                 {
-                    <a href="/account/login" class="icon-btn" title="Đăng nhập" style="width: 38px; height: 38px;">
+                    <a href="/account/login" class="icon-btn" title="Đăng nhập" aria-label="Đăng nhập tài khoản" style="width: 38px; height: 38px;">
                         <i class="fa-solid fa-user"></i>
                     </a>
                 }
@@ -175,7 +189,7 @@
     <div class="mini-cart-drawer" id="cartDrawer">
         <div class="drawer-header">
             <h4 style="font-size: 1.3rem; margin: 0;"><i class="fa-solid fa-bag-shopping" style="color: var(--gold-primary); margin-right: 8px;"></i> Giỏ Hàng Của Bạn</h4>
-            <button type="button" class="icon-btn" id="closeCartBtn" style="width: 32px; height: 32px;"><i class="fa-solid fa-xmark"></i></button>
+            <button type="button" class="icon-btn" id="closeCartBtn" aria-label="Đóng giỏ hàng" style="width: 32px; height: 32px;"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <div class="drawer-body" id="cartDrawerItems">
             <div style="text-align: center; padding: 40px 0; color: var(--text-muted);">
@@ -210,9 +224,9 @@
                     Điểm đến hàng đầu cho những người yêu thích nghệ thuật mùi hương xa xỉ. Mỗi giọt hương là một tác phẩm bất hủ nâng tầm phong cách sống.
                 </p>
                 <div style="display: flex; gap: 12px;">
-                    <a href="#" class="icon-btn" style="width: 36px; height: 36px;"><i class="fa-brands fa-facebook-f"></i></a>
-                    <a href="#" class="icon-btn" style="width: 36px; height: 36px;"><i class="fa-brands fa-instagram"></i></a>
-                    <a href="#" class="icon-btn" style="width: 36px; height: 36px;"><i class="fa-brands fa-tiktok"></i></a>
+                    <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" class="icon-btn" aria-label="Theo dõi PERFUME LUXE trên Facebook" style="width: 36px; height: 36px;"><i class="fa-brands fa-facebook-f"></i></a>
+                    <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="icon-btn" aria-label="Theo dõi PERFUME LUXE trên Instagram" style="width: 36px; height: 36px;"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="https://tiktok.com" target="_blank" rel="noopener noreferrer" class="icon-btn" aria-label="Theo dõi PERFUME LUXE trên TikTok" style="width: 36px; height: 36px;"><i class="fa-brands fa-tiktok"></i></a>
                 </div>
             </div>
 
