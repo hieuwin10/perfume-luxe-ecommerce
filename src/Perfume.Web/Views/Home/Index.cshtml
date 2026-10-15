@@ -24,6 +24,9 @@
                     </span>
                     <h1 style="font-size: clamp(2.5rem, 6vw, 4.5rem); font-family: var(--font-heading); font-weight: 700; line-height: 1.15; margin-bottom: 24px; text-shadow: 0 4px 30px rgba(0,0,0,0.9); color: #FFF;">
                         @b.Title
+                        <span style="display: block; font-size: clamp(1rem, 2vw, 1.35rem); font-weight: 600; font-family: var(--font-body); letter-spacing: 0.05em; color: var(--gold-light); margin-top: 10px;">
+                            Nước Hoa Xa Xỉ Chính Hãng
+                        </span>
                     </h1>
                     @if (!string.IsNullOrEmpty(b.Subtitle))
                     {
@@ -100,9 +103,12 @@ else
             </span>
             <h1 style="font-size: clamp(2.5rem, 6vw, 4.5rem); font-family: var(--font-heading); font-weight: 700; line-height: 1.15; margin-bottom: 24px; text-shadow: 0 4px 30px rgba(0,0,0,0.8);">
                 Bản Giao Hưởng <br /><span class="text-gold-gradient">Mùi Hương Bất Hủ</span>
+                <span style="display: block; font-size: clamp(1.1rem, 2.2vw, 1.45rem); font-weight: 600; font-family: var(--font-body); letter-spacing: 0.05em; color: var(--gold-light); margin-top: 14px; text-shadow: 0 2px 10px rgba(0,0,0,0.9);">
+                    Nước Hoa Xa Xỉ Chính Hãng
+                </span>
             </h1>
             <p style="font-size: clamp(1rem, 1.5vw, 1.25rem); color: var(--text-secondary); max-width: 680px; margin: 0 auto 36px; line-height: 1.7;">
-                Bản giao hưởng mùi hương bất hủ hội tụ từng nốt hương tuyệt tác thủ công chạm đến tâm hồn. Khám phá những sáng tạo mùi hương độc bản từ Paris, Grasse và London.
+                Bản giao hưởng mùi hương bất hủ hội tụ từng nốt hương nước hoa xa xỉ chính hãng chạm đến tâm hồn. Khám phá những sáng tạo mùi hương độc bản từ Paris, Grasse và London.
             </p>
             <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
                 <a href="/bo-suu-tap" class="btn-luxe" style="font-size: 1rem; padding: 14px 36px;">
@@ -322,7 +328,7 @@ else
             <h2 style="font-size: 2.4rem; margin-top: 4px;">Kiệt Tác Mùi Hương Nổi Bật</h2>
         </div>
         <a href="/bo-suu-tap" class="btn-luxe-outline" style="padding: 8px 20px; font-size: 0.82rem;">
-            Xem Tất Cả (@featured.Count+ Sản Phẩm) <i class="fa-solid fa-arrow-right" style="margin-left: 6px;"></i>
+            Khám Phá Toàn Bộ Tuyển Chọn (@featured.Count+ Mùi Hương) <i class="fa-solid fa-arrow-right" style="margin-left: 6px;"></i>
         </a>
     </div>
 
@@ -464,7 +470,7 @@ else
                             @b.Summary
                         </p>
                         <a href="/blog/@b.Slug" aria-label="Đọc bài viết: @b.Title" style="margin-top: auto; font-size: 0.82rem; font-weight: 600; color: var(--gold-primary); display: inline-flex; align-items: center; gap: 6px;">
-                            Đọc Bài Viết <i class="fa-solid fa-arrow-right"></i>
+                            <span>Đọc Chuyên Đề: @b.Title</span> <i class="fa-solid fa-arrow-right"></i>
                         </a>
                     </div>
                 </div>
