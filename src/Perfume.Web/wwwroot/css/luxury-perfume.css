@@ -35,8 +35,8 @@
     --bg-glass: rgba(20, 20, 25, 0.85);
     
     --text-primary: #F8F7F5;
-    --text-secondary: #A0A0AB;
-    --text-muted: #656573;
+    --text-secondary: #C4C4CF;
+    --text-muted: #A1A1B2;
     
     --border-subtle: rgba(212, 175, 55, 0.15);
     --border-focus: rgba(212, 175, 55, 0.5);
@@ -332,8 +332,9 @@ a {
 }
 
 .badge-tag.tag-hot {
-    background: #E63946;
-    color: #FFF;
+    background: #B91C1C;
+    color: #FFFFFF;
+    font-weight: 700;
 }
 
 .badge-tag.tag-new {

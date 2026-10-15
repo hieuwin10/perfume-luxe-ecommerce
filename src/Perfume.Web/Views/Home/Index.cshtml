@@ -102,7 +102,7 @@ else
                 Bản Giao Hưởng <br /><span class="text-gold-gradient">Mùi Hương Bất Hủ</span>
             </h1>
             <p style="font-size: clamp(1rem, 1.5vw, 1.25rem); color: var(--text-secondary); max-width: 680px; margin: 0 auto 36px; line-height: 1.7;">
-                Từng nốt hương là một tuyệt tác thủ công chạm đến tâm hồn. Khám phá những sáng tạo mùi hương độc bản từ Paris, Grasse và London.
+                Bản giao hưởng mùi hương bất hủ hội tụ từng nốt hương tuyệt tác thủ công chạm đến tâm hồn. Khám phá những sáng tạo mùi hương độc bản từ Paris, Grasse và London.
             </p>
             <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
                 <a href="/bo-suu-tap" class="btn-luxe" style="font-size: 1rem; padding: 14px 36px;">
@@ -348,7 +348,7 @@ else
                     </div>
 
                     <a href="/nuoc-hoa/@p.Slug" class="card-img-wrapper">
-                        <img src="@p.MainImageUrl" alt="@p.Name" loading="lazy" />
+                        <img src="@p.MainImageUrl" alt="@p.Name" loading="lazy" decoding="async" width="300" height="300" />
                     </a>
 
                     <div class="card-body">
@@ -452,8 +452,8 @@ else
             @foreach (var b in blogs)
             {
                 <div style="background: var(--bg-surface); border: 1px solid var(--border-card); border-radius: var(--radius-md); overflow: hidden; display: flex; flex-direction: column;">
-                    <a href="/blog/@b.Slug" style="display: block; width: 100%; height: 220px; overflow: hidden;">
-                        <img src="@(b.ThumbnailUrl ?? "https://images.unsplash.com/photo-1547887537-6158d64c35b3?auto=format&fit=crop&w=800&q=80")" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease;" alt="@b.Title" />
+                    <a href="/blog/@b.Slug" style="display: block; width: 100%; height: 220px; overflow: hidden;" aria-label="Xem chi tiết bài viết: @b.Title">
+                        <img src="@(b.ThumbnailUrl ?? "https://images.unsplash.com/photo-1547887537-6158d64c35b3?auto=format&fit=crop&w=600&q=75")" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease;" alt="@b.Title" loading="lazy" decoding="async" width="400" height="220" />
                     </a>
                     <div style="padding: 24px; display: flex; flex-direction: column; flex-grow: 1;">
                         <span style="font-size: 0.75rem; color: var(--gold-primary); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;">@(b.Category?.Name ?? "Kiến Thức")</span>
@@ -463,7 +463,7 @@ else
                         <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.6; margin-bottom: 16px;">
                             @b.Summary
                         </p>
-                        <a href="/blog/@b.Slug" style="margin-top: auto; font-size: 0.82rem; font-weight: 600; color: var(--gold-primary); display: inline-flex; align-items: center; gap: 6px;">
+                        <a href="/blog/@b.Slug" aria-label="Đọc bài viết: @b.Title" style="margin-top: auto; font-size: 0.82rem; font-weight: 600; color: var(--gold-primary); display: inline-flex; align-items: center; gap: 6px;">
                             Đọc Bài Viết <i class="fa-solid fa-arrow-right"></i>
                         </a>
                     </div>
