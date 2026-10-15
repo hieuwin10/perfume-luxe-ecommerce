@@ -2,7 +2,7 @@
 @inject SignInManager<Perfume.Infrastructure.Identity.AppUser> SignInManager
 @inject UserManager<Perfume.Infrastructure.Identity.AppUser> UserManager
 @{
-    var canonicalUrl = ViewData["CanonicalUrl"]?.ToString() ?? $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}{Context.Request.QueryString}";
+    var canonicalUrl = ViewData["CanonicalUrl"]?.ToString() ?? $"https://{Context.Request.Host}{Context.Request.Path}{Context.Request.QueryString}";
     var ogUrl = ViewData["OgUrl"]?.ToString() ?? canonicalUrl;
     var requestPath = Context.Request.Path;
     var isPrivatePage = requestPath.StartsWithSegments("/account", StringComparison.OrdinalIgnoreCase)
@@ -25,6 +25,15 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@documentTitle</title>
+    
+    <!-- Google Search Console Verification -->
+    <meta name="google-site-verification" content="Qh9rEGR7zfGddcqbtlF1p2H9s544wnJg2TOfQeLgNJs" />
+
+    <!-- Performance Preconnect & DNS-Prefetch -->
+    <link rel="preconnect" href="https://images.unsplash.com" crossorigin />
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+    <link rel="dns-prefetch" href="https://images.unsplash.com" />
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com" />
     
     <!-- Meta SEO Google & Social Cards -->
     <meta name="description" content="@(ViewData["MetaDescription"] ?? "Thế giới nước hoa cao cấp chính hãng từ các thương hiệu xa xỉ bậc nhất thế giới: Dior, Chanel, Creed, Tom Ford, Le Labo, Kilian. Bảo đảm 100% xuất xứ.")" />
