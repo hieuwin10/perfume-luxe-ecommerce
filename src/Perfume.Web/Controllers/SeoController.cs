@@ -1,97 +1,126 @@
+using System.Globalization;
 using System.Text;
+using System.Xml.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Perfume.Application.DTOs;
 using Perfume.Application.Interfaces;
+using Perfume.Web.Seo;
 
 namespace Perfume.Web.Controllers;
 
 public class SeoController : Controller
 {
+    private static readonly XNamespace SitemapNamespace = "http://www.sitemaps.org/schemas/sitemap/0.9";
     private readonly IPerfumeCatalogService _catalogService;
     private readonly IBlogService _blogService;
+    private readonly IConfiguration _configuration;
 
-    public SeoController(IPerfumeCatalogService catalogService, IBlogService blogService)
+    public SeoController(IPerfumeCatalogService catalogService, IBlogService blogService, IConfiguration? configuration = null)
     {
         _catalogService = catalogService;
         _blogService = blogService;
+        _configuration = configuration ?? new ConfigurationBuilder().Build();
     }
 
     [HttpGet]
-    [ResponseCache(Duration = 86400)]
-    public async Task<IActionResult> Sitemap()
+    [ResponseCache(Duration = 3600)]
+    public async Task<IActionResult> Sitemap(CancellationToken cancellationToken = default)
     {
-        var scheme = Request.Scheme;
-        var host = Request.Host.Value;
-        var baseUrl = $"{scheme}://{host}";
+        var baseUrl = SeoUrlBuilder.GetSiteBaseUrl(Request, _configuration);
+        var entries = new List<(string Url, DateTime? LastModified)>();
 
-        var (products, _) = await _catalogService.GetProductsAsync(new ProductFilterParams { PageSize = 1000 });
-        var posts = await _blogService.GetRecentPostsAsync(100);
+        Add("/");
+        Add("/bo-suu-tap");
+        Add("/blog");
+        Add("/catalog/quiz");
 
-        var sb = new StringBuilder();
-        sb.AppendLine("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-        sb.AppendLine("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">");
-
-        // Static routes
-        AddUrl(sb, baseUrl, "daily", "1.0");
-        AddUrl(sb, $"{baseUrl}/bo-suu-tap", "daily", "0.9");
-        AddUrl(sb, $"{baseUrl}/bo-suu-tap?gender=Men", "weekly", "0.85");
-        AddUrl(sb, $"{baseUrl}/bo-suu-tap?gender=Women", "weekly", "0.85");
-        AddUrl(sb, $"{baseUrl}/blog", "weekly", "0.8");
-        AddUrl(sb, $"{baseUrl}/catalog/quiz", "monthly", "0.7");
-
-        // Products
-        foreach (var p in products)
+        const int pageSize = 1000;
+        var productPage = 1;
+        while (true)
         {
-            AddUrl(sb, $"{baseUrl}/nuoc-hoa/{p.Slug}", "weekly", "0.9");
+            var (products, total) = await _catalogService.GetProductsAsync(new ProductFilterParams
+            {
+                Page = productPage,
+                PageSize = pageSize,
+                SortBy = "newest"
+            });
+
+            foreach (var product in products)
+                Add($"/nuoc-hoa/{Uri.EscapeDataString(product.Slug)}", product.UpdatedAt ?? product.CreatedAt);
+
+            if (products.Count == 0 || productPage * pageSize >= total) break;
+            productPage++;
         }
 
-        // Blogs
-        foreach (var b in posts)
+        var categories = await _blogService.GetBlogCategoriesAsync();
+        foreach (var category in categories)
         {
-            AddUrl(sb, $"{baseUrl}/blog/{b.Slug}", "monthly", "0.8");
+            var (_, categoryPostCount) = await _blogService.GetPostsPagedAsync(category.Slug, 1, pageSize);
+            if (categoryPostCount == 0) continue;
+            var categoryQuery = $"category={Uri.EscapeDataString(category.Slug)}";
+            Add($"/blog?{categoryQuery}");
+            var categoryPages = (int)Math.Ceiling(categoryPostCount / (double)pageSize);
+            for (var categoryPage = 2; categoryPage <= categoryPages; categoryPage++)
+                Add($"/blog?page={categoryPage}&{categoryQuery}");
         }
 
-        sb.AppendLine("</urlset>");
+        var (firstPosts, totalPosts) = await _blogService.GetPostsPagedAsync(null, 1, pageSize);
+        AddPosts(firstPosts);
+        var totalBlogPages = (int)Math.Ceiling(totalPosts / (double)pageSize);
+        for (var blogPage = 2; blogPage <= totalBlogPages; blogPage++)
+        {
+            Add($"/blog?page={blogPage}");
+            var (posts, _) = await _blogService.GetPostsPagedAsync(null, blogPage, pageSize);
+            AddPosts(posts);
+        }
 
-        return Content(sb.ToString(), "application/xml", Encoding.UTF8);
+        var document = new XDocument(
+            new XDeclaration("1.0", "utf-8", null),
+            new XElement(SitemapNamespace + "urlset",
+                entries.Select(entry => new XElement(SitemapNamespace + "url",
+                    new XElement(SitemapNamespace + "loc", entry.Url),
+                    entry.LastModified.HasValue
+                        ? new XElement(SitemapNamespace + "lastmod", DateTime.SpecifyKind(entry.LastModified.Value, DateTimeKind.Utc).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture))
+                        : null))));
+
+        return Content(document.ToString(SaveOptions.DisableFormatting), "application/xml", Encoding.UTF8);
+
+        void Add(string path, DateTime? lastModified = null) => entries.Add(($"{baseUrl}{path}", lastModified));
+        void AddPosts(IEnumerable<Perfume.Domain.Entities.BlogPost> posts)
+        {
+            foreach (var post in posts)
+                Add($"/blog/{Uri.EscapeDataString(post.Slug)}", post.UpdatedAt ?? post.CreatedAt);
+        }
     }
 
     [HttpGet]
-    [ResponseCache(Duration = 86400)]
+    [ResponseCache(Duration = 3600)]
     public IActionResult Robots()
     {
-        var scheme = Request.Scheme;
-        var host = Request.Host.Value;
-        var baseUrl = $"{scheme}://{host}";
+        var baseUrl = SeoUrlBuilder.GetSiteBaseUrl(Request, _configuration);
+        var content = string.Join('\n', new[]
+        {
+            "User-agent: *",
+            "Disallow: /admin/",
+            "Disallow: /account/",
+            "Disallow: /cart/",
+            "Disallow: /checkout/",
+            "Disallow: /api/",
+            "Disallow: /tra-cuu-don-hang",
+            "Disallow: /order-tracking",
+            "Allow: /",
+            string.Empty,
+            "User-agent: GPTBot",
+            "Allow: /",
+            "User-agent: PerplexityBot",
+            "Allow: /",
+            "User-agent: ClaudeBot",
+            "Allow: /",
+            string.Empty,
+            $"Sitemap: {baseUrl}/sitemap.xml",
+            string.Empty
+        });
 
-        var sb = new StringBuilder();
-        sb.AppendLine("User-agent: *");
-        sb.AppendLine("Disallow: /admin/");
-        sb.AppendLine("Disallow: /cart/");
-        sb.AppendLine("Disallow: /checkout/");
-        sb.AppendLine("Disallow: /api/");
-        sb.AppendLine("Allow: /");
-        sb.AppendLine();
-        sb.AppendLine("# AI & Answer Engine Crawlers (AEO / GEO)");
-        sb.AppendLine("User-agent: GPTBot");
-        sb.AppendLine("Allow: /");
-        sb.AppendLine("User-agent: PerplexityBot");
-        sb.AppendLine("Allow: /");
-        sb.AppendLine("User-agent: ClaudeBot");
-        sb.AppendLine("Allow: /");
-        sb.AppendLine();
-        sb.AppendLine($"Sitemap: {baseUrl}/sitemap.xml");
-
-        return Content(sb.ToString(), "text/plain", Encoding.UTF8);
-    }
-
-    private static void AddUrl(StringBuilder sb, string url, string changeFreq, string priority)
-    {
-        sb.AppendLine("  <url>");
-        sb.AppendLine($"    <loc>{url}</loc>");
-        sb.AppendLine($"    <lastmod>{DateTime.UtcNow:yyyy-MM-dd}</lastmod>");
-        sb.AppendLine($"    <changefreq>{changeFreq}</changefreq>");
-        sb.AppendLine($"    <priority>{priority}</priority>");
-        sb.AppendLine("  </url>");
+        return Content(content, "text/plain", Encoding.UTF8);
     }
 }

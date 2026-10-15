@@ -1,7 +1,7 @@
 @model List<BlogPost>
 @{
-    ViewData["Title"] = "Tạp Chí Mùi Hương & Cẩm Nang Haute Parfumerie";
-    ViewData["MetaDescription"] = "Khám phá thế giới nước hoa xa xỉ: Nghệ thuật dùng hương, giải mã kim tự tháp 3 tầng hương, lịch sử các chai nước hoa kinh điển và xu hướng Niche quốc tế.";
+    ViewData["Title"] ??= "Tạp Chí Mùi Hương & Cẩm Nang Haute Parfumerie";
+    ViewData["MetaDescription"] ??= "Khám phá nghệ thuật nước hoa, cách chọn hương theo phong cách và những gợi ý tinh tế giúp bạn tìm mùi hương phù hợp.";
     var categories = ViewBag.Categories as List<BlogCategory> ?? new List<BlogCategory>();
     var currentCat = ViewBag.CurrentCategory as string;
     var heroPost = ViewBag.HeroPost as BlogPost;
@@ -243,36 +243,36 @@
 </div>
 
 <!-- GOOGLE STRUCTURED DATA (JSON-LD) -->
-<script type="application/ld+json">
-{
-  "@@context": "https://schema.org",
-  "@@type": "Blog",
-  "name": "Tạp Chí Nghệ Thuật Mùi Hương - PERFUME LUXE",
-  "description": "Cẩm nang chuyên sâu về nước hoa cao cấp, nghệ thuật dùng hương và văn hóa Haute Parfumerie.",
-  "url": "@($"{Context.Request.Scheme}://{Context.Request.Host}/blog")",
-  "publisher": {
-    "@@type": "Organization",
-    "name": "PERFUME LUXE"
-  }
-}
-</script>
-<script type="application/ld+json">
-{
-  "@@context": "https://schema.org",
-  "@@type": "BreadcrumbList",
-  "itemListElement": [
+@{
+    var pageUrl = ViewData["CanonicalUrl"]?.ToString() ?? $"{Context.Request.Scheme}://{Context.Request.Host}/blog";
+    var siteBaseUrl = ViewData["SeoSiteBaseUrl"]?.ToString() ?? $"{Context.Request.Scheme}://{Context.Request.Host}";
+    var blogJsonLd = System.Text.Json.JsonSerializer.Serialize(new Dictionary<string, object?>
     {
-      "@@type": "ListItem",
-      "position": 1,
-      "name": "Trang Chủ",
-      "item": "@($"{Context.Request.Scheme}://{Context.Request.Host}/")"
-    },
+        ["@context"] = "https://schema.org",
+        ["@type"] = "Blog",
+        ["name"] = "Tạp Chí Nghệ Thuật Mùi Hương - PERFUME LUXE",
+        ["description"] = ViewData["MetaDescription"]?.ToString(),
+        ["url"] = pageUrl,
+        ["publisher"] = new Dictionary<string, object?> { ["@type"] = "Organization", ["name"] = "PERFUME LUXE" },
+        ["blogPost"] = Model.Select(post => new Dictionary<string, object?>
+        {
+            ["@type"] = "BlogPosting",
+            ["headline"] = post.Title,
+            ["url"] = $"{siteBaseUrl}/blog/{Uri.EscapeDataString(post.Slug)}",
+            ["datePublished"] = DateTime.SpecifyKind(post.CreatedAt, DateTimeKind.Utc).ToString("O"),
+            ["author"] = new Dictionary<string, object?> { ["@type"] = "Person", ["name"] = post.AuthorName }
+        }).ToArray()
+    });
+    var breadcrumbJsonLd = System.Text.Json.JsonSerializer.Serialize(new Dictionary<string, object?>
     {
-      "@@type": "ListItem",
-      "position": 2,
-      "name": "Tạp Chí Mùi Hương",
-      "item": "@($"{Context.Request.Scheme}://{Context.Request.Host}/blog")"
-    }
-  ]
+        ["@context"] = "https://schema.org",
+        ["@type"] = "BreadcrumbList",
+        ["itemListElement"] = new object[]
+        {
+            new Dictionary<string, object?> { ["@type"] = "ListItem", ["position"] = 1, ["name"] = "Trang Chủ", ["item"] = $"{siteBaseUrl}/" },
+            new Dictionary<string, object?> { ["@type"] = "ListItem", ["position"] = 2, ["name"] = "Tạp Chí Mùi Hương", ["item"] = pageUrl }
+        }
+    });
 }
-</script>
+<script type="application/ld+json">@Html.Raw(blogJsonLd)</script>
+<script type="application/ld+json">@Html.Raw(breadcrumbJsonLd)</script>

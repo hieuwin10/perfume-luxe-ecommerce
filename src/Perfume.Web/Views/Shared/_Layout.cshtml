@@ -1,17 +1,44 @@
 @using Microsoft.AspNetCore.Identity
 @inject SignInManager<Perfume.Infrastructure.Identity.AppUser> SignInManager
 @inject UserManager<Perfume.Infrastructure.Identity.AppUser> UserManager
+@{
+    var canonicalUrl = ViewData["CanonicalUrl"]?.ToString() ?? $"https://{Context.Request.Host}{Context.Request.Path}{Context.Request.QueryString}";
+    var ogUrl = ViewData["OgUrl"]?.ToString() ?? canonicalUrl;
+    var requestPath = Context.Request.Path;
+    var isPrivatePage = requestPath.StartsWithSegments("/account", StringComparison.OrdinalIgnoreCase)
+        || requestPath.StartsWithSegments("/cart", StringComparison.OrdinalIgnoreCase)
+        || requestPath.StartsWithSegments("/checkout", StringComparison.OrdinalIgnoreCase)
+        || requestPath.StartsWithSegments("/admin", StringComparison.OrdinalIgnoreCase)
+        || requestPath.StartsWithSegments("/tra-cuu-don-hang", StringComparison.OrdinalIgnoreCase)
+        || requestPath.StartsWithSegments("/order-tracking", StringComparison.OrdinalIgnoreCase);
+    var robotsContent = ViewData["Robots"]?.ToString() ?? (isPrivatePage ? "noindex, nofollow" : "index, follow");
+    var pageTitle = ViewData["Title"]?.ToString()?.Trim();
+    var documentTitle = string.IsNullOrWhiteSpace(pageTitle)
+        ? "PERFUME LUXE - Haute Parfumerie | Nước Hoa Cao Cấp Chính Hãng"
+        : pageTitle.EndsWith("PERFUME LUXE", StringComparison.OrdinalIgnoreCase)
+            ? pageTitle
+            : $"{pageTitle} | PERFUME LUXE";
+}
 <!DOCTYPE html>
 <html lang="vi" data-theme="dark">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@(ViewData["Title"] != null ? $"{ViewData["Title"]} | PERFUME LUXE" : "PERFUME LUXE - Haute Parfumerie | Nước Hoa Cao Cấp Chính Hãng")</title>
+    <title>@documentTitle</title>
+    
+    <!-- Google Search Console Verification -->
+    <meta name="google-site-verification" content="Qh9rEGR7zfGddcqbtlF1p2H9s544wnJg2TOfQeLgNJs" />
+
+    <!-- Performance Preconnect & DNS-Prefetch -->
+    <link rel="preconnect" href="https://images.unsplash.com" crossorigin />
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+    <link rel="dns-prefetch" href="https://images.unsplash.com" />
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com" />
     
     <!-- Meta SEO Google & Social Cards -->
     <meta name="description" content="@(ViewData["MetaDescription"] ?? "Thế giới nước hoa cao cấp chính hãng từ các thương hiệu xa xỉ bậc nhất thế giới: Dior, Chanel, Creed, Tom Ford, Le Labo, Kilian. Bảo đảm 100% xuất xứ.")" />
-    <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="@(ViewData["CanonicalUrl"] ?? $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}")" />
+    <meta name="robots" content="@robotsContent" />
+    <link rel="canonical" href="@canonicalUrl" />
 
     <!-- Open Graph / Facebook -->
     <meta property="og:site_name" content="PERFUME LUXE" />
@@ -19,7 +46,7 @@
     <meta property="og:title" content="@(ViewData["Title"] ?? "PERFUME LUXE - Nước Hoa Xa Xỉ Chính Hãng")" />
     <meta property="og:description" content="@(ViewData["MetaDescription"] ?? "Bộ sưu tập nước hoa cao cấp, chiết 10ml và fullbox với 3 tầng hương độc bản.")" />
     <meta property="og:image" content="@(ViewData["OgImage"] ?? "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=1200&q=80")" />
-    <meta property="og:url" content="@($"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}")" />
+    <meta property="og:url" content="@ogUrl" />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />

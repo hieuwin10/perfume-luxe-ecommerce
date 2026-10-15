@@ -8,7 +8,7 @@ using Perfume.Infrastructure.Data;
 namespace Perfume.Web.Areas.Admin.Controllers;
 
 [Area("Admin")]
-[Authorize(Roles = "Admin,StoreManager")]
+[Authorize(Roles = "Admin")]
 public class CatalogManagerController : Controller
 {
     private readonly PerfumeDbContext _db;

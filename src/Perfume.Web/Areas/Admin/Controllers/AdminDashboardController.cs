@@ -830,6 +830,7 @@ public class AdminDashboardController : Controller
 
     // ─── FLASH SALES MANAGEMENT ──────────────────────────────────────────────
     [HttpGet]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> FlashSales()
     {
         var flashSales = await _flashSaleService.GetAllFlashSalesAsync();
@@ -843,6 +844,7 @@ public class AdminDashboardController : Controller
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> CreateFlashSale(
         string name, 
@@ -905,6 +907,7 @@ public class AdminDashboardController : Controller
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ToggleFlashSaleStatus(int id)
     {
@@ -918,6 +921,7 @@ public class AdminDashboardController : Controller
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteFlashSale(int id)
     {
@@ -931,7 +935,7 @@ public class AdminDashboardController : Controller
     }
 
     // ─── BLOG MANAGEMENT ──────────────────────────────────────────────────────
-    [Authorize(Roles = "Admin,StoreManager")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Blogs()
     {
         var posts = await _blogService.GetAllPostsForAdminAsync();
@@ -939,7 +943,7 @@ public class AdminDashboardController : Controller
     }
 
     [HttpGet]
-    [Authorize(Roles = "Admin,StoreManager")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> CreateBlog()
     {
         ViewBag.Categories = await _blogService.GetBlogCategoriesAsync();
@@ -947,7 +951,7 @@ public class AdminDashboardController : Controller
     }
 
     [HttpPost]
-    [Authorize(Roles = "Admin,StoreManager")]
+    [Authorize(Roles = "Admin")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> CreateBlog(BlogPost post)
     {
@@ -964,7 +968,7 @@ public class AdminDashboardController : Controller
     }
 
     [HttpGet]
-    [Authorize(Roles = "Admin,StoreManager")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> EditBlog(int id)
     {
         var post = await _blogService.GetPostByIdAsync(id);
@@ -975,7 +979,7 @@ public class AdminDashboardController : Controller
     }
 
     [HttpPost]
-    [Authorize(Roles = "Admin,StoreManager")]
+    [Authorize(Roles = "Admin")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> EditBlog(BlogPost post)
     {
@@ -994,7 +998,7 @@ public class AdminDashboardController : Controller
     }
 
     [HttpPost]
-    [Authorize(Roles = "Admin,StoreManager")]
+    [Authorize(Roles = "Admin")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteBlog(int id)
     {
@@ -1137,7 +1141,7 @@ public class AdminDashboardController : Controller
 
     #region QUẢN TRỊ HERO BANNERS (HERO SLIDER)
     [HttpGet]
-    [Authorize(Roles = "Admin,StoreManager")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Banners()
     {
         var banners = await _db.HeroBanners
@@ -1150,7 +1154,7 @@ public class AdminDashboardController : Controller
     }
 
     [HttpPost]
-    [Authorize(Roles = "Admin,StoreManager")]
+    [Authorize(Roles = "Admin")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> SaveBanner(int? id, string title, string? subtitle, string imageUrl, string? targetUrl, string? buttonText, int displayOrder, bool isActive)
     {
@@ -1196,7 +1200,7 @@ public class AdminDashboardController : Controller
     }
 
     [HttpPost]
-    [Authorize(Roles = "Admin,StoreManager")]
+    [Authorize(Roles = "Admin")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ToggleBannerActive(int id)
     {
@@ -1212,7 +1216,7 @@ public class AdminDashboardController : Controller
     }
 
     [HttpPost]
-    [Authorize(Roles = "Admin,StoreManager")]
+    [Authorize(Roles = "Admin")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteBanner(int id)
     {
@@ -1229,7 +1233,7 @@ public class AdminDashboardController : Controller
 
     #region QUẢN TRỊ LỊCH HẸN PRIVATE TASTING VIP
     [HttpGet]
-    [Authorize(Roles = "Admin,StoreManager")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Tastings(string? status)
     {
         var query = _db.PrivateTastingBookings
@@ -1249,7 +1253,7 @@ public class AdminDashboardController : Controller
     }
 
     [HttpPost]
-    [Authorize(Roles = "Admin,StoreManager")]
+    [Authorize(Roles = "Admin")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> UpdateTastingStatus(int id, string status)
     {
@@ -1267,7 +1271,7 @@ public class AdminDashboardController : Controller
 
     #region Báo Cáo Tài Chính P&L (Profit & Loss) & Định Giá Kho
     [HttpGet]
-    [Authorize(Roles = "Admin,StoreManager")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> FinancialReport(DateTime? fromDate, DateTime? toDate, string? preset = "30days")
     {
         var now = DateTime.UtcNow;
@@ -1467,7 +1471,7 @@ public class AdminDashboardController : Controller
     }
 
     [HttpGet]
-    [Authorize(Roles = "Admin,StoreManager")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> ExportFinancialOrdersCsv(DateTime? fromDate, DateTime? toDate)
     {
         var now = DateTime.UtcNow;
@@ -1513,7 +1517,7 @@ public class AdminDashboardController : Controller
     }
 
     [HttpGet]
-    [Authorize(Roles = "Admin,StoreManager")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> ExportInventoryValuationCsv()
     {
         var now = DateTime.UtcNow;

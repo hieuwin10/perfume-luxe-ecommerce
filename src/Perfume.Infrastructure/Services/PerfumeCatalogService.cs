@@ -538,6 +538,8 @@ public class PerfumeCatalogService : IPerfumeCatalogService
             .Select(p => new ProductCardDto
             {
                 Id = p.Id,
+                CreatedAt = p.CreatedAt,
+                UpdatedAt = p.UpdatedAt,
                 Name = p.Name,
                 Slug = p.Slug,
                 Sku = p.Sku,

@@ -35,11 +35,21 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.AddSingleton<JwtTokenService>();
 builder.Services.AddAuthentication()
     .AddScheme<AuthenticationSchemeOptions, BearerTokenHandler>("Bearer", _ => { });
-builder.Services.AddAuthorization(options => options.AddPolicy("CustomerApi", policy =>
+builder.Services.AddAuthorization(options =>
 {
-    policy.AddAuthenticationSchemes(IdentityConstants.ApplicationScheme, "Bearer");
-    policy.RequireAuthenticatedUser();
-}));
+    options.AddPolicy("CustomerApi", policy =>
+    {
+        policy.AddAuthenticationSchemes(IdentityConstants.ApplicationScheme, "Bearer");
+        policy.RequireAuthenticatedUser();
+        policy.RequireRole("Customer");
+    });
+    options.AddPolicy("StoreManagerApi", policy =>
+    {
+        policy.AddAuthenticationSchemes(IdentityConstants.ApplicationScheme, "Bearer");
+        policy.RequireAuthenticatedUser();
+        policy.RequireRole("Admin", "StoreManager");
+    });
+});
 
 var dataPath = builder.Configuration["Storage:RootPath"] ?? Path.Combine(builder.Environment.ContentRootPath, "App_Data");
 Directory.CreateDirectory(Path.Combine(dataPath, "DataProtection-Keys"));
@@ -109,9 +119,33 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 app.UseHttpsRedirection();
+app.Use(async (context, next) =>
+{
+    context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
+    context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
+    context.Response.Headers.Append("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+    await next();
+});
 app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();
+app.Use(async (context, next) =>
+{
+    if (context.Request.Path.StartsWithSegments("/api/v1", StringComparison.OrdinalIgnoreCase) &&
+        context.Request.Headers.Authorization.ToString().StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+    {
+        var bearer = await context.AuthenticateAsync("Bearer");
+        if (!bearer.Succeeded || bearer.Principal == null)
+        {
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            return;
+        }
+
+        context.User = bearer.Principal;
+    }
+
+    await next();
+});
 app.UseAuthorization();
 app.UseMiddleware<MaintenanceMiddleware>();
 app.UseSession();
@@ -120,6 +154,6 @@ app.MapControllerRoute("catalogFilter", "bo-suu-tap", new { controller = "Catalo
 app.MapControllerRoute("blogDetail", "blog/{slug}", new { controller = "Blog", action = "Detail" });
 app.MapControllerRoute("sitemap", "sitemap.xml", new { controller = "Seo", action = "Sitemap" });
 app.MapControllerRoute("robots", "robots.txt", new { controller = "Seo", action = "Robots" });
-app.MapControllerRoute("areas", "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");
+app.MapControllerRoute("areas", "{area:exists}/{controller=AdminDashboard}/{action=Index}/{id?}");
 app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
 app.Run();
