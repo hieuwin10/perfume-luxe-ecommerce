@@ -281,3 +281,45 @@
         }
     </script>
 }
+
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@graph": [
+    {
+      "@@type": "Service",
+      "@@id": "@($"{Context.Request.Scheme}://{Context.Request.Host}/dat-lich-trai-nghiem")",
+      "name": "Dịch Vụ Thử Mùi VIP Private Scent Tasting",
+      "description": "Buổi thẩm hương riêng tư 1:1 trong phòng Salon VIP cùng chuyên gia mùi hương tại Boutique Hà Nội & TP.HCM.",
+      "provider": {
+        "@@type": "Organization",
+        "name": "PERFUME LUXE"
+      },
+      "serviceType": "Fragrance Consultation & Tasting",
+      "offers": {
+        "@@type": "Offer",
+        "price": "0",
+        "priceCurrency": "VND",
+        "description": "Đặc quyền miễn phí dành riêng cho khách hàng hẹn trước"
+      }
+    },
+    {
+      "@@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@@type": "ListItem",
+          "position": 1,
+          "name": "Trang Chủ",
+          "item": "@($"{Context.Request.Scheme}://{Context.Request.Host}")"
+        },
+        {
+          "@@type": "ListItem",
+          "position": 2,
+          "name": "Đặt Lịch Thử Mùi VIP",
+          "item": "@($"{Context.Request.Scheme}://{Context.Request.Host}/dat-lich-trai-nghiem")"
+        }
+      ]
+    }
+  ]
+}
+</script>

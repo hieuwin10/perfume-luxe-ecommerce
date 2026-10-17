@@ -1,5 +1,5 @@
 @{
-    ViewData["Title"] = "AI Fragrance Finder - Trắc Nghiệm Tìm Mùi Hương Thượng Lưu | PERFUME LUXE";
+    ViewData["Title"] = "AI Fragrance Finder - Trắc Nghiệm Mùi Hương";
     ViewData["MetaDescription"] = "Trải nghiệm động cơ tư vấn nước hoa thông minh chuẩn Haute Parfumerie. Phân tích phong cách, tính cách và hoàn cảnh để khám phá kiệt tác mùi hương dành riêng cho bạn.";
 }
 
@@ -34,7 +34,7 @@
 
         <!-- STEP 1: ĐỐI TƯỢNG -->
         <div id="qStep1" class="quiz-step-pane active">
-            <h3 class="quiz-step-title">Bạn đang tìm kiếm kiệt tác mùi hương cho ai?</h3>
+            <h2 class="quiz-step-title">Bạn đang tìm kiếm kiệt tác mùi hương cho ai?</h2>
             <p class="quiz-step-desc">Định hình phong cách và đối tượng cảm nhận ban đầu</p>
             <div class="quiz-grid quiz-grid-3">
                 <button type="button" class="quiz-option-card" onclick="selectQuizAnswer('gender', 'men', 2)">
@@ -57,7 +57,7 @@
 
         <!-- STEP 2: PHONG THÁI & VIBE -->
         <div id="qStep2" class="quiz-step-pane">
-            <h3 class="quiz-step-title">Phong thái hoặc Vibe bạn muốn toát ra nhất?</h3>
+            <h2 class="quiz-step-title">Phong thái hoặc Vibe bạn muốn toát ra nhất?</h2>
             <p class="quiz-step-desc">Linh hồn của mùi hương sẽ phản chiếu chiều sâu nội tâm của bạn</p>
             <div class="quiz-grid quiz-grid-3">
                 <button type="button" class="quiz-option-card" onclick="selectQuizAnswer('vibe', 'luxury', 3)">
@@ -90,7 +90,7 @@
 
         <!-- STEP 3: HOÀN CẢNH & DỊP SỬ DỤNG -->
         <div id="qStep3" class="quiz-step-pane">
-            <h3 class="quiz-step-title">Bạn dự định đồng hành cùng mùi hương trong dịp nào?</h3>
+            <h2 class="quiz-step-title">Bạn dự định đồng hành cùng mùi hương trong dịp nào?</h2>
             <p class="quiz-step-desc">Mỗi không gian sẽ có nốt hương tỏa sáng rực rỡ nhất</p>
             <div class="quiz-grid quiz-grid-2">
                 <button type="button" class="quiz-option-card" onclick="selectQuizAnswer('occasion', 'evening', 4)">
@@ -118,7 +118,7 @@
 
         <!-- STEP 4: CƯỜNG ĐỘ & ĐỘ LƯU TỎA -->
         <div id="qStep4" class="quiz-step-pane">
-            <h3 class="quiz-step-title">Cường độ tỏa hương và thời gian lưu hương bạn kỳ vọng?</h3>
+            <h2 class="quiz-step-title">Cường độ tỏa hương và thời gian lưu hương bạn kỳ vọng?</h2>
             <p class="quiz-step-desc">Quyết định nồng độ tinh dầu Eau de Parfum (EDP) hay Extrait de Parfum</p>
             <div class="quiz-grid quiz-grid-3">
                 <button type="button" class="quiz-option-card" onclick="selectQuizAnswer('intensity', 'moderate', 5)">
@@ -141,7 +141,7 @@
 
         <!-- STEP 5: NGÂN SÁCH & TRẢI NGHIỆM -->
         <div id="qStep5" class="quiz-step-pane">
-            <h3 class="quiz-step-title">Tầm ngân sách và định dạng sở hữu ưu tiên của bạn?</h3>
+            <h2 class="quiz-step-title">Tầm ngân sách và định dạng sở hữu ưu tiên của bạn?</h2>
             <p class="quiz-step-desc">Chúng tôi sẽ cân đối dung tích và các phân khúc giá tương thích nhất</p>
             <div class="quiz-grid quiz-grid-3">
                 <button type="button" class="quiz-option-card" onclick="finalizeQuiz('sample')">
@@ -810,3 +810,35 @@
         }
     </script>
 }
+
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@graph": [
+    {
+      "@@type": "ItemPage",
+      "@@id": "@($"{Context.Request.Scheme}://{Context.Request.Host}/catalog/quiz")",
+      "name": "AI Fragrance Finder - Trắc Nghiệm Mùi Hương Thông Minh",
+      "description": "Hệ thống trắc nghiệm tìm mùi hương nước hoa Niche chuẩn xác theo phong cách, nốt hương và hoàn cảnh sử dụng.",
+      "url": "@($"{Context.Request.Scheme}://{Context.Request.Host}/catalog/quiz")"
+    },
+    {
+      "@@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@@type": "ListItem",
+          "position": 1,
+          "name": "Trang Chủ",
+          "item": "@($"{Context.Request.Scheme}://{Context.Request.Host}")"
+        },
+        {
+          "@@type": "ListItem",
+          "position": 2,
+          "name": "AI Fragrance Finder",
+          "item": "@($"{Context.Request.Scheme}://{Context.Request.Host}/catalog/quiz")"
+        }
+      ]
+    }
+  ]
+}
+</script>

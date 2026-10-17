@@ -29,7 +29,7 @@
         <!-- Filter Sidebar -->
         <aside class="catalog-filter-sidebar" id="catalogFilterSidebar" style="background: var(--bg-surface); border: 1px solid var(--border-card); border-radius: var(--radius-md); padding: 24px; position: sticky; top: 100px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h3 style="font-size: 1.15rem; color: var(--gold-primary);"><i class="fa-solid fa-filter" style="margin-right: 6px;"></i> Bộ Lọc</h3>
+                <h2 style="font-size: 1.15rem; color: var(--gold-primary); margin: 0;"><i class="fa-solid fa-filter" style="margin-right: 6px;"></i> Bộ Lọc Tìm Kiếm</h2>
                 <a href="/bo-suu-tap" style="font-size: 0.78rem; color: var(--text-muted);">Xóa Lọc</a>
             </div>
 
@@ -94,6 +94,7 @@
 
         <!-- Product Grid -->
         <div>
+            <h2 class="visually-hidden" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;">Danh Sách Nước Hoa Cao Cấp</h2>
             @if (Model.Any())
             {
                 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 24px;">
@@ -116,7 +117,7 @@
                             </div>
 
                             <a href="/nuoc-hoa/@p.Slug" class="card-img-wrapper">
-                                <img src="@p.MainImageUrl" alt="@p.Name" loading="lazy" />
+                                <img src="@p.MainImageUrl" alt="@p.Name" width="300" height="300" loading="lazy" style="aspect-ratio: 1/1; object-fit: contain;" />
                             </a>
 
                             <div class="card-body">
@@ -169,11 +170,38 @@
             {
                 <div style="text-align: center; padding: 80px 20px; background: var(--bg-surface); border-radius: var(--radius-md); border: 1px dashed var(--border-card);">
                     <i class="fa-solid fa-magnifying-glass" style="font-size: 3rem; color: var(--gold-primary); margin-bottom: 16px; opacity: 0.5;"></i>
-                    <h3 style="font-size: 1.4rem; margin-bottom: 8px;">Không Tìm Thấy Sản Phẩm Phù Hợp</h3>
+                    <h2 style="font-size: 1.4rem; margin-bottom: 8px;">Không Tìm Thấy Sản Phẩm Phù Hợp</h2>
                     <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 0.9rem;">Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm của bạn.</p>
                     <a href="/bo-suu-tap" class="btn-luxe-outline">Xóa Bộ Lọc</a>
                 </div>
             }
+        </div>
+    </div>
+
+    <!-- Editorial & FAQ Section for Category SEO Authority -->
+    <div style="margin-top: 60px; padding: 40px; background: var(--bg-surface); border: 1px solid var(--border-card); border-radius: var(--radius-lg);">
+        <h2 style="font-size: 1.8rem; font-family: var(--font-serif); margin-bottom: 20px; color: var(--gold-primary);">
+            Nghệ Thuật Lựa Chọn Nước Hoa Haute Parfumerie Độc Bản
+        </h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; font-size: 0.92rem; color: var(--text-secondary); line-height: 1.8;">
+            <div>
+                <h3 style="font-size: 1.15rem; color: var(--text-primary); margin-bottom: 10px;">
+                    <i class="fa-solid fa-gem" style="color: var(--gold-primary); margin-right: 8px;"></i>1. Tiêu Chuẩn Nước Hoa Niche Chính Hãng
+                </h3>
+                <p>Khác biệt hoàn toàn với các dòng nước hoa thương mại đại chúng, nước hoa Niche và Haute Parfumerie tại PERFUME LUXE được sáng tạo bởi các bậc thầy chế tác hương (Master Perfumers) hàng đầu thế giới như Roja Dove, Francis Kurkdjian, Kilian Hennessy. Từng giọt hương chứa đựng hàm lượng tinh dầu tự nhiên quý hiếm bậc nhất như trầm hương Oud hoàng gia, hoa hồng xứ Grasse, long diên hương và diên vĩ Iris Pallida.</p>
+            </div>
+            <div>
+                <h3 style="font-size: 1.15rem; color: var(--text-primary); margin-bottom: 10px;">
+                    <i class="fa-solid fa-flask" style="margin-right: 8px; color: var(--gold-primary);"></i>2. Trải Nghiệm Chiết 10ml & Chai Fullbox
+                </h3>
+                <p>Để quý khách dễ dàng khám phá và thẩm định độ bám tỏa trên da thật trước khi sở hữu chai nguyên bản, PERFUME LUXE cung cấp quy cách chiết vô trùng 10ml chuẩn hãng với vòi xịt phun sương siêu mịn, cùng chính sách bảo hành vòi xịt và bảo quản hương thơm chuẩn điều kiện nhiệt độ phòng VIP.</p>
+            </div>
+            <div>
+                <h3 style="font-size: 1.15rem; color: var(--text-primary); margin-bottom: 10px;">
+                    <i class="fa-solid fa-shield-halved" style="margin-right: 8px; color: var(--gold-primary);"></i>3. Cam Kết Chất Lượng Tuyệt Đối
+                </h3>
+                <p>100% sản phẩm có tem chống hàng giả điện tử và mã QR truy xuất lô xuất xưởng từ Pháp, Ý và Anh Quốc. Cam kết hoàn tiền 200% nếu phát hiện sai lệch xuất xứ. Hỗ trợ đổi mùi hương trong vòng 7 ngày và giao hàng hỏa tốc 2H tại nội thành Hà Nội & TP. Hồ Chí Minh.</p>
+            </div>
         </div>
     </div>
 </div>
@@ -182,20 +210,51 @@
 <script type="application/ld+json">
 {
   "@@context": "https://schema.org",
-  "@@type": "ItemList",
-  "itemListElement": [
-  @for (int i = 0; i < Model.Count; i++)
-  {
-      var p = Model[i];
-      <text>
+  "@@graph": [
+    {
+      "@@type": "CollectionPage",
+      "@@id": "@($"{Context.Request.Scheme}://{Context.Request.Host}/bo-suu-tap")",
+      "name": "Bộ Sưu Tập Nước Hoa Cao Cấp - PERFUME LUXE",
+      "description": "Danh mục nước hoa Haute Parfumerie & Niche chính hãng với các phiên bản chiết 10ml và fullbox 100ml.",
+      "url": "@($"{Context.Request.Scheme}://{Context.Request.Host}/bo-suu-tap")",
+      "inLanguage": "vi-VN"
+    },
+    {
+      "@@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@@type": "ListItem",
+          "position": 1,
+          "name": "Trang Chủ",
+          "item": "@($"{Context.Request.Scheme}://{Context.Request.Host}")"
+        },
+        {
+          "@@type": "ListItem",
+          "position": 2,
+          "name": "Bộ Sưu Tập",
+          "item": "@($"{Context.Request.Scheme}://{Context.Request.Host}/bo-suu-tap")"
+        }
+      ]
+    },
+    {
+      "@@type": "ItemList",
+      "name": "Danh Sách Nước Hoa Chính Hãng",
+      "numberOfItems": @Model.Count,
+      "itemListElement": [
+      @for (int i = 0; i < Model.Count; i++)
       {
-        "@@type": "ListItem",
-        "position": @(i + 1),
-        "url": "@($"{Context.Request.Scheme}://{Context.Request.Host}/nuoc-hoa/{p.Slug}")",
-        "name": "@p.Name"
-      }@(i < Model.Count - 1 ? "," : "")
-      </text>
-  }
+          var p = Model[i];
+          <text>
+          {
+            "@@type": "ListItem",
+            "position": @(i + 1),
+            "url": "@($"{Context.Request.Scheme}://{Context.Request.Host}/nuoc-hoa/{p.Slug}")",
+            "name": "@p.Name"
+          }@(i < Model.Count - 1 ? "," : "")
+          </text>
+      }
+      ]
+    }
   ]
 }
 </script>

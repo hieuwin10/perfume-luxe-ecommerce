@@ -152,3 +152,35 @@
         </div>
     </div>
 </div>
+
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@graph": [
+    {
+      "@@type": "AboutPage",
+      "@@id": "@($"{Context.Request.Scheme}://{Context.Request.Host}/ve-chung-toi")",
+      "name": "Về Chúng Tôi - Di Sản & Triết Lý Haute Parfumerie | PERFUME LUXE",
+      "description": "Khám phá câu chuyện thương hiệu PERFUME LUXE - Ngôi nhà của những tác phẩm mùi hương Niche độc bản và nghệ thuật thẩm hương chuẩn mực Paris.",
+      "url": "@($"{Context.Request.Scheme}://{Context.Request.Host}/ve-chung-toi")"
+    },
+    {
+      "@@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@@type": "ListItem",
+          "position": 1,
+          "name": "Trang Chủ",
+          "item": "@($"{Context.Request.Scheme}://{Context.Request.Host}")"
+        },
+        {
+          "@@type": "ListItem",
+          "position": 2,
+          "name": "Về Chúng Tôi",
+          "item": "@($"{Context.Request.Scheme}://{Context.Request.Host}/ve-chung-toi")"
+        }
+      ]
+    }
+  ]
+}
+</script>

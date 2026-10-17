@@ -141,7 +141,7 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
                     <h2 style="font-size: 1.25rem; font-weight: 700; margin: 0; color: var(--text-primary);">
                         <span style="display: inline-flex; width: 28px; height: 28px; border-radius: 50%; background: var(--gold-primary); color: #000; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 800; margin-right: 8px;">1</span>
-                        Bước 1: Chọn Vỏ Hộp Hoàng Gia (<code style="color: var(--gold-primary);">BoxStyle</code>)
+                        Bước 1: Chọn Vỏ Hộp Hoàng Gia Thượng Hạng
                     </h2>
                     <span style="font-size: 0.82rem; color: var(--gold-primary); font-weight: 600;" id="selectedBoxStyleLabel">
                         Đang chọn: Hộp Gỗ Sơn Mài Hoàng Gia (250.000 ₫)
@@ -751,4 +751,52 @@
     // Initialize UI on page load
     updateSlotsUI();
     updateGreetingPreview();
+</script>
+
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@graph": [
+    {
+      "@@type": "Product",
+      "@@id": "@($"{Context.Request.Scheme}://{Context.Request.Host}/discovery-box")",
+      "name": "Custom Discovery Gift Box - Hộp Khám Phá Nước Hoa Niche",
+      "image": "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=800&q=80",
+      "description": "Tự thiết kế hộp quà khám phá độc bản gồm 3-5 ống chiết nước hoa Niche chính hãng kèm thiệp ép kim vàng 24K.",
+      "brand": {
+        "@@type": "Brand",
+        "name": "PERFUME LUXE"
+      },
+      "offers": {
+        "@@type": "AggregateOffer",
+        "priceCurrency": "VND",
+        "lowPrice": "450000",
+        "highPrice": "1500000",
+        "offerCount": "5",
+        "availability": "https://schema.org/InStock",
+        "seller": {
+          "@@type": "Organization",
+          "name": "PERFUME LUXE"
+        }
+      }
+    },
+    {
+      "@@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@@type": "ListItem",
+          "position": 1,
+          "name": "Trang Chủ",
+          "item": "@($"{Context.Request.Scheme}://{Context.Request.Host}")"
+        },
+        {
+          "@@type": "ListItem",
+          "position": 2,
+          "name": "Discovery Box",
+          "item": "@($"{Context.Request.Scheme}://{Context.Request.Host}/discovery-box")"
+        }
+      ]
+    }
+  ]
+}
 </script>
