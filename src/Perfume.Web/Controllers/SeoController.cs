@@ -63,23 +63,18 @@ public class SeoController : Controller
         var categories = await _blogService.GetBlogCategoriesAsync();
         foreach (var category in categories)
         {
-            var (_, categoryPostCount) = await _blogService.GetPostsPagedAsync(category.Slug, 1, pageSize);
-            if (categoryPostCount == 0) continue;
-            var categoryQuery = $"category={Uri.EscapeDataString(category.Slug)}";
-            Add($"/blog?{categoryQuery}");
-            var categoryPages = (int)Math.Ceiling(categoryPostCount / (double)pageSize);
-            for (var categoryPage = 2; categoryPage <= categoryPages; categoryPage++)
-                Add($"/blog?page={categoryPage}&{categoryQuery}");
+            Add($"/blog?category={Uri.EscapeDataString(category.Slug)}");
         }
 
-        var (firstPosts, totalPosts) = await _blogService.GetPostsPagedAsync(null, 1, pageSize);
-        AddPosts(firstPosts);
-        var totalBlogPages = (int)Math.Ceiling(totalPosts / (double)pageSize);
-        for (var blogPage = 2; blogPage <= totalBlogPages; blogPage++)
+        var blogPage = 1;
+        while (true)
         {
-            Add($"/blog?page={blogPage}");
-            var (posts, _) = await _blogService.GetPostsPagedAsync(null, blogPage, pageSize);
-            AddPosts(posts);
+            var (posts, totalPosts) = await _blogService.GetPostsPagedAsync(null, blogPage, pageSize);
+            foreach (var post in posts)
+                Add($"/blog/{Uri.EscapeDataString(post.Slug)}", post.UpdatedAt ?? post.CreatedAt);
+
+            if (posts.Count == 0 || blogPage * pageSize >= totalPosts) break;
+            blogPage++;
         }
 
         var document = new XDocument(
@@ -94,11 +89,6 @@ public class SeoController : Controller
         return Content(document.ToString(SaveOptions.DisableFormatting), "application/xml", Encoding.UTF8);
 
         void Add(string path, DateTime? lastModified = null) => entries.Add(($"{baseUrl}{path}", lastModified));
-        void AddPosts(IEnumerable<Perfume.Domain.Entities.BlogPost> posts)
-        {
-            foreach (var post in posts)
-                Add($"/blog/{Uri.EscapeDataString(post.Slug)}", post.UpdatedAt ?? post.CreatedAt);
-        }
     }
 
     [HttpGet]
