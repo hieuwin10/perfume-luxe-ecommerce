@@ -9,10 +9,11 @@
 
     @if (Model.Items.Any())
     {
-        <div id="cartLayout" style="display: grid; grid-template-columns: 1fr 340px; gap: 40px; align-items: start;">
-            <!-- Cart Items Table -->
+        <div id="cartLayout" class="cart-layout-grid">
+            <!-- Cart Items Container -->
             <div style="background: var(--bg-surface); border: 1px solid var(--border-card); border-radius: var(--radius-md); overflow-x: auto; padding: 20px;">
-                <table class="data-table-custom" style="width: 100%;">
+                <!-- Desktop Table View -->
+                <table class="data-table-custom cart-table-desktop">
                     <thead>
                         <tr>
                             <th>Sản Phẩm</th>
@@ -65,6 +66,40 @@
                         }
                     </tbody>
                 </table>
+
+                <!-- Mobile Card List View -->
+                <div class="cart-cards-mobile">
+                    @foreach (var item in Model.Items)
+                    {
+                        <div class="cart-card-item">
+                            <img src="@(item.ProductImageUrl ?? "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=150&q=80")" alt="@item.ProductName" />
+                            <div class="cart-card-info">
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+                                        <a href="/nuoc-hoa/@item.ProductSlug" style="font-weight: 700; font-size: 0.95rem; line-height: 1.3;">@item.ProductName</a>
+                                        <button type="button" onclick="removeCartItem(@item.ProductId, @(item.VariantId?.ToString() ?? "null"))" aria-label="Xóa @item.ProductName" style="background: none; border: none; color: #E63946; cursor: pointer; padding: 4px 6px;">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </button>
+                                    </div>
+                                    <span style="font-size: 0.78rem; color: var(--gold-primary); display: block; margin-top: 2px;">@item.VariantLabel</span>
+                                    @if (!item.IsAvailable)
+                                    {
+                                        <span style="display:block;color:#f87171;font-size:.76rem;margin-top:4px">Sản phẩm tạm hết hàng.</span>
+                                    }
+                                </div>
+
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px;">
+                                    <div class="cart-card-stepper">
+                                        <button type="button" onclick="updateItemQty(@item.ProductId, @(item.VariantId?.ToString() ?? "null"), @(item.Quantity - 1))" aria-label="Giảm"><i class="fa-solid fa-minus" style="font-size: 0.7rem;"></i></button>
+                                        <span>@item.Quantity</span>
+                                        <button type="button" onclick="updateItemQty(@item.ProductId, @(item.VariantId?.ToString() ?? "null"), @(item.Quantity + 1))" aria-label="Tăng"><i class="fa-solid fa-plus" style="font-size: 0.7rem;"></i></button>
+                                    </div>
+                                    <strong style="color: var(--gold-primary); font-size: 1.1rem;">@item.TotalPrice.ToString("N0")₫</strong>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
 
                 <!-- Bespoke Discovery Box Configuration Card (if configured in session/localStorage) -->
                 <div id="customDiscoveryCartBanner" style="display: none; margin-top: 18px; padding: 16px; border-radius: 10px; border: 1px solid var(--gold-primary); background: linear-gradient(135deg, rgba(212,175,55,0.12) 0%, rgba(20,20,26,0.92) 100%);"></div>

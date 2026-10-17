@@ -19,9 +19,15 @@
         <p style="color: var(--text-secondary); font-size: 0.95rem;">Khám phá @totalCount kiệt tác mùi hương từ các nhà chế tác danh tiếng thế giới.</p>
     </div>
 
-    <div style="display: grid; grid-template-columns: 280px 1fr; gap: 40px; align-items: start;">
+    <!-- Mobile Filter Toggle Button -->
+    <button type="button" class="catalog-filter-mobile-trigger" onclick="toggleCatalogFilter()">
+        <span><i class="fa-solid fa-filter" style="margin-right: 6px;"></i> Bộ Lọc &amp; Sắp Xếp (@totalCount sản phẩm)</span>
+        <span><i class="fa-solid fa-chevron-down" id="catalogFilterArrow"></i></span>
+    </button>
+
+    <div class="catalog-layout-grid">
         <!-- Filter Sidebar -->
-        <aside style="background: var(--bg-surface); border: 1px solid var(--border-card); border-radius: var(--radius-md); padding: 24px; position: sticky; top: 100px;">
+        <aside class="catalog-filter-sidebar" id="catalogFilterSidebar" style="background: var(--bg-surface); border: 1px solid var(--border-card); border-radius: var(--radius-md); padding: 24px; position: sticky; top: 100px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h3 style="font-size: 1.15rem; color: var(--gold-primary);"><i class="fa-solid fa-filter" style="margin-right: 6px;"></i> Bộ Lọc</h3>
                 <a href="/bo-suu-tap" style="font-size: 0.78rem; color: var(--text-muted);">Xóa Lọc</a>
@@ -192,4 +198,18 @@
   }
   ]
 }
+</script>
+
+<script>
+    function toggleCatalogFilter() {
+        const sidebar = document.getElementById('catalogFilterSidebar');
+        const arrow = document.getElementById('catalogFilterArrow');
+        if (sidebar) {
+            sidebar.classList.toggle('open-mobile');
+            const isOpen = sidebar.classList.contains('open-mobile');
+            if (arrow) {
+                arrow.className = isOpen ? 'fa-solid fa-chevron-up' : 'fa-solid fa-chevron-down';
+            }
+        }
+    }
 </script>

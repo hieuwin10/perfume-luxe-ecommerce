@@ -21,13 +21,13 @@
 
     <form asp-action="PlaceOrder" method="post" id="checkoutForm">
         @Html.AntiForgeryToken()
-        <div id="checkoutGrid" style="display: grid; grid-template-columns: 1fr 420px; gap: 40px; align-items: start;">
+        <div id="checkoutGrid" class="checkout-grid-container">
             <!-- Left: Customer Information & Payment -->
             <div style="display: flex; flex-direction: column; gap: 24px;">
                 <!-- Section 1: Customer Details -->
                 <div style="background: var(--bg-surface); border: 1px solid var(--border-card); border-radius: var(--radius-md); padding: 24px;">
                     <h3 style="font-size: 1.25rem; margin-bottom: 18px; color: var(--gold-primary);"><i class="fa-solid fa-user" style="margin-right: 8px;"></i> Thông Tin Giao Hàng</h3>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                    <div class="form-grid-2col">
                         <div>
                             <label asp-for="CustomerName" style="display:block;font-size:.8rem;font-weight:600;margin-bottom:6px;color:var(--text-secondary)">Họ &amp; Tên *</label>
                             <input asp-for="CustomerName" autocomplete="name" required maxlength="120" placeholder="Nguyễn Văn A" style="width:100%;background:var(--bg-surface-elevated);border:1px solid var(--border-card);color:var(--text-primary);padding:10px 14px;border-radius:var(--radius-sm);outline:none;font-size:.88rem" />
@@ -39,7 +39,7 @@
                             <span asp-validation-for="CustomerPhone" style="color:#E63946;font-size:.78rem"></span>
                         </div>
                     </div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+                    <div class="form-grid-2col">
                         <div>
                             <label asp-for="CustomerEmail" style="display:block;font-size:.8rem;font-weight:600;margin-bottom:6px;color:var(--text-secondary)">Email nhận xác nhận *</label>
                             <input asp-for="CustomerEmail" type="email" autocomplete="email" required maxlength="254" placeholder="example@gmail.com" style="width:100%;background:var(--bg-surface-elevated);border:1px solid var(--border-card);color:var(--text-primary);padding:10px 14px;border-radius:var(--radius-sm);outline:none;font-size:.88rem" />

@@ -611,6 +611,29 @@
             text-align: center;
             padding: 60px 20px;
         }
+
+        @@media (max-width: 768px) {
+            .quiz-page-wrapper {
+                margin: 20px auto 40px;
+                padding: 0 12px;
+            }
+            .quiz-main-title {
+                font-size: 1.8rem;
+            }
+            .quiz-card-box {
+                padding: 20px 16px;
+                border-radius: var(--radius-md);
+            }
+            .quiz-grid-3, .quiz-grid-2 {
+                grid-template-columns: 1fr;
+            }
+            .archetype-hero-card {
+                padding: 20px;
+            }
+            .archetype-title {
+                font-size: 1.8rem;
+            }
+        }
     </style>
 }
 

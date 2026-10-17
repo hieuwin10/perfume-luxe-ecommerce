@@ -14,7 +14,11 @@
 <body class="dark-theme">
     <!-- Admin Console Navigation -->
     <header style="background: #111116; border-bottom: 1px solid rgba(212, 175, 55, 0.2); padding: 10px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1000; flex-wrap: wrap; gap: 12px;">
-        <div style="display: flex; align-items: center; gap: 20px;">
+        <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+            <button type="button" class="admin-nav-toggle-btn" id="adminNavToggleBtn" aria-label="Mở menu quản trị">
+                <i class="fa-solid fa-bars"></i> Menu Quản Trị
+            </button>
+
             <a href="@(User.IsInRole("Admin") ? "/admin/admindashboard" : "/admin/storemanager")" style="display: flex; align-items: center; gap: 10px; text-decoration: none;">
                 <div style="width: 34px; height: 34px; border-radius: 6px; background: var(--gold-gradient); display: flex; align-items: center; justify-content: center; color: #000; font-weight: 800; font-size: 1.1rem;">
                     <i class="fa-solid fa-crown"></i>
@@ -25,7 +29,7 @@
                 </div>
             </a>
 
-            <nav style="display: flex; gap: 8px; margin-left: 10px; flex-wrap: wrap;">
+            <nav class="admin-header-nav" id="adminHeaderNav">
                 @if (User.IsInRole("Admin"))
                 {
                     <a href="/admin/admindashboard" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
@@ -163,6 +167,15 @@
             const icon = document.getElementById('themeIconAdmin');
             if (icon) icon.className = next === 'dark' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
         });
+
+        // Admin mobile navigation toggle
+        const adminNavToggleBtn = document.getElementById('adminNavToggleBtn');
+        const adminHeaderNav = document.getElementById('adminHeaderNav');
+        if (adminNavToggleBtn && adminHeaderNav) {
+            adminNavToggleBtn.addEventListener('click', () => {
+                adminHeaderNav.classList.toggle('active');
+            });
+        }
     </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
