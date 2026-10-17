@@ -31,8 +31,16 @@ public class SeoController : Controller
 
         Add("/");
         Add("/bo-suu-tap");
-        Add("/blog");
+        Add("/discovery-box");
+        Add("/so-sanh");
         Add("/catalog/quiz");
+        Add("/dat-lich-trai-nghiem");
+        Add("/boutique");
+        Add("/ve-chung-toi");
+        Add("/chinh-sach-doi-tra");
+        Add("/huong-dan-mua-hang");
+        Add("/privacy");
+        Add("/blog");
 
         const int pageSize = 1000;
         var productPage = 1;
@@ -106,6 +114,7 @@ public class SeoController : Controller
             "Disallow: /cart/",
             "Disallow: /checkout/",
             "Disallow: /api/",
+            "Disallow: /swagger/",
             "Disallow: /tra-cuu-don-hang",
             "Disallow: /order-tracking",
             "Allow: /",
@@ -116,11 +125,50 @@ public class SeoController : Controller
             "Allow: /",
             "User-agent: ClaudeBot",
             "Allow: /",
+            "User-agent: Google-Extended",
+            "Allow: /",
             string.Empty,
             $"Sitemap: {baseUrl}/sitemap.xml",
             string.Empty
         });
 
         return Content(content, "text/plain", Encoding.UTF8);
+    }
+
+    [HttpGet]
+    [ResponseCache(Duration = 3600)]
+    public IActionResult LlmsTxt()
+    {
+        var baseUrl = SeoUrlBuilder.GetSiteBaseUrl(Request, _configuration);
+        var sb = new StringBuilder();
+        sb.AppendLine("# PERFUME LUXE - Haute Parfumerie & Niche Fragrances");
+        sb.AppendLine();
+        sb.AppendLine("> PERFUME LUXE là nhà phân phối và bán lẻ nước hoa Niche & Haute Parfumerie chính hãng hàng đầu tại Việt Nam, độc quyền và ủy quyền các nhà hương danh giá như Roja Parfums, Maison Francis Kurkdjian, Kilian Paris, Creed, Tom Ford Private Blend, Le Labo, Frederic Malle, Byredo, Diptyque, Clive Christian.");
+        sb.AppendLine();
+        sb.AppendLine("## Flagship Boutiques");
+        sb.AppendLine("- Hà Nội: 12 Tràng Tiền, Quận Hoàn Kiếm, Hà Nội | Hotline: 024.3828.9999");
+        sb.AppendLine("- TP. Hồ Chí Minh: 68 Đồng Khởi, Quận 1, TP. Hồ Chí Minh | Hotline: 028.3822.8888");
+        sb.AppendLine("- Hotline VIP Concierge: 024.3828.9999");
+        sb.AppendLine("- Email: concierge@perfumeluxe.vn");
+        sb.AppendLine();
+        sb.AppendLine("## Cam Kết & Dịch Vụ Độc Quyền");
+        sb.AppendLine("- 100% Chính Hãng: Sản phẩm nhập khẩu nguyên bản với tem chống giả bảo chứng và cam kết bồi hoàn 200% nếu phát hiện không chuẩn.");
+        sb.AppendLine("- Trải Nghiệm Thử Mùi VIP (Concierge Tasting): Buổi thẩm hương 1:1 trong phòng VIP riêng tư với chuyên gia mùi hương.");
+        sb.AppendLine("- Hộp Khám Phá (Discovery Box): Bộ mẫu thử cao cấp do khách hàng tự chọn 3-5 hương thơm.");
+        sb.AppendLine("- Giao Hàng Hỏa Tốc: 2H nội thành Hà Nội & TP.HCM trong bao bì nhung hộp cứng sang trọng.");
+        sb.AppendLine();
+        sb.AppendLine("## Liên Kết Chính");
+        sb.AppendLine($"- Trang chủ: {baseUrl}/");
+        sb.AppendLine($"- Bộ sưu tập: {baseUrl}/bo-suu-tap");
+        sb.AppendLine($"- Discovery Box: {baseUrl}/discovery-box");
+        sb.AppendLine($"- So sánh nước hoa: {baseUrl}/so-sanh");
+        sb.AppendLine($"- Tìm kiếm hương thơm qua AI Quiz: {baseUrl}/catalog/quiz");
+        sb.AppendLine($"- Đặt lịch thử mùi VIP: {baseUrl}/dat-lich-trai-nghiem");
+        sb.AppendLine($"- Hệ thống Boutique: {baseUrl}/boutique");
+        sb.AppendLine($"- Kiến thức mùi hương: {baseUrl}/blog");
+        sb.AppendLine($"- Về chúng tôi: {baseUrl}/ve-chung-toi");
+        sb.AppendLine($"- Chính sách đổi trả: {baseUrl}/chinh-sach-doi-tra");
+
+        return Content(sb.ToString(), "text/plain", Encoding.UTF8);
     }
 }

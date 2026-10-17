@@ -1,6 +1,7 @@
 @model List<Perfume.Application.DTOs.ProductDetailDto>
 @{
     ViewData["Title"] = "So Sánh Mùi Hương - PERFUME LUXE";
+    ViewData["MetaDescription"] = "So sánh chi tiết các nốt hương, độ lưu hương, tỏa hương và giá thành của các chai nước hoa Niche để tìm ra tuyệt phẩm phù hợp nhất.";
     var allProducts = ViewBag.AllProducts as List<Perfume.Web.Controllers.CompareProductOptionDto> ?? new();
 }
 

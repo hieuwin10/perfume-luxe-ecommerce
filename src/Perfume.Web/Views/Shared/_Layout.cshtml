@@ -2,7 +2,7 @@
 @inject SignInManager<Perfume.Infrastructure.Identity.AppUser> SignInManager
 @inject UserManager<Perfume.Infrastructure.Identity.AppUser> UserManager
 @{
-    var canonicalUrl = ViewData["CanonicalUrl"]?.ToString() ?? $"https://{Context.Request.Host}{Context.Request.Path}{Context.Request.QueryString}";
+    var canonicalUrl = ViewData["CanonicalUrl"]?.ToString() ?? $"https://{Context.Request.Host}{Context.Request.Path}";
     var ogUrl = ViewData["OgUrl"]?.ToString() ?? canonicalUrl;
     var requestPath = Context.Request.Path;
     var isPrivatePage = requestPath.StartsWithSegments("/account", StringComparison.OrdinalIgnoreCase)

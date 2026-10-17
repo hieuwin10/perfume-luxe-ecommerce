@@ -367,6 +367,39 @@
 }
 </script>
 
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@@type": "ListItem",
+      "position": 1,
+      "name": "Trang Chủ",
+      "item": "@($"{Context.Request.Scheme}://{Context.Request.Host}")"
+    },
+    {
+      "@@type": "ListItem",
+      "position": 2,
+      "name": "Bộ Sưu Tập",
+      "item": "@($"{Context.Request.Scheme}://{Context.Request.Host}/bo-suu-tap")"
+    },
+    {
+      "@@type": "ListItem",
+      "position": 3,
+      "name": "@Model.BrandName",
+      "item": "@($"{Context.Request.Scheme}://{Context.Request.Host}/bo-suu-tap?brandSlug={Model.BrandSlug}")"
+    },
+    {
+      "@@type": "ListItem",
+      "position": 4,
+      "name": "@Model.Name",
+      "item": "@($"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}")"
+    }
+  ]
+}
+</script>
+
 @section Scripts {
     <script>
         let selectedVariantId = @(defaultVariant?.Id.ToString() ?? "null");
