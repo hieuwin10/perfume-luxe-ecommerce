@@ -1,6 +1,7 @@
 @model CheckoutRequestDto
 @{
     ViewData["Title"] = "Thanh Toán Đơn Hàng";
+    ViewData["Robots"] = "noindex, nofollow";
     var cart = ViewBag.Cart as List<CartItemDto> ?? new List<CartItemDto>();
     decimal subTotal = ViewBag.SubTotal as decimal? ?? cart.Sum(i => i.TotalPrice);
     var loyalty = ViewBag.LoyaltyStatus as LoyaltyStatusDto;

@@ -99,12 +99,12 @@ public class SeoController : Controller
         var content = string.Join('\n', new[]
         {
             "User-agent: *",
-            "Disallow: /admin/",
-            "Disallow: /account/",
-            "Disallow: /cart/",
-            "Disallow: /checkout/",
-            "Disallow: /api/",
-            "Disallow: /swagger/",
+            "Disallow: /admin",
+            "Disallow: /account",
+            "Disallow: /cart",
+            "Disallow: /checkout",
+            "Disallow: /api",
+            "Disallow: /swagger",
             "Disallow: /tra-cuu-don-hang",
             "Disallow: /order-tracking",
             "Allow: /",

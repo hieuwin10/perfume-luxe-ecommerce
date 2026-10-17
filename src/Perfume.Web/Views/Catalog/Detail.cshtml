@@ -3,6 +3,7 @@
     ViewData["Title"] = $"{Model.Name} Chính Hãng - {Model.BrandName}";
     ViewData["MetaDescription"] = Model.MetaDescription ?? Model.ShortDescription;
     ViewData["OgImage"] = Model.MainImageUrl;
+    ViewData["LcpImage"] = Model.MainImageUrl;
     var related = ViewBag.RelatedProducts as List<ProductCardDto> ?? new List<ProductCardDto>();
     var defaultVariant = Model.Variants.FirstOrDefault(v => v.IsDefault) ?? Model.Variants.FirstOrDefault();
 }
@@ -20,7 +21,7 @@
         <!-- Left: Image Showcase -->
         <div>
             <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); overflow: hidden; padding: 20px; box-shadow: var(--shadow-luxury); margin-bottom: 20px; text-align: center;">
-                <img id="mainProductImg" class="detail-img-box" src="@Model.MainImageUrl" alt="@Model.Name" style="width: 100%; object-fit: contain; border-radius: var(--radius-md); transition: transform 0.4s ease;" />
+                <img id="mainProductImg" class="detail-img-box" src="@Model.MainImageUrl" alt="@Model.Name" width="500" height="500" fetchpriority="high" style="width: 100%; object-fit: contain; border-radius: var(--radius-md); transition: transform 0.4s ease;" />
             </div>
 
             <!-- Trust Badges -->
@@ -234,12 +235,75 @@
     </section>
 
     <!-- FULL STORY / DESCRIPTION -->
-    <section style="background: var(--bg-surface); border: 1px solid var(--border-card); border-radius: var(--radius-lg); padding: 40px; margin-bottom: 80px;">
-        <h3 style="font-size: 1.6rem; margin-bottom: 16px; color: var(--gold-primary);">Câu Chuyện & Cảm Hứng Sáng Tạo</h3>
+    <section style="background: var(--bg-surface); border: 1px solid var(--border-card); border-radius: var(--radius-lg); padding: 40px; margin-bottom: 40px;">
+        <h2 style="font-size: 1.8rem; font-family: var(--font-serif); margin-bottom: 16px; color: var(--gold-primary);">Câu Chuyện & Cảm Hứng Sáng Tạo</h2>
         <div style="font-size: 0.95rem; line-height: 1.8; color: var(--text-secondary);">
             @(Model.FullDescription ?? Model.ShortDescription)
         </div>
     </section>
+
+    <!-- HƯỚNG DẪN THẨM HƯƠNG & ĐẶC QUYỀN MUA HÀNG TẠI PERFUME LUXE -->
+    <section style="background: var(--bg-surface); border: 1px solid var(--border-card); border-radius: var(--radius-lg); padding: 40px; margin-bottom: 40px;">
+        <h2 style="font-size: 1.8rem; font-family: var(--font-serif); margin-bottom: 24px; color: var(--gold-primary);">Hướng Dẫn Thẩm Hương & Đặc Quyền Dành Riêng Cho Quý Khách</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px;">
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 24px;">
+                <h3 style="font-size: 1.15rem; color: var(--text-primary); margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-wand-magic-sparkles text-gold-gradient"></i> Nghệ Thuật Tỏa Hương Đỉnh Cao
+                </h3>
+                <p style="font-size: 0.9rem; line-height: 1.7; color: var(--text-secondary); margin: 0;">
+                    Để nốt hương <strong>@Model.Name</strong> lưu giữ trọn vẹn từ 8 đến 12 giờ, hãy xịt vào các vị trí có mạch đập: sau gáy, hai bên cổ, cổ tay và hõm ngực. Hạn chế xoa mạnh hai cổ tay để không làm vỡ các phân tử hương đầu thanh thoát.
+                </p>
+            </div>
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 24px;">
+                <h3 style="font-size: 1.15rem; color: var(--text-primary); margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-temperature-arrow-down text-gold-gradient"></i> Bảo Quản Chuẩn Niche Salon
+                </h3>
+                <p style="font-size: 0.9rem; line-height: 1.7; color: var(--text-secondary); margin: 0;">
+                    Giữ sản phẩm trong hộp giấy nguyên bản hoặc tủ mát chuyên dụng ở nhiệt độ 18 - 22°C, tránh ánh nắng trực tiếp và độ ẩm cao phòng tắm. Điều này đảm bảo tinh dầu tự nhiên của <strong>@Model.BrandName</strong> không bị oxy hóa theo thời gian.
+                </p>
+            </div>
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 24px;">
+                <h3 style="font-size: 1.15rem; color: var(--text-primary); margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-gift text-gold-gradient"></i> Hộp Quà Xa Xỉ & Dịch Vụ Khắc Tên
+                </h3>
+                <p style="font-size: 0.9rem; line-height: 1.7; color: var(--text-secondary); margin: 0;">
+                    Mỗi đơn hàng được đóng gói trong hộp cứng đệm nhung sang trọng kèm thiệp viết tay và mẫu thử vial độc quyền. Khách hàng mua chai Fullbox được tặng miễn phí dịch vụ khắc tên laser cá nhân hóa lên thân chai tại Boutique.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- CÁC SẢN PHẨM CÙNG NHÓM HƯƠNG / LIÊN QUAN -->
+    @if (related.Any())
+    {
+        <section style="margin-bottom: 60px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
+                <div>
+                    <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.2em; color: var(--gold-primary); font-weight: 700;">Gợi Ý Hoàn Hảo</span>
+                    <h2 style="font-size: 1.8rem; font-family: var(--font-serif); margin-top: 4px;">Tuyệt Tác Cùng Nhóm Hương Tương Tự</h2>
+                </div>
+                <a href="/bo-suu-tap" style="color: var(--gold-primary); font-size: 0.9rem; text-decoration: none; font-weight: 600;">Xem Tất Cả &raquo;</a>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px;">
+                @foreach (var p in related)
+                {
+                    <article style="background: var(--bg-surface); border: 1px solid var(--border-card); border-radius: var(--radius-md); padding: 16px; display: flex; flex-direction: column; transition: transform 0.3s ease, border-color 0.3s ease;">
+                        <a href="/nuoc-hoa/@p.Slug" style="display: block; text-align: center; margin-bottom: 12px; overflow: hidden; border-radius: var(--radius-sm);">
+                            <img src="@p.MainImageUrl" alt="@p.Name" width="220" height="220" loading="lazy" style="width: 100%; aspect-ratio: 1/1; object-fit: contain; transition: transform 0.3s ease;" />
+                        </a>
+                        <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--gold-primary); letter-spacing: 0.1em; font-weight: 600;">@p.BrandName</span>
+                        <h3 style="font-size: 0.95rem; margin: 4px 0 8px; line-height: 1.4; flex-grow: 1;">
+                            <a href="/nuoc-hoa/@p.Slug" style="color: var(--text-primary); text-decoration: none;">@p.Name</a>
+                        </h3>
+                        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: auto; padding-top: 8px; border-top: 1px solid var(--border-subtle);">
+                            <span style="color: var(--gold-primary); font-weight: 700; font-size: 1rem;">@p.BasePrice.ToString("N0")₫</span>
+                            <span style="font-size: 0.75rem; color: var(--text-muted);"><i class="fa-solid fa-star" style="color: var(--gold-primary);"></i> @p.RatingAverage.ToString("0.0")</span>
+                        </div>
+                    </article>
+                }
+            </div>
+        </section>
+    }
 </div>
 
 <section class="luxury-card" style="padding:28px;margin:0 auto 60px;max-width:1100px">
@@ -277,7 +341,7 @@
                 <div style="display:flex;gap:10px;flex-wrap:wrap">
                 @foreach (var name in names)
                 {
-                    <img src="@Url.Action("Photo", "Reviews", new { reviewId = review.Id, fileName = name })" alt="Ảnh đánh giá" loading="lazy" style="width:110px;height:110px;object-fit:cover;border-radius:8px" />
+                    <img src="@Url.Action("Photo", "Reviews", new { reviewId = review.Id, fileName = name })" alt="Ảnh đánh giá" width="110" height="110" loading="lazy" style="width:110px;height:110px;object-fit:cover;border-radius:8px" />
                 }
                 </div>
             }

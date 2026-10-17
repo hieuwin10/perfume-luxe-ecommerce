@@ -1,6 +1,8 @@
 @{
     ViewData["Title"] = "Chính Sách Bảo Mật Dữ Liệu Khách Hàng - PERFUME LUXE";
-    ViewData["MetaDescription"] = "Cam kết bảo mật tuyệt đối dữ liệu cá nhân, thông tin thanh toán và lịch sử giao dịch của khách hàng tại PERFUME LUXE.";
+    ViewData["MetaDescription"] = "Cam kết bảo mật tuyệt đối dữ liệu cá nhân, thông tin thanh toán và lịch sử giao dịch của khách hàng tại PERFUME LUXE với tiêu chuẩn mã hóa SSL/TLS 256-bit.";
+    var siteBaseUrl = $"{Context.Request.Scheme}://{Context.Request.Host}";
+    var canonicalUrl = $"{siteBaseUrl}/privacy";
 }
 
 <div style="background: radial-gradient(circle at center, rgba(212, 175, 55, 0.1) 0%, rgba(10, 10, 10, 0.98) 75%); padding: 70px 24px; text-align: center; border-bottom: 1px solid var(--border-card);">
@@ -19,35 +21,101 @@
 
 <div style="max-width: 960px; margin: 60px auto; padding: 0 24px; font-size: 0.95rem; line-height: 1.8; color: var(--text-secondary);">
     <h2 style="font-size: 1.5rem; font-family: var(--font-serif); color: var(--text-primary); margin-bottom: 14px;">
-        1. Mục Đích Thu Thập Dữ Liệu
+        1. Mục Đích Thu Thập Dữ Liệu Cá Nhân
     </h2>
     <p>
-        Chúng tôi chỉ thu thập các thông tin cần thiết nhằm phục vụ việc xử lý đơn hàng, bao gồm: Họ tên, số điện thoại, địa chỉ nhận hàng và địa chỉ email để gửi hóa đơn điện tử cùng mã theo dõi vận đơn. Chúng tôi tuyệt đối <strong>không lưu trữ</strong> thông tin số thẻ tín dụng hay mật khẩu ngân hàng của quý khách trên hệ thống máy chủ.
+        Chúng tôi chỉ thu thập các thông tin cần thiết nhằm phục vụ việc xử lý đơn hàng, bao gồm: Họ tên, số điện thoại, địa chỉ nhận hàng và địa chỉ email để gửi hóa đơn điện tử cùng mã theo dõi vận đơn. Chúng tôi tuyệt đối <strong>không lưu trữ</strong> thông tin số thẻ tín dụng hay mật khẩu ngân hàng của quý khách trên hệ thống máy chủ nội bộ.
     </p>
 
     <h2 style="font-size: 1.5rem; font-family: var(--font-serif); color: var(--text-primary); margin: 30px 0 14px;">
-        2. Phạm Vi Sử Dụng Thông Tin
+        2. Phạm Vi Sử Dụng Thông Tin Khách Hàng
     </h2>
     <p>
-        Thông tin khách hàng chỉ được sử dụng nội bộ trong các trường hợp:
+        Thông tin khách hàng chỉ được sử dụng nội bộ trong các trường hợp sau đây nhằm đảm bảo chất lượng phục vụ:
     </p>
     <ul style="padding-left: 20px; margin-bottom: 24px;">
-        <li>Xác nhận và chuyển giao kiện hàng qua đối tác vận chuyển hỏa tốc uy tín (VNPost, GHN, SPX).</li>
-        <li>Gửi thông báo cập nhật tiến độ giao hàng và mã kích hoạt tích điểm hội viên VIP.</li>
+        <li>Xác nhận và chuyển giao kiện hàng qua đối tác vận chuyển hỏa tốc uy tín (VNPost, GHN, SPX, GrabExpress).</li>
+        <li>Gửi thông báo cập nhật tiến độ giao hàng và mã kích hoạt tích điểm hội viên VIP Privilège.</li>
         <li>Gửi các bản tin đặc quyền Haute Parfumerie Gazette và quà tặng sinh nhật (khi khách hàng chủ động đăng ký).</li>
+        <li>Hỗ trợ xử lý yêu cầu bảo hành vòi xịt hoặc đổi trả sản phẩm nhanh chóng trong vòng 24 giờ.</li>
     </ul>
 
     <h2 style="font-size: 1.5rem; font-family: var(--font-serif); color: var(--text-primary); margin: 30px 0 14px;">
         3. Cam Kết Tuyệt Đối Không Tiết Lộ Cho Bên Thứ Ba
     </h2>
     <p>
-        PERFUME LUXE cam đoan không bán, trao đổi hay chia sẻ dữ liệu cá nhân của quý khách cho bất kỳ bên thứ ba nào vì mục đích thương mại. Mọi nhân viên phụ trách dữ liệu đều ký cam kết bảo mật thông tin nghiêm ngặt theo quy định của pháp luật.
+        PERFUME LUXE cam đoan không bán, trao đổi hay chia sẻ dữ liệu cá nhân của quý khách cho bất kỳ bên thứ ba nào vì mục đích thương mại. Mọi nhân viên phụ trách dữ liệu đều ký cam kết bảo mật thông tin nghiêm ngặt theo quy định của pháp luật và tiêu chuẩn ISO/IEC 27001.
     </p>
 
     <h2 style="font-size: 1.5rem; font-family: var(--font-serif); color: var(--text-primary); margin: 30px 0 14px;">
         4. Quyền Của Khách Hàng Đối Với Dữ Liệu
     </h2>
     <p>
-        Quý khách có toàn quyền yêu cầu kiểm tra, cập nhật, điều chỉnh hoặc hủy bỏ thông tin cá nhân của mình bằng cách liên hệ Ban Quản Trị qua email: <a href="mailto:privacy@perfumeluxe.com" style="color: var(--gold-primary);">privacy@perfumeluxe.com</a> hoặc hotline <strong style="color: var(--text-primary);">024.3828.9999</strong>.
+        Quý khách có toàn quyền yêu cầu kiểm tra, cập nhật, điều chỉnh hoặc hủy bỏ thông tin cá nhân của mình bằng cách liên hệ Ban Quản Trị qua email: <a href="mailto:privacy@perfumeluxe.com" style="color: var(--gold-primary);">privacy@perfumeluxe.com</a> hoặc hotline <strong style="color: var(--text-primary);">024.3828.9999</strong>. Yêu cầu của quý khách sẽ được hoàn tất xử lý trong vòng 48 giờ làm việc.
+    </p>
+
+    <h2 style="font-size: 1.5rem; font-family: var(--font-serif); color: var(--text-primary); margin: 30px 0 14px;">
+        5. Thời Gian Lưu Trữ Thông Tin
+    </h2>
+    <p>
+        Dữ liệu cá nhân của khách hàng sẽ được lưu trữ cho đến khi có yêu cầu hủy bỏ hoặc tự khách hàng đăng nhập và thực hiện hủy bỏ tại trang quản trị tài khoản cá nhân. Trong mọi trường hợp khác, thông tin sẽ được bảo mật an toàn trên máy chủ đám mây có tường lửa bảo vệ 24/7.
+    </p>
+
+    <h2 style="font-size: 1.5rem; font-family: var(--font-serif); color: var(--text-primary); margin: 30px 0 14px;">
+        6. Tiêu Chuẩn An Ninh Mạng & Mã Hóa SSL/TLS
+    </h2>
+    <p>
+        Hệ thống giao dịch của PERFUME LUXE được trang bị chứng chỉ bảo mật SSL/TLS 256-bit cao cấp nhất. Mọi luồng dữ liệu truyền tải giữa thiết bị của quý khách và hệ thống máy chủ đều được mã hóa toàn trình, ngăn chặn tuyệt đối các hành vi nghe lén hoặc can thiệp dữ liệu từ bên ngoài.
+    </p>
+
+    <h2 style="font-size: 1.5rem; font-family: var(--font-serif); color: var(--text-primary); margin: 30px 0 14px;">
+        7. Cơ Chế Sử Dụng Cookie & Trải Nghiệm Người Dùng
+    </h2>
+    <p>
+        Chúng tôi sử dụng cookie phiên làm việc (session cookies) nhằm ghi nhớ giỏ hàng tạm thời và tùy chọn ngôn ngữ hiển thị. Quý khách có thể tùy chỉnh cài đặt trình duyệt để từ chối cookie, tuy nhiên một số tính năng như lưu giỏ hàng hoặc gợi ý nước hoa cá nhân hóa có thể hoạt động không tối ưu.
+    </p>
+
+    <h2 style="font-size: 1.5rem; font-family: var(--font-serif); color: var(--text-primary); margin: 30px 0 14px;">
+        8. Đơn Vị Thu Thập & Địa Chỉ Tiếp Nhận Khiếu Nại
+    </h2>
+    <p>
+        Mọi thắc mắc hoặc phản ánh liên quan đến việc thu thập và quản lý thông tin cá nhân, xin vui lòng liên hệ:
+        <br /><strong>Công Ty Cổ Phần PERFUME LUXE Việt Nam</strong>
+        <br />Địa chỉ trụ sở: 24 Phố Tràng Tiền, Phường Tràng Tiền, Quận Hoàn Kiếm, Hà Nội
+        <br />Email: <a href="mailto:contact@perfumeluxe.com" style="color: var(--gold-primary);">contact@perfumeluxe.com</a> | Hotline: <strong>024.3828.9999</strong>
     </p>
 </div>
+
+<!-- STRUCTURED DATA FOR SEO -->
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@graph": [
+    {
+      "@@type": "WebPage",
+      "@@id": "@canonicalUrl",
+      "url": "@canonicalUrl",
+      "name": "Chính Sách Bảo Mật Dữ Liệu Khách Hàng - PERFUME LUXE",
+      "description": "Cam kết bảo mật tuyệt đối dữ liệu cá nhân, thông tin thanh toán và lịch sử giao dịch của khách hàng tại PERFUME LUXE.",
+      "inLanguage": "vi-VN"
+    },
+    {
+      "@@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@@type": "ListItem",
+          "position": 1,
+          "name": "Trang Chủ",
+          "item": "@siteBaseUrl/"
+        },
+        {
+          "@@type": "ListItem",
+          "position": 2,
+          "name": "Chính Sách Bảo Mật",
+          "item": "@canonicalUrl"
+        }
+      ]
+    }
+  ]
+}
+</script>

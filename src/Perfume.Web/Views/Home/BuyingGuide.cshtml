@@ -1,6 +1,8 @@
 @{
     ViewData["Title"] = "Hướng Dẫn Mua Hàng & Phương Thức Thanh Toán - PERFUME LUXE";
     ViewData["MetaDescription"] = "Cẩm nang hướng dẫn đặt mua nước hoa chính hãng trực tuyến tại PERFUME LUXE, các phương thức thanh toán an toàn và thời gian giao hàng toàn quốc.";
+    var siteBaseUrl = $"{Context.Request.Scheme}://{Context.Request.Host}";
+    var canonicalUrl = $"{siteBaseUrl}/huong-dan-mua-hang";
 }
 
 <div style="background: radial-gradient(circle at center, rgba(212, 175, 55, 0.1) 0%, rgba(10, 10, 10, 0.98) 75%); padding: 70px 24px; text-align: center; border-bottom: 1px solid var(--border-card);">
@@ -20,7 +22,7 @@
 <div style="max-width: 960px; margin: 60px auto; padding: 0 24px; font-size: 0.95rem; line-height: 1.8; color: var(--text-secondary);">
     <!-- Các bước đặt hàng -->
     <h2 style="font-size: 1.6rem; font-family: var(--font-serif); color: var(--text-primary); margin-bottom: 24px;">
-        Quy Trình 4 Bước Đặt Hàng Nhanh Chóng
+        1. Quy Trình 4 Bước Đặt Hàng Nhanh Chóng
     </h2>
 
     <div style="display: flex; flex-direction: column; gap: 20px; margin-bottom: 45px;">
@@ -59,23 +61,85 @@
 
     <!-- Phương thức thanh toán -->
     <h2 style="font-size: 1.6rem; font-family: var(--font-serif); color: var(--text-primary); margin: 30px 0 20px;">
-        Các Phương Thức Thanh Toán Hỗ Trợ
+        2. Các Phương Thức Thanh Toán Hỗ Trợ
     </h2>
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 40px;">
         <div style="background: var(--bg-surface); border: 1px solid var(--border-card); padding: 20px; border-radius: var(--radius-sm); text-align: center;">
             <i class="fa-solid fa-hand-holding-dollar" style="font-size: 2rem; color: var(--gold-primary); margin-bottom: 10px;"></i>
-            <h4 style="color: var(--text-primary); margin-bottom: 6px;">COD Toàn Quốc</h4>
+            <h3 style="font-size: 1.05rem; color: var(--text-primary); margin-bottom: 6px;">COD Toàn Quốc</h3>
             <p style="font-size: 0.82rem; margin: 0;">Thanh toán tiền mặt khi nhận hàng</p>
         </div>
         <div style="background: var(--bg-surface); border: 1px solid var(--border-card); padding: 20px; border-radius: var(--radius-sm); text-align: center;">
             <i class="fa-solid fa-qrcode" style="font-size: 2rem; color: var(--gold-primary); margin-bottom: 10px;"></i>
-            <h4 style="color: var(--text-primary); margin-bottom: 6px;">Cổng VNPAY-QR</h4>
+            <h3 style="font-size: 1.05rem; color: var(--text-primary); margin-bottom: 6px;">Cổng VNPAY-QR</h3>
             <p style="font-size: 0.82rem; margin: 0;">Quét mã trực tiếp qua app ngân hàng</p>
         </div>
         <div style="background: var(--bg-surface); border: 1px solid var(--border-card); padding: 20px; border-radius: var(--radius-sm); text-align: center;">
             <i class="fa-solid fa-building-columns" style="font-size: 2rem; color: var(--gold-primary); margin-bottom: 10px;"></i>
-            <h4 style="color: var(--text-primary); margin-bottom: 6px;">Chuyển Khoản 24/7</h4>
+            <h3 style="font-size: 1.05rem; color: var(--text-primary); margin-bottom: 6px;">Chuyển Khoản 24/7</h3>
             <p style="font-size: 0.82rem; margin: 0;">Xác nhận tự động trong 30 giây</p>
         </div>
     </div>
+
+    <!-- Thời gian & chi phí vận chuyển -->
+    <h2 style="font-size: 1.6rem; font-family: var(--font-serif); color: var(--text-primary); margin: 30px 0 16px;">
+        3. Thời Gian & Phí Vận Chuyển Hỏa Tốc
+    </h2>
+    <p>
+        Mọi đơn hàng đều được xử lý đóng gói và bàn giao đối tác chuyển phát trong vòng 2 - 4 giờ làm việc:
+    </p>
+    <ul style="padding-left: 20px; margin-bottom: 24px;">
+        <li><strong>Nội thành Hà Nội & TP. Hồ Chí Minh:</strong> Giao hỏa tốc 2H hoặc trong ngày (phí dịch vụ 45.000₫, miễn phí cho đơn từ 2.000.000₫).</li>
+        <li><strong>Các tỉnh thành khác trên toàn quốc:</strong> Giao nhanh từ 1 - 3 ngày làm việc qua bưu chính VNPost / GHN (phí đồng giá 35.000₫, miễn phí cho đơn từ 2.000.000₫).</li>
+    </ul>
+
+    <!-- Quy chuẩn đóng gói sang trọng -->
+    <h2 style="font-size: 1.6rem; font-family: var(--font-serif); color: var(--text-primary); margin: 30px 0 16px;">
+        4. Quy Chuẩn Đóng Gói Sang Trọng Chuẩn Quà Tặng
+    </h2>
+    <p>
+        Từng chai nước hoa từ PERFUME LUXE được bảo vệ trong hộp carton cứng cáp 3 lớp, chèn xốp bóng khí định hình chống sốc tuyệt đối và niêm phong bằng băng keo an ninh. Bên trong bao gồm túi xách giấy ép kim cao cấp, nơ ruy băng nhung và thiệp viết tay theo yêu cầu để quý khách sẵn sàng trao tặng người thân yêu.
+    </p>
+
+    <!-- Hỗ trợ đơn hàng doanh nghiệp -->
+    <h2 style="font-size: 1.6rem; font-family: var(--font-serif); color: var(--text-primary); margin: 30px 0 16px;">
+        5. Dịch Vụ Đặt Hàng Doanh Nghiệp & Quà Tặng VIP
+    </h2>
+    <p>
+        Đối với quý khách hàng doanh nghiệp hoặc cá nhân có nhu cầu đặt set quà tặng số lượng lớn (Discovery Box, Gift Hamper cao cấp cho hội nghị, đối tác), xin vui lòng liên hệ phòng Chăm sóc Khách hàng Doanh nghiệp qua hotline <strong style="color: var(--text-primary);">024.3828.9999</strong> hoặc email <a href="mailto:corporate@perfumeluxe.com" style="color: var(--gold-primary);">corporate@perfumeluxe.com</a> để nhận bảng chiết khấu ưu đãi từ 15% - 25% kèm mẫu thử tận nơi.
+    </p>
 </div>
+
+<!-- STRUCTURED DATA FOR SEO -->
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@graph": [
+    {
+      "@@type": "WebPage",
+      "@@id": "@canonicalUrl",
+      "url": "@canonicalUrl",
+      "name": "Hướng Dẫn Mua Hàng & Phương Thức Thanh Toán - PERFUME LUXE",
+      "description": "Cẩm nang hướng dẫn đặt mua nước hoa chính hãng trực tuyến tại PERFUME LUXE, các phương thức thanh toán an toàn và thời gian giao hàng toàn quốc.",
+      "inLanguage": "vi-VN"
+    },
+    {
+      "@@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@@type": "ListItem",
+          "position": 1,
+          "name": "Trang Chủ",
+          "item": "@siteBaseUrl/"
+        },
+        {
+          "@@type": "ListItem",
+          "position": 2,
+          "name": "Hướng Dẫn Mua Hàng",
+          "item": "@canonicalUrl"
+        }
+      ]
+    }
+  ]
+}
+</script>

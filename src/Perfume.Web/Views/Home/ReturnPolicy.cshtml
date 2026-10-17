@@ -1,6 +1,8 @@
 @{
     ViewData["Title"] = "Chính Sách Đổi Trả & Bảo Hành Chính Hãng - PERFUME LUXE";
     ViewData["MetaDescription"] = "Chính sách đổi trả linh hoạt trong vòng 7 ngày, bảo hành vòi xịt trọn đời và cam kết hoàn tiền 200% nếu phát hiện hàng không chính hãng.";
+    var siteBaseUrl = $"{Context.Request.Scheme}://{Context.Request.Host}";
+    var canonicalUrl = $"{siteBaseUrl}/chinh-sach-doi-tra";
 }
 
 <div style="background: radial-gradient(circle at center, rgba(212, 175, 55, 0.1) 0%, rgba(10, 10, 10, 0.98) 75%); padding: 70px 24px; text-align: center; border-bottom: 1px solid var(--border-card);">
@@ -22,11 +24,11 @@
     <div style="background: linear-gradient(135deg, rgba(212,175,55,0.15), rgba(20,20,20,0.95)); border: 1px solid var(--gold-primary); border-radius: var(--radius-md); padding: 30px; margin-bottom: 40px; display: flex; gap: 24px; align-items: center;">
         <div style="font-size: 3rem; color: var(--gold-primary);"><i class="fa-solid fa-shield-halved"></i></div>
         <div>
-            <h3 style="font-size: 1.3rem; font-family: var(--font-serif); color: var(--gold-primary); margin-bottom: 8px;">
+            <h2 style="font-size: 1.4rem; font-family: var(--font-serif); color: var(--gold-primary); margin-bottom: 8px;">
                 Bảo Đảm Chính Hãng 100% • Cam Kết Bồi Hoàn 200%
-            </h3>
+            </h2>
             <p style="margin: 0; color: var(--text-primary); font-size: 0.92rem;">
-                Mọi chai nước hoa bán ra tại PERFUME LUXE đều được bảo hiểm trọn đời sản phẩm. Nếu có bất kỳ kiểm định nào từ cơ quan chức năng hoặc hãng chứng minh hàng không chính hãng, chúng tôi bồi hoàn ngay lập tức 200% giá trị đơn hàng.
+                Mọi chai nước hoa bán ra tại PERFUME LUXE đều được bảo hiểm trọn đời sản phẩm. Nếu có bất kỳ kiểm định nào từ cơ quan chức năng hoặc hãng chứng minh hàng không chính hãng, chúng tôi bồi hoàn ngay lập tức 200% giá trị đơn hàng cùng văn bản xin lỗi chính thức.
             </p>
         </div>
     </div>
@@ -47,7 +49,7 @@
         2. Bảo Hành Vòi Xịt Trọn Đời Sản Phẩm
     </h2>
     <p>
-        Đối với tất cả chai chiết 10ml và chai Fullbox mua tại PERFUME LUXE, quý khách được hưởng chính sách <strong>bảo hành thay thế vòi xịt hoàn toàn miễn phí</strong> trọn đời chai nước hoa nếu gặp hiện tượng tia xịt không tơi sương hoặc kẹt nắp.
+        Đối với tất cả chai chiết 10ml và chai Fullbox mua tại PERFUME LUXE, quý khách được hưởng chính sách <strong>bảo hành thay thế vòi xịt hoàn toàn miễn phí</strong> trọn đời chai nước hoa nếu gặp hiện tượng tia xịt không tơi sương hoặc kẹt nắp. Quý khách chỉ cần mang sản phẩm tới bất kỳ Boutique nào của hệ thống để được kỹ thuật viên xử lý lấy ngay.
     </p>
 
     <!-- Quy trình 3 bước -->
@@ -68,4 +70,67 @@
             <p style="margin: 0; font-size: 0.88rem;">Ngay khi nhận được kiện hàng, PERFUME LUXE gửi sản phẩm mới hoặc hoàn tiền chuyển khoản trong vòng 24 giờ.</p>
         </div>
     </div>
+
+    <!-- Chi phí vận chuyển đổi trả -->
+    <h2 style="font-size: 1.6rem; font-family: var(--font-serif); color: var(--text-primary); margin: 30px 0 16px;">
+        4. Chi Phí Vận Chuyển Khi Thực Hiện Đổi Trả
+    </h2>
+    <p>
+        Trong trường hợp đổi trả do lỗi kỹ thuật của nhà sản xuất, đóng gói sai mẫu hoặc hư hại do đơn vị vận chuyển, PERFUME LUXE chịu <strong>100% phí vận chuyển cả hai chiều</strong>. Trường hợp quý khách muốn đổi sang chai hương khác theo sở thích cá nhân (khi seal chưa mở), quý khách chỉ cần thanh toán cước chuyển phát bưu điện tiêu chuẩn (35.000₫).
+    </p>
+
+    <!-- Các trường hợp không áp dụng -->
+    <h2 style="font-size: 1.6rem; font-family: var(--font-serif); color: var(--text-primary); margin: 30px 0 16px;">
+        5. Các Trường Hợp Không Áp Dụng Đổi Trả
+    </h2>
+    <p>
+        Chính sách hoàn tiền hoặc đổi mới sẽ không áp dụng cho các trường hợp:
+    </p>
+    <ul style="padding-left: 20px; margin-bottom: 24px;">
+        <li>Sản phẩm đã bóc seal, xịt thử hoặc bị trầy xước bao bì do lỗi từ phía người sử dụng.</li>
+        <li>Sản phẩm đã quá hạn 07 ngày kể từ ngày đơn hàng hiển thị trạng thái giao thành công.</li>
+        <li>Các sản phẩm nằm trong chương trình Flash Sale xả kho hoặc quà tặng kèm không bán.</li>
+    </ul>
+
+    <!-- Hỗ trợ đổi hương cho VIP -->
+    <h2 style="font-size: 1.6rem; font-family: var(--font-serif); color: var(--text-primary); margin: 30px 0 16px;">
+        6. Đặc Quyền Đổi Hương Dành Cho Thành Viên VIP
+    </h2>
+    <p>
+        Hội viên hạng Platinum và Diamond thuộc chương trình <em>VIP Privilège</em> được hưởng đặc quyền đổi sang sản phẩm khác cùng tầm giá 01 lần/năm ngay cả khi đã mở seal thử 1 - 2 shot xịt, nhằm mang lại trải nghiệm hoàn hảo không rủi ro khi khám phá các sáng tạo Niche mới lạ.
+    </p>
 </div>
+
+<!-- STRUCTURED DATA FOR SEO -->
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@graph": [
+    {
+      "@@type": "WebPage",
+      "@@id": "@canonicalUrl",
+      "url": "@canonicalUrl",
+      "name": "Chính Sách Đổi Trả & Bảo Hành Chính Hãng - PERFUME LUXE",
+      "description": "Chính sách đổi trả linh hoạt trong vòng 7 ngày, bảo hành vòi xịt trọn đời và cam kết hoàn tiền 200% nếu phát hiện hàng không chính hãng.",
+      "inLanguage": "vi-VN"
+    },
+    {
+      "@@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@@type": "ListItem",
+          "position": 1,
+          "name": "Trang Chủ",
+          "item": "@siteBaseUrl/"
+        },
+        {
+          "@@type": "ListItem",
+          "position": 2,
+          "name": "Chính Sách Đổi Trả",
+          "item": "@canonicalUrl"
+        }
+      ]
+    }
+  ]
+}
+</script>
