@@ -1,8 +1,10 @@
 @using Microsoft.AspNetCore.Identity
 @inject SignInManager<Perfume.Infrastructure.Identity.AppUser> SignInManager
 @inject UserManager<Perfume.Infrastructure.Identity.AppUser> UserManager
+@inject IConfiguration Configuration
 @{
-    var canonicalUrl = ViewData["CanonicalUrl"]?.ToString() ?? $"https://{Context.Request.Host}{Context.Request.Path}";
+    var canonicalUrl = ViewData["CanonicalUrl"]?.ToString()
+        ?? Perfume.Web.Seo.SeoUrlBuilder.AbsoluteUrl(Context.Request, Configuration, Context.Request.Path);
     var ogUrl = ViewData["OgUrl"]?.ToString() ?? canonicalUrl;
     var requestPath = Context.Request.Path;
     var isPrivatePage = requestPath.StartsWithSegments("/account", StringComparison.OrdinalIgnoreCase)
@@ -39,10 +41,17 @@
     </script>
 
     <!-- Performance Preconnect & DNS-Prefetch -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preconnect" href="https://images.unsplash.com" crossorigin />
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
     <link rel="dns-prefetch" href="https://images.unsplash.com" />
     <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com" />
+
+    <!-- Google Fonts (Non-blocking HTML link with preconnect) -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" />
     
     <!-- Meta SEO Google & Social Cards -->
     <meta name="description" content="@(ViewData["MetaDescription"] ?? "Thế giới nước hoa cao cấp chính hãng từ các thương hiệu xa xỉ bậc nhất thế giới: Dior, Chanel, Creed, Tom Ford, Le Labo, Kilian. Bảo đảm 100% xuất xứ.")" />
@@ -68,13 +77,9 @@
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💎</text></svg>" />
     <meta name="theme-color" content="#0B0B0E" />
 
-    @if (Context.Request.Path == "/" || Context.Request.Path == "")
+    @if (ViewData["LcpImage"] != null)
     {
-        <!-- LCP Hero Image Preload (Homepage only) -->
-        <link rel="preload" as="image" href="https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=1920&q=80" fetchpriority="high" />
-    }
-    else if (ViewData["LcpImage"] != null)
-    {
+        <!-- Preload the actual hero or product image chosen by this page. -->
         <link rel="preload" as="image" href="@ViewData["LcpImage"]" fetchpriority="high" />
     }
 

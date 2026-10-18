@@ -6,6 +6,84 @@
     ViewData["LcpImage"] = Model.MainImageUrl;
     var related = ViewBag.RelatedProducts as List<ProductCardDto> ?? new List<ProductCardDto>();
     var defaultVariant = Model.Variants.FirstOrDefault(v => v.IsDefault) ?? Model.Variants.FirstOrDefault();
+    var productCanonicalUrl = ViewData["CanonicalUrl"]?.ToString()
+        ?? $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}";
+    var displayedPrice = Model.IsFlashSale && Model.FlashSalePrice.HasValue
+        ? Model.FlashSalePrice.Value
+        : defaultVariant?.SalePrice ?? Model.BasePrice;
+    var productJsonLd = new Dictionary<string, object?>
+    {
+        ["@context"] = "https://schema.org",
+        ["@type"] = "Product",
+        ["name"] = Model.Name,
+        ["image"] = string.IsNullOrWhiteSpace(Model.MainImageUrl) ? null : new[] { Model.MainImageUrl },
+        ["description"] = Model.MetaDescription ?? Model.ShortDescription,
+        ["sku"] = Model.Sku,
+        ["brand"] = new Dictionary<string, object?> { ["@type"] = "Brand", ["name"] = Model.BrandName },
+        ["offers"] = new Dictionary<string, object?>
+        {
+            ["@type"] = "Offer",
+            ["url"] = productCanonicalUrl,
+            ["priceCurrency"] = "VND",
+            ["price"] = displayedPrice.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            ["priceValidUntil"] = DateTime.UtcNow.AddYears(1).ToString("yyyy-MM-dd"),
+            ["itemCondition"] = "https://schema.org/NewCondition",
+            ["availability"] = Model.IsInStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+            ["seller"] = new Dictionary<string, object?> { ["@type"] = "Organization", ["name"] = "PERFUME LUXE" },
+            ["hasMerchantReturnPolicy"] = new Dictionary<string, object?>
+            {
+                ["@type"] = "MerchantReturnPolicy",
+                ["applicableCountry"] = "VN",
+                ["returnPolicyCategory"] = "https://schema.org/MerchantReturnFiniteReturnWindow",
+                ["merchantReturnDays"] = 7,
+                ["returnMethod"] = "https://schema.org/ReturnByMail",
+                ["returnFees"] = "https://schema.org/FreeReturn"
+            },
+            ["shippingDetails"] = new Dictionary<string, object?>
+            {
+                ["@type"] = "OfferShippingDetails",
+                ["shippingRate"] = new Dictionary<string, object?>
+                {
+                    ["@type"] = "MonetaryAmount",
+                    ["value"] = "35000",
+                    ["currency"] = "VND"
+                },
+                ["shippingDestination"] = new Dictionary<string, object?>
+                {
+                    ["@type"] = "DefinedRegion",
+                    ["addressCountry"] = "VN"
+                },
+                ["deliveryTime"] = new Dictionary<string, object?>
+                {
+                    ["@type"] = "ShippingDeliveryTime",
+                    ["handlingTime"] = new Dictionary<string, object?>
+                    {
+                        ["@type"] = "QuantitativeValue",
+                        ["minValue"] = 0,
+                        ["maxValue"] = 1,
+                        ["unitCode"] = "DAY"
+                    },
+                    ["transitTime"] = new Dictionary<string, object?>
+                    {
+                        ["@type"] = "QuantitativeValue",
+                        ["minValue"] = 1,
+                        ["maxValue"] = 3,
+                        ["unitCode"] = "DAY"
+                    }
+                }
+            }
+        }
+    };
+    if (Model.RatingCount > 0)
+    {
+        productJsonLd["aggregateRating"] = new Dictionary<string, object?>
+        {
+            ["@type"] = "AggregateRating",
+            ["ratingValue"] = Model.RatingAverage.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture),
+            ["reviewCount"] = Model.RatingCount
+        };
+    }
+    var productJsonLdText = System.Text.Json.JsonSerializer.Serialize(productJsonLd);
 }
 
 <div style="max-width: 1360px; margin: 40px auto; padding: 0 24px;">
@@ -110,11 +188,12 @@
                     <label style="display: block; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; color: var(--text-secondary);">
                         Chọn Dung Tích / Phiên Bản:
                     </label>
-                    <div style="display: flex; flex-wrap: wrap; gap: 12px;">
+                    <div role="group" aria-label="Chọn dung tích hoặc phiên bản" style="display: flex; flex-wrap: wrap; gap: 12px;">
                         @foreach (var v in Model.Variants)
                         {
                             bool isDefault = (defaultVariant?.Id == v.Id);
                             <button type="button" class="variant-btn @(isDefault ? "active" : "")" 
+                                    aria-pressed="@(isDefault ? "true" : "false")"
                                     data-id="@v.Id" 
                                     data-price="@v.SalePrice.ToString(System.Globalization.CultureInfo.InvariantCulture)" 
                                     data-orig="@v.OriginalPrice.ToString(System.Globalization.CultureInfo.InvariantCulture)"
@@ -130,9 +209,9 @@
             <!-- Quantity & Add to Cart -->
             <div style="display: flex; gap: 16px; margin-bottom: 36px; align-items: center; flex-wrap: wrap;">
                 <div style="display: flex; align-items: center; border: 1px solid var(--border-card); border-radius: var(--radius-sm); background: var(--bg-surface);">
-                    <button type="button" onclick="changeQty(-1)" style="padding: 12px 16px; background: none; border: none; color: var(--text-primary); cursor: pointer;"><i class="fa-solid fa-minus"></i></button>
-                    <input type="number" id="buyQty" value="1" min="1" max="10" style="width: 45px; text-align: center; background: none; border: none; color: var(--text-primary); font-weight: 700; outline: none;" />
-                    <button type="button" onclick="changeQty(1)" style="padding: 12px 16px; background: none; border: none; color: var(--text-primary); cursor: pointer;"><i class="fa-solid fa-plus"></i></button>
+                    <button type="button" onclick="changeQty(-1)" aria-label="Giảm số lượng" style="padding: 12px 16px; background: none; border: none; color: var(--text-primary); cursor: pointer;"><i class="fa-solid fa-minus" aria-hidden="true"></i></button>
+                    <input type="number" id="buyQty" aria-label="Số lượng sản phẩm" value="1" min="1" max="10" style="width: 45px; text-align: center; background: none; border: none; color: var(--text-primary); font-weight: 700; outline: none;" />
+                    <button type="button" onclick="changeQty(1)" aria-label="Tăng số lượng" style="padding: 12px 16px; background: none; border: none; color: var(--text-primary); cursor: pointer;"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>
                 </div>
 
                 <button type="button" class="btn-luxe" onclick="handleAddToCart()" style="flex-grow: 1; padding: 14px 28px; font-size: 0.95rem;">
@@ -341,7 +420,7 @@
                 <div style="display:flex;gap:10px;flex-wrap:wrap">
                 @foreach (var name in names)
                 {
-                    <img src="@Url.Action("Photo", "Reviews", new { reviewId = review.Id, fileName = name })" alt="Ảnh đánh giá" width="110" height="110" loading="lazy" style="width:110px;height:110px;object-fit:cover;border-radius:8px" />
+                    <img src="@Url.Action("Photo", "Reviews", new { reviewId = review.Id, fileName = name })" alt="Ảnh thực tế @Model.Name từ khách hàng @review.UserName" width="110" height="110" loading="lazy" style="width:110px;height:110px;object-fit:cover;border-radius:8px" />
                 }
                 </div>
             }
@@ -357,79 +436,13 @@
             @((Model.IsFlashSale && Model.FlashSalePrice.HasValue ? Model.FlashSalePrice.Value : (defaultVariant?.SalePrice ?? Model.BasePrice)).ToString("N0"))₫
         </strong>
     </div>
-    <button type="button" class="btn-luxe" onclick="handleAddToCart()" style="padding: 10px 18px; font-size: 0.88rem; flex-grow: 1; max-width: 220px;">
+    <button type="button" class="btn-luxe" onclick="handleAddToCart()" aria-label="Thêm @Model.Name vào giỏ hàng" style="padding: 10px 18px; font-size: 0.88rem; flex-grow: 1; max-width: 220px;">
         <i class="fa-solid fa-bag-shopping" style="margin-right: 6px;"></i> Thêm Vào Giỏ
     </button>
 </div>
 
-<!-- GOOGLE STRUCTURED DATA (JSON-LD) FOR SEO -->
-<script type="application/ld+json">
-{
-  "@@context": "https://schema.org",
-  "@@type": "Product",
-  "name": "@Model.Name",
-  "image": ["@Model.MainImageUrl"],
-  "description": "@(Model.MetaDescription ?? Model.ShortDescription)",
-  "sku": "@Model.Sku",
-  "brand": {
-    "@@type": "Brand",
-    "name": "@Model.BrandName"
-  },
-  "offers": {
-    "@@type": "Offer",
-    "url": "@($"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}")",
-    "priceCurrency": "VND",
-    "price": "@Model.BasePrice.ToString(System.Globalization.CultureInfo.InvariantCulture)",
-    "priceValidUntil": "@DateTime.UtcNow.AddYears(1).ToString("yyyy-MM-dd")",
-    "itemCondition": "https://schema.org/NewCondition",
-    "availability": "https://schema.org/InStock",
-    "seller": {
-      "@@type": "Organization",
-      "name": "PERFUME LUXE"
-    },
-    "hasMerchantReturnPolicy": {
-      "@@type": "MerchantReturnPolicy",
-      "applicableCountry": "VN",
-      "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
-      "merchantReturnDays": 7,
-      "returnMethod": "https://schema.org/ReturnByMail",
-      "returnFees": "https://schema.org/FreeReturn"
-    },
-    "shippingDetails": {
-      "@@type": "OfferShippingDetails",
-      "shippingRate": {
-        "@@type": "MonetaryAmount",
-        "value": "35000",
-        "currency": "VND"
-      },
-      "shippingDestination": {
-        "@@type": "DefinedRegion",
-        "addressCountry": "VN"
-      },
-      "deliveryTime": {
-        "@@type": "ShippingDeliveryTime",
-        "handlingTime": {
-          "@@type": "QuantitativeValue",
-          "minValue": 0,
-          "maxValue": 1,
-          "unitCode": "DAY"
-        },
-        "transitTime": {
-          "@@type": "QuantitativeValue",
-          "minValue": 1,
-          "maxValue": 3,
-          "unitCode": "DAY"
-        }
-      }
-    }
-  },
-  "aggregateRating": {
-    "@@type": "AggregateRating",
-    "ratingValue": "@Model.RatingAverage.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)",
-    "reviewCount": "@Math.Max(1, Model.RatingCount)"
-  }
-}
-</script>
+<!-- Product structured data uses the same price and stock status shown to shoppers. -->
+<script type="application/ld+json">@Html.Raw(productJsonLdText)</script>
 
 <script type="application/ld+json">
 {
@@ -472,10 +485,12 @@
             document.querySelectorAll('.variant-btn').forEach(b => {
                 b.style.borderColor = 'var(--border-card)';
                 b.style.background = 'var(--bg-surface)';
+                b.setAttribute('aria-pressed', 'false');
             });
 
             btn.style.borderColor = 'var(--gold-primary)';
             btn.style.background = 'rgba(212, 175, 55, 0.15)';
+            btn.setAttribute('aria-pressed', 'true');
 
             selectedVariantId = btn.getAttribute('data-id');
             const price = Number(btn.getAttribute('data-price'));

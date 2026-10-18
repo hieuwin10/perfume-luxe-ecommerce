@@ -91,6 +91,7 @@
         ["@context"] = "https://schema.org",
         ["@type"] = "BlogPosting",
         ["headline"] = Model.Title,
+        ["url"] = articleUrl,
         ["description"] = string.IsNullOrWhiteSpace(Model.MetaDescription) ? Model.Summary : Model.MetaDescription.Trim(),
         ["image"] = string.IsNullOrWhiteSpace(articleImage) ? null : new[] { articleImage },
         ["datePublished"] = publishedAt,

@@ -2,9 +2,7 @@
    PERFUME LUXE - HAUTE PARFUMERIE DESIGN SYSTEM
    Bản quyền thiết kế giao diện Nước hoa Cao Cấp (Dark / Light Hybrid)
    ========================================================================== */
-
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
-
+/* Fonts loaded via preconnected <link> tags in _Layout.cshtml for maximum performance (eliminating render-blocking CSS @@import) */
 :root {
     /* Brand Color Palette - Luxury Champagne & Gold */
     --gold-primary: #D4AF37;

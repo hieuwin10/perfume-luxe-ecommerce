@@ -3,6 +3,7 @@ using Perfume.Application.DTOs;
 using Perfume.Application.Interfaces;
 using Perfume.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Perfume.Web.Seo;
 
 namespace Perfume.Web.Controllers;
 
@@ -10,11 +11,13 @@ public class CatalogController : Controller
 {
     private readonly IPerfumeCatalogService _catalogService;
     private readonly PerfumeDbContext _db;
+    private readonly IConfiguration _configuration;
 
-    public CatalogController(IPerfumeCatalogService catalogService, PerfumeDbContext db)
+    public CatalogController(IPerfumeCatalogService catalogService, PerfumeDbContext db, IConfiguration? configuration = null)
     {
         _catalogService = catalogService;
         _db = db;
+        _configuration = configuration ?? new ConfigurationBuilder().Build();
     }
 
     [HttpGet]
@@ -33,6 +36,9 @@ public class CatalogController : Controller
         ViewBag.Families = families;
         ViewBag.Notes = notes;
 
+        ViewData["CanonicalUrl"] = SeoUrlBuilder.AbsoluteUrl(ControllerContext.HttpContext?.Request, _configuration, "/bo-suu-tap");
+        ViewData["SeoSiteBaseUrl"] = SeoUrlBuilder.GetSiteBaseUrl(ControllerContext.HttpContext?.Request, _configuration);
+
         return View(items);
     }
 
@@ -50,6 +56,9 @@ public class CatalogController : Controller
         ViewBag.RelatedProducts = relatedItems.Where(p => p.Id != product.Id).Take(4).ToList();
         ViewBag.ApprovedReviews = await _db.Reviews.Where(r => r.ProductId == product.Id && r.IsApproved)
             .OrderByDescending(r => r.CreatedAt).Take(50).ToListAsync();
+
+        ViewData["CanonicalUrl"] = SeoUrlBuilder.AbsoluteUrl(ControllerContext.HttpContext?.Request, _configuration, $"/nuoc-hoa/{Uri.EscapeDataString(product.Slug)}");
+        ViewData["SeoSiteBaseUrl"] = SeoUrlBuilder.GetSiteBaseUrl(ControllerContext.HttpContext?.Request, _configuration);
 
         return View(product);
     }
@@ -104,6 +113,9 @@ public class CatalogController : Controller
             if (p != null) productsToCompare.Add(p);
         }
 
+        ViewData["CanonicalUrl"] = SeoUrlBuilder.AbsoluteUrl(ControllerContext.HttpContext?.Request, _configuration, "/so-sanh");
+        ViewData["SeoSiteBaseUrl"] = SeoUrlBuilder.GetSiteBaseUrl(ControllerContext.HttpContext?.Request, _configuration);
+
         return View(productsToCompare);
     }
 
@@ -132,6 +144,9 @@ public class CatalogController : Controller
                 BasePrice = p.BasePrice
             })
             .ToListAsync();
+
+        ViewData["CanonicalUrl"] = SeoUrlBuilder.AbsoluteUrl(ControllerContext.HttpContext?.Request, _configuration, "/discovery-box");
+        ViewData["SeoSiteBaseUrl"] = SeoUrlBuilder.GetSiteBaseUrl(ControllerContext.HttpContext?.Request, _configuration);
 
         return View(availablePerfumes);
     }

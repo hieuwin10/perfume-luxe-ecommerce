@@ -8,6 +8,8 @@
     var families = ViewBag.Families as List<FragranceFamily> ?? new List<FragranceFamily>();
     var blogs = ViewBag.RecentBlogs as List<BlogPost> ?? new List<BlogPost>();
     var heroBanners = ViewBag.HeroBanners as List<HeroBanner> ?? new List<HeroBanner>();
+    ViewData["LcpImage"] = heroBanners.FirstOrDefault()?.ImageUrl
+        ?? "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=1920&q=80";
 }
 
 <!-- HERO BANNER / SLIDER -->
@@ -49,17 +51,17 @@
         @if (heroBanners.Count > 1)
         {
             <!-- Slider Controls -->
-            <button type="button" onclick="prevSlide()" style="position: absolute; left: 24px; top: 50%; transform: translateY(-50%); z-index: 10; width: 44px; height: 44px; border-radius: 50%; background: rgba(0,0,0,0.6); border: 1px solid var(--border-card); color: #FFF; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); transition: all 0.2s;" onmouseover="this.style.borderColor='var(--gold-primary)'; this.style.color='var(--gold-primary)'" onmouseout="this.style.borderColor='var(--border-card)'; this.style.color='#FFF'">
-                <i class="fa-solid fa-chevron-left"></i>
+            <button type="button" onclick="prevSlide()" aria-label="Slide trước" style="position: absolute; left: 24px; top: 50%; transform: translateY(-50%); z-index: 10; width: 44px; height: 44px; border-radius: 50%; background: rgba(0,0,0,0.6); border: 1px solid var(--border-card); color: #FFF; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); transition: all 0.2s;" onmouseover="this.style.borderColor='var(--gold-primary)'; this.style.color='var(--gold-primary)'" onmouseout="this.style.borderColor='var(--border-card)'; this.style.color='#FFF'">
+                <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
             </button>
-            <button type="button" onclick="nextSlide()" style="position: absolute; right: 24px; top: 50%; transform: translateY(-50%); z-index: 10; width: 44px; height: 44px; border-radius: 50%; background: rgba(0,0,0,0.6); border: 1px solid var(--border-card); color: #FFF; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); transition: all 0.2s;" onmouseover="this.style.borderColor='var(--gold-primary)'; this.style.color='var(--gold-primary)'" onmouseout="this.style.borderColor='var(--border-card)'; this.style.color='#FFF'">
-                <i class="fa-solid fa-chevron-right"></i>
+            <button type="button" onclick="nextSlide()" aria-label="Slide kế tiếp" style="position: absolute; right: 24px; top: 50%; transform: translateY(-50%); z-index: 10; width: 44px; height: 44px; border-radius: 50%; background: rgba(0,0,0,0.6); border: 1px solid var(--border-card); color: #FFF; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); transition: all 0.2s;" onmouseover="this.style.borderColor='var(--gold-primary)'; this.style.color='var(--gold-primary)'" onmouseout="this.style.borderColor='var(--border-card)'; this.style.color='#FFF'">
+                <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
             </button>
             <!-- Dots -->
             <div style="position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 10; display: flex; gap: 8px;">
                 @for (int i = 0; i < heroBanners.Count; i++)
                 {
-                    <button type="button" onclick="goToSlide(@i)" class="slide-dot @(i == 0 ? "active" : "")" style="width: @(i == 0 ? "24px" : "10px"); height: 10px; border-radius: 99px; border: none; background: @(i == 0 ? "var(--gold-primary)" : "rgba(255,255,255,0.4)"); cursor: pointer; transition: all 0.3s;"></button>
+                    <button type="button" onclick="goToSlide(@i)" aria-label="@($"Chuyển tới slide {i + 1}")" class="slide-dot @(i == 0 ? "active" : "")" style="width: @(i == 0 ? "24px" : "10px"); height: 10px; border-radius: 99px; border: none; background: @(i == 0 ? "var(--gold-primary)" : "rgba(255,255,255,0.4)"); cursor: pointer; transition: all 0.3s;"></button>
                 }
             </div>
             <script>
@@ -205,7 +207,7 @@ else
                         </div>
 
                         <a href="/nuoc-hoa/@item.ProductSlug" style="display: block; width: 100%; height: 220px; overflow: hidden; border-radius: var(--radius-sm); margin-bottom: 14px; background: #000;">
-                            <img src="@(item.ProductImageUrl ?? "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=800&q=80")" alt="@item.ProductName" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease;" />
+                            <img src="@(item.ProductImageUrl ?? "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=800&q=80")" alt="@item.ProductName" loading="lazy" decoding="async" width="400" height="400" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease;" />
                         </a>
 
                         <div style="font-size: 0.75rem; color: var(--gold-primary); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-bottom: 4px;">
