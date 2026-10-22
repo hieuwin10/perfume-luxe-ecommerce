@@ -455,14 +455,18 @@
 
 @section Scripts {
     <!-- Chart.js 4.4.1 CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script type="application/json" id="revenueChartLabelsData">@Json.Serialize(Model.RevenueChartLabels)</script>
+    <script type="application/json" id="revenueChartValuesData">@Json.Serialize(Model.RevenueChartData)</script>
+    <script type="application/json" id="orderStatusChartData">@Json.Serialize(Model.OrderStatusChart)</script>
+    <script type="application/json" id="paymentMethodChartData">@Json.Serialize(Model.PaymentMethodChart)</script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             // 1. Biểu đồ Đường/Diện tích Doanh Thu 7 Ngày Gần Nhất
             const revCtx = document.getElementById('revenueLineChart');
             if (revCtx) {
-                const labels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.RevenueChartLabels));
-                const dataValues = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.RevenueChartData));
+                const labels = JSON.parse(document.getElementById('revenueChartLabelsData')?.textContent || '[]');
+                const dataValues = JSON.parse(document.getElementById('revenueChartValuesData')?.textContent || '[]');
 
                 const gradient = revCtx.getContext('2d').createLinearGradient(0, 0, 0, 260);
                 gradient.addColorStop(0, 'rgba(212, 175, 55, 0.45)');
@@ -523,7 +527,7 @@
             // 2. Biểu đồ Doughnut Trạng Thái Đơn Hàng
             const statusCtx = document.getElementById('orderStatusDoughnutChart');
             if (statusCtx) {
-                const statusData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.OrderStatusChart));
+                const statusData = JSON.parse(document.getElementById('orderStatusChartData')?.textContent || '{}');
                 const keys = Object.keys(statusData);
                 const values = Object.values(statusData);
 
@@ -561,7 +565,7 @@
             // 3. Biểu đồ Doughnut Phương Thức Thanh Toán
             const payCtx = document.getElementById('paymentMethodChart');
             if (payCtx) {
-                const payData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.PaymentMethodChart));
+                const payData = JSON.parse(document.getElementById('paymentMethodChartData')?.textContent || '{}');
                 const payKeys = Object.keys(payData);
                 const payValues = Object.values(payData);
 

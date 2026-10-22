@@ -346,7 +346,7 @@
                     <li><a href="/chinh-sach-doi-tra" class="nav-link"><i class="fa-solid fa-shield-halved" style="color: var(--gold-primary); width: 18px;"></i> Đổi Trả 7 Ngày & Hoàn 200%</a></li>
                     <li><a href="/huong-dan-mua-hang" class="nav-link"><i class="fa-solid fa-cart-shopping" style="color: var(--gold-primary); width: 18px;"></i> Hướng Dẫn Mua Hàng & COD</a></li>
                     <li><a href="/privacy" class="nav-link"><i class="fa-solid fa-lock" style="color: var(--gold-primary); width: 18px;"></i> Chính Sách Bảo Mật Dữ Liệu</a></li>
-                    <li><a href="/swagger" target="_blank" class="nav-link" style="color: #2dd4bf;"><i class="fa-solid fa-code" style="color: #2dd4bf; width: 18px;"></i> API Docs / Swagger</a></li>
+                    <li><a href="/swagger" target="_blank" rel="noopener noreferrer" class="nav-link" style="color: #2dd4bf;"><i class="fa-solid fa-code" style="color: #2dd4bf; width: 18px;"></i> API Docs / Swagger</a></li>
                     <li><a href="tel:+842438289999" class="nav-link" style="color: var(--text-muted);"><i class="fa-solid fa-phone" style="width: 18px; color: var(--gold-primary);"></i> Hotline VIP: 024.3828.9999</a></li>
                     <li><a href="mailto:concierge@perfumeluxe.vn" class="nav-link" style="color: var(--text-muted);"><i class="fa-solid fa-envelope" style="width: 18px; color: var(--gold-primary);"></i> concierge&#64;perfumeluxe.vn</a></li>
                 </ul>
@@ -576,8 +576,9 @@
         // Show TempData success toast
         @if (TempData["Success"] != null)
         {
+            var successMsg = System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(TempData["Success"]?.ToString() ?? "");
             <text>
-            setTimeout(() => showToast('@Html.Raw(TempData["Success"])', 'success'), 300);
+            setTimeout(() => showToast('@successMsg', 'success'), 300);
             </text>
         }
 
@@ -609,7 +610,11 @@
                     notice.style.background = 'rgba(46, 204, 113, 0.15)';
                     notice.style.color = '#2ecc71';
                     notice.style.border = '1px solid #2ecc71';
-                    notice.innerHTML = `<i class="fa-solid fa-gift" style="margin-right: 6px;"></i> ${data.message}`;
+                    notice.textContent = ' ' + data.message;
+                    const giftIcon = document.createElement('i');
+                    giftIcon.className = 'fa-solid fa-gift';
+                    giftIcon.style.marginRight = '6px';
+                    notice.prepend(giftIcon);
                     input.value = '';
                     if (typeof showToast === 'function') {
                         showToast(`Mã ưu đãi LUXE2026 đã kích hoạt cho ${email}!`, 'success');

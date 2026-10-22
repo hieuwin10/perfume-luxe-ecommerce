@@ -26,6 +26,7 @@ RUN dotnet publish "Perfume.Web.csproj" -c Release -o /app/publish /p:UseAppHost
 
 FROM base AS final
 WORKDIR /app
-COPY --from=publish /app/publish .
-COPY --from=build /src/scripts ./scripts
+COPY --chown=app:app --from=publish /app/publish .
+COPY --chown=app:app --from=build /src/scripts ./scripts
+USER app
 ENTRYPOINT ["dotnet", "Perfume.Web.dll"]
