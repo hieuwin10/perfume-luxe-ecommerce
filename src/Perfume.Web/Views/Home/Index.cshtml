@@ -44,7 +44,7 @@
                 <!-- Responsive Hero LCP Image -->
                 <picture style="position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1;">
                     <source media="(max-width: 768px)" srcset="@slideMobileImg" />
-                    <img src="@slideDesktopImg" alt="@b.Title" width="1440" height="850" fetchpriority="@(i == 0 ? "high" : "low")" loading="@(i == 0 ? "eager" : "lazy")" decoding="async" style="width: 100%; height: 100%; object-fit: cover; object-position: center;" />
+                    <img src="@slideDesktopImg" alt="@b.Title" width="1440" height="850" fetchpriority="@(i == 0 ? "high" : "low")" loading="@(i == 0 ? "eager" : "lazy")" decoding="@(i == 0 ? "sync" : "async")" style="width: 100%; height: 100%; object-fit: cover; object-position: center;" />
                 </picture>
                 <!-- Luxury Dark Radial Gradient Overlay -->
                 <div style="position: absolute; inset: 0; z-index: 2; background: radial-gradient(circle at center, rgba(212, 175, 55, 0.14) 0%, rgba(11, 11, 14, 0.94) 75%); pointer-events: none;"></div>
@@ -133,7 +133,7 @@ else
         <!-- Responsive Fallback Hero LCP Image -->
         <picture style="position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1;">
             <source media="(max-width: 768px)" srcset="@fallbackMobileImg" />
-            <img src="@fallbackDesktopImg" alt="PERFUME LUXE - Nước Hoa Xa Xỉ Chính Hãng" width="1440" height="850" fetchpriority="high" loading="eager" decoding="async" style="width: 100%; height: 100%; object-fit: cover; object-position: center;" />
+            <img src="@fallbackDesktopImg" alt="PERFUME LUXE - Nước Hoa Xa Xỉ Chính Hãng" width="1440" height="850" fetchpriority="high" loading="eager" decoding="sync" style="width: 100%; height: 100%; object-fit: cover; object-position: center;" />
         </picture>
         <!-- Luxury Dark Radial Gradient Overlay -->
         <div style="position: absolute; inset: 0; z-index: 2; background: radial-gradient(circle at center, rgba(212, 175, 55, 0.12) 0%, rgba(11, 11, 14, 0.95) 70%); pointer-events: none;"></div>
