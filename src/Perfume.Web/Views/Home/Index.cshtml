@@ -8,6 +8,7 @@
         var cleanUrl = System.Text.RegularExpressions.Regex.Replace(url, @"([?&])w=\d+", "$1");
         cleanUrl = System.Text.RegularExpressions.Regex.Replace(cleanUrl, @"([?&])q=\d+", "$1");
         cleanUrl = System.Text.RegularExpressions.Regex.Replace(cleanUrl, @"([?&])fm=\w+", "$1");
+        cleanUrl = cleanUrl.Replace("auto=format", "").Replace("fit=crop", "");
         cleanUrl = cleanUrl.Replace("?&", "?").Replace("&&", "&").TrimEnd('&').TrimEnd('?');
         
         var separator = cleanUrl.Contains("?") ? "&" : "?";
@@ -48,7 +49,7 @@
                 <!-- Luxury Dark Radial Gradient Overlay -->
                 <div style="position: absolute; inset: 0; z-index: 2; background: radial-gradient(circle at center, rgba(212, 175, 55, 0.14) 0%, rgba(11, 11, 14, 0.94) 75%); pointer-events: none;"></div>
                 
-                <div style="max-width: 900px; margin: 0 auto; z-index: 3; position: relative;">
+                <div style="max-width: 900px; margin: 0 auto; z-index: 3; position: relative; min-height: 320px;">
                     <span style="display: inline-block; font-size: 0.8rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold-primary); font-weight: 700; margin-bottom: 16px; border: 1px solid var(--border-subtle); padding: 6px 16px; border-radius: var(--radius-full); background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);">
                         <i class="fa-solid fa-crown" style="margin-right: 6px;"></i> Haute Parfumerie Collection
                     </span>
@@ -137,7 +138,7 @@ else
         <!-- Luxury Dark Radial Gradient Overlay -->
         <div style="position: absolute; inset: 0; z-index: 2; background: radial-gradient(circle at center, rgba(212, 175, 55, 0.12) 0%, rgba(11, 11, 14, 0.95) 70%); pointer-events: none;"></div>
         
-        <div style="max-width: 900px; margin: 0 auto; z-index: 3; position: relative;">
+        <div style="max-width: 900px; margin: 0 auto; z-index: 3; position: relative; min-height: 320px;">
             <span style="display: inline-block; font-size: 0.8rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold-primary); font-weight: 700; margin-bottom: 16px; border: 1px solid var(--border-subtle); padding: 6px 16px; border-radius: var(--radius-full); background: rgba(0,0,0,0.5); backdrop-filter: blur(8px);">
                 <i class="fa-solid fa-crown" style="margin-right: 6px;"></i> Haute Parfumerie Collection 2026
             </span>

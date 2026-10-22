@@ -31,18 +31,35 @@
     <!-- Google Search Console Verification -->
     <meta name="google-site-verification" content="Qh9rEGR7zfGddcqbtlF1p2H9s544wnJg2TOfQeLgNJs" />
 
-    <!-- Google Analytics 4 (GA4) - Deferred for Maximum Web Vitals & FCP -->
+    <!-- Google Analytics 4 (GA4) - Deferred on Idle/Interaction for Maximum Web Vitals -->
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
-        window.addEventListener('DOMContentLoaded', function() {
-            var s = document.createElement('script');
-            s.async = true;
-            s.src = 'https://www.googletagmanager.com/gtag/js?id=G-KCWE7ENDEJ';
-            document.head.appendChild(s);
-            gtag('js', new Date());
-            gtag('config', 'G-KCWE7ENDEJ');
-        });
+        (function() {
+            var gaInitialized = false;
+            function loadGA4() {
+                if (gaInitialized) return;
+                gaInitialized = true;
+                var s = document.createElement('script');
+                s.async = true;
+                s.src = 'https://www.googletagmanager.com/gtag/js?id=G-KCWE7ENDEJ';
+                document.head.appendChild(s);
+                gtag('js', new Date());
+                gtag('config', 'G-KCWE7ENDEJ');
+            }
+            if (window.addEventListener) {
+                window.addEventListener('load', function() {
+                    if ('requestIdleCallback' in window) {
+                        requestIdleCallback(function() { setTimeout(loadGA4, 1500); });
+                    } else {
+                        setTimeout(loadGA4, 2500);
+                    }
+                });
+                ['scroll', 'touchstart', 'mousemove', 'click', 'keydown'].forEach(function(evt) {
+                    window.addEventListener(evt, loadGA4, { once: true, passive: true });
+                });
+            }
+        })();
     </script>
 
     <!-- Performance Preconnect & DNS-Prefetch -->
@@ -55,9 +72,9 @@
     <link rel="dns-prefetch" href="https://images.unsplash.com" />
     <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com" />
 
-    <!-- Google Fonts (Non-blocking HTML link with preconnect) -->
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'" />
-    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" /></noscript>
+    <!-- Google Fonts (Non-blocking HTML link with preconnect - Essential weights only) -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" /></noscript>
     
     <!-- Meta SEO Google & Social Cards -->
     <meta name="description" content="@(ViewData["MetaDescription"] ?? "Thế giới nước hoa cao cấp chính hãng từ các thương hiệu xa xỉ bậc nhất thế giới: Dior, Chanel, Creed, Tom Ford, Le Labo, Kilian. Bảo đảm 100% xuất xứ.")" />
