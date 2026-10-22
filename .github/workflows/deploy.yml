@@ -5,6 +5,12 @@ on:
     branches: [ main, master, "codex/**" ]
   workflow_dispatch:
 
+# All these branches deploy to the same Somee site. Serialize them so a queued
+# deployment from an older commit cannot overwrite a newer release.
+concurrency:
+  group: perfume-luxe-somee-production
+  cancel-in-progress: false
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -12,6 +18,25 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+
+    - name: Skip stale deployment
+      shell: bash
+      run: |
+        git fetch --quiet origin "$GITHUB_REF_NAME"
+        branch_sha="$(git rev-parse FETCH_HEAD)"
+        if [[ "$branch_sha" != "$GITHUB_SHA" ]]; then
+          echo "::error::Skipping stale deployment $GITHUB_SHA; $GITHUB_REF_NAME is now at $branch_sha."
+          exit 1
+        fi
+
+    - name: Calculate expected CSS version
+      id: asset-version
+      shell: bash
+      run: |
+        css_version="$(openssl dgst -sha256 -binary src/Perfume.Web/wwwroot/css/luxury-perfume.css | openssl base64 -A | tr '+/' '-_' | tr -d '=')"
+        icon_css_version="$(openssl dgst -sha256 -binary src/Perfume.Web/wwwroot/css/font-awesome-subset.css | openssl base64 -A | tr '+/' '-_' | tr -d '=')"
+        echo "css_version=$css_version" >> "$GITHUB_OUTPUT"
+        echo "icon_css_version=$icon_css_version" >> "$GITHUB_OUTPUT"
 
     - name: Setup .NET SDK 8.0
       uses: actions/setup-dotnet@v4
@@ -38,9 +63,28 @@ jobs:
         password: ${{ secrets.FTP_PASSWORD }}
         server-dir: /www.perfumeluxe.somee.com/
         local-dir: ./publish/
+        state-name: .ftp-deploy-sync-state-v2.json
         dangerous-clean-slate: false
 
     - name: Bring website back online
       if: always()
       run: |
         curl -u "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" ftp://perfumeluxe.somee.com/ -Q "DELE /www.perfumeluxe.somee.com/app_offline.htm" || true
+
+    - name: Verify deployed storefront assets
+      shell: bash
+      env:
+        EXPECTED_CSS_VERSION: ${{ steps.asset-version.outputs.css_version }}
+        EXPECTED_ICON_CSS_VERSION: ${{ steps.asset-version.outputs.icon_css_version }}
+      run: |
+        for attempt in {1..12}; do
+          html="$(curl -fsS --max-time 20 "https://perfumeluxe.somee.com/?deploy_check=$GITHUB_SHA" || true)"
+          if [[ "$html" == *"luxury-perfume.css?v=$EXPECTED_CSS_VERSION"* && "$html" == *"font-awesome-subset.css?v=$EXPECTED_ICON_CSS_VERSION"* ]] && grep -Fq "Load cart data only after the page's load event" <<< "$html"; then
+            echo "The live storefront is serving the expected release from $GITHUB_SHA."
+            exit 0
+          fi
+          echo "Waiting for Somee to start the deployed release ($attempt/12)."
+          sleep 5
+        done
+        echo "::error::The live storefront is not serving the current stylesheets from $GITHUB_SHA."
+        exit 1
