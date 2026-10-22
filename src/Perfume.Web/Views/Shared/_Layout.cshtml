@@ -79,8 +79,19 @@
 
     @if (ViewData["LcpImage"] != null)
     {
-        <!-- Preload the actual hero or product image chosen by this page. -->
-        <link rel="preload" as="image" href="@ViewData["LcpImage"]" fetchpriority="high" />
+        var lcpDesktop = ViewData["LcpImage"]?.ToString();
+        var lcpMobile = ViewData["LcpImageMobile"]?.ToString();
+        if (!string.IsNullOrEmpty(lcpMobile) && lcpMobile != lcpDesktop)
+        {
+            <!-- Responsive preload for LCP image: lightweight WebP for mobile, high-res for desktop -->
+            <link rel="preload" as="image" href="@lcpMobile" media="(max-width: 768px)" fetchpriority="high" />
+            <link rel="preload" as="image" href="@lcpDesktop" media="(min-width: 769px)" fetchpriority="high" />
+        }
+        else
+        {
+            <!-- Preload the actual hero or product image chosen by this page. -->
+            <link rel="preload" as="image" href="@lcpDesktop" fetchpriority="high" />
+        }
     }
 
     <!-- Font Awesome Icons (Non-render-blocking) -->

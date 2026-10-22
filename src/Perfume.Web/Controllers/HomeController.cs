@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Perfume.Application.Interfaces;
 using Perfume.Domain.Entities;
 using Perfume.Infrastructure.Data;
@@ -14,30 +15,76 @@ public class HomeController : Controller
     private readonly IBlogService _blogService;
     private readonly IFlashSaleService _flashSaleService;
     private readonly PerfumeDbContext _db;
+    private readonly IMemoryCache _cache;
 
-    public HomeController(IPerfumeCatalogService catalogService, IBlogService blogService, IFlashSaleService flashSaleService, PerfumeDbContext db)
+    public HomeController(
+        IPerfumeCatalogService catalogService,
+        IBlogService blogService,
+        IFlashSaleService flashSaleService,
+        PerfumeDbContext db,
+        IMemoryCache cache)
     {
         _catalogService = catalogService;
         _blogService = blogService;
         _flashSaleService = flashSaleService;
         _db = db;
+        _cache = cache;
     }
 
     public async Task<IActionResult> Index()
     {
-        ViewBag.ActiveFlashSale = await _flashSaleService.GetActiveFlashSaleAsync();
-        ViewBag.HeroBanners = await _db.HeroBanners
-            .AsNoTracking()
-            .Where(b => b.IsActive)
-            .OrderBy(b => b.DisplayOrder)
-            .ThenByDescending(b => b.CreatedAt)
-            .ToListAsync();
-        ViewBag.FeaturedProducts = await _catalogService.GetFeaturedProductsAsync();
-        ViewBag.BestSellers = await _catalogService.GetBestSellersAsync();
-        ViewBag.NewArrivals = await _catalogService.GetNewArrivalsAsync();
-        ViewBag.Brands = await _catalogService.GetBrandsAsync();
-        ViewBag.Families = await _catalogService.GetFragranceFamiliesAsync();
-        ViewBag.RecentBlogs = await _blogService.GetRecentPostsAsync(3);
+        ViewBag.ActiveFlashSale = await _cache.GetOrCreateAsync("home_active_flash_sale", entry =>
+        {
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2);
+            return _flashSaleService.GetActiveFlashSaleAsync();
+        });
+
+        ViewBag.HeroBanners = await _cache.GetOrCreateAsync("home_hero_banners", entry =>
+        {
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15);
+            return _db.HeroBanners
+                .AsNoTracking()
+                .Where(b => b.IsActive)
+                .OrderBy(b => b.DisplayOrder)
+                .ThenByDescending(b => b.CreatedAt)
+                .ToListAsync();
+        });
+
+        ViewBag.FeaturedProducts = await _cache.GetOrCreateAsync("home_featured_products", entry =>
+        {
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15);
+            return _catalogService.GetFeaturedProductsAsync();
+        });
+
+        ViewBag.BestSellers = await _cache.GetOrCreateAsync("home_best_sellers", entry =>
+        {
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15);
+            return _catalogService.GetBestSellersAsync();
+        });
+
+        ViewBag.NewArrivals = await _cache.GetOrCreateAsync("home_new_arrivals", entry =>
+        {
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15);
+            return _catalogService.GetNewArrivalsAsync();
+        });
+
+        ViewBag.Brands = await _cache.GetOrCreateAsync("home_brands", entry =>
+        {
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30);
+            return _catalogService.GetBrandsAsync();
+        });
+
+        ViewBag.Families = await _cache.GetOrCreateAsync("home_families", entry =>
+        {
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30);
+            return _catalogService.GetFragranceFamiliesAsync();
+        });
+
+        ViewBag.RecentBlogs = await _cache.GetOrCreateAsync("home_recent_blogs", entry =>
+        {
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15);
+            return _blogService.GetRecentPostsAsync(3);
+        });
 
         return View();
     }

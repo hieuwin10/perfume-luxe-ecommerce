@@ -1,4 +1,18 @@
 @using Perfume.Application.DTOs
+@functions {
+    public static string OptimizeUnsplash(string? url, int width, int quality = 75)
+    {
+        if (string.IsNullOrWhiteSpace(url)) return "";
+        if (!url.Contains("images.unsplash.com")) return url;
+        
+        var cleanUrl = System.Text.RegularExpressions.Regex.Replace(url, @"([?&])w=\d+", "$1");
+        cleanUrl = System.Text.RegularExpressions.Regex.Replace(cleanUrl, @"([?&])q=\d+", "$1");
+        cleanUrl = cleanUrl.Replace("?&", "?").Replace("&&", "&").TrimEnd('&').TrimEnd('?');
+        
+        var separator = cleanUrl.Contains("?") ? "&" : "?";
+        return $"{cleanUrl}{separator}auto=format&fit=crop&w={width}&q={quality}";
+    }
+}
 @{
     ViewData["Title"] = "Nước Hoa Niche & Haute Parfumerie Chính Hãng";
     var activeFlashSale = ViewBag.ActiveFlashSale as FlashSaleDto;
@@ -8,8 +22,11 @@
     var families = ViewBag.Families as List<FragranceFamily> ?? new List<FragranceFamily>();
     var blogs = ViewBag.RecentBlogs as List<BlogPost> ?? new List<BlogPost>();
     var heroBanners = ViewBag.HeroBanners as List<HeroBanner> ?? new List<HeroBanner>();
-    ViewData["LcpImage"] = heroBanners.FirstOrDefault()?.ImageUrl
-        ?? "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=1920&q=80";
+    
+    var defaultHeroUrl = "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop";
+    var primaryHeroUrl = heroBanners.FirstOrDefault()?.ImageUrl ?? defaultHeroUrl;
+    ViewData["LcpImage"] = OptimizeUnsplash(primaryHeroUrl, 1440, 80);
+    ViewData["LcpImageMobile"] = OptimizeUnsplash(primaryHeroUrl, 640, 75);
 }
 
 <!-- HERO BANNER / SLIDER -->
@@ -19,8 +36,18 @@
         @for (int i = 0; i < heroBanners.Count; i++)
         {
             var b = heroBanners[i];
-            <div class="hero-slide @(i == 0 ? "active" : "")" style="position: @(i == 0 ? "relative" : "absolute"); inset: 0; min-height: 85vh; display: @(i == 0 ? "flex" : "none"); align-items: center; justify-content: center; background: radial-gradient(circle at center, rgba(212, 175, 55, 0.14) 0%, rgba(11, 11, 14, 0.94) 75%), url('@b.ImageUrl') center/cover no-repeat; padding: 100px 24px; text-align: center; transition: opacity 0.6s ease-in-out;">
-                <div style="max-width: 900px; margin: 0 auto; z-index: 2;">
+            var slideDesktopImg = OptimizeUnsplash(b.ImageUrl, 1440, 80);
+            var slideMobileImg = OptimizeUnsplash(b.ImageUrl, 640, 75);
+            <div class="hero-slide @(i == 0 ? "active" : "")" style="position: @(i == 0 ? "relative" : "absolute"); inset: 0; min-height: 85vh; display: @(i == 0 ? "flex" : "none"); align-items: center; justify-content: center; overflow: hidden; padding: 100px 24px; text-align: center; transition: opacity 0.6s ease-in-out;">
+                <!-- Responsive Hero LCP Image -->
+                <picture style="position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1;">
+                    <source media="(max-width: 768px)" srcset="@slideMobileImg" />
+                    <img src="@slideDesktopImg" alt="@b.Title" fetchpriority="@(i == 0 ? "high" : "low")" loading="@(i == 0 ? "eager" : "lazy")" decoding="async" style="width: 100%; height: 100%; object-fit: cover; object-position: center;" />
+                </picture>
+                <!-- Luxury Dark Radial Gradient Overlay -->
+                <div style="position: absolute; inset: 0; z-index: 2; background: radial-gradient(circle at center, rgba(212, 175, 55, 0.14) 0%, rgba(11, 11, 14, 0.94) 75%); pointer-events: none;"></div>
+                
+                <div style="max-width: 900px; margin: 0 auto; z-index: 3; position: relative;">
                     <span style="display: inline-block; font-size: 0.8rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold-primary); font-weight: 700; margin-bottom: 16px; border: 1px solid var(--border-subtle); padding: 6px 16px; border-radius: var(--radius-full); background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);">
                         <i class="fa-solid fa-crown" style="margin-right: 6px;"></i> Haute Parfumerie Collection
                     </span>
@@ -98,8 +125,18 @@
 else
 {
     <!-- FALLBACK HERO BANNER -->
-    <section style="position: relative; min-height: 85vh; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at center, rgba(212, 175, 55, 0.12) 0%, rgba(11, 11, 14, 0.95) 70%), url('https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=1920&q=80') center/cover no-repeat; padding: 100px 24px; text-align: center; border-bottom: 1px solid var(--border-subtle);">
-        <div style="max-width: 900px; margin: 0 auto; z-index: 2;">
+    var fallbackDesktopImg = OptimizeUnsplash(defaultHeroUrl, 1440, 80);
+    var fallbackMobileImg = OptimizeUnsplash(defaultHeroUrl, 640, 75);
+    <section style="position: relative; min-height: 85vh; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 100px 24px; text-align: center; border-bottom: 1px solid var(--border-subtle);">
+        <!-- Responsive Fallback Hero LCP Image -->
+        <picture style="position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1;">
+            <source media="(max-width: 768px)" srcset="@fallbackMobileImg" />
+            <img src="@fallbackDesktopImg" alt="PERFUME LUXE - Nước Hoa Xa Xỉ Chính Hãng" fetchpriority="high" loading="eager" decoding="async" style="width: 100%; height: 100%; object-fit: cover; object-position: center;" />
+        </picture>
+        <!-- Luxury Dark Radial Gradient Overlay -->
+        <div style="position: absolute; inset: 0; z-index: 2; background: radial-gradient(circle at center, rgba(212, 175, 55, 0.12) 0%, rgba(11, 11, 14, 0.95) 70%); pointer-events: none;"></div>
+        
+        <div style="max-width: 900px; margin: 0 auto; z-index: 3; position: relative;">
             <span style="display: inline-block; font-size: 0.8rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold-primary); font-weight: 700; margin-bottom: 16px; border: 1px solid var(--border-subtle); padding: 6px 16px; border-radius: var(--radius-full); background: rgba(0,0,0,0.5); backdrop-filter: blur(8px);">
                 <i class="fa-solid fa-crown" style="margin-right: 6px;"></i> Haute Parfumerie Collection 2026
             </span>
@@ -207,7 +244,7 @@ else
                         </div>
 
                         <a href="/nuoc-hoa/@item.ProductSlug" style="display: block; width: 100%; height: 220px; overflow: hidden; border-radius: var(--radius-sm); margin-bottom: 14px; background: #000;">
-                            <img src="@(item.ProductImageUrl ?? "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=800&q=80")" alt="@item.ProductName" loading="lazy" decoding="async" width="400" height="400" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease;" />
+                            <img src="@OptimizeUnsplash(item.ProductImageUrl ?? "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop", 400, 75)" alt="@item.ProductName" loading="lazy" decoding="async" width="400" height="400" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease;" />
                         </a>
 
                         <div style="font-size: 0.75rem; color: var(--gold-primary); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-bottom: 4px;">
@@ -356,7 +393,7 @@ else
                     </div>
 
                     <a href="/nuoc-hoa/@p.Slug" class="card-img-wrapper">
-                        <img src="@p.MainImageUrl" alt="@p.Name" loading="lazy" decoding="async" width="300" height="300" />
+                        <img src="@OptimizeUnsplash(p.MainImageUrl, 360, 75)" alt="@p.Name" loading="lazy" decoding="async" width="300" height="300" />
                     </a>
 
                     <div class="card-body">
@@ -461,7 +498,7 @@ else
             {
                 <div style="background: var(--bg-surface); border: 1px solid var(--border-card); border-radius: var(--radius-md); overflow: hidden; display: flex; flex-direction: column;">
                     <a href="/blog/@b.Slug" style="display: block; width: 100%; height: 220px; overflow: hidden;" aria-label="Xem chi tiết bài viết: @b.Title">
-                        <img src="@(b.ThumbnailUrl ?? "https://images.unsplash.com/photo-1547887537-6158d64c35b3?auto=format&fit=crop&w=600&q=75")" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease;" alt="@b.Title" loading="lazy" decoding="async" width="400" height="220" />
+                        <img src="@OptimizeUnsplash(b.ThumbnailUrl ?? "https://images.unsplash.com/photo-1547887537-6158d64c35b3?auto=format&fit=crop", 400, 75)" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease;" alt="@b.Title" loading="lazy" decoding="async" width="400" height="220" />
                     </a>
                     <div style="padding: 24px; display: flex; flex-direction: column; flex-grow: 1;">
                         <span style="font-size: 0.75rem; color: var(--gold-primary); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;">@(b.Category?.Name ?? "Kiến Thức")</span>
