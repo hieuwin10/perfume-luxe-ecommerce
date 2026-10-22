@@ -2,6 +2,7 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using Perfume.Application.DTOs;
 using Perfume.Application.Interfaces;
 using Perfume.Domain.Entities;
 using Perfume.Infrastructure.Data;
@@ -31,60 +32,40 @@ public class HomeController : Controller
         _cache = cache;
     }
 
+    [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Client)]
     public async Task<IActionResult> Index()
     {
-        ViewBag.ActiveFlashSale = await _cache.GetOrCreateAsync("home_active_flash_sale", entry =>
+        var data = await _cache.GetOrCreateAsync("home_composite_cache_v2", async entry =>
         {
-            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2);
-            return _flashSaleService.GetActiveFlashSaleAsync();
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(3);
+
+            var result = new HomeCompositeCache
+            {
+                ActiveFlashSale = await _flashSaleService.GetActiveFlashSaleAsync(),
+                HeroBanners = await _db.HeroBanners
+                    .AsNoTracking()
+                    .Where(b => b.IsActive)
+                    .OrderBy(b => b.DisplayOrder)
+                    .ThenByDescending(b => b.CreatedAt)
+                    .ToListAsync(),
+                FeaturedProducts = await _catalogService.GetFeaturedProductsAsync(),
+                BestSellers = await _catalogService.GetBestSellersAsync(),
+                NewArrivals = await _catalogService.GetNewArrivalsAsync(),
+                Brands = await _catalogService.GetBrandsAsync(),
+                Families = await _catalogService.GetFragranceFamiliesAsync(),
+                RecentBlogs = await _blogService.GetRecentPostsAsync(3)
+            };
+            return result;
         });
 
-        ViewBag.HeroBanners = await _cache.GetOrCreateAsync("home_hero_banners", entry =>
-        {
-            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15);
-            return _db.HeroBanners
-                .AsNoTracking()
-                .Where(b => b.IsActive)
-                .OrderBy(b => b.DisplayOrder)
-                .ThenByDescending(b => b.CreatedAt)
-                .ToListAsync();
-        });
-
-        ViewBag.FeaturedProducts = await _cache.GetOrCreateAsync("home_featured_products", entry =>
-        {
-            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15);
-            return _catalogService.GetFeaturedProductsAsync();
-        });
-
-        ViewBag.BestSellers = await _cache.GetOrCreateAsync("home_best_sellers", entry =>
-        {
-            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15);
-            return _catalogService.GetBestSellersAsync();
-        });
-
-        ViewBag.NewArrivals = await _cache.GetOrCreateAsync("home_new_arrivals", entry =>
-        {
-            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15);
-            return _catalogService.GetNewArrivalsAsync();
-        });
-
-        ViewBag.Brands = await _cache.GetOrCreateAsync("home_brands", entry =>
-        {
-            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30);
-            return _catalogService.GetBrandsAsync();
-        });
-
-        ViewBag.Families = await _cache.GetOrCreateAsync("home_families", entry =>
-        {
-            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30);
-            return _catalogService.GetFragranceFamiliesAsync();
-        });
-
-        ViewBag.RecentBlogs = await _cache.GetOrCreateAsync("home_recent_blogs", entry =>
-        {
-            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15);
-            return _blogService.GetRecentPostsAsync(3);
-        });
+        ViewBag.ActiveFlashSale = data?.ActiveFlashSale;
+        ViewBag.HeroBanners = data?.HeroBanners ?? new List<HeroBanner>();
+        ViewBag.FeaturedProducts = data?.FeaturedProducts ?? new List<ProductCardDto>();
+        ViewBag.BestSellers = data?.BestSellers ?? new List<ProductCardDto>();
+        ViewBag.NewArrivals = data?.NewArrivals ?? new List<ProductCardDto>();
+        ViewBag.Brands = data?.Brands ?? new List<Brand>();
+        ViewBag.Families = data?.Families ?? new List<FragranceFamily>();
+        ViewBag.RecentBlogs = data?.RecentBlogs ?? new List<BlogPost>();
 
         return View();
     }
@@ -153,4 +134,16 @@ public class HomeController : Controller
 public class NewsletterSubscribeRequest
 {
     public string? Email { get; set; }
+}
+
+public class HomeCompositeCache
+{
+    public FlashSaleDto? ActiveFlashSale { get; set; }
+    public List<HeroBanner> HeroBanners { get; set; } = new();
+    public List<ProductCardDto> FeaturedProducts { get; set; } = new();
+    public List<ProductCardDto> BestSellers { get; set; } = new();
+    public List<ProductCardDto> NewArrivals { get; set; } = new();
+    public List<Brand> Brands { get; set; } = new();
+    public List<FragranceFamily> Families { get; set; } = new();
+    public List<BlogPost> RecentBlogs { get; set; } = new();
 }

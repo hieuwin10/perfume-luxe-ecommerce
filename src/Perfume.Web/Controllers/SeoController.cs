@@ -108,6 +108,9 @@ public class SeoController : Controller
             "Disallow: /tra-cuu-don-hang",
             "Disallow: /order-tracking",
             "Allow: /",
+            "Allow: /llms.txt",
+            "Allow: /.well-known/llms.txt",
+            "Allow: /llms-full.txt",
             string.Empty,
             "User-agent: GPTBot",
             "Allow: /",
@@ -128,7 +131,7 @@ public class SeoController : Controller
             string.Empty
         });
 
-        return Content(content, "text/plain", Encoding.UTF8);
+        return Content(content, "text/plain; charset=utf-8", Encoding.UTF8);
     }
 
     [HttpGet]
@@ -137,9 +140,21 @@ public class SeoController : Controller
     {
         var baseUrl = SeoUrlBuilder.GetSiteBaseUrl(Request, _configuration);
         var sb = new StringBuilder();
-        sb.AppendLine("# PERFUME LUXE - Haute Parfumerie & Niche Fragrances");
+        sb.AppendLine("# PERFUME LUXE");
         sb.AppendLine();
-        sb.AppendLine("> PERFUME LUXE là nhà phân phối và bán lẻ nước hoa Niche & Haute Parfumerie chính hãng hàng đầu tại Việt Nam, độc quyền và ủy quyền các nhà hương danh giá như Roja Parfums, Maison Francis Kurkdjian, Kilian Paris, Creed, Tom Ford Private Blend, Le Labo, Frederic Malle, Byredo, Diptyque, Clive Christian.");
+        sb.AppendLine("> PERFUME LUXE là nhà phân phối và bán lẻ nước hoa Niche & Haute Parfumerie chính hãng hàng đầu tại Việt Nam, ủy quyền các nhà hương danh giá như Roja Parfums, Maison Francis Kurkdjian, Kilian Paris, Creed, Tom Ford Private Blend, Le Labo, Byredo.");
+        sb.AppendLine();
+        sb.AppendLine("## Danh Mục & Dịch Vụ");
+        sb.AppendLine($"- [Trang Chủ]({baseUrl}/): Cửa hàng trực tuyến nước hoa xa xỉ chính hãng.");
+        sb.AppendLine($"- [Bộ Sưu Tập Nước Hoa]({baseUrl}/bo-suu-tap): Danh mục nước hoa Niche, chiết 10ml và fullbox 100ml.");
+        sb.AppendLine($"- [Hộp Quà Discovery Box]({baseUrl}/discovery-box): Bộ mẫu thử 3-5 mùi hương cao cấp tự chọn.");
+        sb.AppendLine($"- [AI Trắc Nghiệm Tìm Mùi]({baseUrl}/catalog/quiz): Công cụ AI gợi ý mùi hương định danh cá nhân.");
+        sb.AppendLine($"- [So Sánh Mùi Hương]({baseUrl}/so-sanh): Bảng so sánh nốt hương và độ lưu hương trực quan.");
+        sb.AppendLine($"- [Đặt Lịch Thử Mùi VIP]({baseUrl}/dat-lich-trai-nghiem): Dịch vụ thử mùi 1:1 riêng tư với chuyên gia.");
+        sb.AppendLine($"- [Tạp Chí Mùi Hương]({baseUrl}/blog): Kiến thức và cẩm nang phân tầng hương nước hoa.");
+        sb.AppendLine($"- [Hệ Thống Flagship Boutique]({baseUrl}/boutique): Danh sách showroom tại Hà Nội và TP.HCM.");
+        sb.AppendLine($"- [Về Chúng Tôi]({baseUrl}/ve-chung-toi): Tuyên ngôn di sản và sứ mệnh của PERFUME LUXE.");
+        sb.AppendLine($"- [Chính Sách Đổi Trả & Bảo Hành]({baseUrl}/chinh-sach-doi-tra): Cam kết 100% xuất xứ và chính sách 7 ngày.");
         sb.AppendLine();
         sb.AppendLine("## Flagship Boutiques");
         sb.AppendLine("- Hà Nội: 12 Tràng Tiền, Quận Hoàn Kiếm, Hà Nội | Hotline: 024.3828.9999");
@@ -147,24 +162,37 @@ public class SeoController : Controller
         sb.AppendLine("- Hotline VIP Concierge: 024.3828.9999");
         sb.AppendLine("- Email: concierge@perfumeluxe.vn");
         sb.AppendLine();
-        sb.AppendLine("## Cam Kết & Dịch Vụ Độc Quyền");
-        sb.AppendLine("- 100% Chính Hãng: Sản phẩm nhập khẩu nguyên bản với tem chống giả bảo chứng và cam kết bồi hoàn 200% nếu phát hiện không chuẩn.");
-        sb.AppendLine("- Trải Nghiệm Thử Mùi VIP (Concierge Tasting): Buổi thẩm hương 1:1 trong phòng VIP riêng tư với chuyên gia mùi hương.");
-        sb.AppendLine("- Hộp Khám Phá (Discovery Box): Bộ mẫu thử cao cấp do khách hàng tự chọn 3-5 hương thơm.");
-        sb.AppendLine("- Giao Hàng Hỏa Tốc: 2H nội thành Hà Nội & TP.HCM trong bao bì nhung hộp cứng sang trọng.");
-        sb.AppendLine();
-        sb.AppendLine("## Liên Kết Chính");
-        sb.AppendLine($"- Trang chủ: {baseUrl}/");
-        sb.AppendLine($"- Bộ sưu tập: {baseUrl}/bo-suu-tap");
-        sb.AppendLine($"- Discovery Box: {baseUrl}/discovery-box");
-        sb.AppendLine($"- So sánh nước hoa: {baseUrl}/so-sanh");
-        sb.AppendLine($"- Tìm kiếm hương thơm qua AI Quiz: {baseUrl}/catalog/quiz");
-        sb.AppendLine($"- Đặt lịch thử mùi VIP: {baseUrl}/dat-lich-trai-nghiem");
-        sb.AppendLine($"- Hệ thống Boutique: {baseUrl}/boutique");
-        sb.AppendLine($"- Kiến thức mùi hương: {baseUrl}/blog");
-        sb.AppendLine($"- Về chúng tôi: {baseUrl}/ve-chung-toi");
-        sb.AppendLine($"- Chính sách đổi trả: {baseUrl}/chinh-sach-doi-tra");
+        sb.AppendLine("## Optional");
+        sb.AppendLine($"- [llms-full.txt]({baseUrl}/llms-full.txt): Toàn bộ thông tin mở rộng dành cho LLM và AI Agents.");
 
-        return Content(sb.ToString(), "text/plain", Encoding.UTF8);
+        return Content(sb.ToString(), "text/markdown; charset=utf-8", Encoding.UTF8);
+    }
+
+    [HttpGet]
+    [ResponseCache(Duration = 3600)]
+    public IActionResult LlmsFullTxt()
+    {
+        var baseUrl = SeoUrlBuilder.GetSiteBaseUrl(Request, _configuration);
+        var sb = new StringBuilder();
+        sb.AppendLine("# PERFUME LUXE - Báo Cáo Toàn Diện Cho AI Agents");
+        sb.AppendLine();
+        sb.AppendLine("> Tài liệu chi tiết mô tả hệ thống danh mục, sản phẩm nước hoa niche, chính sách bảo hành, cam kết chính hãng và hệ thống cửa hàng PERFUME LUXE.");
+        sb.AppendLine();
+        sb.AppendLine("## Danh Mục Sản Phẩm Chính");
+        sb.AppendLine($"- [Bộ Sưu Tập Nước Hoa Niche]({baseUrl}/bo-suu-tap): Tuyển tập Roja Parfums, Creed Aventus, MFK Baccarat Rouge 540, Kilian Angels' Share, Tom Ford Lost Cherry.");
+        sb.AppendLine($"- [Discovery Box]({baseUrl}/discovery-box): Bộ sưu tập thử mùi 3 ống hoặc 5 ống 2ml tùy chọn.");
+        sb.AppendLine($"- [Trắc Nghiệm Mùi Hương AI]({baseUrl}/catalog/quiz): Bộ câu hỏi thông minh giúp xác định phong cách mùi hương phù hợp.");
+        sb.AppendLine();
+        sb.AppendLine("## Chính Sách & Cam Kết");
+        sb.AppendLine("- 100% Chính Hãng: Hoàn tiền 200% nếu phát hiện hàng giả.");
+        sb.AppendLine("- Đổi Trả Miễn Phí: Trong vòng 7 ngày nếu còn nguyên tem niêm phong.");
+        sb.AppendLine("- Giao Hàng Hỏa Tốc: Nội thành 2 giờ trong bao bì sang trọng.");
+        sb.AppendLine();
+        sb.AppendLine("## Flagship Boutiques");
+        sb.AppendLine("- Hà Nội: 12 Tràng Tiền, Hoàn Kiếm, Hà Nội.");
+        sb.AppendLine("- TP.HCM: 68 Đồng Khởi, Quận 1, TP. Hồ Chí Minh.");
+        sb.AppendLine($"- Website chính thức: {baseUrl}/");
+
+        return Content(sb.ToString(), "text/markdown; charset=utf-8", Encoding.UTF8);
     }
 }
