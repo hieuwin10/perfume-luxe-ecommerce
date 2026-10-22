@@ -546,12 +546,15 @@
             finally { window.location.assign('/'); }
         });
 
-        // Initialize cart count on idle to avoid blocking first paint
-        if ('requestIdleCallback' in window) {
-            requestIdleCallback(refreshCartState);
-        } else {
-            setTimeout(refreshCartState, 250);
-        }
+        // Load cart data only after the page's load event so its API request
+        // cannot compete with the hero image and other LCP resources.
+        window.addEventListener('load', function initializeCartWhenIdle() {
+            if ('requestIdleCallback' in window) {
+                requestIdleCallback(refreshCartState, { timeout: 3000 });
+            } else {
+                setTimeout(refreshCartState, 2000);
+            }
+        }, { once: true });
     </script>
 
     <script>
