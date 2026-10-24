@@ -23,13 +23,13 @@ public class HomeController : Controller
         IBlogService blogService,
         IFlashSaleService flashSaleService,
         PerfumeDbContext db,
-        IMemoryCache cache)
+        IMemoryCache? cache = null)
     {
         _catalogService = catalogService;
         _blogService = blogService;
         _flashSaleService = flashSaleService;
         _db = db;
-        _cache = cache;
+        _cache = cache ?? new MemoryCache(new MemoryCacheOptions());
     }
 
     [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Client)]

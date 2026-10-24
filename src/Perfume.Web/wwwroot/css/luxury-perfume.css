@@ -11,13 +11,6 @@
     src: url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/webfonts/fa-regular-400.woff2') format('woff2');
 }
 @font-face {
-    font-family: 'Font Awesome 6 Brands';
-    font-style: normal;
-    font-weight: 400;
-    font-display: swap;
-    src: url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/webfonts/fa-brands-400.woff2') format('woff2');
-}
-@font-face {
     font-family: 'Font Awesome 6 Free';
     font-style: normal;
     font-weight: 900;
@@ -42,7 +35,7 @@
     --radius-md: 12px;
     --radius-lg: 20px;
     --radius-full: 9999px;
-    --transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    --transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease, box-shadow 0.25s ease;
 }
 
 /* --------------------------------------------------------------------------
@@ -300,14 +293,14 @@ a {
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    transition: var(--transition);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
+    will-change: transform;
     position: relative;
 }
 
 .perfume-card:hover {
     transform: translateY(-6px);
-    border-color: var(--border-subtle);
-    box-shadow: var(--shadow-luxury);
+    box-shadow: 0 10px 25px rgba(212, 175, 55, 0.15), var(--shadow-luxury);
 }
 
 .card-img-wrapper {
@@ -676,7 +669,7 @@ a {
     opacity: 0;
     visibility: hidden;
     transform: translateY(-8px) scale(0.97);
-    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: opacity 0.22s ease, transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.22s ease;
     z-index: 1000;
     overflow: hidden;
 }
@@ -1226,4 +1219,81 @@ a {
         gap: 8px;
     }
 }
+
+/* --------------------------------------------------------------------------
+   MOBILE BOTTOM NAVIGATION & TOUCH TARGET OPTIMIZATIONS
+   -------------------------------------------------------------------------- */
+.mobile-bottom-nav {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    body {
+        padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px));
+    }
+
+    input, select, textarea {
+        font-size: 16px !important;
+    }
+
+    .mobile-bottom-nav {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: calc(56px + env(safe-area-inset-bottom, 0px));
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+        background: rgba(14, 14, 18, 0.95);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-top: 1px solid var(--border-subtle);
+        z-index: 2000;
+        justify-content: space-around;
+        align-items: center;
+    }
+
+    .mobile-bottom-nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        flex: 1;
+        height: 100%;
+        color: var(--text-muted);
+        font-size: 0.65rem;
+        font-weight: 500;
+        text-decoration: none;
+        -webkit-tap-highlight-color: transparent;
+        transition: color 0.2s ease;
+    }
+
+    .mobile-bottom-nav-item i {
+        font-size: 1.1rem;
+    }
+
+    .mobile-bottom-nav-item.active {
+        color: var(--gold-primary);
+        font-weight: 700;
+    }
+
+    .mobile-bottom-nav-item.highlight .bottom-nav-quiz-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--gold-gradient);
+        color: #0B0B0E;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: -12px;
+        box-shadow: 0 4px 14px rgba(212, 175, 55, 0.4);
+    }
+
+    .mobile-bottom-nav-item.highlight .bottom-nav-quiz-icon i {
+        font-size: 0.95rem;
+    }
+}
+
 

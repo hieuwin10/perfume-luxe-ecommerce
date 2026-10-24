@@ -1,0 +1,21 @@
+{
+  "name": "PERFUME LUXE - Nước Hoa Xa Xỉ Chính Hãng",
+  "short_name": "PerfumeLuxe",
+  "description": "Thế giới nước hoa Niche & Haute Parfumerie chính hãng cao cấp từ Paris, Grasse và London.",
+  "start_url": "/",
+  "id": "/",
+  "display": "standalone",
+  "background_color": "#0B0B0E",
+  "theme_color": "#0B0B0E",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "vi",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ],
+  "categories": ["shopping", "lifestyle"]
+}

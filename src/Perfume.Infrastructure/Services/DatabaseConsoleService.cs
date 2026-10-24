@@ -17,8 +17,8 @@ public class DatabaseConsoleService : IDatabaseConsoleService
         var configured = configuration.GetConnectionString("DefaultConnection")
             ?? throw new InvalidOperationException("DefaultConnection string not found.");
         var builder = new SqlConnectionStringBuilder(configured);
-        if (string.IsNullOrWhiteSpace(builder.InitialCatalog))
-            throw new InvalidOperationException("Tên Database trong ConnectionString không hợp lệ.");
+        if (string.IsNullOrWhiteSpace(builder.InitialCatalog) || !builder.InitialCatalog.Contains("PerfumeDb", StringComparison.OrdinalIgnoreCase))
+            throw new InvalidOperationException("Tên Database trong ConnectionString không thuộc PerfumeDb hợp lệ.");
         _connectionString = builder.ConnectionString;
     }
 

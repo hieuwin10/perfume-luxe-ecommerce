@@ -28,30 +28,30 @@
     var defaultHeroUrl = "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop";
     var primaryHeroUrl = heroBanners.FirstOrDefault()?.ImageUrl ?? defaultHeroUrl;
     ViewData["LcpImage"] = OptimizeUnsplash(primaryHeroUrl, 1440, 80);
-    ViewData["LcpImageMobile"] = OptimizeUnsplash(primaryHeroUrl, 540, 70);
+    ViewData["LcpImageMobile"] = OptimizeUnsplash(primaryHeroUrl, 380, 60);
 }
 
 <!-- HERO BANNER / SLIDER -->
 @if (heroBanners.Any())
 {
-    <section id="heroSliderSection" style="position: relative; height: 85vh; min-height: 560px; max-height: 850px; overflow: hidden; border-bottom: 1px solid var(--border-subtle);">
+    <section id="heroSliderSection" class="luxe-hero-banner" style="position: relative; width: 100%; min-height: 580px; display: flex; align-items: center; justify-content: center; overflow: hidden; text-align: center; border-bottom: 1px solid var(--border-subtle); contain: layout size paint;">
         @for (int i = 0; i < heroBanners.Count; i++)
         {
             var b = heroBanners[i];
             var slideDesktopImg = OptimizeUnsplash(b.ImageUrl, 1440, 80);
-            var slideMobileImg = OptimizeUnsplash(b.ImageUrl, 540, 70);
+            var slideMobileImg = OptimizeUnsplash(b.ImageUrl, 380, 60);
             <div class="hero-slide @(i == 0 ? "active" : "")" style="position: absolute; inset: 0; display: @(i == 0 ? "flex" : "none"); align-items: center; justify-content: center; overflow: hidden; padding: 100px 24px; text-align: center; transition: opacity 0.6s ease-in-out;">
                 <!-- Responsive Hero LCP Image -->
                 <picture style="position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1;">
-                    <source media="(max-width: 768px)" srcset="@slideMobileImg" />
-                    <img src="@slideDesktopImg" alt="@b.Title" width="1440" height="850" fetchpriority="@(i == 0 ? "high" : "low")" loading="@(i == 0 ? "eager" : "lazy")" decoding="@(i == 0 ? "sync" : "async")" style="width: 100%; height: 100%; object-fit: cover; object-position: center;" />
+                    <source media="(max-width: 768px)" srcset="@slideMobileImg" width="380" height="580" />
+                    <img src="@slideDesktopImg" alt="@b.Title" width="1440" height="850" fetchpriority="@(i == 0 ? "high" : "low")" loading="@(i == 0 ? "eager" : "lazy")" decoding="async" style="width: 100%; height: 100%; object-fit: cover; object-position: center;" />
                 </picture>
                 <!-- Luxury Dark Radial Gradient Overlay -->
                 <div style="position: absolute; inset: 0; z-index: 2; background: radial-gradient(circle at center, rgba(212, 175, 55, 0.14) 0%, rgba(11, 11, 14, 0.94) 75%); pointer-events: none;"></div>
                 
                 <div style="max-width: 900px; margin: 0 auto; z-index: 3; position: relative; min-height: 320px;">
-                    <span style="display: inline-block; font-size: 0.8rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold-primary); font-weight: 700; margin-bottom: 16px; border: 1px solid var(--border-subtle); padding: 6px 16px; border-radius: var(--radius-full); background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);">
-                        <i class="fa-solid fa-crown" style="margin-right: 6px;"></i> Haute Parfumerie Collection
+                    <span style="display: inline-flex; align-items: center; min-height: 32px; font-size: 0.8rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold-primary); font-weight: 700; margin-bottom: 16px; border: 1px solid var(--border-subtle); padding: 6px 16px; border-radius: var(--radius-full); background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);">
+                        <i class="fa-solid fa-crown" style="display: inline-block; width: 1em; text-align: center; margin-right: 6px;"></i> Haute Parfumerie Collection
                     </span>
                     <h1 style="font-size: clamp(2.5rem, 6vw, 4.5rem); font-family: var(--font-heading); font-weight: 700; line-height: 1.15; margin-bottom: 24px; text-shadow: 0 4px 30px rgba(0,0,0,0.9); color: #FFF;">
                         @b.Title
@@ -65,12 +65,12 @@
                             @b.Subtitle
                         </p>
                     }
-                    <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
-                        <a href="@(string.IsNullOrEmpty(b.TargetUrl) ? "/bo-suu-tap" : b.TargetUrl)" class="btn-luxe" style="font-size: 1rem; padding: 14px 36px;">
-                            <i class="fa-solid fa-gem" style="margin-right: 8px;"></i> @(string.IsNullOrEmpty(b.ButtonText) ? "Khám Phá Ngay" : b.ButtonText)
+                    <div style="display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; width: 100%; min-height: 52px;">
+                        <a href="@(string.IsNullOrEmpty(b.TargetUrl) ? "/bo-suu-tap" : b.TargetUrl)" class="btn-luxe" style="min-width: 180px; height: 50px; font-size: 0.95rem; padding: 0 24px; display: inline-flex; align-items: center; justify-content: center;">
+                            <i class="fa-solid fa-gem" style="display: inline-block; width: 1em; text-align: center; margin-right: 8px;"></i> @(string.IsNullOrEmpty(b.ButtonText) ? "Khám Phá Ngay" : b.ButtonText)
                         </a>
-                        <a href="/catalog/quiz" class="btn-luxe-outline" style="font-size: 1rem; padding: 14px 32px; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px);">
-                            <i class="fa-solid fa-wand-magic-sparkles" style="margin-right: 8px;"></i> Trắc Nghiệm Mùi Hương
+                        <a href="/catalog/quiz" class="btn-luxe-outline" style="min-width: 180px; height: 50px; font-size: 0.95rem; padding: 0 24px; display: inline-flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px);">
+                            <i class="fa-solid fa-wand-magic-sparkles" style="display: inline-block; width: 1em; text-align: center; margin-right: 8px;"></i> Trắc Nghiệm Mùi Hương
                         </a>
                     </div>
                 </div>
@@ -126,19 +126,19 @@ else
 {
     <!-- FALLBACK HERO BANNER -->
     var fallbackDesktopImg = OptimizeUnsplash(defaultHeroUrl, 1440, 80);
-    var fallbackMobileImg = OptimizeUnsplash(defaultHeroUrl, 540, 70);
-    <section style="position: relative; height: max(85vh, 700px); min-height: 560px; max-height: 850px; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 100px 24px; text-align: center; border-bottom: 1px solid var(--border-subtle);">
+    var fallbackMobileImg = OptimizeUnsplash(defaultHeroUrl, 380, 60);
+    <section class="luxe-hero-banner" style="position: relative; width: 100%; min-height: 580px; display: flex; align-items: center; justify-content: center; overflow: hidden; text-align: center; border-bottom: 1px solid var(--border-subtle); contain: layout size paint;">
         <!-- Responsive Fallback Hero LCP Image -->
         <picture style="position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1;">
-            <source media="(max-width: 768px)" srcset="@fallbackMobileImg" />
-            <img src="@fallbackDesktopImg" alt="PERFUME LUXE - Nước Hoa Xa Xỉ Chính Hãng" width="1440" height="850" fetchpriority="high" loading="eager" decoding="sync" style="width: 100%; height: 100%; object-fit: cover; object-position: center;" />
+            <source media="(max-width: 768px)" srcset="@fallbackMobileImg" width="380" height="580" />
+            <img src="@fallbackDesktopImg" alt="PERFUME LUXE - Nước Hoa Xa Xỉ Chính Hãng" width="1440" height="850" fetchpriority="high" loading="eager" decoding="async" style="width: 100%; height: 100%; object-fit: cover; object-position: center;" />
         </picture>
         <!-- Luxury Dark Radial Gradient Overlay -->
         <div style="position: absolute; inset: 0; z-index: 2; background: radial-gradient(circle at center, rgba(212, 175, 55, 0.12) 0%, rgba(11, 11, 14, 0.95) 70%); pointer-events: none;"></div>
         
         <div style="max-width: 900px; margin: 0 auto; z-index: 3; position: relative; min-height: 320px;">
-            <span style="display: inline-block; font-size: 0.8rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold-primary); font-weight: 700; margin-bottom: 16px; border: 1px solid var(--border-subtle); padding: 6px 16px; border-radius: var(--radius-full); background: rgba(0,0,0,0.5); backdrop-filter: blur(8px);">
-                <i class="fa-solid fa-crown" style="margin-right: 6px;"></i> Haute Parfumerie Collection 2026
+            <span style="display: inline-flex; align-items: center; min-height: 32px; font-size: 0.8rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold-primary); font-weight: 700; margin-bottom: 16px; border: 1px solid var(--border-subtle); padding: 6px 16px; border-radius: var(--radius-full); background: rgba(0,0,0,0.5); backdrop-filter: blur(8px);">
+                <i class="fa-solid fa-crown" style="display: inline-block; width: 1em; text-align: center; margin-right: 6px;"></i> Haute Parfumerie Collection 2026
             </span>
             <h1 style="font-size: clamp(2.5rem, 6vw, 4.5rem); font-family: var(--font-heading); font-weight: 700; line-height: 1.15; margin-bottom: 24px; text-shadow: 0 4px 30px rgba(0,0,0,0.8);">
                 Bản Giao Hưởng <br /><span class="text-gold-gradient">Mùi Hương Bất Hủ</span>
@@ -149,12 +149,12 @@ else
             <p style="font-size: clamp(1rem, 1.5vw, 1.25rem); color: var(--text-secondary); max-width: 680px; margin: 0 auto 36px; line-height: 1.7;">
                 Bản giao hưởng mùi hương bất hủ hội tụ từng nốt hương nước hoa xa xỉ chính hãng chạm đến tâm hồn. Khám phá những sáng tạo mùi hương độc bản từ Paris, Grasse và London.
             </p>
-            <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
-                <a href="/bo-suu-tap" class="btn-luxe" style="font-size: 1rem; padding: 14px 36px;">
-                    <i class="fa-solid fa-gem" style="margin-right: 8px;"></i> Khám Phá Bộ Sưu Tập
+            <div style="display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; width: 100%; min-height: 52px;">
+                <a href="/bo-suu-tap" class="btn-luxe" style="min-width: 180px; height: 50px; font-size: 0.95rem; padding: 0 24px; display: inline-flex; align-items: center; justify-content: center;">
+                    <i class="fa-solid fa-gem" style="display: inline-block; width: 1em; text-align: center; margin-right: 8px;"></i> Khám Phá Bộ Sưu Tập
                 </a>
-                <a href="/catalog/quiz" class="btn-luxe-outline" style="font-size: 1rem; padding: 14px 32px; background: rgba(0,0,0,0.4); backdrop-filter: blur(8px);">
-                    <i class="fa-solid fa-wand-magic-sparkles" style="margin-right: 8px;"></i> Trắc Nghiệm Tìm Mùi
+                <a href="/catalog/quiz" class="btn-luxe-outline" style="min-width: 180px; height: 50px; font-size: 0.95rem; padding: 0 24px; display: inline-flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.4); backdrop-filter: blur(8px);">
+                    <i class="fa-solid fa-wand-magic-sparkles" style="display: inline-block; width: 1em; text-align: center; margin-right: 8px;"></i> Trắc Nghiệm Tìm Mùi
                 </a>
             </div>
         </div>
