@@ -16,4 +16,6 @@ src/Perfume.Web/App_Data/**
 src/Perfume.Web/DataProtection-Keys/
 publish_somee/
 publish.zip
-scratch/
+scratch/
+.agents/
+
