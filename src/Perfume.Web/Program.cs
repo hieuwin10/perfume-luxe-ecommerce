@@ -7,6 +7,7 @@ using Perfume.Infrastructure.Data;
 using Perfume.Infrastructure.Identity;
 using Perfume.Web.Middlewares;
 using Perfume.Web.Security;
+using Perfume.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddInfrastructureServices(builder.Configuration);
@@ -58,6 +59,7 @@ builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(dataPath, "DataProtection-Keys")))
     .SetApplicationName("PerfumeLuxe");
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<IAdminDashboardAnalyticsService, AdminDashboardAnalyticsService>();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
