@@ -60,6 +60,7 @@ builder.Services.AddDataProtection()
     .SetApplicationName("PerfumeLuxe");
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<IAdminDashboardAnalyticsService, AdminDashboardAnalyticsService>();
+builder.Services.AddScoped<IAdminFinancialReportService, AdminFinancialReportService>();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
