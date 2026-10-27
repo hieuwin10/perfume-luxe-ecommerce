@@ -7,6 +7,7 @@ using Perfume.Infrastructure.Data;
 using Perfume.Infrastructure.Identity;
 using Perfume.Web.Middlewares;
 using Perfume.Web.Security;
+using Perfume.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddInfrastructureServices(builder.Configuration);
@@ -60,6 +61,8 @@ builder.Services.AddDataProtection()
 builder.Services.AddControllersWithViews();
 builder.Services.AddResponseCaching();
 builder.Services.AddMemoryCache();
+builder.Services.AddScoped<IAdminDashboardAnalyticsService, AdminDashboardAnalyticsService>();
+builder.Services.AddScoped<IAdminFinancialReportService, AdminFinancialReportService>();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {

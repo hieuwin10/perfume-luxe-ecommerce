@@ -13,6 +13,10 @@ public interface ICustomerAccountService
     bool ValidatePasswordPolicy(string? password, out List<string> errors);
 }
 
+public interface ILoyaltyService : ILoyaltyTierService
+{
+}
+
 public interface ILoyaltyTierService
 {
     UserTier EvaluateTier(decimal cumulativeSpent);

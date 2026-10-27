@@ -1,0 +1,58 @@
+        <!-- RIGHT COLUMN: STICKY TRAY, PRICING BREAKDOWN & LIVE API VALIDATION -->
+        <div style="position: sticky; top: 96px;">
+            <div class="luxury-card" style="padding: 26px; border: 1px solid var(--border-subtle); background: var(--bg-surface); border-radius: 16px; box-shadow: 0 12px 36px rgba(0,0,0,0.45);">
+                <div style="text-align: center; margin-bottom: 18px;">
+                    <span style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.16em; color: var(--gold-primary); font-weight: 700;">Bespoke Discovery Tray</span>
+                    <h3 style="font-size: 1.35rem; font-weight: 800; margin: 4px 0; color: var(--text-primary);">Hộp Quà Discovery Của Bạn</h3>
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;" id="traySubtitle">
+                        Vỏ hộp: Hộp Gỗ Sơn Mài Hoàng Gia &bull; Chọn 3–5 ống chiết
+                    </p>
+                </div>
+
+                <!-- 5 VIAL SLOTS TRAY -->
+                <div id="vialSlotsContainer" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+                    <!-- Populated dynamically by updateSlotsUI() -->
+                </div>
+
+                <!-- BUNDLE DISCOUNT CALLOUT -->
+                <div id="bundleDiscountBanner" style="padding: 10px 12px; border-radius: 8px; background: rgba(42,157,143,0.12); border: 1px dashed #2A9D8F; color: #52B788; font-size: 0.8rem; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between;">
+                    <span><i class="fa-solid fa-sparkles" style="margin-right: 6px;"></i> Ưu đãi chọn nhiều ống:</span>
+                    <strong id="bundleDiscountStatusText">Chọn 4 ống (-5%) | 5 ống (-10%)</strong>
+                </div>
+
+                <!-- LIVE PRICE BREAKDOWN -->
+                <div style="border-top: 1px solid var(--border-card); padding-top: 16px; margin-bottom: 18px; display: flex; flex-direction: column; gap: 8px; font-size: 0.88rem;">
+                    <div style="display: flex; justify-content: space-between; color: var(--text-secondary);">
+                        <span>Vỏ hộp (<strong id="summaryBoxCode" style="color: var(--gold-primary);">ClassicWood</strong>):</span>
+                        <span id="summaryBoxPrice">250.000 ₫</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; color: var(--text-secondary);">
+                        <span>Ống chiết (<span id="summaryVialCount">0</span> ống):</span>
+                        <span id="summaryVialsPrice">0 ₫</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; color: #52B788;" id="summaryDiscountRow">
+                        <span>Chiết khấu Bundle (<span id="summaryDiscountRate">0%</span>):</span>
+                        <span id="summaryDiscountAmount">-0 ₫</span>
+                    </div>
+                    <div style="border-top: 1px dashed var(--border-card); margin: 4px 0;"></div>
+                    <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                        <span style="font-weight: 700; color: var(--text-primary); font-size: 1rem;">Tổng cộng tạm tính:</span>
+                        <strong id="summaryTotalPrice" style="color: var(--gold-primary); font-size: 1.45rem;">250.000 ₫</strong>
+                    </div>
+                </div>
+
+                <!-- VALIDATE API & ADD TO CART BUTTON -->
+                <button type="button" id="btnOrderDiscovery" class="btn-luxe" disabled
+                        style="width: 100%; padding: 14px; font-size: 0.92rem; opacity: 0.5; cursor: not-allowed;"
+                        onclick="submitDiscoveryBox()">
+                    <i class="fa-solid fa-shield-check" style="margin-right: 6px;"></i> Hãy Chọn Từ 3 Đến 5 Mùi Hương (0/3)
+                </button>
+
+                <!-- LIVE API VALIDATION RESULT BOX -->
+                <div id="apiValidationResultBox" style="display: none; margin-top: 16px; padding: 14px; border-radius: 10px; font-size: 0.82rem; line-height: 1.5;"></div>
+
+                <div style="margin-top: 14px; font-size: 0.76rem; color: var(--text-muted); text-align: center; line-height: 1.5;">
+                    <i class="fa-solid fa-shield-halved" style="color: var(--gold-primary); margin-right: 4px;"></i> Hoàn 100% giá trị hộp Discovery vào đơn đặt mua chai Fullsize tiếp theo.
+                </div>
+            </div>
+        </div>

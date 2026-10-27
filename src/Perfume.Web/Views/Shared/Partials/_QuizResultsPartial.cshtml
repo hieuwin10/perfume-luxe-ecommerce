@@ -1,0 +1,66 @@
+        <!-- RESULT SECTION: LUXURY SCENT DOSSIER -->
+        <div id="quizResultSection" class="quiz-result-wrapper" style="display: none;">
+            <!-- Loading Indicator -->
+            <div id="quizLoadingState" class="quiz-loading-box">
+                <div class="luxury-spinner">
+                    <i class="fa-solid fa-wand-magic-sparkles fa-spin fa-3x" style="color: var(--gold-primary);"></i>
+                </div>
+                <h4 style="font-size: 1.4rem; margin-top: 20px; font-family: var(--font-serif);">AI Fragrance Engine Đang Phân Tích...</h4>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 6px;">Đang tính toán ma trận nốt hương và tạo lập hồ sơ danh phận mùi hương của bạn</p>
+            </div>
+
+            <!-- Content Area -->
+            <div id="quizResultContent" style="display: none;">
+                <!-- Archetype Dossier Hero Card -->
+                <div class="archetype-hero-card">
+                    <div class="archetype-header">
+                        <span class="archetype-tag">
+                            <i class="fa-solid fa-fingerprint"></i> HỒ SƠ DANH PHẬN MÙI HƯƠNG (SCENT ARCHETYPE)
+                        </span>
+                        <h2 id="resArchetypeTitle" class="archetype-title text-gold-gradient">THE SOVEREIGN ARISTOCRAT</h2>
+                        <h4 id="resArchetypeSubtitle" class="archetype-subtitle">BẬC ĐẾ VƯƠNG QUYỀN UY & ĐẲNG CẤP</h4>
+                    </div>
+
+                    <p id="resArchetypeDesc" class="archetype-desc"></p>
+
+                    <div class="archetype-meta-grid">
+                        <div class="meta-item">
+                            <span class="meta-label"><i class="fa-solid fa-layer-group"></i> Nhóm Hương Chủ Đạo</span>
+                            <div id="resAccordsTags" class="meta-tags-list"></div>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label"><i class="fa-solid fa-sparkles"></i> Nốt Hương Chữ Ký</span>
+                            <div id="resNotesTags" class="meta-tags-list"></div>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label"><i class="fa-solid fa-calendar-check"></i> Hoàn Cảnh Khuyên Dùng</span>
+                            <div id="resOccasionText" class="meta-highlight-text"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Products Recommendations Header -->
+                <div class="results-products-header">
+                    <span class="sub-lead">TUYỂN CHỌN THEO ĐIỂM TƯƠNG THÍCH CAO NHẤT</span>
+                    <h3 class="title-lead">Top 4 Kiệt Tác Dành Riêng Cho Bạn</h3>
+                </div>
+
+                <!-- Products Grid -->
+                <div id="quizResultGrid" class="quiz-products-grid">
+                    <!-- Populated dynamically via JS -->
+                </div>
+
+                <!-- Post-Quiz Action Bar -->
+                <div class="quiz-actions-bar">
+                    <button type="button" class="btn-luxe" onclick="copyQuizShareLink()">
+                        <i class="fa-solid fa-share-nodes"></i> Sao Chép Hồ Sơ Mùi Hương
+                    </button>
+                    <button type="button" class="btn-luxe-outline" onclick="restartQuiz()">
+                        <i class="fa-solid fa-rotate-right"></i> Làm Lại Trắc Nghiệm
+                    </button>
+                    <a href="/bo-suu-tap" class="btn-luxe-outline">
+                        <i class="fa-solid fa-compass"></i> Khám Phá Toàn Bộ Cửa Hàng
+                    </a>
+                </div>
+            </div>
+        </div>

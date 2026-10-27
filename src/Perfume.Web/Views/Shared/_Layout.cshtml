@@ -13,7 +13,7 @@
         || requestPath.StartsWithSegments("/admin", StringComparison.OrdinalIgnoreCase)
         || requestPath.StartsWithSegments("/tra-cuu-don-hang", StringComparison.OrdinalIgnoreCase)
         || requestPath.StartsWithSegments("/order-tracking", StringComparison.OrdinalIgnoreCase);
-    var robotsContent = ViewData["Robots"]?.ToString() ?? (isPrivatePage ? "noindex, nofollow" : "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1");
+    var robotsContent = ViewData["Robots"]?.ToString() ?? (isPrivatePage ? "noindex, nofollow" : "index, follow");
     var pageTitle = ViewData["Title"]?.ToString()?.Trim();
     var documentTitle = string.IsNullOrWhiteSpace(pageTitle)
         ? "PERFUME LUXE - Haute Parfumerie | Nước Hoa Cao Cấp Chính Hãng"
@@ -27,129 +27,32 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@documentTitle</title>
-
-    <!-- Critical Above-The-Fold Stylesheet (Immediately compiled for Instant FCP) -->
-    @if (string.IsNullOrEmpty(requestPath.Value) || string.Equals(requestPath.Value, "/", StringComparison.Ordinal) || requestPath.StartsWithSegments("/Home", StringComparison.OrdinalIgnoreCase))
-    {
-        <style>
-            :root {
-                --gold-primary: #D4AF37;
-                --gold-light: #F3E5AB;
-                --gold-gradient: linear-gradient(135deg, #ECC86E 0%, #D4AF37 50%, #997A15 100%);
-                --font-heading: 'Cormorant Garamond', Garamond, 'Times New Roman', Georgia, serif;
-                --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                --radius-sm: 6px;
-                --radius-md: 12px;
-                --radius-full: 9999px;
-                --transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease, background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
-                --bg-main: #0B0B0E;
-                --bg-surface: #141419;
-                --bg-surface-elevated: #1D1D24;
-                --bg-glass: rgba(20, 20, 25, 0.85);
-                --text-primary: #F8F7F5;
-                --text-secondary: #C4C4CF;
-                --text-muted: #A1A1B2;
-                --border-subtle: rgba(212, 175, 55, 0.15);
-                --border-focus: rgba(212, 175, 55, 0.5);
-                --border-card: rgba(255, 255, 255, 0.08);
-            }
-            *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-            body { margin: 0; background: var(--bg-main); color: var(--text-primary); font-family: var(--font-body); line-height: 1.6; overflow-x: hidden; }
-            h1, h2, h3, h4 { font-family: var(--font-heading); letter-spacing: 0.02em; }
-            a { color: inherit; text-decoration: none; }
-            .text-gold-gradient { background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-            .btn-luxe, .btn-luxe-outline { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: var(--radius-full); font-weight: 600; text-transform: uppercase; text-decoration: none; cursor: pointer; transition: var(--transition); }
-            .btn-luxe { border: 0; background: var(--gold-gradient); color: #0B0B0E !important; box-shadow: 0 4px 15px rgba(212,175,55,.25); }
-            .btn-luxe-outline { border: 1px solid var(--gold-primary); background: transparent; color: var(--gold-primary) !important; }
-            .luxe-header { position: sticky; top: 0; z-index: 1000; background: var(--bg-glass); border-bottom: 1px solid var(--border-subtle); }
-            .header-inner { max-width: 1360px; margin: 0 auto; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; }
-            .brand-logo { display: flex; flex-direction: column; align-items: flex-start; }
-            .brand-title { font-size: 1.85rem; font-family: var(--font-heading); letter-spacing: .12em; font-weight: 700; }
-            .brand-sub { color: var(--gold-primary); font-size: .65rem; letter-spacing: .25em; text-transform: uppercase; }
-            .nav-links { display: flex; align-items: center; gap: 28px; list-style: none; }
-            .nav-link { position: relative; padding: 6px 0; color: var(--text-secondary); font-size: .9rem; font-weight: 500; }
-            .header-actions { display: flex; align-items: center; gap: 16px; }
-            .icon-btn { position: relative; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-card); border-radius: 50%; background: var(--bg-surface); color: var(--text-primary); cursor: pointer; transition: var(--transition); }
-            .badge-count { position: absolute; top: -4px; right: -4px; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--gold-primary); color: #0B0B0E; font-size: .7rem; font-weight: 700; }
-            .mobile-nav-toggle { display: none; width: 42px; height: 42px; align-items: center; justify-content: center; border: 1px solid var(--border-card); border-radius: var(--radius-sm); background: var(--bg-surface); color: var(--text-primary); cursor: pointer; }
-            .mobile-nav-overlay { position: fixed; inset: 0; z-index: 2090; background: rgba(0,0,0,.75); opacity: 0; visibility: hidden; transition: opacity .3s cubic-bezier(.16,1,.3,1), visibility .3s; }
-            .mobile-nav-overlay.active { opacity: 1; visibility: visible; }
-            .mobile-nav-drawer { position: fixed; top: 0; left: 0; z-index: 2100; display: flex; flex-direction: column; width: 320px; max-width: 86vw; height: 100vh; overflow-y: auto; border-right: 1px solid var(--border-subtle); background: var(--bg-surface); transform: translateX(-100%); transition: transform .35s cubic-bezier(.16,1,.3,1); }
-            .mobile-nav-drawer.active { transform: translateX(0); }
-            .mobile-nav-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid var(--border-card); background: var(--bg-surface-elevated); }
-            .mobile-nav-body { display: flex; flex: 1; flex-direction: column; gap: 4px; padding: 20px 16px; }
-            .mobile-nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: var(--radius-sm); color: var(--text-secondary); font-size: .95rem; font-weight: 500; }
-            .mobile-nav-item i { width: 22px; color: var(--gold-primary); text-align: center; }
-            .mobile-nav-footer { display: flex; flex-direction: column; gap: 12px; padding: 20px 24px; border-top: 1px solid var(--border-card); background: var(--bg-surface-elevated); }
-            
-            /* Mobile-First Base Rules (Instant FCP with radial background) */
-            .announcement-bar { min-height: 32px; background: var(--bg-surface-elevated); border-bottom: 1px solid var(--border-card); font-size: 0.78rem; padding: 6px 16px; text-align: center; color: var(--text-secondary); display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 8px; }
-            .announcement-desktop-only { display: none; }
-            .luxe-hero-banner { position: relative; width: 100%; height: 580px; min-height: 580px; max-height: 580px; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 50px 16px; text-align: center; border-bottom: 1px solid var(--border-subtle); contain: layout size paint; background: radial-gradient(circle at center, rgba(212, 175, 55, 0.14) 0%, rgba(11, 11, 14, 0.94) 75%), #0B0B0E; }
-            .mobile-bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; height: calc(56px + env(safe-area-inset-bottom, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); background: rgba(14, 14, 18, 0.95); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-top: 1px solid var(--border-subtle); z-index: 2000; justify-content: space-around; align-items: center; }
-            .mobile-bottom-nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; flex: 1; height: 100%; color: var(--text-muted); font-size: 0.65rem; font-weight: 500; text-decoration: none; -webkit-tap-highlight-color: transparent; }
-            .mobile-bottom-nav-item i { font-size: 1.1rem; }
-            .mobile-bottom-nav-item.active { color: var(--gold-primary); font-weight: 700; }
-            .mobile-bottom-nav-item.highlight .bottom-nav-quiz-icon { width: 36px; height: 36px; border-radius: 50%; background: var(--gold-gradient); color: #0B0B0E; display: flex; align-items: center; justify-content: center; margin-top: -12px; box-shadow: 0 4px 14px rgba(212, 175, 55, 0.4); }
-            .mobile-bottom-nav-item.highlight .bottom-nav-quiz-icon i { font-size: 0.95rem; }
-
-            /* Desktop Expansion (>= 769px) */
-            @@media (min-width: 769px) {
-                .announcement-desktop-only { display: block !important; }
-                .luxe-hero-banner { height: 720px; min-height: 720px; max-height: 720px; padding: 80px 20px; }
-                .mobile-bottom-nav { display: none !important; }
-            }
-            @@media (max-width: 1024px) {
-                .nav-links { display: none !important; }
-                .mobile-nav-toggle { display: flex; }
-            }
-            @@media (max-width: 768px) {
-                body { padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px)); }
-                input, select, textarea { font-size: 16px !important; }
-                .brand-title { font-size: 1.45rem; }
-                .brand-sub { font-size: .58rem; }
-                .header-inner { padding: 12px 16px; }
-            }
-        </style>
-        <link rel="preload" href="~/css/luxury-perfume.min.css" asp-append-version="true" as="style" onload="this.onload=null;this.rel='stylesheet'" />
-        <noscript><link rel="stylesheet" href="~/css/luxury-perfume.min.css" asp-append-version="true" /></noscript>
-    }
-    else
-    {
-        <link rel="stylesheet" href="~/css/luxury-perfume.min.css" asp-append-version="true" />
-    }
-
-    @if (ViewData["LcpImage"] != null)
-    {
-        var lcpDesktop = ViewData["LcpImage"]?.ToString();
-        var lcpMobile = ViewData["LcpImageMobile"]?.ToString();
-        if (!string.IsNullOrEmpty(lcpMobile) && lcpMobile != lcpDesktop)
-        {
-            <!-- Ultra-High Priority Responsive Preload for LCP Hero Element -->
-            <link rel="preload" as="image" href="@lcpMobile" media="(max-width: 768px)" fetchpriority="high" />
-            <link rel="preload" as="image" href="@lcpDesktop" media="(min-width: 769px)" fetchpriority="high" />
-        }
-        else
-        {
-            <link rel="preload" as="image" href="@lcpDesktop" fetchpriority="high" />
-        }
-    }
-
-    <!-- Performance Preconnect & DNS-Prefetch -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
-    <link rel="preconnect" href="https://images.unsplash.com" crossorigin="anonymous" />
-    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
-    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
-    <link rel="dns-prefetch" href="https://images.unsplash.com" />
-
-    <!-- Google Fonts (display=optional guarantees 0 CLS and instant initial paint) -->
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Plus+Jakarta+Sans:wght@400;600&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'" />
-    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Plus+Jakarta+Sans:wght@400;600&display=optional" /></noscript>
     
     <!-- Google Search Console Verification -->
     <meta name="google-site-verification" content="Qh9rEGR7zfGddcqbtlF1p2H9s544wnJg2TOfQeLgNJs" />
 
+    <!-- Google Analytics 4 (GA4) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-KCWE7ENDEJ"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-KCWE7ENDEJ');
+    </script>
+
+    <!-- Performance Preconnect & DNS-Prefetch -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://images.unsplash.com" crossorigin />
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+    <link rel="dns-prefetch" href="https://images.unsplash.com" />
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com" />
+
+    <!-- Google Fonts (Non-blocking HTML link with preconnect) -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" />
+    
     <!-- Meta SEO Google & Social Cards -->
     <meta name="description" content="@(ViewData["MetaDescription"] ?? "Thế giới nước hoa cao cấp chính hãng từ các thương hiệu xa xỉ bậc nhất thế giới: Dior, Chanel, Creed, Tom Ford, Le Labo, Kilian. Bảo đảm 100% xuất xứ.")" />
     <meta name="robots" content="@robotsContent" />
@@ -173,190 +76,28 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💎</text></svg>" />
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💎</text></svg>" />
     <meta name="theme-color" content="#0B0B0E" />
-    <link rel="manifest" href="~/manifest.webmanifest" />
+
+    @if (ViewData["LcpImage"] != null)
+    {
+        <!-- Preload the actual hero or product image chosen by this page. -->
+        <link rel="preload" as="image" href="@ViewData["LcpImage"]" fetchpriority="high" />
+    }
 
     <!-- Font Awesome Icons (Non-render-blocking) -->
-    <link rel="preload" href="~/css/font-awesome-subset.css" asp-append-version="true" as="style" onload="this.onload=null;this.rel='stylesheet'" />
-    <noscript><link rel="stylesheet" href="~/css/font-awesome-subset.css" asp-append-version="true" /></noscript>
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" /></noscript>
 
+    <!-- Luxury Theme Stylesheet -->
+    <link rel="stylesheet" href="~/css/luxury-perfume.css" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body class="dark-theme">
-    <!-- Top Announcement Bar -->
-    <div class="announcement-bar" style="min-height: 32px; background: var(--bg-surface-elevated); border-bottom: 1px solid var(--border-card); font-size: 0.78rem; padding: 6px 16px; text-align: center; color: var(--text-secondary); display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 8px;">
-        <div><i class="fa-solid fa-crown text-gold-gradient" style="margin-right: 6px;"></i> Cam kết 100% Nước Hoa Chính Hãng</div>
-        <div class="announcement-desktop-only" style="display: none;"><i class="fa-solid fa-truck-fast" style="color: var(--gold-primary); margin-right: 6px;"></i> Miễn phí giao hàng toàn quốc từ 2.000.000₫</div>
-        <div><i class="fa-solid fa-shield-halved" style="color: var(--gold-primary); margin-right: 6px;"></i> Đổi trả 7 ngày nếu lỗi niêm phong</div>
-    </div>
-
-    <!-- Mobile Nav Overlay & Drawer -->
-    <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
-    <aside class="mobile-nav-drawer" id="mobileNavDrawer" aria-label="Menu di động">
-        <div class="mobile-nav-header">
-            <a href="/" class="brand-logo" onclick="closeMobileNav()">
-                <span class="brand-title text-gold-gradient" style="font-size: 1.35rem;">PERFUME LUXE</span>
-                <span class="brand-sub" style="font-size: 0.58rem;">Haute Parfumerie</span>
-            </a>
-            <button type="button" class="icon-btn" id="closeMobileNavBtn" aria-label="Đóng menu" style="width: 38px; height: 38px;">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-        <div class="mobile-nav-body">
-            <a href="/" class="mobile-nav-item" onclick="closeMobileNav()"><i class="fa-solid fa-house"></i> Trang Chủ</a>
-            <a href="/bo-suu-tap" class="mobile-nav-item" onclick="closeMobileNav()"><i class="fa-solid fa-gem"></i> Bộ Sưu Tập Nước Hoa</a>
-            <a href="/catalog/quiz" class="mobile-nav-item" onclick="closeMobileNav()" style="color: var(--gold-primary);"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Trắc Nghiệm Tìm Mùi</a>
-            <a href="/discovery-box" class="mobile-nav-item" onclick="closeMobileNav()" style="color: var(--gold-primary);"><i class="fa-solid fa-gift"></i> Hộp Quà Discovery Box</a>
-            <a href="/so-sanh" class="mobile-nav-item" onclick="closeMobileNav()"><i class="fa-solid fa-scale-balanced"></i> So Sánh Mùi Hương</a>
-            <a href="/dat-lich-trai-nghiem" class="mobile-nav-item" onclick="closeMobileNav()"><i class="fa-solid fa-crown"></i> Thử Mùi VIP Concierge</a>
-            <a href="/tra-cuu-don-hang" class="mobile-nav-item" onclick="closeMobileNav()"><i class="fa-solid fa-truck-fast"></i> Tra Cứu Đơn Hàng</a>
-            <a href="/blog" class="mobile-nav-item" onclick="closeMobileNav()"><i class="fa-solid fa-newspaper"></i> Tạp Chí Mùi Hương</a>
-            <a href="/ve-chung-toi" class="mobile-nav-item" onclick="closeMobileNav()"><i class="fa-solid fa-circle-info"></i> Về Chúng Tôi</a>
-
-            <div class="mobile-nav-divider"></div>
-
-            @if (SignInManager.IsSignedIn(User))
-            {
-                var mobileUser = await UserManager.GetUserAsync(User);
-                <div style="padding: 6px 14px 10px; font-size: 0.82rem; color: var(--text-muted);">
-                    <div style="font-weight: 700; color: var(--text-primary); font-size: 0.9rem;">@mobileUser?.FullName</div>
-                    <div>@mobileUser?.Email</div>
-                </div>
-                @if (User.IsInRole("Admin"))
-                {
-                    <a href="/admin/admindashboard" class="mobile-nav-item" style="color: #f87171;"><i class="fa-solid fa-gauge-high"></i> Admin Dashboard</a>
-                }
-                else if (User.IsInRole("StoreManager"))
-                {
-                    <a href="/admin/storemanager" class="mobile-nav-item" style="color: var(--gold-primary);"><i class="fa-solid fa-chart-line"></i> Quản Lý Cửa Hàng</a>
-                }
-                <a href="/account/profile" class="mobile-nav-item"><i class="fa-solid fa-user"></i> Tài Khoản Của Tôi</a>
-                <a href="/account/myorders" class="mobile-nav-item"><i class="fa-solid fa-box"></i> Đơn Hàng Của Tôi</a>
-                <form method="post" action="/account/logout" style="margin: 4px 0 0;">
-                    @Html.AntiForgeryToken()
-                    <button type="submit" class="mobile-nav-item" style="width: 100%; border: none; background: none; cursor: pointer; color: #f87171; text-align: left;">
-                        <i class="fa-solid fa-right-from-bracket" style="color: #f87171;"></i> Đăng Xuất
-                    </button>
-                </form>
-            }
-            else
-            {
-                <a href="/account/login" class="mobile-nav-item" style="color: var(--gold-primary); font-weight: 600;"><i class="fa-solid fa-right-to-bracket"></i> Đăng Nhập / Đăng Ký</a>
-            }
-        </div>
-        <div class="mobile-nav-footer">
-            <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.85rem;">
-                <span style="color: var(--text-muted);"><i class="fa-solid fa-phone" style="color: var(--gold-primary); margin-right: 6px;"></i> Hotline VIP:</span>
-                <strong style="color: var(--text-primary);">024.3828.9999</strong>
-            </div>
-        </div>
-    </aside>
-
-    <!-- Header Navigation -->
-    <header class="luxe-header">
-        <div class="header-inner">
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <!-- Hamburger Button on Mobile -->
-                <button type="button" class="mobile-nav-toggle" id="mobileNavToggleBtn" aria-label="Mở Menu điều hướng" title="Mở danh mục">
-                    <i class="fa-solid fa-bars"></i>
-                </button>
-
-                <a href="/" class="brand-logo">
-                    <span class="brand-title text-gold-gradient">PERFUME LUXE</span>
-                    <span class="brand-sub">Haute Parfumerie Paris</span>
-                </a>
-            </div>
-
-            <nav>
-                <ul class="nav-links">
-                    <li><a href="/" class="nav-link">Trang Chủ</a></li>
-                    <li><a href="/bo-suu-tap" class="nav-link">Bộ Sưu Tập</a></li>
-                    <li><a href="/catalog/quiz" class="nav-link" style="color: var(--gold-primary);"><i class="fa-solid fa-wand-magic-sparkles" style="margin-right: 4px;"></i> Trắc Nghiệm Mùi</a></li>
-                    <li><a href="/blog" class="nav-link">Tạp Chí Mùi Hương</a></li>
-                    <li><a href="/ve-chung-toi" class="nav-link">Về Chúng Tôi</a></li>
-                    <li><a href="/discovery-box" class="nav-link" style="color: var(--gold-primary);"><i class="fa-solid fa-gift" style="margin-right: 4px;"></i> Discovery Box</a></li>
-                    <li><a href="/so-sanh" class="nav-link"><i class="fa-solid fa-scale-balanced" style="margin-right: 4px;"></i> So Sánh</a></li>
-                    <li><a href="/dat-lich-trai-nghiem" class="nav-link"><i class="fa-solid fa-crown" style="margin-right: 4px; color: var(--gold-primary);"></i> Thử Mùi VIP</a></li>
-                    <li><a href="/tra-cuu-don-hang" class="nav-link" style="color: var(--gold-primary);"><i class="fa-solid fa-truck-fast" style="margin-right: 4px;"></i> Tra Cứu Đơn</a></li>
-
-                    @if (SignInManager.IsSignedIn(User))
-                    {
-                        @if (User.IsInRole("Admin"))
-                        {
-                            <li><a href="/admin/admindashboard" class="nav-link" style="background: rgba(212,175,55,0.12); padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border-subtle); color: var(--gold-primary); font-size: 0.82rem;"><i class="fa-solid fa-gauge-high" style="margin-right: 4px;"></i> Quản trị</a></li>
-                        }
-                        else if (User.IsInRole("StoreManager"))
-                        {
-                            <li><a href="/admin/storemanager" class="nav-link" style="background: rgba(212,175,55,0.12); padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border-subtle); color: var(--gold-primary); font-size: 0.82rem;"><i class="fa-solid fa-chart-line" style="margin-right: 4px;"></i> Quản lý cửa hàng</a></li>
-                        }
-                    }
-                </ul>
-            </nav>
-
-            <div class="header-actions">
-                <!-- Theme Toggle Button (Dark / Light) -->
-                <button type="button" class="icon-btn" id="themeToggleBtn" title="Chuyển đổi Sáng / Tối" aria-label="Chuyển đổi giao diện sáng tối">
-                    <i class="fa-solid fa-moon" id="themeIcon"></i>
-                </button>
-
-                <!-- Mini Cart Trigger -->
-                <button type="button" class="icon-btn" id="cartDrawerBtn" title="Giỏ hàng" aria-label="Xem giỏ hàng của bạn">
-                    <i class="fa-solid fa-bag-shopping"></i>
-                    <span class="badge-count" id="headerCartCount">0</span>
-                </button>
-
-                <!-- User Account Button -->
-                @if (SignInManager.IsSignedIn(User))
-                {
-                    var currentUser = await UserManager.GetUserAsync(User);
-                    <div class="user-avatar-dropdown" id="userDropdown">
-                        <button type="button" id="userAvatarBtn" class="icon-btn" title="Tài khoản của bạn" aria-label="Tài khoản cá nhân" style="width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, var(--gold-primary), #8B6914); font-weight: 700; font-size: 0.85rem; color: #000;">
-                            @((currentUser?.FullName ?? "U").Substring(0, 1).ToUpper())
-                        </button>
-                        <div class="user-dropdown-menu" id="userDropdownMenu">
-                            <div style="padding: 14px 16px; border-bottom: 1px solid var(--border-card);">
-                                <div style="font-weight: 700; font-size: 0.92rem; color: var(--text-primary); margin-bottom: 2px;">@currentUser?.FullName</div>
-                                <div style="font-size: 0.78rem; color: var(--text-muted);">@currentUser?.Email</div>
-                                @if (User.IsInRole("Admin")) { <span class="role-badge-admin">Admin</span> }
-                                else if (User.IsInRole("StoreManager")) { <span class="role-badge-manager">Cửa hàng trưởng</span> }
-                                else { <span class="role-badge-customer">Khách hàng</span> }
-                            </div>
-                            <a href="/account/profile" class="dropdown-item-luxe">
-                                <i class="fa-solid fa-user-circle"></i> Tài Khoản Của Tôi
-                            </a>
-                            <a href="/account/myorders" class="dropdown-item-luxe"><i class="fa-solid fa-box"></i> Đơn hàng của tôi</a>
-                            <a href="/tra-cuu-don-hang" class="dropdown-item-luxe"><i class="fa-solid fa-truck-fast"></i> Tra Cứu Đơn Hàng</a>
-                            @if (User.IsInRole("Admin"))
-                            {
-                                <a href="/admin/admindashboard" class="dropdown-item-luxe"><i class="fa-solid fa-gauge-high"></i> Admin Dashboard</a>
-                                <a href="/admin/databaseconsole" class="dropdown-item-luxe"><i class="fa-solid fa-database"></i> Database Console</a>
-                            }
-                            else if (User.IsInRole("StoreManager"))
-                            {
-                                <a href="/admin/storemanager" class="dropdown-item-luxe"><i class="fa-solid fa-chart-line"></i> Thống kê cửa hàng</a>
-                            }
-                            <div style="border-top: 1px solid var(--border-card); margin: 4px 0;"></div>
-                            <form method="post" action="/account/logout" id="customerLogoutForm" style="margin: 0;">
-                                @Html.AntiForgeryToken()
-                                <button type="submit" class="dropdown-item-luxe" style="width: 100%; text-align: left; background: none; border: none; cursor: pointer; color: #f87171;">
-                                    <i class="fa-solid fa-right-from-bracket"></i> Đăng Xuất
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                }
-                else
-                {
-                    <a href="/account/login" class="icon-btn" title="Đăng nhập" aria-label="Đăng nhập tài khoản" style="width: 38px; height: 38px;">
-                        <i class="fa-solid fa-user"></i>
-                    </a>
-                }
-            </div>
-        </div>
-    </header>
+    <div hidden aria-hidden="true">@Html.AntiForgeryToken()</div>
+    <partial name="Partials/_HeaderNavPartial" />
 
     <!-- Mini Cart Drawer & Overlay -->
-    <div class="drawer-overlay" id="cartOverlay" style="position: fixed; inset: 0; display: none; z-index: 1999; background: rgba(0,0,0,0.7);"></div>
-    <div class="mini-cart-drawer" id="cartDrawer" style="position: fixed; top: 0; right: -420px; width: 400px; max-width: 90vw; height: 100vh; z-index: 2000; display: flex; flex-direction: column;">
+    <div class="drawer-overlay" id="cartOverlay"></div>
+    <div class="mini-cart-drawer" id="cartDrawer">
         <div class="drawer-header">
             <div class="drawer-title" style="font-size: 1.3rem; font-weight: 700; margin: 0; color: var(--text-primary);"><i class="fa-solid fa-bag-shopping" style="color: var(--gold-primary); margin-right: 8px;"></i> Giỏ Hàng Của Bạn</div>
             <button type="button" class="icon-btn" id="closeCartBtn" aria-label="Đóng giỏ hàng" style="width: 36px; height: 36px;"><i class="fa-solid fa-xmark"></i></button>
@@ -384,87 +125,13 @@
         @RenderBody()
     </main>
 
-    <!-- Luxury Footer -->
-    <footer style="background: var(--bg-surface); border-top: 1px solid var(--border-subtle); padding: 60px 24px 24px; margin-top: 80px;">
-        <div style="max-width: 1360px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 40px; margin-bottom: 40px;">
-            <div>
-                <span class="brand-title text-gold-gradient" style="font-size: 1.6rem; display: block; margin-bottom: 4px;">PERFUME LUXE</span>
-                <span class="brand-sub" style="margin-bottom: 16px; display: block;">Haute Parfumerie Paris</span>
-                <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.7; margin-bottom: 20px;">
-                    Điểm đến hàng đầu cho những người yêu thích nghệ thuật mùi hương xa xỉ. Mỗi giọt hương là một tác phẩm bất hủ nâng tầm phong cách sống.
-                </p>
-                <div style="display: flex; gap: 12px; margin-bottom: 20px;">
-                    <a href="https://facebook.com/perfumeluxe.vn" target="_blank" rel="noopener noreferrer" class="icon-btn" aria-label="Theo dõi PERFUME LUXE trên Facebook" style="width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center;">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                    </a>
-                    <a href="https://instagram.com/perfumeluxe.vn" target="_blank" rel="noopener noreferrer" class="icon-btn" aria-label="Theo dõi PERFUME LUXE trên Instagram" style="width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center;">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-                    </a>
-                    <a href="https://tiktok.com/@@perfumeluxe.vn" target="_blank" rel="noopener noreferrer" class="icon-btn" aria-label="Theo dõi PERFUME LUXE trên TikTok" style="width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center;">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.97v7.54c-.03 2.06-.82 4.04-2.27 5.46-1.77 1.73-4.31 2.6-6.78 2.28-2.65-.34-4.99-2.12-6.04-4.59-.97-2.27-.66-4.97.77-6.97 1.34-1.87 3.6-2.97 5.89-2.88.24 0 .47.02.71.05v4.11c-.55-.17-1.15-.22-1.72-.13-.98.15-1.84.77-2.27 1.67-.44.91-.35 2.01.23 2.82.58.82 1.57 1.25 2.58 1.11 1.01-.14 1.83-.93 2.02-1.92.05-.28.08-.57.08-.85V.02z"/></svg>
-                    </a>
-                    <a href="https://youtube.com/@@perfumeluxe" target="_blank" rel="noopener noreferrer" class="icon-btn" aria-label="Kênh YouTube PERFUME LUXE" style="width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center;">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-                    </a>
-                </div>
-                <address style="font-style: normal; font-size: 0.84rem; color: var(--text-secondary); line-height: 1.6;" itemscope itemtype="https://schema.org/PostalAddress">
-                    <div style="margin-bottom: 6px;"><strong style="color: var(--gold-primary);"><i class="fa-solid fa-location-dot" style="margin-right: 6px;"></i> Boutique Hà Nội:</strong> <span itemprop="streetAddress">12 Tràng Tiền</span>, <span itemprop="addressLocality">Hoàn Kiếm</span>, <span itemprop="addressRegion">Hà Nội</span></div>
-                    <div><strong style="color: var(--gold-primary);"><i class="fa-solid fa-location-dot" style="margin-right: 6px;"></i> Boutique TP.HCM:</strong> <span itemprop="streetAddress">68 Đồng Khởi</span>, <span itemprop="addressLocality">Quận 1</span>, <span itemprop="addressRegion">TP. Hồ Chí Minh</span></div>
-                </address>
-            </div>
-
-            <div>
-                <div class="footer-title" style="font-size: 1.15rem; font-weight: 700; margin-bottom: 20px; color: var(--gold-primary);">Trải Nghiệm & Khám Phá</div>
-                <ul style="list-style: none; display: flex; flex-direction: column; gap: 10px; font-size: 0.9rem; color: var(--text-secondary);">
-                    <li><a href="/bo-suu-tap" class="nav-link"><i class="fa-solid fa-angle-right" style="color: var(--gold-primary); font-size: 0.75rem; margin-right: 6px;"></i> Tất Cả Sản Phẩm</a></li>
-                    <li><a href="/discovery-box" class="nav-link" style="color: var(--gold-primary);"><i class="fa-solid fa-gift" style="font-size: 0.8rem; margin-right: 6px;"></i> Hộp Quà Discovery</a></li>
-                    <li><a href="/catalog/quiz" class="nav-link" style="color: var(--gold-primary);"><i class="fa-solid fa-wand-magic-sparkles" style="font-size: 0.8rem; margin-right: 6px;"></i> AI Fragrance Finder</a></li>
-                    <li><a href="/blog" class="nav-link"><i class="fa-solid fa-angle-right" style="color: var(--gold-primary); font-size: 0.75rem; margin-right: 6px;"></i> Tạp Chí Mùi Hương (12 bài viết)</a></li>
-                    <li><a href="/ve-chung-toi" class="nav-link"><i class="fa-solid fa-angle-right" style="color: var(--gold-primary); font-size: 0.75rem; margin-right: 6px;"></i> Câu Chuyện Thương Hiệu</a></li>
-                    <li><a href="/boutique" class="nav-link"><i class="fa-solid fa-angle-right" style="color: var(--gold-primary); font-size: 0.75rem; margin-right: 6px;"></i> Hệ Thống Flagship Boutique</a></li>
-                </ul>
-            </div>
-
-            <div>
-                <div class="footer-title" style="font-size: 1.15rem; font-weight: 700; margin-bottom: 20px; color: var(--gold-primary);">Chính Sách & Hỗ Trợ</div>
-                <ul style="list-style: none; display: flex; flex-direction: column; gap: 10px; font-size: 0.9rem; color: var(--text-secondary);">
-                    <li><a href="/tra-cuu-don-hang" class="nav-link"><i class="fa-solid fa-truck-fast" style="color: var(--gold-primary); width: 18px;"></i> Tra Cứu Hành Trình Đơn</a></li>
-                    <li><a href="/chinh-sach-doi-tra" class="nav-link"><i class="fa-solid fa-shield-halved" style="color: var(--gold-primary); width: 18px;"></i> Đổi Trả 7 Ngày & Hoàn 200%</a></li>
-                    <li><a href="/huong-dan-mua-hang" class="nav-link"><i class="fa-solid fa-cart-shopping" style="color: var(--gold-primary); width: 18px;"></i> Hướng Dẫn Mua Hàng & COD</a></li>
-                    <li><a href="/privacy" class="nav-link"><i class="fa-solid fa-lock" style="color: var(--gold-primary); width: 18px;"></i> Chính Sách Bảo Mật Dữ Liệu</a></li>
-                    <li><a href="/swagger" target="_blank" rel="noopener noreferrer" class="nav-link" style="color: #2dd4bf;"><i class="fa-solid fa-code" style="color: #2dd4bf; width: 18px;"></i> API Docs / Swagger</a></li>
-                    <li><a href="tel:+842438289999" class="nav-link" style="color: var(--text-muted);"><i class="fa-solid fa-phone" style="width: 18px; color: var(--gold-primary);"></i> Hotline VIP: 024.3828.9999</a></li>
-                    <li><a href="mailto:concierge@perfumeluxe.vn" class="nav-link" style="color: var(--text-muted);"><i class="fa-solid fa-envelope" style="width: 18px; color: var(--gold-primary);"></i> concierge&#64;perfumeluxe.vn</a></li>
-                </ul>
-            </div>
-
-            <div>
-                <div class="footer-title" style="font-size: 1.15rem; font-weight: 700; margin-bottom: 20px; color: var(--gold-primary);">Đặc Quyền Thành Viên</div>
-                <p style="color: var(--text-secondary); font-size: 0.88rem; margin-bottom: 14px;">Đăng ký gia nhập Haute Parfumerie Club để nhận voucher <strong style="color: var(--gold-primary);">LUXE2026</strong> giảm 10%:</p>
-                <div style="display: flex; gap: 8px; margin-bottom: 12px;">
-                    <input type="email" id="footerNewsletterEmail" aria-label="Địa chỉ email đăng ký nhận ưu đãi" placeholder="Nhập địa chỉ email..." style="background: var(--bg-surface-elevated); border: 1px solid var(--border-card); color: var(--text-primary); padding: 10px 14px; border-radius: var(--radius-sm); flex-grow: 1; outline: none; font-size: 0.85rem;" />
-                    <button type="button" onclick="handleNewsletterSubscribe()" class="btn-luxe-primary" style="padding: 10px 18px; font-size: 0.82rem; white-space: nowrap;">Đăng Ký</button>
-                </div>
-                <div id="newsletterNotice" style="display: none; font-size: 0.82rem; padding: 10px; border-radius: var(--radius-sm);"></div>
-            </div>
-        </div>
-
-        <div style="max-width: 1360px; margin: 0 auto; border-top: 1px solid var(--border-card); padding-top: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; font-size: 0.8rem; color: var(--text-muted);">
-            <div>&copy; @DateTime.UtcNow.Year PERFUME LUXE. Haute Parfumerie Enterprise System. All rights reserved.</div>
-            <div style="display: flex; gap: 16px; align-items: center;">
-                <span>Thanh toán:</span>
-                <span><i class="fa-solid fa-money-bill-wave" style="color: #2A9D8F; margin-right: 4px;"></i> COD (Kiểm hàng thanh toán)</span>
-                <span><i class="fa-solid fa-qrcode" style="color: var(--gold-primary); margin-right: 4px;"></i> VNPAY-QR</span>
-                <span><i class="fa-solid fa-building-columns" style="color: #3b82f6; margin-right: 4px;"></i> Chuyển khoản 24/7</span>
-            </div>
-        </div>
-    </footer>
+    <partial name="Partials/_FooterPartial" />
 
     <!-- Toast Notifications -->
     <div class="toast-container-luxe" id="toastContainer"></div>
 
     <!-- Scripts -->
-    <script src="~/js/customer-api.js" asp-append-version="true" defer></script>
+    <script src="~/js/customer-api.js" asp-append-version="true"></script>
     <script>
         // 1. Theme Management (Dark / Light + Cốc Cốc / Chrome system auto-detection)
         (function() {
@@ -484,19 +151,11 @@
         })();
 
         function applyTheme(theme) {
-            if (document.documentElement.getAttribute('data-theme') !== theme) {
-                document.documentElement.setAttribute('data-theme', theme);
-            }
-            const desiredClass = theme === 'dark' ? 'dark-theme' : 'light-theme';
-            if (document.body.className !== desiredClass) {
-                document.body.className = desiredClass;
-            }
+            document.documentElement.setAttribute('data-theme', theme);
+            document.body.className = theme === 'dark' ? 'dark-theme' : 'light-theme';
             const icon = document.getElementById('themeIcon');
             if (icon) {
-                const desiredIcon = theme === 'dark' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
-                if (icon.className !== desiredIcon) {
-                    icon.className = desiredIcon;
-                }
+                icon.className = theme === 'dark' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
             }
         }
 
@@ -537,11 +196,6 @@
                 // Update badge
                 const badge = document.getElementById('headerCartCount');
                 if (badge) badge.innerText = data.totalCount;
-                const bottomBadge = document.getElementById('mobileBottomCartBadge');
-                if (bottomBadge) {
-                    bottomBadge.innerText = data.totalCount;
-                    bottomBadge.style.display = data.totalCount > 0 ? 'flex' : 'none';
-                }
 
                 // Update subtotal
                 const subtotal = document.getElementById('cartDrawerSubtotal');
@@ -622,15 +276,8 @@
             finally { window.location.assign('/'); }
         });
 
-        // Load cart data only after the page's load event so its API request
-        // cannot compete with the hero image and other LCP resources.
-        window.addEventListener('load', function initializeCartWhenIdle() {
-            if ('requestIdleCallback' in window) {
-                requestIdleCallback(refreshCartState, { timeout: 3000 });
-            } else {
-                setTimeout(refreshCartState, 2000);
-            }
-        }, { once: true });
+        // Initialize cart count on load
+        refreshCartState();
     </script>
 
     <script>
@@ -679,12 +326,11 @@
             });
         }
 
-        // Show TempData success toast (guard with cookie check to avoid emitting Set-Cookie on cached GETs)
-        @if (Context.Request.Cookies.ContainsKey(".AspNetCore.Mvc.CookieTempDataProvider") && TempData["Success"] != null)
+        // Show TempData success toast
+        @if (TempData["Success"] != null)
         {
-            var successMsg = System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(TempData["Success"]?.ToString() ?? "");
             <text>
-            setTimeout(() => showToast('@successMsg', 'success'), 300);
+            setTimeout(() => showToast('@Html.Raw(TempData["Success"])', 'success'), 300);
             </text>
         }
 
@@ -716,11 +362,7 @@
                     notice.style.background = 'rgba(46, 204, 113, 0.15)';
                     notice.style.color = '#2ecc71';
                     notice.style.border = '1px solid #2ecc71';
-                    notice.textContent = ' ' + data.message;
-                    const giftIcon = document.createElement('i');
-                    giftIcon.className = 'fa-solid fa-gift';
-                    giftIcon.style.marginRight = '6px';
-                    notice.prepend(giftIcon);
+                    notice.innerHTML = `<i class="fa-solid fa-gift" style="margin-right: 6px;"></i> ${data.message}`;
                     input.value = '';
                     if (typeof showToast === 'function') {
                         showToast(`Mã ưu đãi LUXE2026 đã kích hoạt cho ${email}!`, 'success');
@@ -742,63 +384,6 @@
         }
     </script>
 
-    <!-- Mobile Bottom Navigation Bar -->
-    <nav class="mobile-bottom-nav" aria-label="Thanh điều hướng di động">
-        <a href="/" class="mobile-bottom-nav-item @(requestPath == "/" ? "active" : "")">
-            <i class="fa-solid fa-house"></i>
-            <span>Trang Chủ</span>
-        </a>
-        <a href="/bo-suu-tap" class="mobile-bottom-nav-item @(requestPath.StartsWithSegments("/bo-suu-tap") ? "active" : "")">
-            <i class="fa-solid fa-gem"></i>
-            <span>Bộ Sưu Tập</span>
-        </a>
-        <a href="/catalog/quiz" class="mobile-bottom-nav-item highlight @(requestPath.StartsWithSegments("/catalog/quiz") ? "active" : "")">
-            <div class="bottom-nav-quiz-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
-            <span>Tìm Mùi</span>
-        </a>
-        <a href="/cart" class="mobile-bottom-nav-item @(requestPath.StartsWithSegments("/cart") ? "active" : "")" style="position: relative;">
-            <i class="fa-solid fa-bag-shopping"></i>
-            <span class="badge-count cart-count-badge" id="mobileBottomCartBadge" style="display: none; top: 4px; right: 20%;">0</span>
-            <span>Giỏ Hàng</span>
-        </a>
-        <a href="@(SignInManager.IsSignedIn(User) ? "/account/profile" : "/account/login")" class="mobile-bottom-nav-item @(requestPath.StartsWithSegments("/account") ? "active" : "")">
-            <i class="fa-solid fa-user"></i>
-            <span>@(SignInManager.IsSignedIn(User) ? "Tài Khoản" : "Đăng Nhập")</span>
-        </a>
-    </nav>
-
-    <!-- Deferred GA4 Analytics -->
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        (function() {
-            var gaInitialized = false;
-            function loadGA4() {
-                if (gaInitialized) return;
-                gaInitialized = true;
-                var s = document.createElement('script');
-                s.async = true;
-                s.src = 'https://www.googletagmanager.com/gtag/js?id=G-KCWE7ENDEJ';
-                document.head.appendChild(s);
-                gtag('js', new Date());
-                gtag('config', 'G-KCWE7ENDEJ');
-            }
-            if (window.addEventListener) {
-                window.addEventListener('load', function() {
-                    setTimeout(function() {
-                        if ('requestIdleCallback' in window) {
-                            requestIdleCallback(loadGA4, { timeout: 4000 });
-                        } else {
-                            loadGA4();
-                        }
-                    }, 5000);
-                });
-                ['click', 'keydown', 'touchstart'].forEach(function(evt) {
-                    window.addEventListener(evt, loadGA4, { once: true, passive: true });
-                });
-            }
-        })();
-    </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

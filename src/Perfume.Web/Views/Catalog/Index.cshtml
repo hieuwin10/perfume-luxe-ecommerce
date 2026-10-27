@@ -1,21 +1,9 @@
 @model List<ProductCardDto>
-@functions {
-    public static string OptimizeThumbnail(string? url, int width = 360, int quality = 75)
-    {
-        if (string.IsNullOrWhiteSpace(url)) return "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=360&q=75&fm=webp";
-        if (!url.Contains("images.unsplash.com")) return url;
-        var cleanUrl = System.Text.RegularExpressions.Regex.Replace(url, @"([?&])w=\d+", "$1");
-        cleanUrl = System.Text.RegularExpressions.Regex.Replace(cleanUrl, @"([?&])q=\d+", "$1");
-        cleanUrl = System.Text.RegularExpressions.Regex.Replace(cleanUrl, @"([?&])fm=\w+", "$1");
-        cleanUrl = cleanUrl.Replace("?&", "?").Replace("&&", "&").TrimEnd('&').TrimEnd('?');
-        var separator = cleanUrl.Contains("?") ? "&" : "?";
-        return $"{cleanUrl}{separator}auto=format&fit=crop&w={width}&q={quality}&fm=webp";
-    }
-}
 @{
     ViewData["Title"] = "Bộ Sưu Tập Nước Hoa Cao Cấp";
     ViewData["MetaDescription"] = "Khám phá danh mục nước hoa cao cấp chính hãng từ các thương hiệu hàng đầu: Dior, Chanel, Creed, Tom Ford, Le Labo, Kilian. Đầy đủ phiên bản chiết 10ml và fullbox.";
     ViewData["OgType"] = "website";
+    ViewData["ProductCardVariant"] = "Catalog";
     var filter = ViewBag.Filter as ProductFilterParams ?? new ProductFilterParams();
     var brands = ViewBag.Brands as List<Brand> ?? new List<Brand>();
     var families = ViewBag.Families as List<FragranceFamily> ?? new List<FragranceFamily>();
@@ -49,14 +37,14 @@
             <form method="get" action="/bo-suu-tap" id="filterForm">
                 <!-- Search Keyword -->
                 <div style="margin-bottom: 20px;">
-                    <label for="filterKeyword" style="display: block; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; margin-bottom: 6px; color: var(--text-secondary);">Từ Khóa</label>
-                    <input type="text" id="filterKeyword" name="keyword" value="@filter.Keyword" aria-label="Tìm kiếm theo từ khóa" placeholder="Tìm tên, thương hiệu..." style="width: 100%; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); color: var(--text-primary); padding: 8px 12px; border-radius: var(--radius-sm); font-size: 0.85rem; outline: none;" />
+                    <label style="display: block; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; margin-bottom: 6px; color: var(--text-secondary);">Từ Khóa</label>
+                    <input type="text" name="keyword" value="@filter.Keyword" placeholder="Tìm tên, thương hiệu..." style="width: 100%; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); color: var(--text-primary); padding: 8px 12px; border-radius: var(--radius-sm); font-size: 0.85rem; outline: none;" />
                 </div>
 
                 <!-- Gender -->
                 <div style="margin-bottom: 24px;">
-                    <label for="filterGender" style="display: block; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; margin-bottom: 8px; color: var(--text-secondary);">Giới Tính</label>
-                    <select id="filterGender" name="gender" aria-label="Lọc theo giới tính" onchange="this.form.submit()" style="width: 100%; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); color: var(--text-primary); padding: 8px 12px; border-radius: var(--radius-sm); font-size: 0.85rem; outline: none;">
+                    <label style="display: block; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; margin-bottom: 8px; color: var(--text-secondary);">Giới Tính</label>
+                    <select name="gender" onchange="this.form.submit()" style="width: 100%; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); color: var(--text-primary); padding: 8px 12px; border-radius: var(--radius-sm); font-size: 0.85rem; outline: none;">
                         <option value="">Tất cả giới tính</option>
                         <option value="Men" selected="@(filter.Gender == GenderTarget.Men)">Nước hoa Nam</option>
                         <option value="Women" selected="@(filter.Gender == GenderTarget.Women)">Nước hoa Nữ</option>
@@ -66,8 +54,8 @@
 
                 <!-- Brands -->
                 <div style="margin-bottom: 24px;">
-                    <label for="filterBrand" style="display: block; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; margin-bottom: 8px; color: var(--text-secondary);">Thương Hiệu</label>
-                    <select id="filterBrand" name="brandSlug" aria-label="Lọc theo thương hiệu" onchange="this.form.submit()" style="width: 100%; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); color: var(--text-primary); padding: 8px 12px; border-radius: var(--radius-sm); font-size: 0.85rem; outline: none;">
+                    <label style="display: block; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; margin-bottom: 8px; color: var(--text-secondary);">Thương Hiệu</label>
+                    <select name="brandSlug" onchange="this.form.submit()" style="width: 100%; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); color: var(--text-primary); padding: 8px 12px; border-radius: var(--radius-sm); font-size: 0.85rem; outline: none;">
                         <option value="">Tất cả thương hiệu</option>
                         @foreach (var b in brands)
                         {
@@ -78,8 +66,8 @@
 
                 <!-- Fragrance Family -->
                 <div style="margin-bottom: 24px;">
-                    <label for="filterFamily" style="display: block; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; margin-bottom: 8px; color: var(--text-secondary);">Nhóm Hương (Family)</label>
-                    <select id="filterFamily" name="familySlug" aria-label="Lọc theo nhóm hương" onchange="this.form.submit()" style="width: 100%; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); color: var(--text-primary); padding: 8px 12px; border-radius: var(--radius-sm); font-size: 0.85rem; outline: none;">
+                    <label style="display: block; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; margin-bottom: 8px; color: var(--text-secondary);">Nhóm Hương (Family)</label>
+                    <select name="familySlug" onchange="this.form.submit()" style="width: 100%; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); color: var(--text-primary); padding: 8px 12px; border-radius: var(--radius-sm); font-size: 0.85rem; outline: none;">
                         <option value="">Tất cả nhóm hương</option>
                         @foreach (var f in families)
                         {
@@ -90,8 +78,8 @@
 
                 <!-- Sort By -->
                 <div style="margin-bottom: 24px;">
-                    <label for="filterSortBy" style="display: block; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; margin-bottom: 8px; color: var(--text-secondary);">Sắp Xếp Theo</label>
-                    <select id="filterSortBy" name="sortBy" aria-label="Sắp xếp sản phẩm" onchange="this.form.submit()" style="width: 100%; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); color: var(--text-primary); padding: 8px 12px; border-radius: var(--radius-sm); font-size: 0.85rem; outline: none;">
+                    <label style="display: block; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; margin-bottom: 8px; color: var(--text-secondary);">Sắp Xếp Theo</label>
+                    <select name="sortBy" onchange="this.form.submit()" style="width: 100%; background: var(--bg-surface-elevated); border: 1px solid var(--border-card); color: var(--text-primary); padding: 8px 12px; border-radius: var(--radius-sm); font-size: 0.85rem; outline: none;">
                         <option value="" selected="@(string.IsNullOrEmpty(filter.SortBy))">Mới nhất</option>
                         <option value="price_asc" selected="@(filter.SortBy == "price_asc")">Giá tăng dần</option>
                         <option value="price_desc" selected="@(filter.SortBy == "price_desc")">Giá giảm dần</option>
@@ -113,69 +101,7 @@
                 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 24px;">
                     @foreach (var p in Model)
                     {
-                        <div class="perfume-card">
-                            <div class="card-badges">
-                                @if (p.IsFlashSale)
-                                {
-                                    <span class="badge-tag" style="background: linear-gradient(135deg, #ef4444, #f59e0b); color: #FFF; font-weight: 700;"><i class="fa-solid fa-bolt"></i> Flash Sale -@p.FlashSaleDiscountPercent%</span>
-                                }
-                                @if (p.IsBestSeller)
-                                {
-                                    <span class="badge-tag tag-hot">Best Seller</span>
-                                }
-                                @if (p.IsNewArrival)
-                                {
-                                    <span class="badge-tag tag-new">Mới Về</span>
-                                }
-                            </div>
-
-                            <a href="/nuoc-hoa/@p.Slug" class="card-img-wrapper">
-                                <img src="@OptimizeThumbnail(p.MainImageUrl, 360, 75)" alt="@p.Name" width="300" height="300" loading="lazy" decoding="async" style="aspect-ratio: 1/1; object-fit: contain;" />
-                            </a>
-
-                            <div class="card-body">
-                                <div class="card-brand">@p.BrandName</div>
-                                <h3 class="card-title">
-                                    <a href="/nuoc-hoa/@p.Slug">@p.Name</a>
-                                </h3>
-
-                                <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 12px;">
-                                    <div style="color: var(--gold-primary); font-size: 0.8rem;">
-                                        <i class="fa-solid fa-star"></i> @p.RatingAverage.ToString("0.0")
-                                    </div>
-                                    <span style="font-size: 0.75rem; color: var(--text-muted);">(@p.RatingCount đánh giá)</span>
-                                </div>
-
-                                @if (p.TopNotes.Any())
-                                {
-                                    <div class="card-notes">
-                                        @foreach (var note in p.TopNotes)
-                                        {
-                                            <span class="note-pill"><i class="fa-solid fa-leaf" style="font-size: 0.65rem; color: var(--gold-primary);"></i> @note</span>
-                                        }
-                                    </div>
-                                }
-
-                                <div class="card-footer">
-                                    <div>
-                                        @if (p.IsFlashSale && p.FlashSalePrice.HasValue)
-                                        {
-                                            <span style="font-size: 0.7rem; color: #f59e0b; display: block; font-weight: 600;"><i class="fa-solid fa-bolt"></i> Flash Sale</span>
-                                            <span class="card-price" style="color: #f59e0b;">@p.FlashSalePrice.Value.ToString("N0")₫</span>
-                                            <span style="font-size: 0.7rem; text-decoration: line-through; color: var(--text-muted); display: block;">@p.BasePrice.ToString("N0")₫</span>
-                                        }
-                                        else
-                                        {
-                                            <span style="font-size: 0.7rem; color: var(--text-muted); display: block;">Từ</span>
-                                            <span class="card-price">@p.BasePrice.ToString("N0")₫</span>
-                                        }
-                                    </div>
-                                    <button type="button" class="btn-luxe" onclick="addToCart('@p.Slug', null, 1)" style="padding: 8px 16px; font-size: 0.78rem;">
-                                        <i class="fa-solid fa-bag-shopping"></i> Thêm
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+                        <partial name="Partials/_ProductCardPartial" model="p" />
                     }
                 </div>
             }

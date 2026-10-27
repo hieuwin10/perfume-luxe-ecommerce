@@ -1,0 +1,65 @@
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<Perfume.Infrastructure.Identity.AppUser> SignInManager
+@inject UserManager<Perfume.Infrastructure.Identity.AppUser> UserManager
+
+    <!-- Mobile Nav Overlay & Drawer -->
+    <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
+    <aside class="mobile-nav-drawer" id="mobileNavDrawer" aria-label="Menu di động">
+        <div class="mobile-nav-header">
+            <a href="/" class="brand-logo" onclick="closeMobileNav()">
+                <span class="brand-title text-gold-gradient" style="font-size: 1.35rem;">PERFUME LUXE</span>
+                <span class="brand-sub" style="font-size: 0.58rem;">Haute Parfumerie</span>
+            </a>
+            <button type="button" class="icon-btn" id="closeMobileNavBtn" aria-label="Đóng menu" style="width: 38px; height: 38px;">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="mobile-nav-body">
+            <a href="/" class="mobile-nav-item" onclick="closeMobileNav()"><i class="fa-solid fa-house"></i> Trang Chủ</a>
+            <a href="/bo-suu-tap" class="mobile-nav-item" onclick="closeMobileNav()"><i class="fa-solid fa-gem"></i> Bộ Sưu Tập Nước Hoa</a>
+            <a href="/catalog/quiz" class="mobile-nav-item" onclick="closeMobileNav()" style="color: var(--gold-primary);"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Trắc Nghiệm Tìm Mùi</a>
+            <a href="/discovery-box" class="mobile-nav-item" onclick="closeMobileNav()" style="color: var(--gold-primary);"><i class="fa-solid fa-gift"></i> Hộp Quà Discovery Box</a>
+            <a href="/so-sanh" class="mobile-nav-item" onclick="closeMobileNav()"><i class="fa-solid fa-scale-balanced"></i> So Sánh Mùi Hương</a>
+            <a href="/dat-lich-trai-nghiem" class="mobile-nav-item" onclick="closeMobileNav()"><i class="fa-solid fa-crown"></i> Thử Mùi VIP Concierge</a>
+            <a href="/tra-cuu-don-hang" class="mobile-nav-item" onclick="closeMobileNav()"><i class="fa-solid fa-truck-fast"></i> Tra Cứu Đơn Hàng</a>
+            <a href="/blog" class="mobile-nav-item" onclick="closeMobileNav()"><i class="fa-solid fa-newspaper"></i> Tạp Chí Mùi Hương</a>
+            <a href="/ve-chung-toi" class="mobile-nav-item" onclick="closeMobileNav()"><i class="fa-solid fa-circle-info"></i> Về Chúng Tôi</a>
+
+            <div class="mobile-nav-divider"></div>
+
+            @if (SignInManager.IsSignedIn(User))
+            {
+                var mobileUser = await UserManager.GetUserAsync(User);
+                <div style="padding: 6px 14px 10px; font-size: 0.82rem; color: var(--text-muted);">
+                    <div style="font-weight: 700; color: var(--text-primary); font-size: 0.9rem;">@mobileUser?.FullName</div>
+                    <div>@mobileUser?.Email</div>
+                </div>
+                @if (User.IsInRole("Admin"))
+                {
+                    <a href="/admin/admindashboard" class="mobile-nav-item" style="color: #f87171;"><i class="fa-solid fa-gauge-high"></i> Admin Dashboard</a>
+                }
+                else if (User.IsInRole("StoreManager"))
+                {
+                    <a href="/admin/storemanager" class="mobile-nav-item" style="color: var(--gold-primary);"><i class="fa-solid fa-chart-line"></i> Quản Lý Cửa Hàng</a>
+                }
+                <a href="/account/profile" class="mobile-nav-item"><i class="fa-solid fa-user"></i> Tài Khoản Của Tôi</a>
+                <a href="/account/myorders" class="mobile-nav-item"><i class="fa-solid fa-box"></i> Đơn Hàng Của Tôi</a>
+                <form method="post" action="/account/logout" style="margin: 4px 0 0;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="mobile-nav-item" style="width: 100%; border: none; background: none; cursor: pointer; color: #f87171; text-align: left;">
+                        <i class="fa-solid fa-right-from-bracket" style="color: #f87171;"></i> Đăng Xuất
+                    </button>
+                </form>
+            }
+            else
+            {
+                <a href="/account/login" class="mobile-nav-item" style="color: var(--gold-primary); font-weight: 600;"><i class="fa-solid fa-right-to-bracket"></i> Đăng Nhập / Đăng Ký</a>
+            }
+        </div>
+        <div class="mobile-nav-footer">
+            <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.85rem;">
+                <span style="color: var(--text-muted);"><i class="fa-solid fa-phone" style="color: var(--gold-primary); margin-right: 6px;"></i> Hotline VIP:</span>
+                <strong style="color: var(--text-primary);">024.3828.9999</strong>
+            </div>
+        </div>
+    </aside>

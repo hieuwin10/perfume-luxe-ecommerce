@@ -1,0 +1,91 @@
+@model List<Perfume.Web.Controllers.DiscoveryPerfumeItemDto>
+@using System.Text.Encodings.Web
+@{
+    decimal CalcVialPrice(decimal basePrice, int volumeMl)
+    {
+        var safeBase = Math.Max(0m, basePrice);
+        if (volumeMl == 2)
+        {
+            var prop = Math.Round((safeBase * 0.03m) / 1000m, 0, MidpointRounding.AwayFromZero) * 1000m;
+            return Math.Max(150_000m, prop);
+        }
+        else
+        {
+            var prop = Math.Round((safeBase * 0.06m) / 1000m, 0, MidpointRounding.AwayFromZero) * 1000m;
+            return Math.Max(280_000m, prop);
+        }
+    }
+ }
+
+            <!-- BƯỚC 2: TUYỂN CHỌN 3 – 5 ỐNG CHIẾT (Vials) & DUNG TÍCH (2ml hoặc 5ml) -->
+            <section class="discovery-step-card" id="step-2-vials">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+                    <div>
+                        <h2 style="font-size: 1.25rem; font-weight: 700; margin: 0 0 4px; color: var(--text-primary);">
+                            <span style="display: inline-flex; width: 28px; height: 28px; border-radius: 50%; background: var(--gold-primary); color: #000; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 800; margin-right: 8px;">2</span>
+                            Bước 2: Tuyển Chọn 3 – 5 Ống Chiết (<code style="color: var(--gold-primary);">2ml</code> hoặc <code style="color: var(--gold-primary);">5ml</code>)
+                        </h2>
+                        <p style="margin: 0; font-size: 0.82rem; color: var(--text-muted);">
+                            Chọn từ 3 đến 5 mùi hương yêu thích. Bạn có thể tùy chỉnh dung tích <strong>2ml</strong> hoặc <strong>5ml</strong> cho từng ống chiết.
+                        </p>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                        <span style="background: rgba(42,157,143,0.15); border: 1px solid #2A9D8F; color: #52B788; font-size: 0.76rem; font-weight: 700; padding: 4px 10px; border-radius: 99px;">
+                            4 ống: Giảm 5%
+                        </span>
+                        <span style="background: rgba(212,175,55,0.18); border: 1px solid var(--gold-primary); color: var(--gold-primary); font-size: 0.76rem; font-weight: 700; padding: 4px 10px; border-radius: 99px;">
+                            5 ống: Giảm 10%
+                        </span>
+                        <span style="font-size: 0.88rem; color: var(--text-secondary);">
+                            Đã chọn: <strong id="selectedCountBadge" style="color: var(--gold-primary); font-size: 1rem;">0/5</strong> <small style="color: var(--text-muted);">(Tối thiểu 3)</small>
+                        </span>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px;">
+                    @foreach (var item in Model)
+                    {
+                        var price2ml = CalcVialPrice(item.BasePrice, 2);
+                        var price5ml = CalcVialPrice(item.BasePrice, 5);
+                        <div class="luxury-card discovery-item-card" id="perfume-card-@item.Id"
+                             data-id="@item.Id"
+                             data-price-2ml="@price2ml"
+                             data-price-5ml="@price5ml"
+                             style="padding: 14px; border: 1px solid var(--border-card); background: var(--bg-surface-elevated); border-radius: 12px; transition: all 0.2s; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <div style="position: relative; height: 165px; border-radius: 8px; overflow: hidden; margin-bottom: 10px; background: #111;">
+                                    <img src="@(string.IsNullOrEmpty(item.MainImageUrl) ? "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=400&q=80" : item.MainImageUrl)"
+                                         alt="@item.Name" style="width: 100%; height: 100%; object-fit: cover;" />
+                                    <span style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.75); backdrop-filter: blur(4px); color: var(--gold-primary); font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 99px;">
+                                        2ml / 5ml Vial
+                                    </span>
+                                </div>
+
+                                <span style="font-size: 0.72rem; text-transform: uppercase; color: var(--gold-primary); font-weight: 700; letter-spacing: 0.05em;">@item.BrandName</span>
+                                <h4 style="margin: 2px 0 6px; font-size: 0.92rem; font-weight: 600; color: var(--text-primary); line-height: 1.3;">@item.Name</h4>
+
+                                <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px;">
+                                    <span style="background: rgba(212,175,55,0.1); color: var(--gold-primary); font-size: 0.7rem; padding: 2px 6px; border-radius: 4px;">
+                                        @item.FamilyName
+                                    </span>
+                                    <span style="background: rgba(255,255,255,0.05); color: var(--text-muted); font-size: 0.7rem; padding: 2px 6px; border-radius: 4px;">
+                                        @item.Gender
+                                    </span>
+                                </div>
+
+                                <div style="display: flex; justify-content: space-between; font-size: 0.74rem; color: var(--text-secondary); margin-bottom: 10px; padding: 6px 8px; background: rgba(0,0,0,0.2); border-radius: 6px;">
+                                    <span><strong>2ml:</strong> @price2ml.ToString("N0")₫</span>
+                                    <span style="color: var(--gold-primary);"><strong>5ml:</strong> @price5ml.ToString("N0")₫</span>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; gap: 6px;">
+                                <button type="button" class="btn-luxe-outline select-slot-btn" id="btn-select-@item.Id" style="flex: 1; padding: 8px; font-size: 0.8rem;"
+                                        onclick="toggleSelectPerfume(@item.Id, '@Html.Raw(JavaScriptEncoder.Default.Encode(item.Name))', '@Html.Raw(JavaScriptEncoder.Default.Encode(item.BrandName))', '@(item.MainImageUrl ?? "")', '@Html.Raw(JavaScriptEncoder.Default.Encode(item.Slug))', @price2ml, @price5ml)">
+                                    <i class="fa-solid fa-plus" style="margin-right: 4px;"></i> Chọn Chai Này
+                                </button>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </section>
