@@ -1,0 +1,129 @@
+        <!-- STEP 1: ĐỐI TƯỢNG -->
+        <div id="qStep1" class="quiz-step-pane active">
+            <h2 class="quiz-step-title">Bạn đang tìm kiếm kiệt tác mùi hương cho ai?</h2>
+            <p class="quiz-step-desc">Định hình phong cách và đối tượng cảm nhận ban đầu</p>
+            <div class="quiz-grid quiz-grid-3">
+                <button type="button" class="quiz-option-card" onclick="selectQuizAnswer('gender', 'men', 2)">
+                    <div class="quiz-icon-box"><i class="fa-solid fa-mars" style="color: #48CAE4;"></i></div>
+                    <strong class="quiz-opt-title">Quý Ông (Men)</strong>
+                    <span class="quiz-opt-desc">Nam tính, bản lĩnh, lịch lãm & quyền uy</span>
+                </button>
+                <button type="button" class="quiz-option-card" onclick="selectQuizAnswer('gender', 'women', 2)">
+                    <div class="quiz-icon-box"><i class="fa-solid fa-venus" style="color: #E56B6F;"></i></div>
+                    <strong class="quiz-opt-title">Phái Đẹp (Women)</strong>
+                    <span class="quiz-opt-desc">Quyến rũ, kiêu kỳ, dịu dàng & đài các</span>
+                </button>
+                <button type="button" class="quiz-option-card" onclick="selectQuizAnswer('gender', 'unisex', 2)">
+                    <div class="quiz-icon-box"><i class="fa-solid fa-infinity" style="color: var(--gold-primary);"></i></div>
+                    <strong class="quiz-opt-title">Phi Giới Tính (Unisex)</strong>
+                    <span class="quiz-opt-desc">Độc bản, phá cách, tự do & thời thượng</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- STEP 2: PHONG THÁI & VIBE -->
+        <div id="qStep2" class="quiz-step-pane">
+            <h2 class="quiz-step-title">Phong thái hoặc Vibe bạn muốn toát ra nhất?</h2>
+            <p class="quiz-step-desc">Linh hồn của mùi hương sẽ phản chiếu chiều sâu nội tâm của bạn</p>
+            <div class="quiz-grid quiz-grid-3">
+                <button type="button" class="quiz-option-card" onclick="selectQuizAnswer('vibe', 'luxury', 3)">
+                    <div class="quiz-icon-box"><i class="fa-solid fa-crown" style="color: var(--gold-primary);"></i></div>
+                    <strong class="quiz-opt-title">Quyền Lực & Sang Trọng</strong>
+                    <span class="quiz-opt-desc">Trầm hương Oud, da thuộc quý, dứa khói hoàng gia</span>
+                </button>
+                <button type="button" class="quiz-option-card" onclick="selectQuizAnswer('vibe', 'cozy', 3)">
+                    <div class="quiz-icon-box"><i class="fa-solid fa-fire" style="color: #E76F51;"></i></div>
+                    <strong class="quiz-opt-title">Trầm Ấm & Sâu Lắng</strong>
+                    <span class="quiz-opt-desc">Gỗ đàn hương, tuyết tùng, hổ phách & rượu ủ</span>
+                </button>
+                <button type="button" class="quiz-option-card" onclick="selectQuizAnswer('vibe', 'fresh', 3)">
+                    <div class="quiz-icon-box"><i class="fa-solid fa-wind" style="color: #2A9D8F;"></i></div>
+                    <strong class="quiz-opt-title">Tươi Mát & Phóng Khoáng</strong>
+                    <span class="quiz-opt-desc">Cam Bergamot Calabre, gió biển & thảo mộc thanh sạch</span>
+                </button>
+                <button type="button" class="quiz-option-card" onclick="selectQuizAnswer('vibe', 'romantic', 3)">
+                    <div class="quiz-icon-box"><i class="fa-solid fa-heart" style="color: #E56B6F;"></i></div>
+                    <strong class="quiz-opt-title">Ngọt Ngào & Quyến Rũ</strong>
+                    <span class="quiz-opt-desc">Hoa hồng Grasse, vani Bourbon & nhài Sambac mị hoặc</span>
+                </button>
+                <button type="button" class="quiz-option-card" onclick="selectQuizAnswer('vibe', 'mysterious', 3)">
+                    <div class="quiz-icon-box"><i class="fa-solid fa-moon" style="color: #9D4EDD;"></i></div>
+                    <strong class="quiz-opt-title">Bí Ẩn & Khó Đoán</strong>
+                    <span class="quiz-opt-desc">Gia vị cay ấm, khói huyền ảo, hoắc hương mê hoặc</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- STEP 3: HOÀN CẢNH & DỊP SỬ DỤNG -->
+        <div id="qStep3" class="quiz-step-pane">
+            <h2 class="quiz-step-title">Bạn dự định đồng hành cùng mùi hương trong dịp nào?</h2>
+            <p class="quiz-step-desc">Mỗi không gian sẽ có nốt hương tỏa sáng rực rỡ nhất</p>
+            <div class="quiz-grid quiz-grid-2">
+                <button type="button" class="quiz-option-card" onclick="selectQuizAnswer('occasion', 'evening', 4)">
+                    <div class="quiz-icon-box"><i class="fa-solid fa-champagne-glasses" style="color: var(--gold-primary);"></i></div>
+                    <strong class="quiz-opt-title">Dạ Tiệc Tối & Hẹn Hò Lãng Mạn</strong>
+                    <span class="quiz-opt-desc">Không gian lung linh, cần sức hút ma mị và để lại ấn tượng khó quên</span>
+                </button>
+                <button type="button" class="quiz-option-card" onclick="selectQuizAnswer('occasion', 'daily', 4)">
+                    <div class="quiz-icon-box"><i class="fa-solid fa-briefcase" style="color: #48CAE4;"></i></div>
+                    <strong class="quiz-opt-title">Công Sở & Giao Tiếp Hằng Ngày</strong>
+                    <span class="quiz-opt-desc">Thanh lịch, dễ chịu, tinh tế và đáng tin cậy suốt 8 tiếng làm việc</span>
+                </button>
+                <button type="button" class="quiz-option-card" onclick="selectQuizAnswer('occasion', 'all', 4)">
+                    <div class="quiz-icon-box"><i class="fa-solid fa-sun" style="color: #F4A261;"></i></div>
+                    <strong class="quiz-opt-title">Bốn Mùa Đa Dụng (Signature Scent)</strong>
+                    <span class="quiz-opt-desc">Tự tin là chính mình trong mọi khoảnh khắc, mọi điều kiện thời tiết</span>
+                </button>
+                <button type="button" class="quiz-option-card" onclick="selectQuizAnswer('occasion', 'special', 4)">
+                    <div class="quiz-icon-box"><i class="fa-solid fa-gem" style="color: #D4AF37;"></i></div>
+                    <strong class="quiz-opt-title">Sự Kiện Trọng Đại & Đẳng Cấp</strong>
+                    <span class="quiz-opt-desc">Ký kết thương vụ lớn, thảm đỏ, lễ kỷ niệm khẳng định vị thế đỉnh cao</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- STEP 4: CƯỜNG ĐỘ & ĐỘ LƯU TỎA -->
+        <div id="qStep4" class="quiz-step-pane">
+            <h2 class="quiz-step-title">Cường độ tỏa hương và thời gian lưu hương bạn kỳ vọng?</h2>
+            <p class="quiz-step-desc">Quyết định nồng độ tinh dầu Eau de Parfum (EDP) hay Extrait de Parfum</p>
+            <div class="quiz-grid quiz-grid-3">
+                <button type="button" class="quiz-option-card" onclick="selectQuizAnswer('intensity', 'moderate', 5)">
+                    <div class="quiz-icon-box"><i class="fa-solid fa-feather" style="color: #2A9D8F;"></i></div>
+                    <strong class="quiz-opt-title">Thoang Thoảng Tinh Tế (Skin Scent)</strong>
+                    <span class="quiz-opt-desc">Tỏa gần trong vòng tay, dịu nhẹ, lưu hương 4 - 6 giờ tao nhã</span>
+                </button>
+                <button type="button" class="quiz-option-card" onclick="selectQuizAnswer('intensity', 'strong', 5)">
+                    <div class="quiz-icon-box"><i class="fa-solid fa-shield-halved" style="color: var(--gold-primary);"></i></div>
+                    <strong class="quiz-opt-title">Lưu Hương Bền Bỉ (8 - 12 Giờ)</strong>
+                    <span class="quiz-opt-desc">Tỏa hương 1 - 2 mét ấn tượng, bám tỏa trọn vẹn suốt một ngày dài</span>
+                </button>
+                <button type="button" class="quiz-option-card" onclick="selectQuizAnswer('intensity', 'intense', 5)">
+                    <div class="quiz-icon-box"><i class="fa-solid fa-bolt" style="color: #E63946;"></i></div>
+                    <strong class="quiz-opt-title">Bùng Nổ & Sâu Đậm (>12 Giờ)</strong>
+                    <span class="quiz-opt-desc">Nồng độ Extrait / Parfum đậm đặc, để lại vệt hương khó phai mờ</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- STEP 5: NGÂN SÁCH & TRẢI NGHIỆM -->
+        <div id="qStep5" class="quiz-step-pane">
+            <h2 class="quiz-step-title">Tầm ngân sách và định dạng sở hữu ưu tiên của bạn?</h2>
+            <p class="quiz-step-desc">Chúng tôi sẽ cân đối dung tích và các phân khúc giá tương thích nhất</p>
+            <div class="quiz-grid quiz-grid-3">
+                <button type="button" class="quiz-option-card" onclick="finalizeQuiz('sample')">
+                    <div class="quiz-icon-box"><i class="fa-solid fa-vial" style="color: #48CAE4;"></i></div>
+                    <strong class="quiz-opt-title">Trải Nghiệm Chiết 10ml</strong>
+                    <span class="quiz-opt-desc">Thử nghiệm linh hoạt hương xa xỉ chính hãng (Dưới 1.000.000₫)</span>
+                </button>
+                <button type="button" class="quiz-option-card" onclick="finalizeQuiz('mid')">
+                    <div class="quiz-icon-box"><i class="fa-solid fa-box-open" style="color: var(--gold-primary);"></i></div>
+                    <strong class="quiz-opt-title">Fullbox Cao Cấp Tiêu Chuẩn</strong>
+                    <span class="quiz-opt-desc">Dung tích 50ml - 100ml nguyên seal chính hãng (3.000.000₫ - 5.500.000₫)</span>
+                </button>
+                <button type="button" class="quiz-option-card" onclick="finalizeQuiz('high')">
+                    <div class="quiz-icon-box"><i class="fa-solid fa-gem" style="color: #E56B6F;"></i></div>
+                    <strong class="quiz-opt-title">Kiệt Tác Haute Parfumerie</strong>
+                    <span class="quiz-opt-desc">Tuyệt phẩm Niche giới hạn không giới hạn ngân sách (Trên 5.500.000₫)</span>
+                </button>
+            </div>
+        </div>

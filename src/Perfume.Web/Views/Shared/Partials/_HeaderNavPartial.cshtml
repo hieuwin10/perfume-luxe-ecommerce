@@ -1,0 +1,115 @@
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<Perfume.Infrastructure.Identity.AppUser> SignInManager
+@inject UserManager<Perfume.Infrastructure.Identity.AppUser> UserManager
+
+    <!-- Top Announcement Bar -->
+    <div style="background: var(--bg-surface-elevated); border-bottom: 1px solid var(--border-card); font-size: 0.78rem; padding: 6px 16px; text-align: center; color: var(--text-secondary); display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 8px;">
+        <div><i class="fa-solid fa-crown text-gold-gradient" style="margin-right: 6px;"></i> Cam kết 100% Nước Hoa Chính Hãng</div>
+        <div class="announcement-desktop-only"><i class="fa-solid fa-truck-fast" style="color: var(--gold-primary); margin-right: 6px;"></i> Miễn phí giao hàng toàn quốc từ 2.000.000₫</div>
+        <div><i class="fa-solid fa-shield-halved" style="color: var(--gold-primary); margin-right: 6px;"></i> Đổi trả 7 ngày nếu lỗi niêm phong</div>
+    </div>
+
+<partial name="Partials/_MobileBottomNavPartial" />
+
+    <!-- Header Navigation -->
+    <header class="luxe-header">
+        <div class="header-inner">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <!-- Hamburger Button on Mobile -->
+                <button type="button" class="mobile-nav-toggle" id="mobileNavToggleBtn" aria-label="Mở Menu điều hướng" title="Mở danh mục">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+
+                <a href="/" class="brand-logo">
+                    <span class="brand-title text-gold-gradient">PERFUME LUXE</span>
+                    <span class="brand-sub">Haute Parfumerie Paris</span>
+                </a>
+            </div>
+
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="/" class="nav-link">Trang Chủ</a></li>
+                    <li><a href="/bo-suu-tap" class="nav-link">Bộ Sưu Tập</a></li>
+                    <li><a href="/catalog/quiz" class="nav-link" style="color: var(--gold-primary);"><i class="fa-solid fa-wand-magic-sparkles" style="margin-right: 4px;"></i> Trắc Nghiệm Mùi</a></li>
+                    <li><a href="/blog" class="nav-link">Tạp Chí Mùi Hương</a></li>
+                    <li><a href="/ve-chung-toi" class="nav-link">Về Chúng Tôi</a></li>
+                    <li><a href="/discovery-box" class="nav-link" style="color: var(--gold-primary);"><i class="fa-solid fa-gift" style="margin-right: 4px;"></i> Discovery Box</a></li>
+                    <li><a href="/so-sanh" class="nav-link"><i class="fa-solid fa-scale-balanced" style="margin-right: 4px;"></i> So Sánh</a></li>
+                    <li><a href="/dat-lich-trai-nghiem" class="nav-link"><i class="fa-solid fa-crown" style="margin-right: 4px; color: var(--gold-primary);"></i> Thử Mùi VIP</a></li>
+                    <li><a href="/tra-cuu-don-hang" class="nav-link" style="color: var(--gold-primary);"><i class="fa-solid fa-truck-fast" style="margin-right: 4px;"></i> Tra Cứu Đơn</a></li>
+
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li><a href="/admin/admindashboard" class="nav-link" style="background: rgba(212,175,55,0.12); padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border-subtle); color: var(--gold-primary); font-size: 0.82rem;"><i class="fa-solid fa-gauge-high" style="margin-right: 4px;"></i> Quản trị</a></li>
+                        }
+                        else if (User.IsInRole("StoreManager"))
+                        {
+                            <li><a href="/admin/storemanager" class="nav-link" style="background: rgba(212,175,55,0.12); padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border-subtle); color: var(--gold-primary); font-size: 0.82rem;"><i class="fa-solid fa-chart-line" style="margin-right: 4px;"></i> Quản lý cửa hàng</a></li>
+                        }
+                    }
+                </ul>
+            </nav>
+
+            <div class="header-actions">
+                <!-- Theme Toggle Button (Dark / Light) -->
+                <button type="button" class="icon-btn" id="themeToggleBtn" title="Chuyển đổi Sáng / Tối" aria-label="Toggle Theme">
+                    <i class="fa-solid fa-moon" id="themeIcon"></i>
+                </button>
+
+                <!-- Mini Cart Trigger -->
+                <button type="button" class="icon-btn" id="cartDrawerBtn" title="Giỏ hàng" aria-label="Open Cart">
+                    <i class="fa-solid fa-bag-shopping"></i>
+                    <span class="badge-count" id="headerCartCount">0</span>
+                </button>
+
+                <!-- User Account Button -->
+                @if (SignInManager.IsSignedIn(User))
+                {
+                    var currentUser = await UserManager.GetUserAsync(User);
+                    <div class="user-avatar-dropdown" id="userDropdown">
+                        <button type="button" id="userAvatarBtn" class="icon-btn" title="Tài khoản của bạn" aria-label="Tài khoản cá nhân" style="width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, var(--gold-primary), #8B6914); font-weight: 700; font-size: 0.85rem; color: #000;">
+                            @((currentUser?.FullName ?? "U").Substring(0, 1).ToUpper())
+                        </button>
+                        <div class="user-dropdown-menu" id="userDropdownMenu">
+                            <div style="padding: 14px 16px; border-bottom: 1px solid var(--border-card);">
+                                <div style="font-weight: 700; font-size: 0.92rem; color: var(--text-primary); margin-bottom: 2px;">@currentUser?.FullName</div>
+                                <div style="font-size: 0.78rem; color: var(--text-muted);">@currentUser?.Email</div>
+                                @if (User.IsInRole("Admin")) { <span class="role-badge-admin">Admin</span> }
+                                else if (User.IsInRole("StoreManager")) { <span class="role-badge-manager">Cửa hàng trưởng</span> }
+                                else { <span class="role-badge-customer">Khách hàng</span> }
+                            </div>
+                            <a href="/account/profile" class="dropdown-item-luxe">
+                                <i class="fa-solid fa-user-circle"></i> Tài Khoản Của Tôi
+                            </a>
+                            <a href="/account/myorders" class="dropdown-item-luxe"><i class="fa-solid fa-box"></i> Đơn hàng của tôi</a>
+                            <a href="/tra-cuu-don-hang" class="dropdown-item-luxe"><i class="fa-solid fa-truck-fast"></i> Tra Cứu Đơn Hàng</a>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <a href="/admin/admindashboard" class="dropdown-item-luxe"><i class="fa-solid fa-gauge-high"></i> Admin Dashboard</a>
+                                <a href="/admin/databaseconsole" class="dropdown-item-luxe"><i class="fa-solid fa-database"></i> Database Console</a>
+                            }
+                            else if (User.IsInRole("StoreManager"))
+                            {
+                                <a href="/admin/storemanager" class="dropdown-item-luxe"><i class="fa-solid fa-chart-line"></i> Thống kê cửa hàng</a>
+                            }
+                            <div style="border-top: 1px solid var(--border-card); margin: 4px 0;"></div>
+                            <form method="post" action="/account/logout" id="customerLogoutForm" style="margin: 0;">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="dropdown-item-luxe" style="width: 100%; text-align: left; background: none; border: none; cursor: pointer; color: #f87171;">
+                                    <i class="fa-solid fa-right-from-bracket"></i> Đăng Xuất
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <a href="/account/login" class="icon-btn" title="Đăng nhập" aria-label="Đăng nhập tài khoản" style="width: 38px; height: 38px;">
+                        <i class="fa-solid fa-user"></i>
+                    </a>
+                }
+            </div>
+        </div>
+    </header>

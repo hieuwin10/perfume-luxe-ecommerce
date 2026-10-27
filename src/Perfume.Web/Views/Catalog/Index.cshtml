@@ -3,6 +3,7 @@
     ViewData["Title"] = "Bộ Sưu Tập Nước Hoa Cao Cấp";
     ViewData["MetaDescription"] = "Khám phá danh mục nước hoa cao cấp chính hãng từ các thương hiệu hàng đầu: Dior, Chanel, Creed, Tom Ford, Le Labo, Kilian. Đầy đủ phiên bản chiết 10ml và fullbox.";
     ViewData["OgType"] = "website";
+    ViewData["ProductCardVariant"] = "Catalog";
     var filter = ViewBag.Filter as ProductFilterParams ?? new ProductFilterParams();
     var brands = ViewBag.Brands as List<Brand> ?? new List<Brand>();
     var families = ViewBag.Families as List<FragranceFamily> ?? new List<FragranceFamily>();
@@ -100,69 +101,7 @@
                 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 24px;">
                     @foreach (var p in Model)
                     {
-                        <div class="perfume-card">
-                            <div class="card-badges">
-                                @if (p.IsFlashSale)
-                                {
-                                    <span class="badge-tag" style="background: linear-gradient(135deg, #ef4444, #f59e0b); color: #FFF; font-weight: 700;"><i class="fa-solid fa-bolt"></i> Flash Sale -@p.FlashSaleDiscountPercent%</span>
-                                }
-                                @if (p.IsBestSeller)
-                                {
-                                    <span class="badge-tag tag-hot">Best Seller</span>
-                                }
-                                @if (p.IsNewArrival)
-                                {
-                                    <span class="badge-tag tag-new">Mới Về</span>
-                                }
-                            </div>
-
-                            <a href="/nuoc-hoa/@p.Slug" class="card-img-wrapper">
-                                <img src="@p.MainImageUrl" alt="@p.Name" width="300" height="300" loading="lazy" style="aspect-ratio: 1/1; object-fit: contain;" />
-                            </a>
-
-                            <div class="card-body">
-                                <div class="card-brand">@p.BrandName</div>
-                                <h3 class="card-title">
-                                    <a href="/nuoc-hoa/@p.Slug">@p.Name</a>
-                                </h3>
-
-                                <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 12px;">
-                                    <div style="color: var(--gold-primary); font-size: 0.8rem;">
-                                        <i class="fa-solid fa-star"></i> @p.RatingAverage.ToString("0.0")
-                                    </div>
-                                    <span style="font-size: 0.75rem; color: var(--text-muted);">(@p.RatingCount đánh giá)</span>
-                                </div>
-
-                                @if (p.TopNotes.Any())
-                                {
-                                    <div class="card-notes">
-                                        @foreach (var note in p.TopNotes)
-                                        {
-                                            <span class="note-pill"><i class="fa-solid fa-leaf" style="font-size: 0.65rem; color: var(--gold-primary);"></i> @note</span>
-                                        }
-                                    </div>
-                                }
-
-                                <div class="card-footer">
-                                    <div>
-                                        @if (p.IsFlashSale && p.FlashSalePrice.HasValue)
-                                        {
-                                            <span style="font-size: 0.7rem; color: #f59e0b; display: block; font-weight: 600;"><i class="fa-solid fa-bolt"></i> Flash Sale</span>
-                                            <span class="card-price" style="color: #f59e0b;">@p.FlashSalePrice.Value.ToString("N0")₫</span>
-                                            <span style="font-size: 0.7rem; text-decoration: line-through; color: var(--text-muted); display: block;">@p.BasePrice.ToString("N0")₫</span>
-                                        }
-                                        else
-                                        {
-                                            <span style="font-size: 0.7rem; color: var(--text-muted); display: block;">Từ</span>
-                                            <span class="card-price">@p.BasePrice.ToString("N0")₫</span>
-                                        }
-                                    </div>
-                                    <button type="button" class="btn-luxe" onclick="addToCart('@p.Slug', null, 1)" style="padding: 8px 16px; font-size: 0.78rem;">
-                                        <i class="fa-solid fa-bag-shopping"></i> Thêm
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+                        <partial name="Partials/_ProductCardPartial" model="p" />
                     }
                 </div>
             }

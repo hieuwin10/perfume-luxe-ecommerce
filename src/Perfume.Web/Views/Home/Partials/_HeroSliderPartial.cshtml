@@ -1,0 +1,113 @@
+@model List<Perfume.Domain.Entities.HeroBanner>
+
+<!-- HERO BANNER / SLIDER -->
+@if (Model.Any())
+{
+    <section id="heroSliderSection" style="position: relative; min-height: 85vh; overflow: hidden; border-bottom: 1px solid var(--border-subtle);">
+        @for (int i = 0; i < Model.Count; i++)
+        {
+            var b = Model[i];
+            <div class="hero-slide @(i == 0 ? "active" : "")" style="position: @(i == 0 ? "relative" : "absolute"); inset: 0; min-height: 85vh; display: @(i == 0 ? "flex" : "none"); align-items: center; justify-content: center; background: radial-gradient(circle at center, rgba(212, 175, 55, 0.14) 0%, rgba(11, 11, 14, 0.94) 75%), url('@b.ImageUrl') center/cover no-repeat; padding: 100px 24px; text-align: center; transition: opacity 0.6s ease-in-out;">
+                <div style="max-width: 900px; margin: 0 auto; z-index: 2;">
+                    <span style="display: inline-block; font-size: 0.8rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold-primary); font-weight: 700; margin-bottom: 16px; border: 1px solid var(--border-subtle); padding: 6px 16px; border-radius: var(--radius-full); background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);">
+                        <i class="fa-solid fa-crown" style="margin-right: 6px;"></i> Haute Parfumerie Collection
+                    </span>
+                    <h1 style="font-size: clamp(2.5rem, 6vw, 4.5rem); font-family: var(--font-heading); font-weight: 700; line-height: 1.15; margin-bottom: 24px; text-shadow: 0 4px 30px rgba(0,0,0,0.9); color: #FFF;">
+                        @b.Title
+                        <span style="display: block; font-size: clamp(1rem, 2vw, 1.35rem); font-weight: 600; font-family: var(--font-body); letter-spacing: 0.05em; color: var(--gold-light); margin-top: 10px;">
+                            Nước Hoa Xa Xỉ Chính Hãng
+                        </span>
+                    </h1>
+                    @if (!string.IsNullOrEmpty(b.Subtitle))
+                    {
+                        <p style="font-size: clamp(1rem, 1.5vw, 1.25rem); color: var(--text-secondary); max-width: 680px; margin: 0 auto 36px; line-height: 1.7; text-shadow: 0 2px 10px rgba(0,0,0,0.8);">
+                            @b.Subtitle
+                        </p>
+                    }
+                    <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+                        <a href="@(string.IsNullOrEmpty(b.TargetUrl) ? "/bo-suu-tap" : b.TargetUrl)" class="btn-luxe" style="font-size: 1rem; padding: 14px 36px;">
+                            <i class="fa-solid fa-gem" style="margin-right: 8px;"></i> @(string.IsNullOrEmpty(b.ButtonText) ? "Khám Phá Ngay" : b.ButtonText)
+                        </a>
+                        <a href="/catalog/quiz" class="btn-luxe-outline" style="font-size: 1rem; padding: 14px 32px; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px);">
+                            <i class="fa-solid fa-wand-magic-sparkles" style="margin-right: 8px;"></i> Trắc Nghiệm Mùi Hương
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (Model.Count > 1)
+        {
+            <!-- Slider Controls -->
+            <button type="button" onclick="prevSlide()" aria-label="Slide trước" style="position: absolute; left: 24px; top: 50%; transform: translateY(-50%); z-index: 10; width: 44px; height: 44px; border-radius: 50%; background: rgba(0,0,0,0.6); border: 1px solid var(--border-card); color: #FFF; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); transition: all 0.2s;" onmouseover="this.style.borderColor='var(--gold-primary)'; this.style.color='var(--gold-primary)'" onmouseout="this.style.borderColor='var(--border-card)'; this.style.color='#FFF'">
+                <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+            </button>
+            <button type="button" onclick="nextSlide()" aria-label="Slide kế tiếp" style="position: absolute; right: 24px; top: 50%; transform: translateY(-50%); z-index: 10; width: 44px; height: 44px; border-radius: 50%; background: rgba(0,0,0,0.6); border: 1px solid var(--border-card); color: #FFF; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); transition: all 0.2s;" onmouseover="this.style.borderColor='var(--gold-primary)'; this.style.color='var(--gold-primary)'" onmouseout="this.style.borderColor='var(--border-card)'; this.style.color='#FFF'">
+                <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+            </button>
+            <!-- Dots -->
+            <div style="position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 10; display: flex; gap: 8px;">
+                @for (int i = 0; i < Model.Count; i++)
+                {
+                    <button type="button" onclick="goToSlide(@i)" aria-label="@($"Chuyển tới slide {i + 1}")" class="slide-dot @(i == 0 ? "active" : "")" style="width: @(i == 0 ? "24px" : "10px"); height: 10px; border-radius: 99px; border: none; background: @(i == 0 ? "var(--gold-primary)" : "rgba(255,255,255,0.4)"); cursor: pointer; transition: all 0.3s;"></button>
+                }
+            </div>
+            <script>
+                let currentSlideIndex = 0;
+                const totalSlides = @Model.Count;
+                function showSlide(idx) {
+                    const slides = document.querySelectorAll('#heroSliderSection .hero-slide');
+                    const dots = document.querySelectorAll('#heroSliderSection .slide-dot');
+                    slides.forEach((s, i) => {
+                        if (i === idx) {
+                            s.style.display = 'flex';
+                            s.style.position = 'relative';
+                            s.style.opacity = '1';
+                        } else {
+                            s.style.display = 'none';
+                            s.style.position = 'absolute';
+                            s.style.opacity = '0';
+                        }
+                    });
+                    dots.forEach((d, i) => {
+                        d.style.width = i === idx ? '24px' : '10px';
+                        d.style.background = i === idx ? 'var(--gold-primary)' : 'rgba(255,255,255,0.4)';
+                    });
+                    currentSlideIndex = idx;
+                }
+                function nextSlide() { showSlide((currentSlideIndex + 1) % totalSlides); }
+                function prevSlide() { showSlide((currentSlideIndex - 1 + totalSlides) % totalSlides); }
+                function goToSlide(idx) { showSlide(idx); }
+                setInterval(nextSlide, 7000);
+            </script>
+        }
+    </section>
+}
+else
+{
+    <!-- FALLBACK HERO BANNER -->
+    <section style="position: relative; min-height: 85vh; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at center, rgba(212, 175, 55, 0.12) 0%, rgba(11, 11, 14, 0.95) 70%), url('https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=1920&q=80') center/cover no-repeat; padding: 100px 24px; text-align: center; border-bottom: 1px solid var(--border-subtle);">
+        <div style="max-width: 900px; margin: 0 auto; z-index: 2;">
+            <span style="display: inline-block; font-size: 0.8rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold-primary); font-weight: 700; margin-bottom: 16px; border: 1px solid var(--border-subtle); padding: 6px 16px; border-radius: var(--radius-full); background: rgba(0,0,0,0.5); backdrop-filter: blur(8px);">
+                <i class="fa-solid fa-crown" style="margin-right: 6px;"></i> Haute Parfumerie Collection 2026
+            </span>
+            <h1 style="font-size: clamp(2.5rem, 6vw, 4.5rem); font-family: var(--font-heading); font-weight: 700; line-height: 1.15; margin-bottom: 24px; text-shadow: 0 4px 30px rgba(0,0,0,0.8);">
+                Bản Giao Hưởng <br /><span class="text-gold-gradient">Mùi Hương Bất Hủ</span>
+                <span style="display: block; font-size: clamp(1.1rem, 2.2vw, 1.45rem); font-weight: 600; font-family: var(--font-body); letter-spacing: 0.05em; color: var(--gold-light); margin-top: 14px; text-shadow: 0 2px 10px rgba(0,0,0,0.9);">
+                    Nước Hoa Xa Xỉ Chính Hãng
+                </span>
+            </h1>
+            <p style="font-size: clamp(1rem, 1.5vw, 1.25rem); color: var(--text-secondary); max-width: 680px; margin: 0 auto 36px; line-height: 1.7;">
+                Bản giao hưởng mùi hương bất hủ hội tụ từng nốt hương nước hoa xa xỉ chính hãng chạm đến tâm hồn. Khám phá những sáng tạo mùi hương độc bản từ Paris, Grasse và London.
+            </p>
+            <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+                <a href="/bo-suu-tap" class="btn-luxe" style="font-size: 1rem; padding: 14px 36px;">
+                    <i class="fa-solid fa-gem" style="margin-right: 8px;"></i> Khám Phá Bộ Sưu Tập
+                </a>
+                <a href="/catalog/quiz" class="btn-luxe-outline" style="font-size: 1rem; padding: 14px 32px; background: rgba(0,0,0,0.4); backdrop-filter: blur(8px);">
+                    <i class="fa-solid fa-wand-magic-sparkles" style="margin-right: 8px;"></i> Trắc Nghiệm Tìm Mùi
+                </a>
+            </div>
+        </div>
+    </section>
+}
