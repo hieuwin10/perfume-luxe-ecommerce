@@ -13,7 +13,7 @@
         || requestPath.StartsWithSegments("/admin", StringComparison.OrdinalIgnoreCase)
         || requestPath.StartsWithSegments("/tra-cuu-don-hang", StringComparison.OrdinalIgnoreCase)
         || requestPath.StartsWithSegments("/order-tracking", StringComparison.OrdinalIgnoreCase);
-    var robotsContent = ViewData["Robots"]?.ToString() ?? (isPrivatePage ? "noindex, nofollow" : "index, follow");
+    var robotsContent = ViewData["Robots"]?.ToString() ?? (isPrivatePage ? "noindex, nofollow" : "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1");
     var pageTitle = ViewData["Title"]?.ToString()?.Trim();
     var documentTitle = string.IsNullOrWhiteSpace(pageTitle)
         ? "PERFUME LUXE - Haute Parfumerie | Nước Hoa Cao Cấp Chính Hãng"
@@ -27,32 +27,38 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@documentTitle</title>
+
+    @if (ViewData["LcpImage"] != null)
+    {
+        var lcpDesktop = ViewData["LcpImage"]?.ToString();
+        var lcpMobile = ViewData["LcpImageMobile"]?.ToString();
+        if (!string.IsNullOrEmpty(lcpMobile) && lcpMobile != lcpDesktop)
+        {
+            <!-- Ultra-High Priority Responsive Preload for LCP Hero Element -->
+            <link rel="preload" as="image" href="@lcpMobile" media="(max-width: 768px)" fetchpriority="high" />
+            <link rel="preload" as="image" href="@lcpDesktop" media="(min-width: 769px)" fetchpriority="high" />
+        }
+        else
+        {
+            <link rel="preload" as="image" href="@lcpDesktop" fetchpriority="high" />
+        }
+    }
+
+    <!-- Performance Preconnect & DNS-Prefetch -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+    <link rel="preconnect" href="https://images.unsplash.com" crossorigin="anonymous" />
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+    <link rel="dns-prefetch" href="https://images.unsplash.com" />
+
+    <!-- Google Fonts (display=optional guarantees 0 CLS and instant initial paint) -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Plus+Jakarta+Sans:wght@400;600&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Plus+Jakarta+Sans:wght@400;600&display=optional" /></noscript>
     
     <!-- Google Search Console Verification -->
     <meta name="google-site-verification" content="Qh9rEGR7zfGddcqbtlF1p2H9s544wnJg2TOfQeLgNJs" />
 
-    <!-- Google Analytics 4 (GA4) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-KCWE7ENDEJ"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-KCWE7ENDEJ');
-    </script>
-
-    <!-- Performance Preconnect & DNS-Prefetch -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="preconnect" href="https://images.unsplash.com" crossorigin />
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
-    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
-    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
-    <link rel="dns-prefetch" href="https://images.unsplash.com" />
-    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com" />
-
-    <!-- Google Fonts (Non-blocking HTML link with preconnect) -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" />
-    
     <!-- Meta SEO Google & Social Cards -->
     <meta name="description" content="@(ViewData["MetaDescription"] ?? "Thế giới nước hoa cao cấp chính hãng từ các thương hiệu xa xỉ bậc nhất thế giới: Dior, Chanel, Creed, Tom Ford, Le Labo, Kilian. Bảo đảm 100% xuất xứ.")" />
     <meta name="robots" content="@robotsContent" />
@@ -76,19 +82,65 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💎</text></svg>" />
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💎</text></svg>" />
     <meta name="theme-color" content="#0B0B0E" />
-
-    @if (ViewData["LcpImage"] != null)
-    {
-        <!-- Preload the actual hero or product image chosen by this page. -->
-        <link rel="preload" as="image" href="@ViewData["LcpImage"]" fetchpriority="high" />
-    }
+    <link rel="manifest" href="~/manifest.webmanifest" />
 
     <!-- Font Awesome Icons (Non-render-blocking) -->
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
-    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" /></noscript>
+    <link rel="preload" href="~/css/font-awesome-subset.css" asp-append-version="true" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <noscript><link rel="stylesheet" href="~/css/font-awesome-subset.css" asp-append-version="true" /></noscript>
 
     <!-- Luxury Theme Stylesheet -->
+    <link rel="preload" href="~/css/luxury-perfume.min.css" asp-append-version="true" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <noscript><link rel="stylesheet" href="~/css/luxury-perfume.min.css" asp-append-version="true" /></noscript>
     <link rel="stylesheet" href="~/css/luxury-perfume.css" asp-append-version="true" />
+
+    @if (requestPath == "/")
+    {
+        <!-- Inline Mobile First Viewport Critical Styles -->
+        <style>
+            :root {
+                --gold-primary: #D4AF37;
+                --gold-light: #F3E5AB;
+                --gold-gradient: linear-gradient(135deg, #ECC86E 0%, #D4AF37 50%, #997A15 100%);
+                --font-heading: 'Cormorant Garamond', Garamond, 'Times New Roman', Georgia, serif;
+                --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                --radius-sm: 6px;
+                --radius-md: 12px;
+                --radius-full: 9999px;
+                --transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease, background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+                --bg-main: #0B0B0E;
+                --bg-surface: #141419;
+                --bg-surface-elevated: #1D1D24;
+                --bg-glass: rgba(20, 20, 25, 0.85);
+                --text-primary: #F8F7F5;
+                --text-secondary: #C4C4CF;
+                --text-muted: #A1A1B2;
+                --border-subtle: rgba(212, 175, 55, 0.15);
+                --border-focus: rgba(212, 175, 55, 0.5);
+                --border-card: rgba(255, 255, 255, 0.08);
+            }
+            *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+            body { margin: 0; background: var(--bg-main); color: var(--text-primary); font-family: var(--font-body); line-height: 1.6; overflow-x: hidden; }
+            h1, h2, h3, h4 { font-family: var(--font-heading); letter-spacing: 0.02em; }
+            a { color: inherit; text-decoration: none; }
+            .text-gold-gradient { background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+            .announcement-bar { min-height: 32px; background: var(--bg-surface-elevated); border-bottom: 1px solid var(--border-card); font-size: 0.78rem; padding: 6px 16px; text-align: center; color: var(--text-secondary); display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 8px; }
+            .announcement-desktop-only { display: none; }
+            .luxe-hero-banner { position: relative; width: 100%; height: 580px; min-height: 580px; max-height: 580px; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 50px 16px; text-align: center; border-bottom: 1px solid var(--border-subtle); contain: layout size paint; }
+            .mobile-bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; height: calc(56px + env(safe-area-inset-bottom, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); background: rgba(14, 14, 18, 0.95); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-top: 1px solid var(--border-subtle); z-index: 2000; justify-content: space-around; align-items: center; }
+            .mobile-bottom-nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; flex: 1; height: 100%; color: var(--text-muted); font-size: 0.65rem; font-weight: 500; text-decoration: none; -webkit-tap-highlight-color: transparent; }
+            .mobile-bottom-nav-item i { font-size: 1.1rem; }
+            .mobile-bottom-nav-item.active { color: var(--gold-primary); font-weight: 700; }
+            .mobile-bottom-nav-item.highlight .bottom-nav-quiz-icon { width: 36px; height: 36px; border-radius: 50%; background: var(--gold-gradient); color: #0B0B0E; display: flex; align-items: center; justify-content: center; margin-top: -12px; box-shadow: 0 4px 14px rgba(212, 175, 55, 0.4); }
+            .mobile-bottom-nav-item.highlight .bottom-nav-quiz-icon i { font-size: 0.95rem; }
+
+            @@media (min-width: 769px) {
+                .announcement-desktop-only { display: block !important; }
+                .luxe-hero-banner { height: 720px; min-height: 720px; max-height: 720px; padding: 80px 20px; }
+                .mobile-bottom-nav { display: none !important; }
+            }
+        </style>
+    }
+
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body class="dark-theme">
@@ -127,6 +179,31 @@
 
     <partial name="Partials/_FooterPartial" />
 
+    <!-- Mobile Bottom Navigation Bar -->
+    <nav class="mobile-bottom-nav" aria-label="Thanh điều hướng di động">
+        <a href="/" class="mobile-bottom-nav-item @(requestPath == "/" ? "active" : "")">
+            <i class="fa-solid fa-house"></i>
+            <span>Trang Chủ</span>
+        </a>
+        <a href="/bo-suu-tap" class="mobile-bottom-nav-item @(requestPath.StartsWithSegments("/bo-suu-tap") ? "active" : "")">
+            <i class="fa-solid fa-gem"></i>
+            <span>Bộ Sưu Tập</span>
+        </a>
+        <a href="/catalog/quiz" class="mobile-bottom-nav-item highlight @(requestPath.StartsWithSegments("/catalog/quiz") ? "active" : "")">
+            <div class="bottom-nav-quiz-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+            <span>Tìm Mùi</span>
+        </a>
+        <a href="/cart" class="mobile-bottom-nav-item @(requestPath.StartsWithSegments("/cart") ? "active" : "")" style="position: relative;">
+            <i class="fa-solid fa-bag-shopping"></i>
+            <span class="badge-count cart-count-badge" id="mobileBottomCartBadge" style="display: none; top: 4px; right: 20%;">0</span>
+            <span>Giỏ Hàng</span>
+        </a>
+        <a href="@(SignInManager.IsSignedIn(User) ? "/account/profile" : "/account/login")" class="mobile-bottom-nav-item @(requestPath.StartsWithSegments("/account") ? "active" : "")">
+            <i class="fa-solid fa-user"></i>
+            <span>@(SignInManager.IsSignedIn(User) ? "Tài Khoản" : "Đăng Nhập")</span>
+        </a>
+    </nav>
+
     <!-- Toast Notifications -->
     <div class="toast-container-luxe" id="toastContainer"></div>
 
@@ -159,54 +236,61 @@
             }
         }
 
-        document.getElementById('themeToggleBtn')?.addEventListener('click', function() {
-            const current = document.documentElement.getAttribute('data-theme') || 'dark';
-            const next = current === 'dark' ? 'light' : 'dark';
-            localStorage.setItem('perfume_luxe_theme', next);
-            applyTheme(next);
-        });
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('perfume_luxe_theme', newTheme);
+            applyTheme(newTheme);
+        }
 
-        // 2. Mini Cart Drawer Management
+        // Mini Cart Drawer Logic
         const cartDrawer = document.getElementById('cartDrawer');
         const cartOverlay = document.getElementById('cartOverlay');
         const cartDrawerBtn = document.getElementById('cartDrawerBtn');
         const closeCartBtn = document.getElementById('closeCartBtn');
 
         function openCart() {
-            cartDrawer?.classList.add('active');
-            cartOverlay?.classList.add('active');
+            if (cartDrawer) cartDrawer.style.right = '0';
+            if (cartOverlay) cartOverlay.style.display = 'block';
+            document.body.style.overflow = 'hidden';
             refreshCartState();
         }
 
         function closeCart() {
-            cartDrawer?.classList.remove('active');
-            cartOverlay?.classList.remove('active');
+            if (cartDrawer) cartDrawer.style.right = '-420px';
+            if (cartOverlay) cartOverlay.style.display = 'none';
+            document.body.style.overflow = '';
         }
 
-        cartDrawerBtn?.addEventListener('click', openCart);
-        closeCartBtn?.addEventListener('click', closeCart);
-        cartOverlay?.addEventListener('click', closeCart);
-
-        const money = value => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value || 0);
+        if (cartDrawerBtn) cartDrawerBtn.addEventListener('click', openCart);
+        if (closeCartBtn) closeCartBtn.addEventListener('click', closeCart);
+        if (cartOverlay) cartOverlay.addEventListener('click', closeCart);
 
         async function refreshCartState() {
             try {
-                const data = await CustomerApi.get('/api/v1/cart');
-                
-                // Update badge
+                const res = await CustomerApi.get('/api/v1/cart');
+                const cart = res.data;
+                const totalCount = cart?.totalItems ?? 0;
+
                 const badge = document.getElementById('headerCartCount');
-                if (badge) badge.innerText = data.totalCount;
+                if (badge) badge.textContent = totalCount;
 
-                // Update subtotal
-                const subtotal = document.getElementById('cartDrawerSubtotal');
-                if (subtotal) subtotal.innerText = money(data.subTotal);
+                const mobileBadge = document.getElementById('mobileBottomCartBadge');
+                if (mobileBadge) {
+                    mobileBadge.textContent = totalCount;
+                    mobileBadge.style.display = totalCount > 0 ? 'flex' : 'none';
+                }
 
-                // Update items in drawer
-                const container = document.getElementById('cartDrawerItems');
-                if (!container) return;
+                const subtotalEl = document.getElementById('cartDrawerSubtotal');
+                if (subtotalEl) {
+                    subtotalEl.textContent = CustomerApi.formatVnd(cart?.finalTotal ?? 0);
+                }
 
-                if (!data.items || data.items.length === 0) {
-                    container.innerHTML = `
+                const itemsContainer = document.getElementById('cartDrawerItems');
+                if (!itemsContainer) return;
+
+                if (!cart || !cart.items || cart.items.length === 0) {
+                    itemsContainer.innerHTML = `
                         <div style="text-align: center; padding: 40px 0; color: var(--text-muted);">
                             <i class="fa-solid fa-bag-shopping" style="font-size: 3rem; margin-bottom: 12px; opacity: 0.3;"></i>
                             <p>Giỏ hàng đang trống.</p>
@@ -214,29 +298,32 @@
                     return;
                 }
 
-                container.innerHTML = data.items.map(item => `
-                    <div style="display: flex; gap: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--border-card); align-items: center;">
-                        <img src="${CustomerApi.escapeHtml(item.productImageUrl || 'https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=150&q=80')}" style="width: 64px; height: 64px; object-fit: cover; border-radius: var(--radius-sm); border: 1px solid var(--border-card);" alt="${CustomerApi.escapeHtml(item.productName)}" />
+                itemsContainer.innerHTML = cart.items.map(item => `
+                    <div class="cart-item-row" style="display: flex; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--border-card);">
+                        <img src="${CustomerApi.escapeHtml(item.productImageUrl || '/images/placeholder-perfume.jpg')}" alt="${CustomerApi.escapeHtml(item.productName)}" style="width: 60px; height: 60px; object-fit: contain; background: var(--bg-surface-elevated); border-radius: var(--radius-sm); padding: 4px;" />
                         <div style="flex-grow: 1;">
-                            <div style="font-size: 0.9rem; font-weight: 600; line-height: 1.2; margin-bottom: 2px;">${CustomerApi.escapeHtml(item.productName)}</div>
-                            <div style="font-size: 0.75rem; color: var(--gold-primary); margin-bottom: 4px;">${CustomerApi.escapeHtml(item.variantLabel)}</div>
-                            <div style="font-size: 0.85rem; font-weight: 700;">${money(item.unitPrice)} x ${item.quantity}</div>
+                            <div style="font-weight: 600; font-size: 0.88rem; color: var(--text-primary); margin-bottom: 2px;">${CustomerApi.escapeHtml(item.productName)}</div>
+                            <div style="font-size: 0.75rem; color: var(--gold-primary); margin-bottom: 4px;">${CustomerApi.escapeHtml(item.variantName || 'Fullbox')} &bull; x${item.quantity}</div>
+                            <div style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary);">${CustomerApi.formatVnd(item.subTotal)}</div>
                         </div>
-                        <button onclick="removeCartItem(${item.productId}, ${item.variantId ?? 'null'})" aria-label="Xóa ${CustomerApi.escapeHtml(item.productName)}" style="background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 6px;"><i class="fa-solid fa-trash-can"></i></button>
+                        <button type="button" onclick="removeCartItem(${item.productId}, ${item.variantId ?? 'null'})" class="icon-btn" style="width: 28px; height: 28px; color: #ef4444;" aria-label="Xóa"><i class="fa-solid fa-trash-can" style="font-size: 0.75rem;"></i></button>
                     </div>
                 `).join('');
             } catch (err) {
-                console.error(err);
-                const badge = document.getElementById('headerCartCount');
-                if (badge) badge.innerText = '–';
+                console.warn('Could not refresh cart state:', err);
             }
         }
 
-        async function addToCart(slug, variantId = null, quantity = 1) {
+        async function addToCart(slug, variantId, qty = 1) {
             try {
-                await CustomerApi.post('/api/v1/cart/items', { productSlug: slug, variantId, quantity });
-                showToast('Đã thêm sản phẩm vào giỏ hàng!', 'success');
+                await CustomerApi.post('/api/v1/cart/items', {
+                    slug: slug,
+                    variantId: variantId,
+                    quantity: qty
+                });
+                await refreshCartState();
                 openCart();
+                showToast('Đã thêm nước hoa vào giỏ hàng!', 'success');
             } catch (err) {
                 showToast(err.message || 'Không thể thêm vào giỏ hàng.', 'error');
             }
@@ -276,8 +363,15 @@
             finally { window.location.assign('/'); }
         });
 
-        // Initialize cart count on load
-        refreshCartState();
+        // Load cart data only after the page's load event so its API request
+        // cannot compete with the hero image and other LCP resources.
+        window.addEventListener('load', function initializeCartWhenIdle() {
+            if ('requestIdleCallback' in window) {
+                requestIdleCallback(refreshCartState, { timeout: 3000 });
+            } else {
+                setTimeout(refreshCartState, 2000);
+            }
+        }, { once: true });
     </script>
 
     <script>
@@ -329,8 +423,9 @@
         // Show TempData success toast
         @if (TempData["Success"] != null)
         {
+            var successMsg = System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(TempData["Success"]?.ToString() ?? "");
             <text>
-            setTimeout(() => showToast('@Html.Raw(TempData["Success"])', 'success'), 300);
+            setTimeout(() => showToast('@successMsg', 'success'), 300);
             </text>
         }
 
@@ -362,7 +457,11 @@
                     notice.style.background = 'rgba(46, 204, 113, 0.15)';
                     notice.style.color = '#2ecc71';
                     notice.style.border = '1px solid #2ecc71';
-                    notice.innerHTML = `<i class="fa-solid fa-gift" style="margin-right: 6px;"></i> ${data.message}`;
+                    notice.textContent = ' ' + data.message;
+                    const giftIcon = document.createElement('i');
+                    giftIcon.className = 'fa-solid fa-gift';
+                    giftIcon.style.marginRight = '6px';
+                    notice.prepend(giftIcon);
                     input.value = '';
                     if (typeof showToast === 'function') {
                         showToast(`Mã ưu đãi LUXE2026 đã kích hoạt cho ${email}!`, 'success');
@@ -382,6 +481,39 @@
                 notice.innerText = 'Có lỗi xảy ra, vui lòng thử lại sau.';
             }
         }
+    </script>
+
+    <!-- Deferred GA4 Analytics -->
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        (function() {
+            var gaInitialized = false;
+            function loadGA4() {
+                if (gaInitialized) return;
+                gaInitialized = true;
+                var s = document.createElement('script');
+                s.async = true;
+                s.src = 'https://www.googletagmanager.com/gtag/js?id=G-KCWE7ENDEJ';
+                document.head.appendChild(s);
+                gtag('js', new Date());
+                gtag('config', 'G-KCWE7ENDEJ');
+            }
+            if (window.addEventListener) {
+                window.addEventListener('load', function() {
+                    setTimeout(function() {
+                        if ('requestIdleCallback' in window) {
+                            requestIdleCallback(loadGA4, { timeout: 4000 });
+                        } else {
+                            loadGA4();
+                        }
+                    }, 5000);
+                });
+                ['click', 'keydown', 'touchstart'].forEach(function(evt) {
+                    window.addEventListener(evt, loadGA4, { once: true, passive: true });
+                });
+            }
+        })();
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)
