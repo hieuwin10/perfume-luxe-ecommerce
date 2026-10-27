@@ -58,6 +58,7 @@ builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(dataPath, "DataProtection-Keys")))
     .SetApplicationName("PerfumeLuxe");
 builder.Services.AddControllersWithViews();
+builder.Services.AddResponseCaching();
 builder.Services.AddMemoryCache();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
@@ -166,6 +167,7 @@ app.UseStaticFiles(new StaticFileOptions
     }
 });
 app.UseRouting();
+app.UseResponseCaching();
 app.UseAuthentication();
 app.Use(async (context, next) =>
 {

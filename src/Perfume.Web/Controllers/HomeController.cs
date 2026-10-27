@@ -32,7 +32,7 @@ public class HomeController : Controller
         _cache = cache ?? new MemoryCache(new MemoryCacheOptions());
     }
 
-    [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Client)]
+    [ResponseCache(Duration = 300, Location = ResponseCacheLocation.Any, NoStore = false)]
     public async Task<IActionResult> Index()
     {
         var data = await _cache.GetOrCreateAsync("home_composite_cache_v2", async entry =>

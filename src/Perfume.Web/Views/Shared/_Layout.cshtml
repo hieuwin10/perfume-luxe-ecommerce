@@ -28,103 +28,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@documentTitle</title>
 
-    @if (ViewData["LcpImage"] != null)
-    {
-        var lcpDesktop = ViewData["LcpImage"]?.ToString();
-        var lcpMobile = ViewData["LcpImageMobile"]?.ToString();
-        if (!string.IsNullOrEmpty(lcpMobile) && lcpMobile != lcpDesktop)
-        {
-            <!-- Ultra-High Priority Responsive Preload for LCP Hero Element -->
-            <link rel="preload" as="image" href="@lcpMobile" media="(max-width: 768px)" fetchpriority="high" />
-            <link rel="preload" as="image" href="@lcpDesktop" media="(min-width: 769px)" fetchpriority="high" />
-        }
-        else
-        {
-            <link rel="preload" as="image" href="@lcpDesktop" fetchpriority="high" />
-        }
-    }
-
-    <!-- Performance Preconnect & DNS-Prefetch -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
-    <link rel="preconnect" href="https://images.unsplash.com" crossorigin="anonymous" />
-    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
-    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
-    <link rel="dns-prefetch" href="https://images.unsplash.com" />
-
-    <!-- Google Fonts (display=optional guarantees 0 CLS and instant initial paint) -->
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Plus+Jakarta+Sans:wght@400;600&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'" />
-    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Plus+Jakarta+Sans:wght@400;600&display=optional" /></noscript>
-    
-    <!-- Google Search Console Verification -->
-    <meta name="google-site-verification" content="Qh9rEGR7zfGddcqbtlF1p2H9s544wnJg2TOfQeLgNJs" />
-
-    <!-- Google Analytics 4 (GA4) - Deferred for Maximum Web Vitals -->
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        (function() {
-            var gaInitialized = false;
-            function loadGA4() {
-                if (gaInitialized) return;
-                gaInitialized = true;
-                var s = document.createElement('script');
-                s.async = true;
-                s.src = 'https://www.googletagmanager.com/gtag/js?id=G-KCWE7ENDEJ';
-                document.head.appendChild(s);
-                gtag('js', new Date());
-                gtag('config', 'G-KCWE7ENDEJ');
-            }
-            if (window.addEventListener) {
-                window.addEventListener('load', function() {
-                    setTimeout(function() {
-                        if ('requestIdleCallback' in window) {
-                            requestIdleCallback(loadGA4, { timeout: 4000 });
-                        } else {
-                            loadGA4();
-                        }
-                    }, 8000);
-                });
-                ['click', 'keydown'].forEach(function(evt) {
-                    window.addEventListener(evt, loadGA4, { once: true, passive: true });
-                });
-            }
-        })();
-    </script>
-
-    <!-- Meta SEO Google & Social Cards -->
-    <meta name="description" content="@(ViewData["MetaDescription"] ?? "Thế giới nước hoa cao cấp chính hãng từ các thương hiệu xa xỉ bậc nhất thế giới: Dior, Chanel, Creed, Tom Ford, Le Labo, Kilian. Bảo đảm 100% xuất xứ.")" />
-    <meta name="robots" content="@robotsContent" />
-    <link rel="canonical" href="@canonicalUrl" />
-
-    <!-- Open Graph / Facebook -->
-    <meta property="og:site_name" content="PERFUME LUXE" />
-    <meta property="og:type" content="@(ViewData["OgType"] ?? "website")" />
-    <meta property="og:title" content="@(ViewData["Title"] ?? "PERFUME LUXE - Nước Hoa Xa Xỉ Chính Hãng")" />
-    <meta property="og:description" content="@(ViewData["MetaDescription"] ?? "Bộ sưu tập nước hoa cao cấp, chiết 10ml và fullbox với 3 tầng hương độc bản.")" />
-    <meta property="og:image" content="@(ViewData["OgImage"] ?? "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=1200&q=80")" />
-    <meta property="og:url" content="@ogUrl" />
-
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="@(ViewData["Title"] ?? "PERFUME LUXE - Nước Hoa Xa Xỉ Chính Hãng")" />
-    <meta name="twitter:description" content="@(ViewData["MetaDescription"] ?? "Bộ sưu tập nước hoa cao cấp, chiết 10ml và fullbox với 3 tầng hương độc bản.")" />
-    <meta name="twitter:image" content="@(ViewData["OgImage"] ?? "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=1200&q=80")" />
-
-    <!-- Favicon & Brand Theme -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💎</text></svg>" />
-    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💎</text></svg>" />
-    <meta name="theme-color" content="#0B0B0E" />
-    <link rel="manifest" href="~/manifest.webmanifest" />
-
-    <!-- Font Awesome Icons (Non-render-blocking) -->
-    <link rel="preload" href="~/css/font-awesome-subset.css" asp-append-version="true" as="style" onload="this.onload=null;this.rel='stylesheet'" />
-    <noscript><link rel="stylesheet" href="~/css/font-awesome-subset.css" asp-append-version="true" /></noscript>
-
-    <!-- Luxury Theme Stylesheet -->
+    <!-- Critical Above-The-Fold Stylesheet (Immediately compiled for Instant FCP) -->
     @if (string.IsNullOrEmpty(requestPath.Value) || string.Equals(requestPath.Value, "/", StringComparison.Ordinal) || requestPath.StartsWithSegments("/Home", StringComparison.OrdinalIgnoreCase))
     {
-        <!-- Keep the mobile first viewport styled while the full theme stylesheet loads without blocking first paint. -->
         <style>
             :root {
                 --gold-primary: #D4AF37;
@@ -176,10 +82,10 @@
             .mobile-nav-item i { width: 22px; color: var(--gold-primary); text-align: center; }
             .mobile-nav-footer { display: flex; flex-direction: column; gap: 12px; padding: 20px 24px; border-top: 1px solid var(--border-card); background: var(--bg-surface-elevated); }
             
-            /* Mobile-First Base Rules (Guarantees zero layout shifts on mobile) */
+            /* Mobile-First Base Rules (Instant FCP with radial background) */
             .announcement-bar { min-height: 32px; background: var(--bg-surface-elevated); border-bottom: 1px solid var(--border-card); font-size: 0.78rem; padding: 6px 16px; text-align: center; color: var(--text-secondary); display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 8px; }
             .announcement-desktop-only { display: none; }
-            .luxe-hero-banner { position: relative; width: 100%; height: 580px; min-height: 580px; max-height: 580px; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 50px 16px; text-align: center; border-bottom: 1px solid var(--border-subtle); contain: layout size paint; }
+            .luxe-hero-banner { position: relative; width: 100%; height: 580px; min-height: 580px; max-height: 580px; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 50px 16px; text-align: center; border-bottom: 1px solid var(--border-subtle); contain: layout size paint; background: radial-gradient(circle at center, rgba(212, 175, 55, 0.14) 0%, rgba(11, 11, 14, 0.94) 75%), #0B0B0E; }
             .mobile-bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; height: calc(56px + env(safe-area-inset-bottom, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); background: rgba(14, 14, 18, 0.95); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-top: 1px solid var(--border-subtle); z-index: 2000; justify-content: space-around; align-items: center; }
             .mobile-bottom-nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; flex: 1; height: 100%; color: var(--text-muted); font-size: 0.65rem; font-weight: 500; text-decoration: none; -webkit-tap-highlight-color: transparent; }
             .mobile-bottom-nav-item i { font-size: 1.1rem; }
@@ -212,10 +118,70 @@
     {
         <link rel="stylesheet" href="~/css/luxury-perfume.min.css" asp-append-version="true" />
     }
+
+    @if (ViewData["LcpImage"] != null)
+    {
+        var lcpDesktop = ViewData["LcpImage"]?.ToString();
+        var lcpMobile = ViewData["LcpImageMobile"]?.ToString();
+        if (!string.IsNullOrEmpty(lcpMobile) && lcpMobile != lcpDesktop)
+        {
+            <!-- Ultra-High Priority Responsive Preload for LCP Hero Element -->
+            <link rel="preload" as="image" href="@lcpMobile" media="(max-width: 768px)" fetchpriority="high" />
+            <link rel="preload" as="image" href="@lcpDesktop" media="(min-width: 769px)" fetchpriority="high" />
+        }
+        else
+        {
+            <link rel="preload" as="image" href="@lcpDesktop" fetchpriority="high" />
+        }
+    }
+
+    <!-- Performance Preconnect & DNS-Prefetch -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+    <link rel="preconnect" href="https://images.unsplash.com" crossorigin="anonymous" />
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+    <link rel="dns-prefetch" href="https://images.unsplash.com" />
+
+    <!-- Google Fonts (display=optional guarantees 0 CLS and instant initial paint) -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Plus+Jakarta+Sans:wght@400;600&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Plus+Jakarta+Sans:wght@400;600&display=optional" /></noscript>
+    
+    <!-- Google Search Console Verification -->
+    <meta name="google-site-verification" content="Qh9rEGR7zfGddcqbtlF1p2H9s544wnJg2TOfQeLgNJs" />
+
+    <!-- Meta SEO Google & Social Cards -->
+    <meta name="description" content="@(ViewData["MetaDescription"] ?? "Thế giới nước hoa cao cấp chính hãng từ các thương hiệu xa xỉ bậc nhất thế giới: Dior, Chanel, Creed, Tom Ford, Le Labo, Kilian. Bảo đảm 100% xuất xứ.")" />
+    <meta name="robots" content="@robotsContent" />
+    <link rel="canonical" href="@canonicalUrl" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:site_name" content="PERFUME LUXE" />
+    <meta property="og:type" content="@(ViewData["OgType"] ?? "website")" />
+    <meta property="og:title" content="@(ViewData["Title"] ?? "PERFUME LUXE - Nước Hoa Xa Xỉ Chính Hãng")" />
+    <meta property="og:description" content="@(ViewData["MetaDescription"] ?? "Bộ sưu tập nước hoa cao cấp, chiết 10ml và fullbox với 3 tầng hương độc bản.")" />
+    <meta property="og:image" content="@(ViewData["OgImage"] ?? "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=1200&q=80")" />
+    <meta property="og:url" content="@ogUrl" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="@(ViewData["Title"] ?? "PERFUME LUXE - Nước Hoa Xa Xỉ Chính Hãng")" />
+    <meta name="twitter:description" content="@(ViewData["MetaDescription"] ?? "Bộ sưu tập nước hoa cao cấp, chiết 10ml và fullbox với 3 tầng hương độc bản.")" />
+    <meta name="twitter:image" content="@(ViewData["OgImage"] ?? "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=1200&q=80")" />
+
+    <!-- Favicon & Brand Theme -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💎</text></svg>" />
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💎</text></svg>" />
+    <meta name="theme-color" content="#0B0B0E" />
+    <link rel="manifest" href="~/manifest.webmanifest" />
+
+    <!-- Font Awesome Icons (Non-render-blocking) -->
+    <link rel="preload" href="~/css/font-awesome-subset.css" asp-append-version="true" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <noscript><link rel="stylesheet" href="~/css/font-awesome-subset.css" asp-append-version="true" /></noscript>
+
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body class="dark-theme">
-    <div hidden aria-hidden="true">@Html.AntiForgeryToken()</div>
     <!-- Top Announcement Bar -->
     <div class="announcement-bar" style="min-height: 32px; background: var(--bg-surface-elevated); border-bottom: 1px solid var(--border-card); font-size: 0.78rem; padding: 6px 16px; text-align: center; color: var(--text-secondary); display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 8px;">
         <div><i class="fa-solid fa-crown text-gold-gradient" style="margin-right: 6px;"></i> Cam kết 100% Nước Hoa Chính Hãng</div>
@@ -713,8 +679,8 @@
             });
         }
 
-        // Show TempData success toast
-        @if (TempData["Success"] != null)
+        // Show TempData success toast (guard with cookie check to avoid emitting Set-Cookie on cached GETs)
+        @if (Context.Request.Cookies.ContainsKey(".AspNetCore.Mvc.CookieTempDataProvider") && TempData["Success"] != null)
         {
             var successMsg = System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(TempData["Success"]?.ToString() ?? "");
             <text>
@@ -801,6 +767,38 @@
         </a>
     </nav>
 
+    <!-- Deferred GA4 Analytics -->
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        (function() {
+            var gaInitialized = false;
+            function loadGA4() {
+                if (gaInitialized) return;
+                gaInitialized = true;
+                var s = document.createElement('script');
+                s.async = true;
+                s.src = 'https://www.googletagmanager.com/gtag/js?id=G-KCWE7ENDEJ';
+                document.head.appendChild(s);
+                gtag('js', new Date());
+                gtag('config', 'G-KCWE7ENDEJ');
+            }
+            if (window.addEventListener) {
+                window.addEventListener('load', function() {
+                    setTimeout(function() {
+                        if ('requestIdleCallback' in window) {
+                            requestIdleCallback(loadGA4, { timeout: 4000 });
+                        } else {
+                            loadGA4();
+                        }
+                    }, 5000);
+                });
+                ['click', 'keydown', 'touchstart'].forEach(function(evt) {
+                    window.addEventListener(evt, loadGA4, { once: true, passive: true });
+                });
+            }
+        })();
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
