@@ -1,4 +1,35 @@
 @model List<Perfume.Domain.Entities.HeroBanner>
+@using System
+@using System.Collections.Generic
+@using System.Linq
+@{
+    string OptimizeHeroImageUrl(string? imageUrl, int width = 1080)
+    {
+        if (string.IsNullOrWhiteSpace(imageUrl)) return string.Empty;
+        if (!Uri.TryCreate(imageUrl, UriKind.Absolute, out var imageUri)
+            || !imageUri.Host.Equals("images.unsplash.com", StringComparison.OrdinalIgnoreCase))
+        {
+            return imageUrl;
+        }
+
+        var query = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var pair in imageUri.Query.TrimStart('?').Split('&', StringSplitOptions.RemoveEmptyEntries))
+        {
+            var parts = pair.Split('=', 2);
+            query[Uri.UnescapeDataString(parts[0])] = parts.Length > 1 ? Uri.UnescapeDataString(parts[1]) : string.Empty;
+        }
+
+        query["auto"] = "format";
+        query["fit"] = "crop";
+        query["w"] = width.ToString();
+        query["q"] = "72";
+        var optimizedUri = new UriBuilder(imageUri)
+        {
+            Query = string.Join("&", query.Select(pair => $"{Uri.EscapeDataString(pair.Key)}={Uri.EscapeDataString(pair.Value)}"))
+        };
+        return optimizedUri.Uri.ToString();
+    }
+}
 
 <!-- HERO BANNER / SLIDER -->
 @if (Model.Any())
@@ -7,21 +38,22 @@
         @for (int i = 0; i < Model.Count; i++)
         {
             var b = Model[i];
-            var bMobile = b.ImageUrl.Contains("w=1920") ? b.ImageUrl.Replace("w=1920", "w=640").Replace("q=80", "q=75") : b.ImageUrl;
-            if (i == 0)
-            {
-                <style>
-                    .hero-slide-first-lcp {
-                        background: radial-gradient(circle at center, rgba(212, 175, 55, 0.14) 0%, rgba(11, 11, 14, 0.94) 75%), url('@bMobile') center/cover no-repeat;
-                    }
-                    @@media (min-width: 769px) {
-                        .hero-slide-first-lcp {
-                            background: radial-gradient(circle at center, rgba(212, 175, 55, 0.14) 0%, rgba(11, 11, 14, 0.94) 75%), url('@b.ImageUrl') center/cover no-repeat;
+            <div class="hero-slide @(i == 0 ? "active" : "")" style="position: @(i == 0 ? "relative" : "absolute"); inset: 0; min-height: 85vh; display: @(i == 0 ? "flex" : "none"); align-items: center; justify-content: center; background: radial-gradient(circle at center, rgba(212, 175, 55, 0.14) 0%, rgba(11, 11, 14, 0.94) 75%); padding: 100px 24px; text-align: center; transition: opacity 0.6s ease-in-out;">
+                @if (i == 0)
+                {
+                    <picture>
+                        @if (ViewData["LcpImageMobile"] != null)
+                        {
+                            <source media="(max-width: 768px)" srcset="@ViewData["LcpImageMobile"]" />
                         }
-                    }
-                </style>
-            }
-            <div class="hero-slide @(i == 0 ? "active hero-slide-first-lcp" : "")" style="position: @(i == 0 ? "relative" : "absolute"); inset: 0; min-height: 85vh; display: @(i == 0 ? "flex" : "none"); align-items: center; justify-content: center; @(i > 0 ? $"background: radial-gradient(circle at center, rgba(212, 175, 55, 0.14) 0%, rgba(11, 11, 14, 0.94) 75%), url('{b.ImageUrl}') center/cover no-repeat;" : "") padding: 100px 24px; text-align: center; transition: opacity 0.6s ease-in-out;">
+                        <img class="hero-slide-image" src="@ViewData["LcpImage"]" alt="Perfume Luxe Collection" width="1440" height="850" fetchpriority="high" loading="eager" decoding="async" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center;" />
+                    </picture>
+                }
+                else
+                {
+                    <img class="hero-slide-image" data-src="@OptimizeHeroImageUrl(b.ImageUrl, 1080)" alt="" width="1440" height="850" loading="lazy" decoding="async" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center;" />
+                }
+                <div aria-hidden="true" style="position: absolute; inset: 0; z-index: 1; background: radial-gradient(circle at center, rgba(212, 175, 55, 0.14) 0%, rgba(11, 11, 14, 0.94) 75%);"></div>
                 <div style="max-width: 900px; margin: 0 auto; z-index: 2;">
                     <span style="display: inline-block; font-size: 0.8rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold-primary); font-weight: 700; margin-bottom: 16px; border: 1px solid var(--border-subtle); padding: 6px 16px; border-radius: var(--radius-full); background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);">
                         <i class="fa-solid fa-crown" style="margin-right: 6px;"></i> Haute Parfumerie Collection
@@ -72,6 +104,11 @@
                 function showSlide(idx) {
                     const slides = document.querySelectorAll('#heroSliderSection .hero-slide');
                     const dots = document.querySelectorAll('#heroSliderSection .slide-dot');
+                    const nextImage = slides[idx]?.querySelector('img[data-src]');
+                    if (nextImage && !nextImage.getAttribute('src')) {
+                        nextImage.setAttribute('src', nextImage.dataset.src);
+                        nextImage.removeAttribute('data-src');
+                    }
                     slides.forEach((s, i) => {
                         if (i === idx) {
                             s.style.display = 'flex';
@@ -100,7 +137,15 @@
 else
 {
     <!-- FALLBACK HERO BANNER -->
-    <section style="position: relative; min-height: 85vh; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at center, rgba(212, 175, 55, 0.12) 0%, rgba(11, 11, 14, 0.95) 70%), url('https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=1920&q=80') center/cover no-repeat; padding: 100px 24px; text-align: center; border-bottom: 1px solid var(--border-subtle);">
+    <section style="position: relative; min-height: 85vh; overflow: hidden; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at center, rgba(212, 175, 55, 0.12) 0%, rgba(11, 11, 14, 0.95) 70%); padding: 100px 24px; text-align: center; border-bottom: 1px solid var(--border-subtle);">
+        <picture>
+            @if (ViewData["LcpImageMobile"] != null)
+            {
+                <source media="(max-width: 768px)" srcset="@ViewData["LcpImageMobile"]" />
+            }
+            <img src="@ViewData["LcpImage"]" alt="Haute Parfumerie Collection" width="1440" height="850" fetchpriority="high" loading="eager" decoding="async" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center;" />
+        </picture>
+        <div aria-hidden="true" style="position: absolute; inset: 0; z-index: 1; background: radial-gradient(circle at center, rgba(212, 175, 55, 0.12) 0%, rgba(11, 11, 14, 0.95) 70%);"></div>
         <div style="max-width: 900px; margin: 0 auto; z-index: 2;">
             <span style="display: inline-block; font-size: 0.8rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold-primary); font-weight: 700; margin-bottom: 16px; border: 1px solid var(--border-subtle); padding: 6px 16px; border-radius: var(--radius-full); background: rgba(0,0,0,0.5); backdrop-filter: blur(8px);">
                 <i class="fa-solid fa-crown" style="margin-right: 6px;"></i> Haute Parfumerie Collection 2026

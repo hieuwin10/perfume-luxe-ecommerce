@@ -8,13 +8,37 @@
     var families = ViewBag.Families as List<FragranceFamily> ?? new List<FragranceFamily>();
     var blogs = ViewBag.RecentBlogs as List<BlogPost> ?? new List<BlogPost>();
     var heroBanners = ViewBag.HeroBanners as List<HeroBanner> ?? new List<HeroBanner>();
-    var heroImgDesktop = heroBanners.FirstOrDefault()?.ImageUrl
-        ?? "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=1920&q=80";
-    var heroImgMobile = heroImgDesktop.Contains("w=1920")
-        ? heroImgDesktop.Replace("w=1920", "w=640").Replace("q=80", "q=75")
-        : heroImgDesktop;
-    ViewData["LcpImage"] = heroImgDesktop;
-    ViewData["LcpImageMobile"] = heroImgMobile;
+    string OptimizeHeroImageUrl(string? imageUrl, int width = 1080)
+    {
+        string fallbackImage = $"https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w={width}&q=72";
+        if (string.IsNullOrWhiteSpace(imageUrl)) return fallbackImage;
+        if (!Uri.TryCreate(imageUrl, UriKind.Absolute, out var imageUri)
+            || !imageUri.Host.Equals("images.unsplash.com", StringComparison.OrdinalIgnoreCase))
+        {
+            return imageUrl;
+        }
+
+        var query = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var pair in imageUri.Query.TrimStart('?').Split('&', StringSplitOptions.RemoveEmptyEntries))
+        {
+            var parts = pair.Split('=', 2);
+            query[Uri.UnescapeDataString(parts[0])] = parts.Length > 1 ? Uri.UnescapeDataString(parts[1]) : string.Empty;
+        }
+
+        query["auto"] = "format";
+        query["fit"] = "crop";
+        query["w"] = width.ToString();
+        query["q"] = "72";
+        var optimizedUri = new UriBuilder(imageUri)
+        {
+            Query = string.Join("&", query.Select(pair => $"{Uri.EscapeDataString(pair.Key)}={Uri.EscapeDataString(pair.Value)}"))
+        };
+        return optimizedUri.Uri.ToString();
+    }
+
+    var rawHeroUrl = heroBanners.FirstOrDefault()?.ImageUrl;
+    ViewData["LcpImage"] = OptimizeHeroImageUrl(rawHeroUrl, 1080);
+    ViewData["LcpImageMobile"] = OptimizeHeroImageUrl(rawHeroUrl, 640);
 }
 
 <partial name="Partials/_HeroSliderPartial" model="heroBanners" />
