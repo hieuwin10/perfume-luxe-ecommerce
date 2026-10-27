@@ -88,10 +88,9 @@
     <link rel="preload" href="~/css/font-awesome-subset.css" asp-append-version="true" as="style" onload="this.onload=null;this.rel='stylesheet'" />
     <noscript><link rel="stylesheet" href="~/css/font-awesome-subset.css" asp-append-version="true" /></noscript>
 
-    <!-- Luxury Theme Stylesheet -->
-    <link rel="preload" href="~/css/luxury-perfume.min.css" asp-append-version="true" as="style" onload="this.onload=null;this.rel='stylesheet'" />
-    <noscript><link rel="stylesheet" href="~/css/luxury-perfume.min.css" asp-append-version="true" /></noscript>
-    <link rel="stylesheet" href="~/css/luxury-perfume.css" asp-append-version="true" />
+    <!-- Luxury Theme Stylesheet (Non-render-blocking) -->
+    <link rel="preload" href="~/css/luxury-perfume.css" asp-append-version="true" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <noscript><link rel="stylesheet" href="~/css/luxury-perfume.css" asp-append-version="true" /></noscript>
 
     @if (requestPath == "/")
     {
@@ -207,8 +206,8 @@
     <!-- Toast Notifications -->
     <div class="toast-container-luxe" id="toastContainer"></div>
 
-    <!-- Scripts -->
-    <script src="~/js/customer-api.js" asp-append-version="true"></script>
+    <!-- Scripts (Non-render-blocking) -->
+    <script src="~/js/customer-api.js" asp-append-version="true" defer></script>
     <script>
         // 1. Theme Management (Dark / Light + Cốc Cốc / Chrome system auto-detection)
         (function() {

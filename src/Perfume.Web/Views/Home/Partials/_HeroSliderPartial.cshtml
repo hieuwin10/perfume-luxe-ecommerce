@@ -7,7 +7,21 @@
         @for (int i = 0; i < Model.Count; i++)
         {
             var b = Model[i];
-            <div class="hero-slide @(i == 0 ? "active" : "")" style="position: @(i == 0 ? "relative" : "absolute"); inset: 0; min-height: 85vh; display: @(i == 0 ? "flex" : "none"); align-items: center; justify-content: center; background: radial-gradient(circle at center, rgba(212, 175, 55, 0.14) 0%, rgba(11, 11, 14, 0.94) 75%), url('@b.ImageUrl') center/cover no-repeat; padding: 100px 24px; text-align: center; transition: opacity 0.6s ease-in-out;">
+            var bMobile = b.ImageUrl.Contains("w=1920") ? b.ImageUrl.Replace("w=1920", "w=640").Replace("q=80", "q=75") : b.ImageUrl;
+            if (i == 0)
+            {
+                <style>
+                    .hero-slide-first-lcp {
+                        background: radial-gradient(circle at center, rgba(212, 175, 55, 0.14) 0%, rgba(11, 11, 14, 0.94) 75%), url('@bMobile') center/cover no-repeat;
+                    }
+                    @@media (min-width: 769px) {
+                        .hero-slide-first-lcp {
+                            background: radial-gradient(circle at center, rgba(212, 175, 55, 0.14) 0%, rgba(11, 11, 14, 0.94) 75%), url('@b.ImageUrl') center/cover no-repeat;
+                        }
+                    }
+                </style>
+            }
+            <div class="hero-slide @(i == 0 ? "active hero-slide-first-lcp" : "")" style="position: @(i == 0 ? "relative" : "absolute"); inset: 0; min-height: 85vh; display: @(i == 0 ? "flex" : "none"); align-items: center; justify-content: center; @(i > 0 ? $"background: radial-gradient(circle at center, rgba(212, 175, 55, 0.14) 0%, rgba(11, 11, 14, 0.94) 75%), url('{b.ImageUrl}') center/cover no-repeat;" : "") padding: 100px 24px; text-align: center; transition: opacity 0.6s ease-in-out;">
                 <div style="max-width: 900px; margin: 0 auto; z-index: 2;">
                     <span style="display: inline-block; font-size: 0.8rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold-primary); font-weight: 700; margin-bottom: 16px; border: 1px solid var(--border-subtle); padding: 6px 16px; border-radius: var(--radius-full); background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);">
                         <i class="fa-solid fa-crown" style="margin-right: 6px;"></i> Haute Parfumerie Collection

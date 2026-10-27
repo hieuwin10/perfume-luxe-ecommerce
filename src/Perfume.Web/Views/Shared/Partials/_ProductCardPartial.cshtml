@@ -21,13 +21,17 @@
     </div>
 
     <a href="/nuoc-hoa/@p.Slug" class="card-img-wrapper">
+        @{
+            var origImg = p.MainImageUrl ?? "/images/placeholder-perfume.jpg";
+            var mobileImg = origImg.Contains("w=800") ? origImg.Replace("w=800", "w=360").Replace("q=80", "q=75") : origImg;
+        }
         @if (isCatalogCard)
         {
-            <img src="@p.MainImageUrl" alt="@p.Name" width="300" height="300" loading="lazy" style="aspect-ratio: 1/1; object-fit: contain;" />
+            <img src="@mobileImg" srcset="@mobileImg 360w, @origImg 800w" sizes="(max-width: 768px) 50vw, 300px" alt="@p.Name" width="300" height="300" loading="lazy" decoding="async" style="aspect-ratio: 1/1; object-fit: contain;" />
         }
         else
         {
-            <img src="@p.MainImageUrl" alt="@p.Name" loading="lazy" decoding="async" width="300" height="300" />
+            <img src="@mobileImg" srcset="@mobileImg 360w, @origImg 800w" sizes="(max-width: 768px) 50vw, 300px" alt="@p.Name" loading="lazy" decoding="async" width="300" height="300" style="aspect-ratio: 1/1; object-fit: cover;" />
         }
     </a>
 

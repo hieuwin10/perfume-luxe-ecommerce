@@ -8,8 +8,13 @@
     var families = ViewBag.Families as List<FragranceFamily> ?? new List<FragranceFamily>();
     var blogs = ViewBag.RecentBlogs as List<BlogPost> ?? new List<BlogPost>();
     var heroBanners = ViewBag.HeroBanners as List<HeroBanner> ?? new List<HeroBanner>();
-    ViewData["LcpImage"] = heroBanners.FirstOrDefault()?.ImageUrl
+    var heroImgDesktop = heroBanners.FirstOrDefault()?.ImageUrl
         ?? "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=1920&q=80";
+    var heroImgMobile = heroImgDesktop.Contains("w=1920")
+        ? heroImgDesktop.Replace("w=1920", "w=640").Replace("q=80", "q=75")
+        : heroImgDesktop;
+    ViewData["LcpImage"] = heroImgDesktop;
+    ViewData["LcpImageMobile"] = heroImgMobile;
 }
 
 <partial name="Partials/_HeroSliderPartial" model="heroBanners" />
