@@ -43,7 +43,9 @@ public static class DependencyInjection
         services.AddScoped<IFlashSaleService, FlashSaleService>();
         services.AddScoped<ISystemSettingService, SystemSettingService>();
         services.AddScoped<ICustomerAccountService, CustomerAccountService>();
-        services.AddScoped<ILoyaltyTierService, LoyaltyTierService>();
+        services.AddScoped<LoyaltyService>();
+        services.AddScoped<ILoyaltyService>(provider => provider.GetRequiredService<LoyaltyService>());
+        services.AddScoped<ILoyaltyTierService>(provider => provider.GetRequiredService<LoyaltyService>());
         services.AddScoped<IDiscoveryBoxService, DiscoveryBoxService>();
         return services;
     }
