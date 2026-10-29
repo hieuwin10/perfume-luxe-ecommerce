@@ -68,12 +68,25 @@ builder.Services.AddAuthorization(options =>
 // ==========================================
 // 3. DATA PROTECTION, CACHING, SESSION, COMPRESSION
 // ==========================================
-var dataPath = builder.Configuration["Storage:RootPath"] ?? Path.Combine(builder.Environment.ContentRootPath, "App_Data");
-Directory.CreateDirectory(Path.Combine(dataPath, "DataProtection-Keys"));
-Directory.CreateDirectory(Path.Combine(dataPath, "ReviewImages"));
-builder.Services.AddDataProtection()
-    .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(dataPath, "DataProtection-Keys")))
-    .SetApplicationName("PerfumeLuxe");
+var storageRoot = builder.Configuration["Storage:RootPath"];
+var dataPath = !string.IsNullOrWhiteSpace(storageRoot)
+    ? storageRoot
+    : Path.Combine(builder.Environment.ContentRootPath, "App_Data");
+
+try
+{
+    Directory.CreateDirectory(Path.Combine(dataPath, "DataProtection-Keys"));
+    Directory.CreateDirectory(Path.Combine(dataPath, "ReviewImages"));
+    builder.Services.AddDataProtection()
+        .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(dataPath, "DataProtection-Keys")))
+        .SetApplicationName("PerfumeLuxe");
+}
+catch
+{
+    // Co che phong thu: Neu quyen ghi he thong file bi tu choi tren shared hosting, dung DataProtection mac dinh
+    builder.Services.AddDataProtection()
+        .SetApplicationName("PerfumeLuxe");
+}
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddResponseCaching();
@@ -115,46 +128,54 @@ using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var logger = services.GetRequiredService<ILogger<Program>>();
-    var db = services.GetRequiredService<PerfumeDbContext>();
-    var databaseCreated = await db.Database.EnsureCreatedAsync();
-
-    // Chay migration Schema Upgrader V1 - V6
-    await DatabaseSchemaUpgrader.ApplyAsync(db, builder.Configuration, logger, databaseCreated);
-
-    // Tao cac Role he thong neu chua ton tai
-    var roleManager = services.GetRequiredService<RoleManager<AppRole>>();
-    foreach (var role in new[] { "Admin", "StoreManager", "WarehouseStaff", "Concierge", "Customer" })
+    try
     {
-        if (!await roleManager.RoleExistsAsync(role))
-        {
-            var created = await roleManager.CreateAsync(new AppRole { Name = role, Description = role });
-            if (!created.Succeeded) logger.LogError("Could not create role {Role}.", role);
-        }
-    }
+        var db = services.GetRequiredService<PerfumeDbContext>();
+        var databaseCreated = await db.Database.EnsureCreatedAsync();
 
-    // Khoi tao tai khoan Administrator ban dau neu duoc cau hinh
-    var adminEmail = builder.Configuration["InitialAdmin:Email"];
-    var adminPassword = builder.Configuration["InitialAdmin:Password"];
-    if (!string.IsNullOrWhiteSpace(adminEmail) && !string.IsNullOrWhiteSpace(adminPassword))
-    {
-        var userManager = services.GetRequiredService<UserManager<AppUser>>();
-        var existingAdmin = await userManager.FindByEmailAsync(adminEmail);
-        if (existingAdmin == null)
+        // Chay migration Schema Upgrader V1 - V6
+        await DatabaseSchemaUpgrader.ApplyAsync(db, builder.Configuration, logger, databaseCreated);
+
+        // Tao cac Role he thong neu chua ton tai
+        var roleManager = services.GetRequiredService<RoleManager<AppRole>>();
+        foreach (var role in new[] { "Admin", "StoreManager", "WarehouseStaff", "Concierge", "Customer" })
         {
-            var admin = new AppUser { UserName = adminEmail, Email = adminEmail, FullName = "System Administrator", EmailConfirmed = true };
-            var result = await userManager.CreateAsync(admin, adminPassword);
-            if (result.Succeeded) await userManager.AddToRoleAsync(admin, "Admin");
-            else logger.LogError("Initial administrator was not created; check password policy and local environment settings.");
-        }
-        else
-        {
-            var token = await userManager.GeneratePasswordResetTokenAsync(existingAdmin);
-            await userManager.ResetPasswordAsync(existingAdmin, token, adminPassword);
-            if (!await userManager.IsInRoleAsync(existingAdmin, "Admin"))
+            if (!await roleManager.RoleExistsAsync(role))
             {
-                await userManager.AddToRoleAsync(existingAdmin, "Admin");
+                var created = await roleManager.CreateAsync(new AppRole { Name = role, Description = role });
+                if (!created.Succeeded) logger.LogError("Could not create role {Role}.", role);
             }
         }
+
+        // Khoi tao tai khoan Administrator ban dau neu duoc cau hinh
+        var adminEmail = builder.Configuration["InitialAdmin:Email"];
+        var adminPassword = builder.Configuration["InitialAdmin:Password"];
+        if (!string.IsNullOrWhiteSpace(adminEmail) && !string.IsNullOrWhiteSpace(adminPassword))
+        {
+            var userManager = services.GetRequiredService<UserManager<AppUser>>();
+            var existingAdmin = await userManager.FindByEmailAsync(adminEmail);
+            if (existingAdmin == null)
+            {
+                var admin = new AppUser { UserName = adminEmail, Email = adminEmail, FullName = "System Administrator", EmailConfirmed = true };
+                var result = await userManager.CreateAsync(admin, adminPassword);
+                if (result.Succeeded) await userManager.AddToRoleAsync(admin, "Admin");
+                else logger.LogError("Initial administrator was not created; check password policy and local environment settings.");
+            }
+            else
+            {
+                var token = await userManager.GeneratePasswordResetTokenAsync(existingAdmin);
+                await userManager.ResetPasswordAsync(existingAdmin, token, adminPassword);
+                if (!await userManager.IsInRoleAsync(existingAdmin, "Admin"))
+                {
+                    await userManager.AddToRoleAsync(existingAdmin, "Admin");
+                }
+            }
+        }
+    }
+    catch (Exception ex)
+    {
+        // Ghi log loi he thong neu migration hoac seed gap su co de tranh sup do tien trinh web
+        logger.LogCritical(ex, "Loi khoi tao co so du lieu hoac migration luc ung dung khoi dong.");
     }
 }
 

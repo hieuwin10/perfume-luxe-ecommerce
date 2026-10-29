@@ -178,6 +178,9 @@ public class PerfumeDbContext : IdentityDbContext<AppUser, AppRole, string>
         // Order & OrderItem
         builder.Entity<Order>(entity =>
         {
+            entity.Property(o => o.OrderCode).HasMaxLength(50);
+            entity.Property(o => o.UserId).HasMaxLength(450);
+
             entity.HasIndex(o => o.OrderCode).IsUnique();
             entity.HasIndex(o => new { o.UserId, o.CreatedAt });
             entity.HasIndex(o => new { o.OrderStatus, o.CreatedAt });

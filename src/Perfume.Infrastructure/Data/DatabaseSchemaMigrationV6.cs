@@ -30,6 +30,18 @@ IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_Products_FragranceFam
     CREATE INDEX IX_Products_FragranceFamilyId ON dbo.Products(FragranceFamilyId);
 
 -- Performance Indexing for Orders & Order Items
+-- Chuyen doi cot UserId sang nvarchar(450) de cho phep tao chi muc B-Tree tren SQL Server
+IF EXISTS (
+    SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS 
+    WHERE TABLE_SCHEMA = 'dbo' 
+      AND TABLE_NAME = 'Orders' 
+      AND COLUMN_NAME = 'UserId' 
+      AND (CHARACTER_MAXIMUM_LENGTH = -1 OR CHARACTER_MAXIMUM_LENGTH > 450)
+)
+BEGIN
+    ALTER TABLE dbo.Orders ALTER COLUMN UserId nvarchar(450) NULL;
+END
+
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_Orders_UserId_CreatedAt' AND object_id = OBJECT_ID(N'dbo.Orders'))
     CREATE INDEX IX_Orders_UserId_CreatedAt ON dbo.Orders(UserId, CreatedAt DESC);
 
