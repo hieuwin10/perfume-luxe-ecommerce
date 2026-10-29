@@ -8,11 +8,22 @@ using Perfume.Infrastructure.Data;
 
 namespace Perfume.Infrastructure.Services;
 
+/// <summary>
+/// Service xu ly nghiep vu dat hang, quan ly voucher, giao dich thanh toan va tra cuu don hang.
+/// </summary>
 public class OrderService : IOrderService
 {
     private readonly PerfumeDbContext _context;
+
+    // ==========================================
+    // 1. KHOI TAO SERVICE
+    // ==========================================
     public OrderService(PerfumeDbContext context) => _context = context;
 
+    // ==========================================
+    // 2. XAC THUC MA GIAM GIA (VOUCHER)
+    // ==========================================
+    // Kiem tra voucher hop le: ton tai, con hoat dong, trong thoi han, chua qua so lan dung va dat gia tri toi thieu
     public async Task<Voucher?> ValidateVoucherAsync(string code, decimal currentSubTotal)
     {
         if (string.IsNullOrWhiteSpace(code)) return null;
@@ -23,30 +34,44 @@ public class OrderService : IOrderService
         return voucher;
     }
 
+    // ==========================================
+    // 3. XU LY DAT HANG (CHECKOUT TRANSACTION)
+    // ==========================================
+    // Tien hanh dat hang voi muc co lap Serializable chong tranh chap ton kho dong thoi
     public async Task<(bool Success, string? Error, Order? Order)> PlaceOrderAsync(CheckoutRequestDto request, string? userId = null)
     {
+        // Kiem tra phuong thuc thanh toan hop le (COD hoac Chuyen khoan)
         if (request.PaymentMethod != PaymentMethod.COD && request.PaymentMethod != PaymentMethod.BankTransfer)
             return (false, "Phương thức thanh toán chưa được hỗ trợ.", null);
+
+        // Kiem tra thong tin nguoi nhan va dia chi giao hang
         if (string.IsNullOrWhiteSpace(request.CustomerName) || string.IsNullOrWhiteSpace(request.CustomerPhone) ||
             string.IsNullOrWhiteSpace(request.CustomerEmail) || string.IsNullOrWhiteSpace(request.ShippingAddress))
             return (false, "Vui lòng nhập đầy đủ thông tin giao hàng.", null);
+
+        // Kiem tra gio hang khong duoc de trong
         if (request.Items == null || request.Items.Count == 0) return (false, "Giỏ hàng của bạn đang trống.", null);
 
+        // Nhom cac mat hang trung lap de tong hop so luong can mua
         var lines = request.Items
             .Where(i => i.Quantity > 0)
             .GroupBy(i => new { i.ProductId, i.VariantId })
             .Select(g => new { g.Key.ProductId, g.Key.VariantId, Quantity = g.Sum(i => i.Quantity) })
             .ToList();
+
         if (lines.Count == 0 || lines.Any(i => i.Quantity > 50))
             return (false, "Số lượng mỗi phiên bản không được vượt quá 50.", null);
 
+        // Kiem tra loai database de khoi tao transaction Serializable neu la relational DB
         var isRelational = _context.Database.IsRelational();
         await using var transaction = isRelational
             ? await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable)
             : null;
+
         try
         {
             var now = DateTime.UtcNow;
+            // Khoi tao thuc the Don Hang
             var order = new Order
             {
                 OrderCode = $"LUXE-{now:yyyyMMdd}-{Guid.NewGuid():N}"[..21].ToUpperInvariant(),
@@ -66,6 +91,7 @@ public class OrderService : IOrderService
                 CreatedAt = now
             };
 
+            // Duyet qua tung dong san pham, kiem tra ton kho va tru so luong
             foreach (var line in lines)
             {
                 var product = await _context.Products
@@ -76,12 +102,16 @@ public class OrderService : IOrderService
                 ProductVariant? variant = null;
                 decimal unitPrice;
                 string variantLabel;
+
                 if (product.Variants.Count > 0)
                 {
+                    // Xac dinh dung phien ban variant can mua
                     variant = line.VariantId.HasValue
                         ? product.Variants.FirstOrDefault(v => v.Id == line.VariantId.Value)
                         : product.Variants.FirstOrDefault(v => v.IsDefault) ?? product.Variants.FirstOrDefault();
                     if (variant == null) return (false, "Phiên bản sản phẩm không hợp lệ.", null);
+
+                    // Tru ton kho nguyen tu (atomic deduction)
                     if (isRelational)
                     {
                         var reserved = await _context.ProductVariants
@@ -95,6 +125,7 @@ public class OrderService : IOrderService
                             return (false, $"Không đủ tồn kho cho {product.Name} - {variant.VolumeLabel}.", null);
                         variant.StockQuantity -= line.Quantity;
                     }
+
                     unitPrice = variant.SalePrice > 0 ? variant.SalePrice : variant.OriginalPrice;
                     if (unitPrice <= 0) unitPrice = product.BasePrice;
                     variantLabel = variant.VolumeLabel;
@@ -106,6 +137,7 @@ public class OrderService : IOrderService
                     variantLabel = "Fullbox";
                 }
 
+                // Them chi tiet don hang vao danh sach Items
                 order.Items.Add(new OrderItem
                 {
                     ProductId = product.Id,
@@ -118,11 +150,16 @@ public class OrderService : IOrderService
                 });
             }
 
+            // Tinh tong gia tri tam tinh (SubTotal)
             order.SubTotal = order.Items.Sum(i => i.UnitPrice * i.Quantity);
+
+            // Xu ly ap dung ma giam gia Voucher neu co
             if (!string.IsNullOrWhiteSpace(request.VoucherCode))
             {
                 var voucher = await ValidateVoucherAsync(request.VoucherCode, order.SubTotal);
                 if (voucher == null) return (false, "Mã ưu đãi không hợp lệ, đã hết lượt hoặc không đủ điều kiện.", null);
+
+                // Tang so luong da su dung cua voucher
                 if (isRelational)
                 {
                     var used = await _context.Vouchers
@@ -145,23 +182,37 @@ public class OrderService : IOrderService
                 order.VoucherCode = voucher.Code;
             }
 
+            // Mien phi ship cho don tu 2 trieu VND, nguoc lai phi ship 35.000 VND
             order.ShippingFee = order.SubTotal >= 2_000_000 ? 0 : 35_000;
             order.TotalAmount = Math.Max(0, order.SubTotal - order.DiscountAmount + order.ShippingFee + order.GiftWrappingFee);
+
+            // Luu don hang vao co so du lieu
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
+
+            // Commit transaction neu moi thao tac deu thanh cong
             if (transaction != null) await transaction.CommitAsync();
             return (true, null, order);
         }
         catch
         {
+            // Rollback giao dich neu xay ra loi de bao toan ton kho
             if (transaction != null) await transaction.RollbackAsync();
             return (false, "Không thể hoàn tất đơn hàng. Tồn kho có thể vừa thay đổi; vui lòng kiểm tra giỏ hàng và thử lại.", null);
         }
     }
 
+    // ==========================================
+    // 4. TRA CUU DON HANG THEO MA (ORDER CODE)
+    // ==========================================
+    // Lay thong tin don hang kem chi tiet san pham phuc vu tra cuu
     public async Task<Order?> GetOrderByCodeAsync(string orderCode) =>
-        await _context.Orders.Include(o => o.Items).FirstOrDefaultAsync(o => o.OrderCode == orderCode);
+        await _context.Orders.AsNoTracking().Include(o => o.Items).FirstOrDefaultAsync(o => o.OrderCode == orderCode);
 
+    // ==========================================
+    // 5. XAC NHAN THANH TOAN DON HANG
+    // ==========================================
+    // Cap nhat trang thai thanh toan thanh Cong (Completed)
     public async Task<bool> ConfirmPaymentAsync(string orderCode)
     {
         var order = await _context.Orders.FirstOrDefaultAsync(o => o.OrderCode == orderCode);

@@ -12,6 +12,10 @@ using Perfume.Infrastructure.Services;
 
 namespace Perfume.Web.Controllers;
 
+/// <summary>
+/// Controller quan ly toan bo quy trinh thanh toan don hang (Checkout),
+/// tich hop VietQR dong, ma giam gia Voucher va bao ve don hang khach vang lai qua IDataProtector.
+/// </summary>
 public class CheckoutController : Controller
 {
     private const string GuestCartCookie = "plx_guest_cart";
@@ -21,6 +25,9 @@ public class CheckoutController : Controller
     private readonly UserManager<AppUser> _users;
     private readonly IDataProtector _guestOrderProtector;
 
+    // ==========================================
+    // 1. KHOI TAO CONTROLLER VA DEPENDENCY INJECTION
+    // ==========================================
     public CheckoutController(IOrderService orderService, IOrderEmailSender emailSender, ICustomerCartService carts,
         UserManager<AppUser> users, IDataProtectionProvider protectionProvider)
     {
@@ -31,6 +38,10 @@ public class CheckoutController : Controller
         _guestOrderProtector = protectionProvider.CreateProtector("PerfumeLuxe.GuestOrderTracking.v1");
     }
 
+    // ==========================================
+    // 2. DONG BO THONG TIN HANG THANH VIEN VIP
+    // ==========================================
+    // Xac dinh hang thanh vien va phan tram giam gia cua user dang dang nhap
     private async Task<LoyaltyStatusDto?> ResolveUserLoyaltyStatusAsync(AppUser? user, CancellationToken cancellationToken)
     {
         var userId = user?.Id ?? CurrentUserId();
@@ -70,6 +81,10 @@ public class CheckoutController : Controller
         };
     }
 
+    // ==========================================
+    // 3. TRANG THANH TOAN (INDEX)
+    // ==========================================
+    // Hien thi giao dien nhap thong tin nguoi nhan, dia chi va tom tat gio hang
     [HttpGet]
     public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
@@ -89,6 +104,10 @@ public class CheckoutController : Controller
         });
     }
 
+    // ==========================================
+    // 4. XU LY DAT HANG (PLACE ORDER)
+    // ==========================================
+    // Thuc thi dat hang transaction Serializable, xoa gio va gui email xac nhan
     [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> PlaceOrder(CheckoutRequestDto model, CancellationToken cancellationToken)
     {
@@ -122,12 +141,14 @@ public class CheckoutController : Controller
             return View("Index", model);
         }
 
+        // Xoa sach gio hang sau khi dat hang thanh cong
         await _carts.ClearAsync(userId, guestToken, cancellationToken);
         string? token = null;
         if (order.UserId == null) token = _guestOrderProtector.Protect(order.OrderCode);
         var trackingUrl = token == null ? null : Url.Action(nameof(Success), "Checkout", new { token }, Request.Scheme);
         await _emailSender.SendOrderConfirmationAsync(order, trackingUrl);
 
+        // Chuyen huong theo phuong thuc thanh toan
         if (order.PaymentMethod == PaymentMethod.BankTransfer)
         {
             return order.UserId == null
@@ -140,6 +161,10 @@ public class CheckoutController : Controller
             : RedirectToAction(nameof(Success), new { orderCode = order.OrderCode });
     }
 
+    // ==========================================
+    // 5. THANH TOAN VIETQR CHUYEN KHOAN
+    // ==========================================
+    // Hien thi ma QR Code Vietcombank dong tu sinh theo so tien va ma don
     [HttpGet]
     public async Task<IActionResult> VietQR(string? orderCode, string? token)
     {
@@ -172,6 +197,7 @@ public class CheckoutController : Controller
         return View(order);
     }
 
+    // Xac nhan khach hang da thuc hien chuyen khoan xong
     [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> ConfirmBankTransfer(string? orderCode, string? token)
     {
@@ -196,6 +222,9 @@ public class CheckoutController : Controller
             : RedirectToAction(nameof(Success), new { orderCode = order.OrderCode });
     }
 
+    // ==========================================
+    // 6. TRANG DAT HANG THANH CONG (SUCCESS)
+    // ==========================================
     [HttpGet]
     public async Task<IActionResult> Success(string? orderCode, string? token)
     {
@@ -216,6 +245,10 @@ public class CheckoutController : Controller
         return View(order);
     }
 
+    // ==========================================
+    // 7. KIEM TRA MA VOUCHER REALTIME
+    // ==========================================
+    // API kiem tra tinh hop le va tinh so tien duoc giam truoc khi thanh toan
     [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> CheckVoucher([FromBody] VoucherCheckRequest request, CancellationToken cancellationToken)
     {

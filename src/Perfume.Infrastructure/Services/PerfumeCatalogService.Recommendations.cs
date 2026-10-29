@@ -5,11 +5,17 @@ using Perfume.Domain.Enums;
 
 namespace Perfume.Infrastructure.Services;
 
+/// <summary>
+/// Service de xuat mui huong thong minh (AI Scent Quiz Recommendation Engine).
+/// </summary>
 public partial class PerfumeCatalogService
 {
+    // ==========================================
+    // 1. DE XUAT MUI HUONG THEO KET QUA KHAO SAT (QUIZ)
+    // ==========================================
     public async Task<QuizRecommendationResultDto> GetQuizRecommendationsAsync(QuizAnswerRequest request)
     {
-        var allProducts = await _context.Products
+        var allProducts = await _context.Products.AsNoTracking().AsSplitQuery()
             .Include(p => p.Brand)
             .Include(p => p.FragranceFamily)
             .Include(p => p.FragranceNotes).ThenInclude(fn => fn.FragranceNote)
@@ -26,7 +32,7 @@ public partial class PerfumeCatalogService
             };
         }
 
-        // 1. Chấm điểm ma trận đa chiều cho từng sản phẩm
+        // Buoc 1: Cham diem ma tran da chieu cho tung san pham
         var scoredList = allProducts.Select(p =>
         {
             var rawScore = CalculateRawMatchScore(p, request);
@@ -35,7 +41,7 @@ public partial class PerfumeCatalogService
         .OrderByDescending(x => x.RawScore)
         .ToList();
 
-        // 2. Lấy top 4 sản phẩm điểm cao nhất và chuẩn hóa Match Score % (88% - 99%)
+        // Buoc 2: Lay top 4 san pham diem cao nhat va chuan hoa Match Score % (88% - 99%)
         var topScored = scoredList.Take(4).ToList();
         var maxRaw = topScored.FirstOrDefault()?.RawScore ?? 100;
         if (maxRaw <= 0) maxRaw = 100;
@@ -46,7 +52,7 @@ public partial class PerfumeCatalogService
             var item = topScored[i];
             var p = item.Product;
 
-            // Tính toán Match Score % theo thang tiệm cận chuẩn luxury: 98% -> 94% -> 91% -> 88%
+            // Tinh toan Match Score % theo thang tiem can chuan luxury: 98% -> 94% -> 91% -> 88%
             int percentageScore;
             if (i == 0) percentageScore = Math.Min(99, Math.Max(95, 90 + (int)(item.RawScore * 9.0 / maxRaw)));
             else if (i == 1) percentageScore = Math.Min(95, Math.Max(92, 88 + (int)(item.RawScore * 7.0 / maxRaw)));
@@ -83,18 +89,21 @@ public partial class PerfumeCatalogService
             });
         }
 
-        // 3. Sinh hồ sơ Scent Archetype độc bản
+        // Buoc 3: Sinh ho so Scent Archetype doc ban
         var archetype = GenerateArchetype(request);
         archetype.Items = items;
 
         return archetype;
     }
 
+    // ==========================================
+    // 2. TINH DIEM MA TRAN PHU HOP (MATCH SCORE)
+    // ==========================================
     private static double CalculateRawMatchScore(Product p, QuizAnswerRequest req)
     {
         double score = 0;
 
-        // 1. Phù hợp Giới tính (Max 25đ)
+        // Tieu chi 1: Phu hop Gioi tinh (Toi da 25 diem)
         if (req.GenderPreference == "men")
         {
             if (p.Gender == GenderTarget.Men) score += 25;
@@ -107,13 +116,13 @@ public partial class PerfumeCatalogService
             else if (p.Gender == GenderTarget.Unisex) score += 20;
             else score += 5;
         }
-        else // unisex
+        else // Unisex
         {
             if (p.Gender == GenderTarget.Unisex) score += 25;
             else score += 18;
         }
 
-        // 2. Phong thái / Vibe & Scent Family (Max 30đ)
+        // Tieu chi 2: Phong thai / Vibe & Nhom huong Scent Family (Toi da 30 diem)
         var scentType = p.FragranceFamily?.ScentType;
         if (req.Vibe == "luxury")
         {
@@ -149,7 +158,7 @@ public partial class PerfumeCatalogService
             score += 20;
         }
 
-        // 3. Hoàn cảnh / Occasion (Max 15đ)
+        // Tieu chi 3: Hoan canh su dung / Occasion (Toi da 15 diem)
         if (req.SeasonOrOccasion == "evening" || req.SeasonOrOccasion == "special")
         {
             if (scentType == ScentFamily.Oriental || scentType == ScentFamily.Woody || scentType == ScentFamily.Leather || p.Concentration >= Concentration.EDP) score += 15;
@@ -160,13 +169,13 @@ public partial class PerfumeCatalogService
             if (scentType == ScentFamily.Fresh || scentType == ScentFamily.Citrus || scentType == ScentFamily.Aromatic || scentType == ScentFamily.Floral) score += 15;
             else score += 8;
         }
-        else // all
+        else // Dung trong tat ca moi hoan canh
         {
             if (p.SeasonRecommendation?.Contains("Bốn mùa", StringComparison.OrdinalIgnoreCase) == true || scentType == ScentFamily.Woody || scentType == ScentFamily.Fresh) score += 15;
             else score += 10;
         }
 
-        // 4. Cường độ / Độ lưu tỏa (Max 15đ)
+        // Tieu chi 4: Cuong do / Do luu toa (Toi da 15 diem)
         if (req.IntensityPreference == "intense")
         {
             if (p.Concentration >= Concentration.Parfum || p.Longevity?.Contains("12", StringComparison.OrdinalIgnoreCase) == true) score += 15;
@@ -178,14 +187,14 @@ public partial class PerfumeCatalogService
             if (p.Concentration >= Concentration.EDP) score += 15;
             else score += 9;
         }
-        else // moderate
+        else // Vua phai (moderate)
         {
             if (p.Concentration <= Concentration.EDT || scentType == ScentFamily.Fresh || scentType == ScentFamily.Citrus) score += 15;
             else if (p.Concentration == Concentration.EDP) score += 10;
             else score += 6;
         }
 
-        // 5. Ngân sách & Định dạng (Max 10đ)
+        // Tieu chi 5: Ngan sach & Dinh dang gia (Toi da 10 diem)
         if (req.BudgetPreference == "high")
         {
             if (p.BasePrice >= 5000000 || p.Brand?.Name.Contains("Creed", StringComparison.OrdinalIgnoreCase) == true || p.Brand?.Name.Contains("Kilian", StringComparison.OrdinalIgnoreCase) == true || p.Brand?.Name.Contains("Tom Ford", StringComparison.OrdinalIgnoreCase) == true) score += 10;
@@ -193,17 +202,17 @@ public partial class PerfumeCatalogService
         }
         else if (req.BudgetPreference == "sample")
         {
-            // Chai có giá gốc hợp lý hoặc có thể chiết
+            // Chai co muc gia hop ly hoac co the thu chiet
             if (p.BasePrice <= 4000000) score += 10;
             else score += 7;
         }
-        else // mid
+        else // Muc trung binh (mid)
         {
             if (p.BasePrice >= 3000000 && p.BasePrice <= 6000000) score += 10;
             else score += 6;
         }
 
-        // 6. Điểm chất lượng & Đánh giá (Max 5đ)
+        // Tieu chi 6: Danh gia nguoi dung va san pham tieu bieu (Toi da 5 diem)
         if (p.RatingAverage >= 4.8) score += 5;
         else if (p.RatingAverage >= 4.5) score += 3;
 
@@ -212,6 +221,9 @@ public partial class PerfumeCatalogService
         return score;
     }
 
+    // ==========================================
+    // 3. SINH LY DO DE XUAT PHU HOP
+    // ==========================================
     private static string GenerateMatchReason(Product p, QuizAnswerRequest req)
     {
         var brandName = p.Brand?.Name ?? "Thương hiệu";
@@ -243,6 +255,9 @@ public partial class PerfumeCatalogService
         return $"Tuyệt phẩm cân bằng từ {brandName} với nhóm {familyName} và nốt {notesText}, tương thích trọn vẹn với gu thưởng thức mùi hương độc bản của bạn.";
     }
 
+    // ==========================================
+    // 4. SINH DANH HIEU SCENT ARCHETYPE DOC BAN
+    // ==========================================
     private static QuizRecommendationResultDto GenerateArchetype(QuizAnswerRequest req)
     {
         if (req.GenderPreference == "men" && (req.Vibe == "luxury" || req.Vibe == "mysterious" || req.SeasonOrOccasion == "evening" || req.SeasonOrOccasion == "special"))
@@ -297,7 +312,7 @@ public partial class PerfumeCatalogService
             };
         }
 
-        // Mặc định hoặc Unisex Luxury
+        // Mac dinh hoac Unisex Luxury
         return new QuizRecommendationResultDto
         {
             ArchetypeTitle = "The Avant-Garde Connoisseur",
@@ -308,5 +323,4 @@ public partial class PerfumeCatalogService
             BestOccasions = "Mọi khoảnh khắc bạn muốn khẳng định dấu ấn cá nhân độc nhất vô nhị"
         };
     }
-
 }

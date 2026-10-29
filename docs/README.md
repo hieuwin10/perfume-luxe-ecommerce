@@ -11,10 +11,11 @@ Hệ thống tài liệu được tổ chức theo chuẩn kiến trúc cấp t�
 
 | Tài Liệu | Nội Dung Cốt Lõi | Đối Tượng Mục Tiêu |
 | :--- | :--- | :--- |
+| 📘 [**BMAD.md**](./BMAD.md) | **Tài liệu chuẩn BMAD (Business - Model - Architecture - Database) & Hồ sơ [docs/bmad/](./bmad/README.md)** | Toàn bộ các bên liên quan (C-Level, PM, Architects, Devs) |
 | 🏛️ [**ARCHITECTURE.md**](./ARCHITECTURE.md) | Kiến trúc Clean Architecture 4 Tầng, Design Patterns, C4 Model, Middleware Pipeline | Solution Architects, Senior Engineers |
-| 🗄️ [**DATABASE_SCHEMA.md**](./DATABASE_SCHEMA.md) | 17 Bảng CSDL, Sơ đồ ERD Mermaid, Data Dictionary, Indexing & Audit, Seeding Scripts | Database Administrators, Backend Devs |
+| 🗄️ [**DATABASE_SCHEMA.md**](./DATABASE_SCHEMA.md) | 22 Bảng CSDL, Sơ đồ ERD Mermaid, Data Dictionary, Schema Migration V1-V6, Indexing & Audit | Database Administrators, Backend Devs |
 | 🛡️ [**RBAC_AND_SECURITY.md**](./RBAC_AND_SECURITY.md) | Ma trận phân quyền 3 cấp (Admin, StoreManager, Customer), JWT & Identity Cookie, OWASP Hardening | Security Officers, Lead Developers |
-| 💎 [**BUSINESS_FEATURES.md**](./BUSINESS_FEATURES.md) | Đặc tả 7 Nghiệp vụ cốt lõi: Catalog 3 Tầng Hương, AI Fragrance Quiz, Cart & Voucher, Checkout, Blog Tạp chí | Product Managers, Business Analysts |
+| 💎 [**BUSINESS_FEATURES.md**](./BUSINESS_FEATURES.md) | Đặc tả 10 Nghiệp vụ cốt lõi: Catalog 3 Tầng Hương, AI Quiz, Cart, Checkout, Blog, Discovery Box, VIP Loyalty, Flash Sale, VietQR, Order Tracking | Product Managers, Business Analysts |
 | 📊 [**STORE_MANAGER_AND_ADMIN_GUIDE.md**](./STORE_MANAGER_AND_ADMIN_GUIDE.md) | Sổ tay vận hành Dashboard: Phân tích dòng tiền ca, Tốc độ xoay vòng kho, Báo cáo tồn kho, Quản lý Voucher | Store Managers, C-Level, Operations |
 | 🔌 [**API_REFERENCE.md**](./API_REFERENCE.md) | Đặc tả RESTful Web API cho Mobile App/Frontend SPA, Customer API, JWT Bearer Auth | Frontend/Mobile Devs, Integrators |
 | 🚀 [**DEPLOYMENT_AND_DEVOPS.md**](./DEPLOYMENT_AND_DEVOPS.md) | Triển khai Docker, Docker Compose, Quản lý biến môi trường `.env`, Database Migrations & Backup | DevOps, SRE, SysAdmins |
@@ -39,7 +40,7 @@ flowchart TD
 
     subgraph InfraLayer["Lớp Hạ Tầng & Dữ Liệu"]
         InfraProject["Perfume.Infrastructure (EF Core 8, Dapper, ASP.NET Identity)"]
-        SqlDb[("SQL Server 2022 (PerfumeDb - 17 Tables)")]
+        SqlDb[("SQL Server 2022 (PerfumeDb - 22 Tables)")]
         RedisCache[("Redis 7 Cache (Distributed Sessions & Fragrance Caching)")]
         Mailpit[("Mailpit SMTP (Thử nghiệm Email kích hoạt & Hóa đơn)")]
     end

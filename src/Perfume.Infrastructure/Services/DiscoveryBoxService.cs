@@ -13,12 +13,19 @@ using Perfume.Infrastructure.Identity;
 
 namespace Perfume.Infrastructure.Services;
 
+/// <summary>
+/// Service quan ly tinh nang tuy bien hop qua trai nghiem mui huong Discovery Box (3-5 ong mau, in thiep ep kim).
+/// </summary>
 public sealed class DiscoveryBoxService : IDiscoveryBoxService
 {
+    // ==========================================
+    // 1. HANG SO VA CAU HINH KIEU HOP QUY CHUAN
+    // ==========================================
     public const int MinVialCount = 3;
     public const int MaxVialCount = 5;
     public const int MaxGreetingMessageLength = 250;
 
+    // Danh sach cac kieu hop qua cao cap duoc phep chon
     private static readonly IReadOnlyList<DiscoveryBoxStyleOptionDto> BoxStyles = new List<DiscoveryBoxStyleOptionDto>
     {
         new()
@@ -44,6 +51,7 @@ public sealed class DiscoveryBoxService : IDiscoveryBoxService
         }
     };
 
+    // Danh sach phong cach font chu in loi chuc tren thiep ep kim
     private static readonly IReadOnlyList<string> AllowedFonts = new List<string>
     {
         "Playfair Display",
@@ -64,6 +72,11 @@ public sealed class DiscoveryBoxService : IDiscoveryBoxService
 
     public IReadOnlyList<string> GetAllowedFonts() => AllowedFonts;
 
+    // ==========================================
+    // 2. TINH GIA ONG MAU CHIET THEO DUNG TICH
+    // ==========================================
+
+    // Tinh gia ong mau dua tren gia goc chai fullbox va he so dung tich (2ml hoac 5ml)
     public decimal CalculateSampleVialPrice(decimal productBasePrice, int volumeMl)
     {
         if (volumeMl != 2 && volumeMl != 5)
@@ -72,16 +85,23 @@ public sealed class DiscoveryBoxService : IDiscoveryBoxService
         var safeBasePrice = Math.Max(0m, productBasePrice);
         if (volumeMl == 2)
         {
+            // 2ml tuong duong 3% gia goc chai fullbox, toi thieu 120.000 VND
             var proportional = Math.Round((safeBasePrice * 0.03m) / 1000m, 0, MidpointRounding.AwayFromZero) * 1000m;
             return Math.Max(120_000m, proportional);
         }
         else
         {
+            // 5ml tuong duong 6% gia goc chai fullbox, toi thieu 250.000 VND
             var proportional = Math.Round((safeBasePrice * 0.06m) / 1000m, 0, MidpointRounding.AwayFromZero) * 1000m;
             return Math.Max(250_000m, proportional);
         }
     }
 
+    // ==========================================
+    // 3. KIEM TRA VA DUNG CAU HINH HOP QUA
+    // ==========================================
+
+    // Kiem tra hop le: kieu hop, so luong 3-5 ong, dung tich, do dai loi chuc va tinh tong tien hop
     public async Task<DiscoveryBoxValidationResultDto> ValidateAndBuildConfigurationAsync(
         DiscoveryBoxBuildRequestDto request,
         CancellationToken cancellationToken = default)
@@ -95,7 +115,7 @@ public sealed class DiscoveryBoxService : IDiscoveryBoxService
             return result;
         }
 
-        // Step 1: Validate Box Style
+        // Buoc 1: Kiem tra kieu hop qua
         var styleCode = (request.BoxStyleCode ?? string.Empty).Trim();
         var boxStyle = BoxStyles.FirstOrDefault(s => string.Equals(s.Code, styleCode, StringComparison.Ordinal));
         if (boxStyle == null)
@@ -103,7 +123,7 @@ public sealed class DiscoveryBoxService : IDiscoveryBoxService
             result.Errors.Add("Kiểu hộp quà không hợp lệ. Vui lòng chọn ClassicWood, RoyalVelvet hoặc ArtisanLeather.");
         }
 
-        // Step 2: Validate Sample Vials (3 to 5 vials, 2ml or 5ml, valid & in-stock products)
+        // Buoc 2: Kiem tra cac ong mau (3 den 5 ong, 2ml hoac 5ml)
         var vials = request.Vials ?? new List<DiscoveryVialSelectionDto>();
         if (vials.Count < MinVialCount)
         {
@@ -126,7 +146,7 @@ public sealed class DiscoveryBoxService : IDiscoveryBoxService
             }
         }
 
-        // Step 3: Validate Greeting Card & Typography
+        // Buoc 3: Kiem tra loi chuc tren thiep ep kim va font chu
         var trimmedMessage = string.IsNullOrWhiteSpace(request.GreetingMessage)
             ? null
             : request.GreetingMessage.Trim();
@@ -162,9 +182,10 @@ public sealed class DiscoveryBoxService : IDiscoveryBoxService
             return result;
         }
 
-        // Verify products in DB
+        // Xac thuc cac san pham duoc chon ton tai trong DB va con hang
         var productIds = vials.Select(v => v.ProductId).Distinct().ToList();
         var productsDict = await _db.Products
+            .AsNoTracking()
             .Include(p => p.Brand)
             .Where(p => productIds.Contains(p.Id) && !p.IsDeleted)
             .ToDictionaryAsync(p => p.Id, cancellationToken);
@@ -220,6 +241,7 @@ public sealed class DiscoveryBoxService : IDiscoveryBoxService
             GreetingFont = font
         };
 
+        // Chuyen cau hinh sang chuoi JSON de luu tru trong Cart / Order
         config.ConfigJson = JsonSerializer.Serialize(new
         {
             boxStyleCode = config.BoxStyleCode,
@@ -246,6 +268,11 @@ public sealed class DiscoveryBoxService : IDiscoveryBoxService
         return result;
     }
 
+    // ==========================================
+    // 4. THEM HOP QUA VAO GIO HANG (CART)
+    // ==========================================
+
+    // Them hop qua vao gio hang cua thanh vien hoac khach vang lai
     public async Task<(bool Success, string? Error, ShoppingCartItem? CartItem)> AddDiscoveryBoxToCartAsync(
         string? userId,
         string? guestToken,
@@ -303,6 +330,11 @@ public sealed class DiscoveryBoxService : IDiscoveryBoxService
         return (true, null, cartItem);
     }
 
+    // ==========================================
+    // 5. DAT HANG TRUC TIEP DISCOVERY BOX
+    // ==========================================
+
+    // Tao don hang rieng cho Discovery Box kem ap dung uu dai VIP
     public async Task<(bool Success, string? Error, Order? Order)> PlaceDiscoveryBoxOrderAsync(
         string? userId,
         CheckoutRequestDto checkoutRequest,
@@ -368,6 +400,11 @@ public sealed class DiscoveryBoxService : IDiscoveryBoxService
         return (true, null, order);
     }
 
+    // ==========================================
+    // 6. HAM PHU TRO DINH DANH GIO HANG (SHA-256)
+    // ==========================================
+
+    // Tao khoa nhan dien gio hang: user:{userId} hoac guest:{sha256}
     private static string? GetOwnerKey(string? userId, string? guestToken)
     {
         if (!string.IsNullOrWhiteSpace(userId)) return "user:" + userId;

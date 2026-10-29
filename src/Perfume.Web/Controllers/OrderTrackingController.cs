@@ -6,15 +6,25 @@ using Perfume.Infrastructure.Data;
 
 namespace Perfume.Web.Controllers;
 
+/// <summary>
+/// Controller cho phep khach hang tra cuu tien do don hang theo ma don va so dien thoai
+/// ma khong can dang nhap tai khoan.
+/// </summary>
 public class OrderTrackingController : Controller
 {
     private readonly PerfumeDbContext _db;
 
+    // ==========================================
+    // 1. KHOI TAO CONTROLLER
+    // ==========================================
     public OrderTrackingController(PerfumeDbContext db)
     {
         _db = db;
     }
 
+    // ==========================================
+    // 2. TRA CUU TIEN DO DON HANG (TIM KIEM THEO MA & SDT)
+    // ==========================================
     [HttpGet]
     [Route("tra-cuu-don-hang")]
     [Route("order-tracking")]
@@ -28,10 +38,11 @@ public class OrderTrackingController : Controller
 
         if (!string.IsNullOrWhiteSpace(model.OrderCode) && !string.IsNullOrWhiteSpace(model.Phone))
         {
-            // Làm sạch số điện thoại để so khớp linh hoạt
+            // Lam sach so dien thoai de so khop linh hoat (chi giu lai chu so)
             var cleanPhone = new string(model.Phone.Where(char.IsDigit).ToArray());
             var queryCode = model.OrderCode.Trim().ToUpperInvariant();
 
+            // Truy van don hang kem danh sach chi tiet san pham
             var order = await _db.Orders
                 .AsNoTracking()
                 .Include(o => o.Items)
@@ -40,7 +51,7 @@ public class OrderTrackingController : Controller
             if (order != null)
             {
                 var orderCleanPhone = new string(order.CustomerPhone.Where(char.IsDigit).ToArray());
-                // Kiểm tra trùng khớp SĐT (ít nhất 6 số cuối hoặc bằng nhau)
+                // Kiem tra khop so dien thoai (trung toan bo hoac khop it nhat 6 so cuoi)
                 bool phoneMatches = orderCleanPhone == cleanPhone || 
                     (orderCleanPhone.Length >= 6 && cleanPhone.Length >= 6 && 
                      (orderCleanPhone.EndsWith(cleanPhone) || cleanPhone.EndsWith(orderCleanPhone)));

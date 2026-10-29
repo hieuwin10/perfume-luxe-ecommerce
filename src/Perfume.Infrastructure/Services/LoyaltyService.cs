@@ -13,11 +13,22 @@ using Perfume.Infrastructure.Identity;
 
 namespace Perfume.Infrastructure.Services;
 
+/// <summary>
+/// Service quan ly chuong trinh khach hang than thiet VIP (Loyalty Engine),
+/// tu dong tinh toan hang thanh vien, % uu dai va diem thuong tich luy.
+/// </summary>
 public class LoyaltyService : ILoyaltyService
 {
+    // ==========================================
+    // 1. HANG SO HAN MUC CHI TIEU VIP VA TICH DIEM
+    // ==========================================
+    // Nguong chi tieu dat hang Silver: 5 trieu VND
     public const decimal SilverThreshold = 5_000_000m;
+    // Nguong chi tieu dat hang Gold: 15 trieu VND
     public const decimal GoldThreshold = 15_000_000m;
+    // Nguong chi tieu dat hang Diamond: 30 trieu VND
     public const decimal DiamondThreshold = 30_000_000m;
+    // Don vi quy doi diem: 10.000 VND = 1 diem thuong
     public const decimal PointsUnitAmount = 10_000m;
 
     private readonly PerfumeDbContext _db;
@@ -27,6 +38,11 @@ public class LoyaltyService : ILoyaltyService
         _db = db;
     }
 
+    // ==========================================
+    // 2. DANH GIA HANG THANH VIEN VA TY LE UU DAI
+    // ==========================================
+
+    // Xac dinh hang thanh vien dua tren tong chi tieu tich luy
     public UserTier EvaluateTier(decimal cumulativeSpent)
     {
         if (cumulativeSpent >= DiamondThreshold) return UserTier.Diamond;
@@ -35,20 +51,23 @@ public class LoyaltyService : ILoyaltyService
         return UserTier.Bronze;
     }
 
+    // Lay phan tram giam gia mac dinh theo tung hang thanh vien
     public decimal GetDiscountPercent(UserTier tier) => tier switch
     {
-        UserTier.Diamond => 12m,
-        UserTier.Gold => 7m,
-        UserTier.Silver => 3m,
-        _ => 0m
+        UserTier.Diamond => 12m, // Diamond giam 12%
+        UserTier.Gold => 7m,     // Gold giam 7%
+        UserTier.Silver => 3m,   // Silver giam 3%
+        _ => 0m                  // Bronze khong giam
     };
 
+    // Tinh toan tong so diem thuong tich luy tu chi tieu
     public int CalculatePoints(decimal cumulativeSpent)
     {
         if (cumulativeSpent <= 0m) return 0;
         return (int)Math.Floor(cumulativeSpent / PointsUnitAmount);
     }
 
+    // Lay hang tiep theo can phan dau
     public UserTier? GetNextTier(UserTier currentTier) => currentTier switch
     {
         UserTier.Bronze => UserTier.Silver,
@@ -58,6 +77,11 @@ public class LoyaltyService : ILoyaltyService
         _ => UserTier.Silver
     };
 
+    // ==========================================
+    // 3. TINH TOAN TIEN DO THANG HANG (% VA SO TIEN)
+    // ==========================================
+
+    // Tinh phan tram tien do tien toi hang tiep theo (0 - 100%)
     public decimal CalculateProgressPercent(decimal cumulativeSpent)
     {
         if (cumulativeSpent <= 0m) return 0m;
@@ -70,15 +94,16 @@ public class LoyaltyService : ILoyaltyService
 
         if (cumulativeSpent < GoldThreshold)
         {
-            var span = GoldThreshold - SilverThreshold; // 10,000,000
+            var span = GoldThreshold - SilverThreshold; // 10.000.000 VND
             return Math.Clamp(Math.Round(((cumulativeSpent - SilverThreshold) / span) * 100m, 2, MidpointRounding.AwayFromZero), 0m, 100m);
         }
 
-        // Gold toward Diamond
-        var goldSpan = DiamondThreshold - GoldThreshold; // 15,000,000
+        // Tu Gold tien len Diamond
+        var goldSpan = DiamondThreshold - GoldThreshold; // 15.000.000 VND
         return Math.Clamp(Math.Round(((cumulativeSpent - GoldThreshold) / goldSpan) * 100m, 2, MidpointRounding.AwayFromZero), 0m, 100m);
     }
 
+    // Tinh so tien con thieu de thuc hien buoc thang hang ke tiep
     public decimal CalculateAmountToNextTier(decimal cumulativeSpent)
     {
         var sanitized = Math.Max(0m, cumulativeSpent);
@@ -88,6 +113,11 @@ public class LoyaltyService : ILoyaltyService
         return SilverThreshold - sanitized;
     }
 
+    // ==========================================
+    // 4. DONG BO TONG CHI TIEU VA CAP NHAT HANG
+    // ==========================================
+
+    // Lay thong tin hoac dong bo lai tong chi tieu tu cac don hang hop le
     public async Task<LoyaltyStatusDto> GetOrSyncUserLoyaltyAsync(string userId, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(userId))
@@ -108,10 +138,13 @@ public class LoyaltyService : ILoyaltyService
             };
         }
 
+        // Lay tat ca don hang cua user khong bi xoa
         var userOrders = await _db.Orders
+            .AsNoTracking()
             .Where(o => o.UserId == userId && !o.IsDeleted)
             .ToListAsync(cancellationToken);
 
+        // Don hop le la don da giao thanh cong hoac da hoan tat thanh toan (khong bi huy/hoan tien)
         var qualifyingOrders = userOrders
             .Where(o => o.OrderStatus != OrderStatus.Cancelled
                      && o.PaymentStatus != PaymentStatus.Failed
@@ -136,6 +169,7 @@ public class LoyaltyService : ILoyaltyService
         var calculatedPoints = CalculatePoints(cumulativeSpent);
         var nextTier = GetNextTier(evaluatedTier);
 
+        // Cap nhat ban ghi UserLoyalty
         if (loyaltyRecord == null)
         {
             loyaltyRecord = new UserLoyalty
@@ -154,6 +188,7 @@ public class LoyaltyService : ILoyaltyService
             loyaltyRecord.Points = calculatedPoints;
         }
 
+        // Dong bo hang va diem thuong vao tai khoan AppUser
         var appUser = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
         if (appUser != null)
         {
@@ -179,6 +214,11 @@ public class LoyaltyService : ILoyaltyService
         };
     }
 
+    // ==========================================
+    // 5. TINH TOAN UU DAI VIP TRUOC KHI CHECKOUT
+    // ==========================================
+
+    // Tinh toan gia tri giam gia VIP kem theo phi van chuyen va qua tang
     public async Task<OrderVipDiscountPreviewDto> CalculateOrderVipPricingAsync(
         string? userId,
         decimal subTotal,
@@ -200,6 +240,7 @@ public class LoyaltyService : ILoyaltyService
         }
 
         var vipDiscountAmount = Math.Round(safeSubTotal * (vipDiscountPercent / 100m), 0, MidpointRounding.AwayFromZero);
+        // Dam bao tong giam gia (VIP + Voucher) khong vuot qua tong gia tri tam tinh
         if (vipDiscountAmount + safeVoucherDiscount > safeSubTotal)
         {
             vipDiscountAmount = Math.Max(0m, safeSubTotal - safeVoucherDiscount);
@@ -224,6 +265,11 @@ public class LoyaltyService : ILoyaltyService
         };
     }
 
+    // ==========================================
+    // 6. AP DUNG UU DAI VIP TRUC TIEP VAO DON HANG
+    // ==========================================
+
+    // Cap nhat cac truong giam gia VIP va phi vao don hang
     public async Task<Order> ApplyVipLoyaltyToOrderAsync(Order order, CancellationToken cancellationToken = default)
     {
         if (order == null) throw new ArgumentNullException(nameof(order));
@@ -249,7 +295,3 @@ public class LoyaltyService : ILoyaltyService
         return order;
     }
 }
-
-// ═══════════════════════════════════════════════════════════════════════════
-// PART 4: 3-STEP DISCOVERY GIFT BOX BUILDER SERVICE
-// ═══════════════════════════════════════════════════════════════════════════

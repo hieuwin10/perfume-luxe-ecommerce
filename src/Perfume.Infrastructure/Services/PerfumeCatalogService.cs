@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Perfume.Application.DTOs;
 using Perfume.Application.Interfaces;
 using Perfume.Domain.Entities;
@@ -7,70 +8,99 @@ using Perfume.Infrastructure.Data;
 
 namespace Perfume.Infrastructure.Services;
 
+/// <summary>
+/// Service xu ly nghiep vu catalog, tim kiem san pham da chieu va quan ly danh muc mui huong.
+/// </summary>
 public partial class PerfumeCatalogService : IPerfumeCatalogService
 {
     private readonly PerfumeDbContext _context;
+    private readonly IMemoryCache? _cache;
 
-    public PerfumeCatalogService(PerfumeDbContext context)
+    // ==========================================
+    // 1. KHOI TAO SERVICE VA DEPENDENCY INJECTION
+    // ==========================================
+    // Khoi tao service voi PerfumeDbContext va tuy chon IMemoryCache de cache du lieu tinh
+    public PerfumeCatalogService(PerfumeDbContext context, IMemoryCache? cache = null)
     {
         _context = context;
+        _cache = cache;
     }
 
+    // ==========================================
+    // 2. CAC TRUY VAN TRANG CHU & DANH MUC NOI BAT
+    // ==========================================
+
+    // Lay toi da 8 san pham tieu bieu (Featured) hien thi trang chu
     public async Task<List<ProductCardDto>> GetFeaturedProductsAsync()
     {
-        return await QueryProductCards(_context.Products.Where(p => p.IsFeatured).Take(8));
+        return await QueryProductCards(_context.Products.AsNoTracking().Where(p => p.IsFeatured).Take(8));
     }
 
+    // Lay toi da 8 san pham ban chay nhat (Best Sellers)
     public async Task<List<ProductCardDto>> GetBestSellersAsync()
     {
-        return await QueryProductCards(_context.Products.Where(p => p.IsBestSeller).Take(8));
+        return await QueryProductCards(_context.Products.AsNoTracking().Where(p => p.IsBestSeller).Take(8));
     }
 
+    // Lay toi da 8 san pham moi ve (New Arrivals)
     public async Task<List<ProductCardDto>> GetNewArrivalsAsync()
     {
-        return await QueryProductCards(_context.Products.Where(p => p.IsNewArrival).Take(8));
+        return await QueryProductCards(_context.Products.AsNoTracking().Where(p => p.IsNewArrival).Take(8));
     }
 
+    // ==========================================
+    // 3. BO LOC SAN PHAM DA CHIEU & PHAN TRANG
+    // ==========================================
+
+    // Loc san pham theo tu khoa, thuong hieu, nhom huong, nong do, gia va sap xep
     public async Task<(List<ProductCardDto> Items, int TotalCount)> GetProductsAsync(ProductFilterParams filter)
     {
-        var query = _context.Products.AsQueryable();
+        var query = _context.Products.AsNoTracking().AsQueryable();
 
+        // Loc theo tu khoa tim kiem (ten, thuong hieu, mo ta ngan)
         if (!string.IsNullOrWhiteSpace(filter.Keyword))
         {
             var kw = filter.Keyword.Trim();
             query = query.Where(p => p.Name.Contains(kw) || p.Brand!.Name.Contains(kw) || p.ShortDescription!.Contains(kw));
         }
 
+        // Loc theo slug cua thuong hieu
         if (!string.IsNullOrWhiteSpace(filter.BrandSlug))
         {
             query = query.Where(p => p.Brand != null && p.Brand.Slug == filter.BrandSlug);
         }
 
+        // Loc theo slug cua danh muc
         if (!string.IsNullOrWhiteSpace(filter.CategorySlug))
         {
             query = query.Where(p => p.Category != null && p.Category.Slug == filter.CategorySlug);
         }
 
+        // Loc theo slug cua nhom huong (Fragrance Family)
         if (!string.IsNullOrWhiteSpace(filter.FamilySlug))
         {
             query = query.Where(p => p.FragranceFamily != null && p.FragranceFamily.Slug == filter.FamilySlug);
         }
 
+        // Loc theo not huong cu the
         if (filter.NoteId.HasValue)
         {
             query = query.Where(p => p.FragranceNotes.Any(fn => fn.FragranceNoteId == filter.NoteId.Value));
         }
 
+        // Loc theo gioi tinh muc tieu (Unisex phu hop voi ca Nam va Nu)
         if (filter.Gender.HasValue)
         {
             query = query.Where(p => p.Gender == filter.Gender.Value || p.Gender == GenderTarget.Unisex);
         }
 
+        // Loc theo nong do tinh dau (EDC, EDT, EDP, Extrait)
         if (filter.Concentration.HasValue)
         {
             query = query.Where(p => p.Concentration == filter.Concentration.Value);
         }
 
+        // Loc theo khoang gia (toi thieu va toi da)
         if (filter.MinPrice.HasValue)
         {
             query = query.Where(p => p.BasePrice >= filter.MinPrice.Value);
@@ -81,8 +111,10 @@ public partial class PerfumeCatalogService : IPerfumeCatalogService
             query = query.Where(p => p.BasePrice <= filter.MaxPrice.Value);
         }
 
+        // Dem tong so ban ghi thoa man bo loc truoc khi phan trang
         int totalCount = await query.CountAsync();
 
+        // Sap xep danh sach theo tieu chi yeu cau
         query = filter.SortBy?.ToLower() switch
         {
             "price_asc" => query.OrderBy(p => p.BasePrice),
@@ -91,16 +123,25 @@ public partial class PerfumeCatalogService : IPerfumeCatalogService
             _ => query.OrderByDescending(p => p.CreatedAt)
         };
 
+        // Ap dung phan trang (Skip / Take)
         int skip = (Math.Max(1, filter.Page) - 1) * filter.PageSize;
         var paginatedQuery = query.Skip(skip).Take(filter.PageSize);
 
+        // Truy van va chuyen doi sang Card DTO
         var items = await QueryProductCards(paginatedQuery);
         return (items, totalCount);
     }
 
+    // ==========================================
+    // 4. TRUY VAN CHI TIET SAN PHAM (DETAIL)
+    // ==========================================
+
+    // Lay chi tiet san pham day du kem cac tang huong theo Slug
     public async Task<ProductDetailDto?> GetProductBySlugAsync(string slug)
     {
         var product = await _context.Products
+            .AsNoTracking()
+            .AsSplitQuery()
             .Include(p => p.Brand)
             .Include(p => p.Category)
             .Include(p => p.FragranceFamily)
@@ -113,9 +154,12 @@ public partial class PerfumeCatalogService : IPerfumeCatalogService
         return product == null ? null : await MapToProductDetailDtoAsync(product);
     }
 
+    // Lay chi tiet san pham day du kem cac tang huong theo ID
     public async Task<ProductDetailDto?> GetProductByIdAsync(int id)
     {
         var product = await _context.Products
+            .AsNoTracking()
+            .AsSplitQuery()
             .Include(p => p.Brand)
             .Include(p => p.Category)
             .Include(p => p.FragranceFamily)
@@ -128,6 +172,7 @@ public partial class PerfumeCatalogService : IPerfumeCatalogService
         return product == null ? null : await MapToProductDetailDtoAsync(product);
     }
 
+    // Chuyen doi Entity Product sang ProductDetailDto kem thong tin Flash Sale hien huu
     private async Task<ProductDetailDto> MapToProductDetailDtoAsync(Product product)
     {
         var dto = new ProductDetailDto
@@ -183,8 +228,10 @@ public partial class PerfumeCatalogService : IPerfumeCatalogService
             GalleryImages = product.Images.OrderBy(i => i.DisplayOrder).Select(i => i.ImageUrl).ToList()
         };
 
+        // Kiem tra san pham co dang trong chuong trinh Flash Sale con han va con suat khong
         var now = DateTime.UtcNow;
         var activeFlashItem = await _context.FlashSaleItems
+            .AsNoTracking()
             .Include(i => i.FlashSale)
             .Where(i => i.ProductId == product.Id
                 && i.FlashSale != null
@@ -210,29 +257,79 @@ public partial class PerfumeCatalogService : IPerfumeCatalogService
         return dto;
     }
 
+    // ==========================================
+    // 5. CACHING CAC DANH MUC PHAN LOAI TINH
+    // ==========================================
+
+    // Lay danh sach thuong hieu (co ap dung MemoryCache 1 gio)
     public async Task<List<Brand>> GetBrandsAsync()
     {
-        return await _context.Brands.OrderBy(b => b.Name).ToListAsync();
+        if (_cache != null)
+        {
+            return await _cache.GetOrCreateAsync("catalog_brands_all", async entry =>
+            {
+                entry.SlidingExpiration = TimeSpan.FromMinutes(10);
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
+                return await _context.Brands.AsNoTracking().OrderBy(b => b.Name).ToListAsync();
+            }) ?? new List<Brand>();
+        }
+        return await _context.Brands.AsNoTracking().OrderBy(b => b.Name).ToListAsync();
     }
 
+    // Lay danh sach danh muc nganh hang (co ap dung MemoryCache 1 gio)
     public async Task<List<Category>> GetCategoriesAsync()
     {
-        return await _context.Categories.OrderBy(c => c.Name).ToListAsync();
+        if (_cache != null)
+        {
+            return await _cache.GetOrCreateAsync("catalog_categories_all", async entry =>
+            {
+                entry.SlidingExpiration = TimeSpan.FromMinutes(10);
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
+                return await _context.Categories.AsNoTracking().OrderBy(c => c.Name).ToListAsync();
+            }) ?? new List<Category>();
+        }
+        return await _context.Categories.AsNoTracking().OrderBy(c => c.Name).ToListAsync();
     }
 
+    // Lay danh sach nhom huong (co ap dung MemoryCache 1 gio)
     public async Task<List<FragranceFamily>> GetFragranceFamiliesAsync()
     {
-        return await _context.FragranceFamilies.OrderBy(f => f.Name).ToListAsync();
+        if (_cache != null)
+        {
+            return await _cache.GetOrCreateAsync("catalog_families_all", async entry =>
+            {
+                entry.SlidingExpiration = TimeSpan.FromMinutes(10);
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
+                return await _context.FragranceFamilies.AsNoTracking().OrderBy(f => f.Name).ToListAsync();
+            }) ?? new List<FragranceFamily>();
+        }
+        return await _context.FragranceFamilies.AsNoTracking().OrderBy(f => f.Name).ToListAsync();
     }
 
+    // Lay danh sach tat ca not huong (co ap dung MemoryCache 1 gio)
     public async Task<List<FragranceNote>> GetFragranceNotesAsync()
     {
-        return await _context.FragranceNotes.OrderBy(n => n.Name).ToListAsync();
+        if (_cache != null)
+        {
+            return await _cache.GetOrCreateAsync("catalog_notes_all", async entry =>
+            {
+                entry.SlidingExpiration = TimeSpan.FromMinutes(10);
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
+                return await _context.FragranceNotes.AsNoTracking().OrderBy(n => n.Name).ToListAsync();
+            }) ?? new List<FragranceNote>();
+        }
+        return await _context.FragranceNotes.AsNoTracking().OrderBy(n => n.Name).ToListAsync();
     }
 
+    // ==========================================
+    // 6. HAM PHU TRO TRUY VAN VA MAP PRODUCT CARD
+    // ==========================================
+
+    // Ham phu tro lay thong tin Card san pham va kiem tra Flash Sale hang loat
     private async Task<List<ProductCardDto>> QueryProductCards(IQueryable<Product> query)
     {
         var cards = await query
+            .AsNoTracking()
             .Select(p => new ProductCardDto
             {
                 Id = p.Id,
@@ -263,9 +360,11 @@ public partial class PerfumeCatalogService : IPerfumeCatalogService
 
         if (cards.Any())
         {
+            // Tinh toan thong tin Flash Sale cho tap san pham trong 1 truy van duy nhat
             var now = DateTime.UtcNow;
             var productIds = cards.Select(c => c.Id).ToList();
             var activeItems = await _context.FlashSaleItems
+                .AsNoTracking()
                 .Include(i => i.FlashSale)
                 .Where(i => productIds.Contains(i.ProductId)
                     && i.FlashSale != null

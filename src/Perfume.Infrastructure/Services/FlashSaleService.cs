@@ -6,15 +6,25 @@ using Perfume.Infrastructure.Data;
 
 namespace Perfume.Infrastructure.Services;
 
+/// <summary>
+/// Service quan ly cac chien dich Flash Sale gio vang, tinh gia uu dai va kiem soat ton kho suat mua.
+/// </summary>
 public class FlashSaleService : IFlashSaleService
 {
     private readonly PerfumeDbContext _context;
 
+    // ==========================================
+    // 1. KHOI TAO SERVICE
+    // ==========================================
     public FlashSaleService(PerfumeDbContext context)
     {
         _context = context;
     }
 
+    // ==========================================
+    // 2. LAY CHIEN DICH FLASH SALE DANG HOAT DONG
+    // ==========================================
+    // Lay chien dich dang kich hoat ma thoi gian hien tai nam trong khoang StartTime va EndTime
     public async Task<FlashSaleDto?> GetActiveFlashSaleAsync(CancellationToken cancellationToken = default)
     {
         var now = DateTime.UtcNow;
@@ -32,6 +42,10 @@ public class FlashSaleService : IFlashSaleService
         return MapToDto(flashSale);
     }
 
+    // ==========================================
+    // 3. QUAN LY DANH SACH VA CHI TIET CHIEN DICH
+    // ==========================================
+    // Lay tat ca chien dich Flash Sale sap xep theo thoi gian tao moi nhat
     public async Task<List<FlashSaleDto>> GetAllFlashSalesAsync(CancellationToken cancellationToken = default)
     {
         var flashSales = await _context.FlashSales
@@ -46,6 +60,7 @@ public class FlashSaleService : IFlashSaleService
         return flashSales.Select(MapToDto).ToList();
     }
 
+    // Lay chi tiet chien dich Flash Sale theo ID
     public async Task<FlashSaleDto?> GetFlashSaleByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         var flashSale = await _context.FlashSales
@@ -60,6 +75,7 @@ public class FlashSaleService : IFlashSaleService
         return MapToDto(flashSale);
     }
 
+    // Tao moi chien dich Flash Sale va thiet lap han muc ton kho tung san pham
     public async Task<FlashSaleDto> CreateFlashSaleAsync(CreateFlashSaleRequest request, CancellationToken cancellationToken = default)
     {
         var entity = new FlashSale
@@ -90,6 +106,7 @@ public class FlashSaleService : IFlashSaleService
         return (await GetFlashSaleByIdAsync(entity.Id, cancellationToken)) ?? MapToDto(entity);
     }
 
+    // Bat hoac tat trang thai hoat dong cua chien dich Flash Sale
     public async Task<bool> ToggleStatusAsync(int id, CancellationToken cancellationToken = default)
     {
         var fs = await _context.FlashSales.FindAsync(new object[] { id }, cancellationToken);
@@ -100,6 +117,7 @@ public class FlashSaleService : IFlashSaleService
         return true;
     }
 
+    // Xoa mem (Soft delete) chien dich Flash Sale
     public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default)
     {
         var fs = await _context.FlashSales.FindAsync(new object[] { id }, cancellationToken);
@@ -110,6 +128,10 @@ public class FlashSaleService : IFlashSaleService
         return true;
     }
 
+    // ==========================================
+    // 4. KIEM TRA SUAT FLASH SALE CHO MOT SAN PHAM
+    // ==========================================
+    // Kiem tra san pham va phien ban co dang trong suat uu dai Flash Sale con luot mua khong
     public async Task<FlashSaleItemDto?> GetActiveFlashSaleItemForProductAsync(int productId, int? variantId = null, CancellationToken cancellationToken = default)
     {
         var now = DateTime.UtcNow;
@@ -152,6 +174,10 @@ public class FlashSaleService : IFlashSaleService
         };
     }
 
+    // ==========================================
+    // 5. HAM PHU TRO ANH XA DTO (MAPPING)
+    // ==========================================
+    // Anh xa thuc the FlashSale sang DTO hien thi
     private static FlashSaleDto MapToDto(FlashSale f)
     {
         return new FlashSaleDto

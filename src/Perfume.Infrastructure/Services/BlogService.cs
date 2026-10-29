@@ -5,18 +5,29 @@ using Perfume.Infrastructure.Data;
 
 namespace Perfume.Infrastructure.Services;
 
+/// <summary>
+/// Service quan ly bai viet blog, kien thuc mui huong va danh muc bai viet.
+/// </summary>
 public class BlogService : IBlogService
 {
     private readonly PerfumeDbContext _context;
 
+    // ==========================================
+    // 1. KHOI TAO SERVICE
+    // ==========================================
     public BlogService(PerfumeDbContext context)
     {
         _context = context;
     }
 
+    // ==========================================
+    // 2. TRUY VAN BAI VIET MOI NHAT & PHAN TRANG
+    // ==========================================
+    // Lay danh sach bai viet moi nhat hien thi trang chu hoac sidebar
     public async Task<List<BlogPost>> GetRecentPostsAsync(int count = 6)
     {
         return await _context.BlogPosts
+            .AsNoTracking()
             .Include(b => b.Category)
             .Where(b => b.IsPublished && !b.IsDeleted)
             .OrderByDescending(b => b.CreatedAt)
@@ -24,9 +35,11 @@ public class BlogService : IBlogService
             .ToListAsync();
     }
 
+    // Lay danh sach bai viet co phan trang theo danh muc
     public async Task<(List<BlogPost> Posts, int TotalCount)> GetPostsPagedAsync(string? categorySlug = null, int page = 1, int pageSize = 9)
     {
         var query = _context.BlogPosts
+            .AsNoTracking()
             .Include(b => b.Category)
             .Where(b => b.IsPublished && !b.IsDeleted);
 
@@ -45,6 +58,10 @@ public class BlogService : IBlogService
         return (posts, totalCount);
     }
 
+    // ==========================================
+    // 3. CHI TIET BAI VIET VA TANG LUOT XEM
+    // ==========================================
+    // Lay bai viet theo Slug va tu dong tang so luot doc (ViewCount)
     public async Task<BlogPost?> GetPostBySlugAsync(string slug)
     {
         var post = await _context.BlogPosts
@@ -60,30 +77,40 @@ public class BlogService : IBlogService
         return post;
     }
 
+    // Lay bai viet theo ID cho che do xem nhanh
     public async Task<BlogPost?> GetPostByIdAsync(int id)
     {
         return await _context.BlogPosts
+            .AsNoTracking()
             .Include(b => b.Category)
             .FirstOrDefaultAsync(b => b.Id == id && !b.IsDeleted);
     }
 
+    // Lay danh sach danh muc bai viet blog
     public async Task<List<BlogCategory>> GetBlogCategoriesAsync()
     {
         return await _context.BlogCategories
+            .AsNoTracking()
             .Where(c => !c.IsDeleted)
             .Include(c => c.Posts.Where(p => p.IsPublished && !p.IsDeleted))
             .ToListAsync();
     }
 
+    // ==========================================
+    // 4. QUAN TRI BAI VIET (ADMIN CRUD)
+    // ==========================================
+    // Lay tat ca bai viet cho trang quan tri
     public async Task<List<BlogPost>> GetAllPostsForAdminAsync()
     {
         return await _context.BlogPosts
+            .AsNoTracking()
             .Include(b => b.Category)
             .Where(b => !b.IsDeleted)
             .OrderByDescending(b => b.CreatedAt)
             .ToListAsync();
     }
 
+    // Tao moi bai viet blog va tu dong sinh slug
     public async Task<BlogPost> CreatePostAsync(BlogPost post)
     {
         post.CreatedAt = DateTime.UtcNow;
@@ -98,6 +125,7 @@ public class BlogService : IBlogService
         return post;
     }
 
+    // Cap nhat noi dung bai viet blog
     public async Task<bool> UpdatePostAsync(BlogPost post)
     {
         var existing = await _context.BlogPosts.FirstOrDefaultAsync(b => b.Id == post.Id && !b.IsDeleted);
@@ -119,6 +147,7 @@ public class BlogService : IBlogService
         return true;
     }
 
+    // Xoa mem bai viet
     public async Task<bool> DeletePostAsync(int id)
     {
         var post = await _context.BlogPosts.FirstOrDefaultAsync(b => b.Id == id);
@@ -130,6 +159,9 @@ public class BlogService : IBlogService
         return true;
     }
 
+    // ==========================================
+    // 5. HAM PHU TRO TU SINH SLUG TIENG VIET
+    // ==========================================
     private static string GenerateSlug(string text)
     {
         if (string.IsNullOrWhiteSpace(text)) return Guid.NewGuid().ToString("N")[..8];

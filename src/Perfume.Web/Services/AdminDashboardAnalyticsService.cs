@@ -11,6 +11,9 @@ public interface IAdminDashboardAnalyticsService
     Task<AdminDashboardViewModel> BuildDashboardAsync();
 }
 
+/// <summary>
+/// Service tong hop so lieu phan tich, doanh thu va bao cao bieu do cho Admin Dashboard.
+/// </summary>
 public sealed class AdminDashboardAnalyticsService(
     PerfumeDbContext _db,
     IDatabaseConsoleService _dbConsole) : IAdminDashboardAnalyticsService
@@ -21,6 +24,7 @@ public sealed class AdminDashboardAnalyticsService(
         var startOfMonth = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
 
         var allOrders = await _db.Orders
+            .AsNoTracking()
             .Include(o => o.Items)
             .OrderByDescending(o => o.CreatedAt)
             .ToListAsync();
@@ -38,7 +42,7 @@ public sealed class AdminDashboardAnalyticsService(
         var cancelledCount = allOrders.Count(o => o.OrderStatus == OrderStatus.Cancelled);
         var fulfillmentRate = totalOrders > 0 ? Math.Round((double)deliveredCount / totalOrders * 100, 1) : 0;
 
-        // Biểu đồ doanh thu 7 ngày gần nhất
+        // Bieu do doanh thu 7 ngay gan nhat
         var chartLabels = new List<string>();
         var chartData = new List<decimal>();
         for (int i = 6; i >= 0; i--)
@@ -52,7 +56,7 @@ public sealed class AdminDashboardAnalyticsService(
             chartData.Add(dayRevenue);
         }
 
-        // Biểu đồ trạng thái đơn hàng
+        // Bieu do trang thai don hang
         var orderStatusChart = new Dictionary<string, int>
         {
             { "Đã Giao (Thành công)", deliveredCount },
@@ -62,7 +66,7 @@ public sealed class AdminDashboardAnalyticsService(
             { "Đã Hủy", cancelledCount }
         };
 
-        // Phân bố phương thức thanh toán
+        // Phan bo phuong thuc thanh toan
         var paymentMethodChart = new Dictionary<string, int>
         {
             { "COD (Tiền mặt)", allOrders.Count(o => o.PaymentMethod == PaymentMethod.COD) },
@@ -71,8 +75,9 @@ public sealed class AdminDashboardAnalyticsService(
             { "Ví MoMo", allOrders.Count(o => o.PaymentMethod == PaymentMethod.MoMo) }
         };
 
-        // Top sản phẩm bán chạy nhất
+        // Top san pham ban chay nhat
         var topProducts = await _db.OrderItems
+            .AsNoTracking()
             .GroupBy(i => new { i.ProductId, i.ProductName, i.ProductImageUrl })
             .Select(g => new DashboardTopProductStat
             {
@@ -86,7 +91,7 @@ public sealed class AdminDashboardAnalyticsService(
             .Take(5)
             .ToListAsync();
 
-        // Thống kê theo nhóm hương
+        // Thong ke theo nhom huong
         var scentStats = await _db.FragranceFamilies
             .Where(f => !f.IsDeleted)
             .Select(f => new ScentFamilyStat

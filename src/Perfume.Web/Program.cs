@@ -9,8 +9,13 @@ using Perfume.Web.Middlewares;
 using Perfume.Web.Security;
 using Perfume.Web.Services;
 
+// ==========================================
+// 1. DANG KY SERVICES VA HA TANG
+// ==========================================
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddInfrastructureServices(builder.Configuration);
+
+// Cau hinh Cookie xac thuc cho Storefront va Admin Portal
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/account/login";
@@ -33,17 +38,25 @@ builder.Services.ConfigureApplicationCookie(options =>
         return Task.CompletedTask;
     };
 });
+
+// ==========================================
+// 2. DUAL AUTHENTICATION VA PHAN QUYEN RBAC
+// ==========================================
 builder.Services.AddSingleton<JwtTokenService>();
 builder.Services.AddAuthentication()
     .AddScheme<AuthenticationSchemeOptions, BearerTokenHandler>("Bearer", _ => { });
+
 builder.Services.AddAuthorization(options =>
 {
+    // Policy danh cho API khach hang (Customer)
     options.AddPolicy("CustomerApi", policy =>
     {
         policy.AddAuthenticationSchemes(IdentityConstants.ApplicationScheme, "Bearer");
         policy.RequireAuthenticatedUser();
         policy.RequireRole("Customer");
     });
+
+    // Policy danh cho API quan ly cua hang (Admin, StoreManager)
     options.AddPolicy("StoreManagerApi", policy =>
     {
         policy.AddAuthenticationSchemes(IdentityConstants.ApplicationScheme, "Bearer");
@@ -52,18 +65,23 @@ builder.Services.AddAuthorization(options =>
     });
 });
 
+// ==========================================
+// 3. DATA PROTECTION, CACHING, SESSION, COMPRESSION
+// ==========================================
 var dataPath = builder.Configuration["Storage:RootPath"] ?? Path.Combine(builder.Environment.ContentRootPath, "App_Data");
 Directory.CreateDirectory(Path.Combine(dataPath, "DataProtection-Keys"));
 Directory.CreateDirectory(Path.Combine(dataPath, "ReviewImages"));
 builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(dataPath, "DataProtection-Keys")))
     .SetApplicationName("PerfumeLuxe");
+
 builder.Services.AddControllersWithViews();
 builder.Services.AddResponseCaching();
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IAdminDashboardAnalyticsService, AdminDashboardAnalyticsService>();
 builder.Services.AddScoped<IAdminFinancialReportService, AdminFinancialReportService>();
 builder.Services.AddDistributedMemoryCache();
+
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromHours(2);
@@ -72,6 +90,7 @@ builder.Services.AddSession(options =>
     options.Cookie.SameSite = SameSiteMode.Lax;
 });
 
+// Nen du lieu phan hoi bang Brotli va Gzip de tang toc tai trang
 builder.Services.AddResponseCompression(options =>
 {
     options.EnableForHttps = true;
@@ -88,14 +107,21 @@ builder.Services.Configure<Microsoft.AspNetCore.ResponseCompression.GzipCompress
 });
 
 var app = builder.Build();
+
+// ==========================================
+// 4. MIGRATION DATABASE VA SEED DU LIEU
+// ==========================================
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var logger = services.GetRequiredService<ILogger<Program>>();
     var db = services.GetRequiredService<PerfumeDbContext>();
     var databaseCreated = await db.Database.EnsureCreatedAsync();
+
+    // Chay migration Schema Upgrader V1 - V6
     await DatabaseSchemaUpgrader.ApplyAsync(db, builder.Configuration, logger, databaseCreated);
 
+    // Tao cac Role he thong neu chua ton tai
     var roleManager = services.GetRequiredService<RoleManager<AppRole>>();
     foreach (var role in new[] { "Admin", "StoreManager", "WarehouseStaff", "Concierge", "Customer" })
     {
@@ -106,6 +132,7 @@ using (var scope = app.Services.CreateScope())
         }
     }
 
+    // Khoi tao tai khoan Administrator ban dau neu duoc cau hinh
     var adminEmail = builder.Configuration["InitialAdmin:Email"];
     var adminPassword = builder.Configuration["InitialAdmin:Password"];
     if (!string.IsNullOrWhiteSpace(adminEmail) && !string.IsNullOrWhiteSpace(adminPassword))
@@ -131,6 +158,9 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
+// ==========================================
+// 5. PIPELINE MIDDLEWARE VA ROUTING
+// ==========================================
 app.UseMiddleware<SystemExceptionLoggingMiddleware>();
 
 if (!app.Environment.IsDevelopment())
@@ -140,6 +170,8 @@ if (!app.Environment.IsDevelopment())
 }
 app.UseHttpsRedirection();
 app.UseResponseCompression();
+
+// Gan cac HTTP Security Headers bao ve chong XSS, Clickjacking va Sniffing
 app.Use(async (context, next) =>
 {
     context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
@@ -162,6 +194,8 @@ app.Use(async (context, next) =>
     context.Response.Headers.Remove("Server");
     await next();
 });
+
+// Cache file tinh (CSS, JS, Fonts, Images) trong 30 ngay
 app.UseStaticFiles(new StaticFileOptions
 {
     OnPrepareResponse = ctx =>
@@ -169,9 +203,12 @@ app.UseStaticFiles(new StaticFileOptions
         ctx.Context.Response.Headers.Append("Cache-Control", "public,max-age=2592000,immutable");
     }
 });
+
 app.UseRouting();
 app.UseResponseCaching();
 app.UseAuthentication();
+
+// Xu ly Bearer token cho REST APIs
 app.Use(async (context, next) =>
 {
     if (context.Request.Path.StartsWithSegments("/api/v1", StringComparison.OrdinalIgnoreCase) &&
@@ -189,9 +226,12 @@ app.Use(async (context, next) =>
 
     await next();
 });
+
 app.UseAuthorization();
 app.UseMiddleware<MaintenanceMiddleware>();
 app.UseSession();
+
+// Dinh tuyen URL than thien (SEO Friendly Routes)
 app.MapControllerRoute("productDetail", "nuoc-hoa/{slug}", new { controller = "Catalog", action = "Detail" });
 app.MapControllerRoute("catalogFilter", "bo-suu-tap", new { controller = "Catalog", action = "Index" });
 app.MapControllerRoute("blogDetail", "blog/{slug}", new { controller = "Blog", action = "Detail" });
@@ -202,4 +242,5 @@ app.MapControllerRoute("llmsWellKnown", ".well-known/llms.txt", new { controller
 app.MapControllerRoute("llmsFull", "llms-full.txt", new { controller = "Seo", action = "LlmsFullTxt" });
 app.MapControllerRoute("areas", "{area:exists}/{controller=AdminDashboard}/{action=Index}/{id?}");
 app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
+
 app.Run();

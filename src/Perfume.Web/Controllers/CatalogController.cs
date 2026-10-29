@@ -7,12 +7,19 @@ using Perfume.Web.Seo;
 
 namespace Perfume.Web.Controllers;
 
+/// <summary>
+/// Controller dieu phoi toan bo giao dien Catalog, chi tiet mui huong, Scent Quiz,
+/// so sanh san pham va hop qua Discovery Box cho khach hang.
+/// </summary>
 public class CatalogController : Controller
 {
     private readonly IPerfumeCatalogService _catalogService;
     private readonly PerfumeDbContext _db;
     private readonly IConfiguration _configuration;
 
+    // ==========================================
+    // 1. KHOI TAO CONTROLLER
+    // ==========================================
     public CatalogController(IPerfumeCatalogService catalogService, PerfumeDbContext db, IConfiguration? configuration = null)
     {
         _catalogService = catalogService;
@@ -20,6 +27,10 @@ public class CatalogController : Controller
         _configuration = configuration ?? new ConfigurationBuilder().Build();
     }
 
+    // ==========================================
+    // 2. TRANG DANH SACH SAN PHAM & BO LOC DA CHIEU
+    // ==========================================
+    // Hien thi danh sach nuoc hoa theo bo loc: thuong hieu, nhom huong, nong do, gia ca
     [HttpGet]
     public async Task<IActionResult> Index([FromQuery] ProductFilterParams filter)
     {
@@ -42,6 +53,10 @@ public class CatalogController : Controller
         return View(items);
     }
 
+    // ==========================================
+    // 3. TRANG CHI TIET SAN PHAM (PRODUCT DETAIL)
+    // ==========================================
+    // Hien thi thap mui huong 3 tang, phien ban dung tich va san pham lien quan
     [HttpGet]
     public async Task<IActionResult> Detail(string slug)
     {
@@ -50,11 +65,11 @@ public class CatalogController : Controller
         var product = await _catalogService.GetProductBySlugAsync(slug);
         if (product == null) return NotFound();
 
-        // Get related products in the same family or brand
+        // Lay san pham lien quan trong cung nhom huong hoac thuong hieu
         var relatedFilter = new ProductFilterParams { FamilySlug = product.FamilyName, PageSize = 4 };
         var (relatedItems, _) = await _catalogService.GetProductsAsync(relatedFilter);
         ViewBag.RelatedProducts = relatedItems.Where(p => p.Id != product.Id).Take(4).ToList();
-        ViewBag.ApprovedReviews = await _db.Reviews.Where(r => r.ProductId == product.Id && r.IsApproved)
+        ViewBag.ApprovedReviews = await _db.Reviews.AsNoTracking().Where(r => r.ProductId == product.Id && r.IsApproved)
             .OrderByDescending(r => r.CreatedAt).Take(50).ToListAsync();
 
         ViewData["CanonicalUrl"] = SeoUrlBuilder.AbsoluteUrl(ControllerContext.HttpContext?.Request, _configuration, $"/nuoc-hoa/{Uri.EscapeDataString(product.Slug)}");
@@ -63,12 +78,17 @@ public class CatalogController : Controller
         return View(product);
     }
 
+    // ==========================================
+    // 4. TRAC NGHIEM MUI HUONG AI (SCENT QUIZ)
+    // ==========================================
+    // Hien thi giao dien trac nghiem kham pha phong cach mui huong
     [HttpGet]
     public IActionResult Quiz()
     {
         return View();
     }
 
+    // Nhan ket qua tra loi quiz va tra ve de xuat mui huong phu hop
     [HttpPost]
     public async Task<IActionResult> QuizSubmit([FromBody] QuizAnswerRequest request)
     {
@@ -76,6 +96,10 @@ public class CatalogController : Controller
         return Json(new { success = true, result, items = result.Items });
     }
 
+    // ==========================================
+    // 5. SO SANH MUI HUONG TRUC QUAN (COMPARE)
+    // ==========================================
+    // So sanh chi tiet giua 2 den 3 chai nuoc hoa ve thap huong, do luu huong va toa huong
     [HttpGet]
     [Route("so-sanh")]
     [Route("catalog/compare")]
@@ -119,6 +143,10 @@ public class CatalogController : Controller
         return View(productsToCompare);
     }
 
+    // ==========================================
+    // 6. HOP TRAI NGHIEM KHOA HOC (DISCOVERY BOX)
+    // ==========================================
+    // Trang tuy bien hop qua gom 3 den 5 ong mau chiet va in thiep rieng
     [HttpGet]
     [Route("discovery-box")]
     [Route("hop-kham-pha")]

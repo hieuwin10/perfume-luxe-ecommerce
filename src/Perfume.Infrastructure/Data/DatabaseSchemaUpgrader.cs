@@ -6,24 +6,37 @@ using Perfume.Infrastructure.Data;
 
 namespace Perfume.Infrastructure;
 
+/// <summary>
+/// Bo nang cap Database Schema tu dong, quan ly cac ban migration tuy chinh V1 den V6
+/// va dam bao tinh an toan qua SQL Transaction rollback.
+/// </summary>
 public static class DatabaseSchemaUpgrader
 {
+    // ==========================================
+    // 1. DANH SACH CAC BAN MIGRATION (V1 - V6)
+    // ==========================================
     private static readonly (string Version, string Sql)[] Migrations =
     [
         (DatabaseSchemaMigrationV1.Version, DatabaseSchemaMigrationV1.Sql),
         (DatabaseSchemaMigrationV2.Version, DatabaseSchemaMigrationV2.Sql),
         (DatabaseSchemaMigrationV3.Version, DatabaseSchemaMigrationV3.Sql),
         (DatabaseSchemaMigrationV4.Version, DatabaseSchemaMigrationV4.Sql),
-        (DatabaseSchemaMigrationV5.Version, DatabaseSchemaMigrationV5.Sql)
+        (DatabaseSchemaMigrationV5.Version, DatabaseSchemaMigrationV5.Sql),
+        (DatabaseSchemaMigrationV6.Version, DatabaseSchemaMigrationV6.Sql)
     ];
 
+    // ==========================================
+    // 2. PHUONG THUC THUC THI CHINH (APPLY ASYNC)
+    // ==========================================
     public static async Task ApplyAsync(PerfumeDbContext db, IConfiguration configuration, ILogger logger, bool databaseCreatedThisStart, CancellationToken cancellationToken = default)
     {
         var connection = (SqlConnection)db.Database.GetDbConnection();
         var closeWhenDone = connection.State != System.Data.ConnectionState.Open;
         if (closeWhenDone) await connection.OpenAsync(cancellationToken);
+
         try
         {
+            // Buoc 1: Tao bang quan ly phien ban neu chua ton tai
             await using (var initCommand = connection.CreateCommand())
             {
                 initCommand.CommandText = @"
@@ -38,6 +51,7 @@ END;";
                 await initCommand.ExecuteNonQueryAsync(cancellationToken);
             }
 
+            // Buoc 2: Doc danh sach cac phien ban da ap dung tu truoc
             var appliedVersions = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             await using (var getVersions = connection.CreateCommand())
             {
@@ -49,12 +63,14 @@ END;";
                 }
             }
 
+            // Buoc 3: Loc ra nhung ban migration chua duoc thuc thi
             var pendingMigrations = Migrations.Where(m => !appliedVersions.Contains(m.Version)).ToList();
             if (!pendingMigrations.Any())
             {
                 return;
             }
 
+            // Buoc 4: Sao luu (Backup) co so du lieu truoc khi chay neu duoc cau hinh BackupPath
             if (!databaseCreatedThisStart)
             {
                 var backupDirectory = configuration["Database:BackupPath"];
@@ -81,6 +97,7 @@ END;";
                 }
             }
 
+            // Buoc 5: Chay tung migration ben trong SQL Transaction co Rollback neu gap loi
             foreach (var (version, sql) in pendingMigrations)
             {
                 await using var transaction = (SqlTransaction)await connection.BeginTransactionAsync(cancellationToken);
@@ -96,8 +113,9 @@ END;";
                 }
                 catch (Exception ex)
                 {
+                    // Rollback transaction ngay lap tuc de bao ve tinh toan ven cua CSDL
                     await transaction.RollbackAsync(cancellationToken);
-                    logger.LogError(ex, "Failed applying schema update {Version}, transaction rolled back.", version);
+                    logger.LogError(ex, "Failed to apply additive schema update {Version}.", version);
                     throw;
                 }
             }

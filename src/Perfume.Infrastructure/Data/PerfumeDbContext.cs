@@ -5,13 +5,19 @@ using Perfume.Infrastructure.Identity;
 
 namespace Perfume.Infrastructure.Data;
 
+/// <summary>
+/// DbContext trung tam cua he thong Perfume Luxe quan ly toan bo thuc the,
+/// quan he, chi muc va co che tu dong cap nhat thoi gian UTC.
+/// </summary>
 public class PerfumeDbContext : IdentityDbContext<AppUser, AppRole, string>
 {
     public PerfumeDbContext(DbContextOptions<PerfumeDbContext> options) : base(options)
     {
     }
 
-    // Catalog DbSets
+    // ==========================================
+    // 1. DANH SACH CAC DBSET (CATALOG & HANG HOA)
+    // ==========================================
     public DbSet<Brand> Brands => Set<Brand>();
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<FragranceFamily> FragranceFamilies => Set<FragranceFamily>();
@@ -21,7 +27,9 @@ public class PerfumeDbContext : IdentityDbContext<AppUser, AppRole, string>
     public DbSet<ProductFragranceNote> ProductFragranceNotes => Set<ProductFragranceNote>();
     public DbSet<ProductImage> Images => Set<ProductImage>();
 
-    // Ecommerce DbSets
+    // ==========================================
+    // 2. DANH SACH CAC DBSET (ECOMMERCE & VAN HANH)
+    // ==========================================
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<OrderItem> OrderItems => Set<OrderItem>();
     public DbSet<Voucher> Vouchers => Set<Voucher>();
@@ -42,6 +50,9 @@ public class PerfumeDbContext : IdentityDbContext<AppUser, AppRole, string>
     public DbSet<BackInStockAlert> BackInStockAlerts => Set<BackInStockAlert>();
     public DbSet<SystemErrorLog> SystemErrorLogs => Set<SystemErrorLog>();
 
+    // ==========================================
+    // 3. CAU HINH MODEL & CHI MUC (ON MODEL CREATING)
+    // ==========================================
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -92,6 +103,15 @@ public class PerfumeDbContext : IdentityDbContext<AppUser, AppRole, string>
         {
             entity.HasIndex(p => p.Slug).IsUnique();
             entity.HasIndex(p => p.Sku).IsUnique();
+            entity.HasIndex(p => p.CreatedAt);
+            entity.HasIndex(p => p.BasePrice);
+            entity.HasIndex(p => new { p.IsFeatured, p.CreatedAt });
+            entity.HasIndex(p => new { p.IsBestSeller, p.CreatedAt });
+            entity.HasIndex(p => new { p.IsNewArrival, p.CreatedAt });
+            entity.HasIndex(p => p.BrandId);
+            entity.HasIndex(p => p.CategoryId);
+            entity.HasIndex(p => p.FragranceFamilyId);
+
             entity.Property(p => p.Name).HasMaxLength(255).IsRequired();
             entity.Property(p => p.BasePrice).HasPrecision(18, 2);
 
@@ -116,6 +136,7 @@ public class PerfumeDbContext : IdentityDbContext<AppUser, AppRole, string>
         // ProductVariant
         builder.Entity<ProductVariant>(entity =>
         {
+            entity.HasIndex(pv => new { pv.ProductId, pv.VolumeMl });
             entity.Property(pv => pv.OriginalPrice).HasPrecision(18, 2);
             entity.Property(pv => pv.SalePrice).HasPrecision(18, 2);
 
@@ -158,6 +179,10 @@ public class PerfumeDbContext : IdentityDbContext<AppUser, AppRole, string>
         builder.Entity<Order>(entity =>
         {
             entity.HasIndex(o => o.OrderCode).IsUnique();
+            entity.HasIndex(o => new { o.UserId, o.CreatedAt });
+            entity.HasIndex(o => new { o.OrderStatus, o.CreatedAt });
+            entity.HasIndex(o => o.CreatedAt);
+
             entity.Property(o => o.SubTotal).HasPrecision(18, 2);
             entity.Property(o => o.DiscountAmount).HasPrecision(18, 2);
             entity.Property(o => o.LoyaltyDiscountAmount).HasPrecision(18, 2);
@@ -168,6 +193,8 @@ public class PerfumeDbContext : IdentityDbContext<AppUser, AppRole, string>
 
         builder.Entity<OrderItem>(entity =>
         {
+            entity.HasIndex(oi => oi.OrderId);
+            entity.HasIndex(oi => oi.ProductId);
             entity.Property(oi => oi.UnitPrice).HasPrecision(18, 2);
 
             entity.HasOne(oi => oi.Order)
@@ -197,6 +224,7 @@ public class PerfumeDbContext : IdentityDbContext<AppUser, AppRole, string>
         // Review
         builder.Entity<Review>(entity =>
         {
+            entity.HasIndex(r => new { r.ProductId, r.CreatedAt });
             entity.HasOne(r => r.Product)
                   .WithMany(p => p.Reviews)
                   .HasForeignKey(r => r.ProductId)
@@ -209,6 +237,9 @@ public class PerfumeDbContext : IdentityDbContext<AppUser, AppRole, string>
         builder.Entity<BlogPost>(entity =>
         {
             entity.HasIndex(b => b.Slug).IsUnique();
+            entity.HasIndex(b => new { b.IsPublished, b.CreatedAt });
+            entity.HasIndex(b => b.CategoryId);
+
             entity.HasOne(b => b.Category)
                   .WithMany(c => c.Posts)
                   .HasForeignKey(b => b.CategoryId)
@@ -310,6 +341,7 @@ public class PerfumeDbContext : IdentityDbContext<AppUser, AppRole, string>
         builder.Entity<StockAdjustment>(entity =>
         {
             entity.ToTable("StockAdjustments");
+            entity.HasIndex(a => new { a.VariantId, a.CreatedAt });
             entity.Property(a => a.Reason).HasMaxLength(200).IsRequired();
             entity.Property(a => a.PerformedByName).HasMaxLength(150);
             entity.HasQueryFilter(a => !a.IsDeleted);
@@ -336,6 +368,10 @@ public class PerfumeDbContext : IdentityDbContext<AppUser, AppRole, string>
         });
     }
 
+    // ==========================================
+    // 4. TU DONG CAP NHAT THOI GIAN UTC
+    // ==========================================
+    // Tu dong dien CreatedAt khi tao moi va cap nhat UpdatedAt khi chinh sua
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         var entries = ChangeTracker.Entries<BaseEntity>();
