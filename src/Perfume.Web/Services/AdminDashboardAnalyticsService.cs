@@ -23,33 +23,33 @@ public sealed class AdminDashboardAnalyticsService(
         var now = DateTime.UtcNow;
         var startOfMonth = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
 
-        var allOrders = await _db.Orders
-            .AsNoTracking()
-            .Include(o => o.Items)
-            .OrderByDescending(o => o.CreatedAt)
-            .ToListAsync();
+        var totalOrders = await _db.Orders.CountAsync();
+        var totalRevenue = await _db.Orders.Where(o => o.OrderStatus == OrderStatus.Delivered).SumAsync(o => o.TotalAmount);
+        var revenueThisMonth = await _db.Orders.Where(o => o.OrderStatus == OrderStatus.Delivered && o.CreatedAt >= startOfMonth).SumAsync(o => o.TotalAmount);
+        var avgOrderValue = totalOrders > 0 ? await _db.Orders.AverageAsync(o => o.TotalAmount) : 0;
 
-        var totalOrders = allOrders.Count;
-        var deliveredOrders = allOrders.Where(o => o.OrderStatus == OrderStatus.Delivered).ToList();
-        var totalRevenue = deliveredOrders.Sum(o => o.TotalAmount);
-        var revenueThisMonth = deliveredOrders.Where(o => o.CreatedAt >= startOfMonth).Sum(o => o.TotalAmount);
-        var avgOrderValue = totalOrders > 0 ? allOrders.Average(o => o.TotalAmount) : 0;
-
-        var pendingCount = allOrders.Count(o => o.OrderStatus == OrderStatus.Pending);
-        var confirmedCount = allOrders.Count(o => o.OrderStatus == OrderStatus.Confirmed);
-        var shippingCount = allOrders.Count(o => o.OrderStatus == OrderStatus.Shipping);
-        var deliveredCount = deliveredOrders.Count;
-        var cancelledCount = allOrders.Count(o => o.OrderStatus == OrderStatus.Cancelled);
+        var pendingCount = await _db.Orders.CountAsync(o => o.OrderStatus == OrderStatus.Pending);
+        var confirmedCount = await _db.Orders.CountAsync(o => o.OrderStatus == OrderStatus.Confirmed);
+        var shippingCount = await _db.Orders.CountAsync(o => o.OrderStatus == OrderStatus.Shipping);
+        var deliveredCount = await _db.Orders.CountAsync(o => o.OrderStatus == OrderStatus.Delivered);
+        var cancelledCount = await _db.Orders.CountAsync(o => o.OrderStatus == OrderStatus.Cancelled);
         var fulfillmentRate = totalOrders > 0 ? Math.Round((double)deliveredCount / totalOrders * 100, 1) : 0;
 
         // Bieu do doanh thu 7 ngay gan nhat
+        var sevenDaysAgo = now.Date.AddDays(-6);
+        var recentDeliveredOrders = await _db.Orders
+            .AsNoTracking()
+            .Where(o => o.OrderStatus == OrderStatus.Delivered && o.CreatedAt >= sevenDaysAgo)
+            .Select(o => new { o.CreatedAt, o.TotalAmount })
+            .ToListAsync();
+
         var chartLabels = new List<string>();
         var chartData = new List<decimal>();
         for (int i = 6; i >= 0; i--)
         {
             var date = now.Date.AddDays(-i);
             var nextDate = date.AddDays(1);
-            var dayRevenue = deliveredOrders
+            var dayRevenue = recentDeliveredOrders
                 .Where(o => o.CreatedAt >= date && o.CreatedAt < nextDate)
                 .Sum(o => o.TotalAmount);
             chartLabels.Add(date.ToString("dd/MM"));
@@ -69,10 +69,10 @@ public sealed class AdminDashboardAnalyticsService(
         // Phan bo phuong thuc thanh toan
         var paymentMethodChart = new Dictionary<string, int>
         {
-            { "COD (Tiền mặt)", allOrders.Count(o => o.PaymentMethod == PaymentMethod.COD) },
-            { "VNPAY QR", allOrders.Count(o => o.PaymentMethod == PaymentMethod.VNPAY) },
-            { "Chuyển Khoản", allOrders.Count(o => o.PaymentMethod == PaymentMethod.BankTransfer) },
-            { "Ví MoMo", allOrders.Count(o => o.PaymentMethod == PaymentMethod.MoMo) }
+            { "COD (Tiền mặt)", await _db.Orders.CountAsync(o => o.PaymentMethod == PaymentMethod.COD) },
+            { "VNPAY QR", await _db.Orders.CountAsync(o => o.PaymentMethod == PaymentMethod.VNPAY) },
+            { "Chuyển Khoản", await _db.Orders.CountAsync(o => o.PaymentMethod == PaymentMethod.BankTransfer) },
+            { "Ví MoMo", await _db.Orders.CountAsync(o => o.PaymentMethod == PaymentMethod.MoMo) }
         };
 
         // Top san pham ban chay nhat
@@ -130,8 +130,8 @@ public sealed class AdminDashboardAnalyticsService(
             TopProducts = topProducts,
             ScentFamilyStats = scentStats,
 
-            RecentUsers = await _db.Users.OrderByDescending(u => u.CreatedAt).Take(6).ToListAsync(),
-            RecentOrders = allOrders.Take(8).ToList(),
+            RecentUsers = await _db.Users.AsNoTracking().OrderByDescending(u => u.CreatedAt).Take(6).ToListAsync(),
+            RecentOrders = await _db.Orders.AsNoTracking().Include(o => o.Items).OrderByDescending(o => o.CreatedAt).Take(8).ToListAsync(),
             Tables = await _dbConsole.GetAllTablesAsync(),
         };
         return vm;

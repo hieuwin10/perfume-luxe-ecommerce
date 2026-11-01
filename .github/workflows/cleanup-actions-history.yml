@@ -1,0 +1,47 @@
+name: Auto Cleanup Old Action Runs
+
+on:
+  schedule:
+    # Chay dinh ky vao 00:00 Chu Nhat hang tuan theo gio Viet Nam (UTC 17:00 Thu Bay)
+    - cron: '0 17 * * 6'
+  workflow_dispatch: # Cho phep nguoi dung bam chay thu cong hoac duoc trigger tu dong khi >= 15 lan chay
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  cleanup-runs:
+    runs-on: ubuntu-latest
+    steps:
+      # Buoc 1: Xoa tat ca ban chay cu hon 7 ngay
+      - name: Delete workflow runs older than 7 days
+        uses: Mattraks/delete-workflow-runs@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          retain_days: 7
+          keep_minimum_runs: 5
+
+      # Buoc 2: Neu van con >= 15 ban, cat tia cac ban cu nhat, chi giu lai Top 10 moi nhat
+      - name: Trim excess runs if total count >= 15
+        shell: bash
+        run: |
+          total_runs=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/runs?per_page=100" | jq '.total_count // 0')
+          echo "Total workflow runs in repo: $total_runs"
+          if [ "$total_runs" -ge 15 ]; then
+            echo "Threshold >= 15 reached ($total_runs). Trimming runs older than top 10..."
+            curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+              "https://api.github.com/repos/${{ github.repository }}/actions/runs?per_page=100" \
+              | jq -r '.workflow_runs[10:][].id // empty' \
+              | while read -r run_id; do
+                  [ -z "$run_id" ] && continue
+                  echo "Deleting excess run ID: $run_id"
+                  curl -s -X DELETE -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+                    "https://api.github.com/repos/${{ github.repository }}/actions/runs/$run_id"
+                done
+            echo "Trimming complete!"
+          else
+            echo "Total runs ($total_runs) is below 15, no trimming needed."
+          fi

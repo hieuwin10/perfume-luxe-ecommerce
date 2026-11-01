@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Perfume.Application.DTOs;
 using Perfume.Domain.Entities;
 using Perfume.Domain.Enums;
@@ -10,19 +11,81 @@ namespace Perfume.Infrastructure.Services;
 /// </summary>
 public partial class PerfumeCatalogService
 {
+    private const string QuizCatalogCacheKey = "quiz_catalog_recommendations";
+    private static readonly TimeSpan QuizCatalogCacheDuration = TimeSpan.FromMinutes(15);
+
+    private sealed class QuizProductCandidate
+    {
+        public int Id { get; init; }
+        public string Name { get; init; } = string.Empty;
+        public string Slug { get; init; } = string.Empty;
+        public string Sku { get; init; } = string.Empty;
+        public string? BrandName { get; init; }
+        public string? BrandCountry { get; init; }
+        public string? MainImageUrl { get; init; }
+        public decimal BasePrice { get; init; }
+        public string? FamilyName { get; init; }
+        public string? FamilyColorHex { get; init; }
+        public ScentFamily? ScentType { get; init; }
+        public Concentration Concentration { get; init; }
+        public GenderTarget Gender { get; init; }
+        public double RatingAverage { get; init; }
+        public int RatingCount { get; init; }
+        public string? Longevity { get; init; }
+        public string? Sillage { get; init; }
+        public string? SeasonRecommendation { get; init; }
+        public bool IsBestSeller { get; init; }
+        public bool IsFeatured { get; init; }
+        public List<string> TopNotes { get; init; } = [];
+    }
+
     // ==========================================
     // 1. DE XUAT MUI HUONG THEO KET QUA KHAO SAT (QUIZ)
     // ==========================================
     public async Task<QuizRecommendationResultDto> GetQuizRecommendationsAsync(QuizAnswerRequest request)
     {
-        var allProducts = await _context.Products.AsNoTracking().AsSplitQuery()
-            .Include(p => p.Brand)
-            .Include(p => p.FragranceFamily)
-            .Include(p => p.FragranceNotes).ThenInclude(fn => fn.FragranceNote)
-            .Where(p => !p.IsDeleted)
-            .ToListAsync();
+        List<QuizProductCandidate>? allProducts = null;
+        if (_cache != null && _cache.TryGetValue(QuizCatalogCacheKey, out List<QuizProductCandidate>? cached) && cached != null)
+        {
+            allProducts = cached;
+        }
+        else
+        {
+            allProducts = await _context.Products.AsNoTracking()
+                .Where(p => !p.IsDeleted)
+                .Select(p => new QuizProductCandidate
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Slug = p.Slug,
+                    Sku = p.Sku,
+                    BrandName = p.Brand != null ? p.Brand.Name : null,
+                    BrandCountry = p.Brand != null ? p.Brand.Country : null,
+                    MainImageUrl = p.MainImageUrl,
+                    BasePrice = p.BasePrice,
+                    FamilyName = p.FragranceFamily != null ? p.FragranceFamily.Name : null,
+                    FamilyColorHex = p.FragranceFamily != null ? p.FragranceFamily.ColorHex : null,
+                    ScentType = p.FragranceFamily != null ? (ScentFamily?)p.FragranceFamily.ScentType : null,
+                    Concentration = p.Concentration,
+                    Gender = p.Gender,
+                    RatingAverage = p.RatingAverage,
+                    RatingCount = p.RatingCount,
+                    Longevity = p.Longevity,
+                    Sillage = p.Sillage,
+                    SeasonRecommendation = p.SeasonRecommendation,
+                    IsBestSeller = p.IsBestSeller,
+                    IsFeatured = p.IsFeatured,
+                    TopNotes = p.FragranceNotes
+                        .Where(fn => fn.NoteLevel == NoteLevel.Top && fn.FragranceNote != null)
+                        .Select(fn => fn.FragranceNote!.Name)
+                        .ToList()
+                })
+                .ToListAsync();
 
-        if (!allProducts.Any())
+            _cache?.Set(QuizCatalogCacheKey, allProducts, QuizCatalogCacheDuration);
+        }
+
+        if (allProducts.Count == 0)
         {
             return new QuizRecommendationResultDto
             {
@@ -67,12 +130,12 @@ public partial class PerfumeCatalogService
                 Name = p.Name,
                 Slug = p.Slug,
                 Sku = p.Sku,
-                BrandName = p.Brand?.Name ?? "Haute Parfumerie",
-                BrandCountry = p.Brand?.Country,
+                BrandName = p.BrandName ?? "Haute Parfumerie",
+                BrandCountry = p.BrandCountry,
                 MainImageUrl = p.MainImageUrl,
                 BasePrice = p.BasePrice,
-                FamilyName = p.FragranceFamily?.Name,
-                FamilyColor = p.FragranceFamily?.ColorHex,
+                FamilyName = p.FamilyName,
+                FamilyColor = p.FamilyColorHex,
                 Concentration = p.Concentration,
                 Gender = p.Gender,
                 RatingAverage = p.RatingAverage,
@@ -81,11 +144,7 @@ public partial class PerfumeCatalogService
                 Sillage = p.Sillage,
                 MatchScore = percentageScore,
                 MatchReason = matchReason,
-                TopNotes = p.FragranceNotes
-                    .Where(fn => fn.NoteLevel == NoteLevel.Top && fn.FragranceNote != null)
-                    .Select(fn => fn.FragranceNote!.Name)
-                    .Take(3)
-                    .ToList()
+                TopNotes = p.TopNotes.Take(3).ToList()
             });
         }
 
@@ -99,7 +158,7 @@ public partial class PerfumeCatalogService
     // ==========================================
     // 2. TINH DIEM MA TRAN PHU HOP (MATCH SCORE)
     // ==========================================
-    private static double CalculateRawMatchScore(Product p, QuizAnswerRequest req)
+    private static double CalculateRawMatchScore(QuizProductCandidate p, QuizAnswerRequest req)
     {
         double score = 0;
 
@@ -123,7 +182,7 @@ public partial class PerfumeCatalogService
         }
 
         // Tieu chi 2: Phong thai / Vibe & Nhom huong Scent Family (Toi da 30 diem)
-        var scentType = p.FragranceFamily?.ScentType;
+        var scentType = p.ScentType;
         if (req.Vibe == "luxury")
         {
             if (scentType == ScentFamily.Leather || scentType == ScentFamily.Woody || scentType == ScentFamily.Oriental) score += 30;
@@ -197,7 +256,7 @@ public partial class PerfumeCatalogService
         // Tieu chi 5: Ngan sach & Dinh dang gia (Toi da 10 diem)
         if (req.BudgetPreference == "high")
         {
-            if (p.BasePrice >= 5000000 || p.Brand?.Name.Contains("Creed", StringComparison.OrdinalIgnoreCase) == true || p.Brand?.Name.Contains("Kilian", StringComparison.OrdinalIgnoreCase) == true || p.Brand?.Name.Contains("Tom Ford", StringComparison.OrdinalIgnoreCase) == true) score += 10;
+            if (p.BasePrice >= 5000000 || p.BrandName?.Contains("Creed", StringComparison.OrdinalIgnoreCase) == true || p.BrandName?.Contains("Kilian", StringComparison.OrdinalIgnoreCase) == true || p.BrandName?.Contains("Tom Ford", StringComparison.OrdinalIgnoreCase) == true) score += 10;
             else score += 6;
         }
         else if (req.BudgetPreference == "sample")
@@ -224,15 +283,11 @@ public partial class PerfumeCatalogService
     // ==========================================
     // 3. SINH LY DO DE XUAT PHU HOP
     // ==========================================
-    private static string GenerateMatchReason(Product p, QuizAnswerRequest req)
+    private static string GenerateMatchReason(QuizProductCandidate p, QuizAnswerRequest req)
     {
-        var brandName = p.Brand?.Name ?? "Thương hiệu";
-        var familyName = p.FragranceFamily?.Name ?? "Hương Thơm";
-        var topNotes = p.FragranceNotes
-            .Where(fn => fn.NoteLevel == NoteLevel.Top && fn.FragranceNote != null)
-            .Select(fn => fn.FragranceNote!.Name)
-            .Take(2)
-            .ToList();
+        var brandName = p.BrandName ?? "Thương hiệu";
+        var familyName = p.FamilyName ?? "Hương Thơm";
+        var topNotes = p.TopNotes.Take(2).ToList();
 
         var notesText = topNotes.Any() ? string.Join(" & ", topNotes) : "các nốt hương tinh tuyển";
 

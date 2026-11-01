@@ -1,3 +1,5 @@
+using Perfume.Application.Common;
+
 namespace Perfume.Application.DTOs;
 
 public class SystemSettingsDto
@@ -8,8 +10,8 @@ public class SystemSettingsDto
     public string ContactEmail { get; set; } = "concierge@perfumeluxe.vn";
     public string BoutiqueAddress { get; set; } = "88 Đồng Khởi, Bến Nghé, Quận 1, TP. Hồ Chí Minh";
     public string WorkingHours { get; set; } = "08:00 - 22:00 (Tất cả các ngày trong tuần)";
-    public decimal FreeShippingThreshold { get; set; } = 2000000;
-    public decimal DefaultShippingFee { get; set; } = 35000;
+    public decimal FreeShippingThreshold { get; set; } = CommercePolicyDefaults.FreeShippingThreshold;
+    public decimal DefaultShippingFee { get; set; } = CommercePolicyDefaults.DefaultShippingFee;
     public bool SmtpEnabled { get; set; } = true;
     public string SmtpHost { get; set; } = "localhost";
     public int SmtpPort { get; set; } = 1025;

@@ -155,27 +155,12 @@ public class QuizAnswerRequest
     public string BudgetPreference { get; set; } = "mid"; // sample, mid, high
 }
 
-public class QuizProductRecommendationDto
+public class QuizProductRecommendationDto : ProductCardDto
 {
-    public int Id { get; set; }
-    public string Name { get; set; } = string.Empty;
-    public string Slug { get; set; } = string.Empty;
-    public string Sku { get; set; } = string.Empty;
-    public string BrandName { get; set; } = string.Empty;
-    public string? BrandCountry { get; set; }
-    public string? MainImageUrl { get; set; }
-    public decimal BasePrice { get; set; }
-    public string? FamilyName { get; set; }
-    public string? FamilyColor { get; set; }
-    public Concentration Concentration { get; set; }
-    public GenderTarget Gender { get; set; }
-    public double RatingAverage { get; set; }
-    public int RatingCount { get; set; }
     public string? Longevity { get; set; }
     public string? Sillage { get; set; }
     public int MatchScore { get; set; } // e.g. 98 (%)
     public string MatchReason { get; set; } = string.Empty;
-    public List<string> TopNotes { get; set; } = new();
 }
 
 public class QuizRecommendationResultDto

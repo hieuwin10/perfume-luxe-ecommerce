@@ -16,6 +16,7 @@ using Perfume.Domain.Enums;
 using Perfume.Infrastructure.Data;
 using Perfume.Infrastructure.Identity;
 using Perfume.Infrastructure.Services;
+using Perfume.Web.Extensions;
 using Perfume.Web.Security;
 
 namespace Perfume.Web.Controllers;
@@ -412,12 +413,7 @@ public sealed class CustomerApiController : ControllerBase
 
     private string? CurrentUserId() => User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-    private async Task<bool> ValidateCookieWriteAsync()
-    {
-        if (Request.Headers.Authorization.ToString().StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase)) return true;
-        try { await _antiforgery.ValidateRequestAsync(HttpContext); return true; }
-        catch (AntiforgeryValidationException) { return false; }
-    }
+    private Task<bool> ValidateCookieWriteAsync() => _antiforgery.ValidateCookieWriteAsync(HttpContext);
 
     private static CustomerProfileDto ToProfile(AppUser user) => new()
     {

@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Perfume.Domain.Entities;
 using Perfume.Domain.Enums;
 using Perfume.Infrastructure.Data;
+using Perfume.Web.Extensions;
 
 namespace Perfume.Web.Controllers;
 
@@ -256,12 +257,7 @@ public sealed class StoreManagerCatalogApiController : ControllerBase
         return NoContent();
     }
 
-    private async Task<bool> ValidateCookieWriteAsync()
-    {
-        if (Request.Headers.Authorization.ToString().StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase)) return true;
-        try { await _antiforgery.ValidateRequestAsync(HttpContext); return true; }
-        catch (AntiforgeryValidationException) { return false; }
-    }
+    private Task<bool> ValidateCookieWriteAsync() => _antiforgery.ValidateCookieWriteAsync(HttpContext);
 
     private IActionResult AntiforgeryFailure() => BadRequest(new { message = "Phiên gửi biểu mẫu đã hết hạn. Vui lòng tải lại trang." });
 

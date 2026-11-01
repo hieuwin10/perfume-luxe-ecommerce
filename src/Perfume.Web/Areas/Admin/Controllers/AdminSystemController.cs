@@ -266,21 +266,29 @@ public class AdminSystemController : Controller
         try
         {
             int deletedCount;
-            if (mode == "all")
+            var cutoff = DateTime.UtcNow.AddDays(-30);
+            if (_db.Database.IsRelational())
             {
-                var allLogs = await _db.SystemErrorLogs.ToListAsync();
-                deletedCount = allLogs.Count;
-                _db.SystemErrorLogs.RemoveRange(allLogs);
+                deletedCount = mode == "all"
+                    ? await _db.SystemErrorLogs.ExecuteDeleteAsync()
+                    : await _db.SystemErrorLogs.Where(l => l.CreatedAt < cutoff).ExecuteDeleteAsync();
             }
             else
             {
-                var cutoff = DateTime.UtcNow.AddDays(-30);
-                var oldLogs = await _db.SystemErrorLogs.Where(l => l.CreatedAt < cutoff).ToListAsync();
-                deletedCount = oldLogs.Count;
-                _db.SystemErrorLogs.RemoveRange(oldLogs);
+                if (mode == "all")
+                {
+                    var allLogs = await _db.SystemErrorLogs.ToListAsync();
+                    deletedCount = allLogs.Count;
+                    _db.SystemErrorLogs.RemoveRange(allLogs);
+                }
+                else
+                {
+                    var oldLogs = await _db.SystemErrorLogs.Where(l => l.CreatedAt < cutoff).ToListAsync();
+                    deletedCount = oldLogs.Count;
+                    _db.SystemErrorLogs.RemoveRange(oldLogs);
+                }
+                await _db.SaveChangesAsync();
             }
-
-            await _db.SaveChangesAsync();
             sw.Stop();
 
             _db.DatabaseAuditLogs.Add(new DatabaseAuditLog
@@ -638,13 +646,22 @@ public class AdminSystemController : Controller
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Users()
     {
-        var users = await _db.Users.OrderByDescending(u => u.CreatedAt).ToListAsync();
-        var usersWithRoles = new List<(AppUser User, IList<string> Roles)>();
-        foreach (var u in users)
-        {
-            var roles = await _userManager.GetRolesAsync(u);
-            usersWithRoles.Add((u, roles));
-        }
+        var users = await _db.Users.AsNoTracking().OrderByDescending(u => u.CreatedAt).ToListAsync();
+        var userRoles = await (from ur in _db.UserRoles
+                               join r in _db.Roles on ur.RoleId equals r.Id
+                               select new { ur.UserId, RoleName = r.Name })
+                              .ToListAsync();
+
+        var rolesByUser = userRoles
+            .Where(x => !string.IsNullOrEmpty(x.RoleName))
+            .GroupBy(x => x.UserId)
+            .ToDictionary(g => g.Key, g => (IList<string>)g.Select(x => x.RoleName!).ToList());
+
+        var usersWithRoles = users.Select(u => (
+            User: u,
+            Roles: rolesByUser.TryGetValue(u.Id, out var roles) ? roles : (IList<string>)new List<string>()
+        )).ToList();
+
         return View("~/Areas/Admin/Views/AdminDashboard/Users.cshtml", usersWithRoles);
     }
 

@@ -146,9 +146,23 @@ public sealed class CustomerCartService : ICustomerCartService
         var account = await GetOrCreateCartAsync(userId, null, cancellationToken);
         if (guest == null || guest.Items.Count == 0) return await BuildStateAsync(account, cancellationToken);
 
+        // Truy van hang loat ton kho qua 1 cau lenh de triet tieu N+1 query
+        var productIds = guest.Items.Select(i => i.ProductId).Distinct().ToList();
+        var productsDict = await _db.Products
+            .AsNoTracking()
+            .Include(p => p.Variants)
+            .Where(p => productIds.Contains(p.Id))
+            .ToDictionaryAsync(p => p.Id, cancellationToken);
+
         foreach (var guestLine in guest.Items)
         {
-            var stock = await GetStockAsync(guestLine.ProductId, guestLine.VariantId, cancellationToken);
+            if (!productsDict.TryGetValue(guestLine.ProductId, out var product)) continue;
+
+            var variant = guestLine.VariantId.HasValue
+                ? product.Variants.FirstOrDefault(v => v.Id == guestLine.VariantId.Value)
+                : null;
+            var hasVariants = product.Variants.Count > 0;
+            var stock = hasVariants ? variant?.StockQuantity ?? 0 : product.IsInStock ? 50 : 0;
             if (stock <= 0) continue;
 
             var accountLine = account.Items.FirstOrDefault(i => i.ProductId == guestLine.ProductId && i.VariantId == guestLine.VariantId);

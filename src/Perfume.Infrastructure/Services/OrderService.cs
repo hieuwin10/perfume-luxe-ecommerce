@@ -91,13 +91,18 @@ public class OrderService : IOrderService
                 CreatedAt = now
             };
 
+            // Doc truoc toan bo san pham va phien ban lien quan trong 1 truy van duy nhat de triet tieu N+1 query
+            var productIds = lines.Select(l => l.ProductId).Distinct().ToList();
+            var productsDict = await _context.Products
+                .Include(p => p.Variants)
+                .Where(p => productIds.Contains(p.Id))
+                .ToDictionaryAsync(p => p.Id);
+
             // Duyet qua tung dong san pham, kiem tra ton kho va tru so luong
             foreach (var line in lines)
             {
-                var product = await _context.Products
-                    .Include(p => p.Variants)
-                    .FirstOrDefaultAsync(p => p.Id == line.ProductId && p.IsInStock);
-                if (product == null) return (false, "Một sản phẩm trong giỏ đã ngừng bán.", null);
+                if (!productsDict.TryGetValue(line.ProductId, out var product) || !product.IsInStock)
+                    return (false, "Một sản phẩm trong giỏ đã ngừng bán.", null);
 
                 ProductVariant? variant = null;
                 decimal unitPrice;

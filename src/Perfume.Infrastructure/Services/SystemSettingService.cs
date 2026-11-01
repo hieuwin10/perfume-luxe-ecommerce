@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Mail;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Perfume.Application.DTOs;
@@ -14,26 +15,47 @@ namespace Perfume.Infrastructure.Services;
 public class SystemSettingService : ISystemSettingService
 {
     private const string SettingsKey = "Store_Configuration";
+    private const string CacheKey = "system_settings_cache";
+    private static readonly TimeSpan CacheDuration = TimeSpan.FromSeconds(60);
+
     private readonly PerfumeDbContext _db;
     private readonly IConfiguration _configuration;
     private readonly ILogger<SystemSettingService> _logger;
+    private readonly IMemoryCache? _cache;
 
     public SystemSettingService(PerfumeDbContext db, IConfiguration configuration, ILogger<SystemSettingService> logger)
+        : this(db, configuration, logger, null)
+    {
+    }
+
+    public SystemSettingService(PerfumeDbContext db, IConfiguration configuration, ILogger<SystemSettingService> logger, IMemoryCache? cache = null)
     {
         _db = db;
         _configuration = configuration;
         _logger = logger;
+        _cache = cache;
     }
 
     public async Task<SystemSettingsDto> GetSettingsAsync(CancellationToken cancellationToken = default)
     {
-        var record = await _db.SystemSettings.FirstOrDefaultAsync(s => s.Key == SettingsKey, cancellationToken);
+        if (_cache != null && _cache.TryGetValue(CacheKey, out SystemSettingsDto? cached) && cached != null)
+        {
+            return cached;
+        }
+
+        var record = await _db.SystemSettings.AsNoTracking().FirstOrDefaultAsync(s => s.Key == SettingsKey, cancellationToken);
+        SystemSettingsDto result;
         if (record != null && !string.IsNullOrWhiteSpace(record.Value))
         {
             try
             {
                 var parsed = JsonSerializer.Deserialize<SystemSettingsDto>(record.Value);
-                if (parsed != null) return parsed;
+                if (parsed != null)
+                {
+                    result = parsed;
+                    _cache?.Set(CacheKey, result, CacheDuration);
+                    return result;
+                }
             }
             catch (Exception ex)
             {
@@ -42,7 +64,7 @@ public class SystemSettingService : ISystemSettingService
         }
 
         // Defaults fallback from configuration or hardcoded
-        var fallback = new SystemSettingsDto
+        result = new SystemSettingsDto
         {
             StoreName = _configuration["Store:Name"] ?? "PERFUME LUXE",
             StoreSlogan = _configuration["Store:Slogan"] ?? "Haute Parfumerie & Niche Fragrances",
@@ -61,7 +83,9 @@ public class SystemSettingService : ISystemSettingService
             SmtpUserName = _configuration["Smtp:UserName"],
             SmtpPassword = _configuration["Smtp:Password"]
         };
-        return fallback;
+
+        _cache?.Set(CacheKey, result, CacheDuration);
+        return result;
     }
 
     public async Task SaveSettingsAsync(SystemSettingsDto settings, CancellationToken cancellationToken = default)
@@ -85,6 +109,7 @@ public class SystemSettingService : ISystemSettingService
         }
 
         await _db.SaveChangesAsync(cancellationToken);
+        _cache?.Remove(CacheKey);
     }
 
     public async Task<(bool Success, string Message)> TestSmtpConnectionAsync(string recipientEmail, CancellationToken cancellationToken = default)

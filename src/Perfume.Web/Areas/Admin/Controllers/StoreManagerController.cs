@@ -59,7 +59,7 @@ public class StoreManagerController : Controller
         if (toDate < fromDate) toDate = fromDate;
         var endExclusive = toDate.AddDays(1);
 
-        var period = _db.Orders.Where(o => o.CreatedAt >= fromDate && o.CreatedAt < endExclusive);
+        var period = _db.Orders.AsNoTracking().Where(o => o.CreatedAt >= fromDate && o.CreatedAt < endExclusive);
         var totalOrderCount = await period.CountAsync();
         var paid = period.Where(o => o.OrderStatus == OrderStatus.Delivered && o.PaymentStatus == PaymentStatus.Completed);
         var paidCount = await paid.CountAsync();
@@ -91,6 +91,7 @@ public class StoreManagerController : Controller
             .ToDictionaryAsync(x => x.Status.ToString(), x => x.Count);
 
         var topProducts = await _db.OrderItems
+            .AsNoTracking()
             .Where(i => i.Order != null && i.Order.CreatedAt >= fromDate && i.Order.CreatedAt < endExclusive &&
                         i.Order.OrderStatus == OrderStatus.Delivered && i.Order.PaymentStatus == PaymentStatus.Completed)
             .GroupBy(i => i.ProductName)
@@ -98,7 +99,7 @@ public class StoreManagerController : Controller
             .OrderByDescending(x => x.Quantity).Take(10).ToListAsync();
 
         // Kho bãi & Tồn kho
-        var allVariants = await _db.ProductVariants.Include(v => v.Product).ToListAsync();
+        var allVariants = await _db.ProductVariants.AsNoTracking().Include(v => v.Product).ToListAsync();
         var outOfStockVariants = allVariants.Where(v => v.StockQuantity <= 0).ToList();
         var lowStockVariants = allVariants.Where(v => v.StockQuantity > 0 && v.StockQuantity <= 5).OrderBy(v => v.StockQuantity).ToList();
         var totalStockUnits = allVariants.Sum(v => v.StockQuantity);
@@ -160,7 +161,7 @@ public class StoreManagerController : Controller
         var toDate = (to ?? DateTime.UtcNow.Date).Date;
         if (toDate < fromDate) toDate = fromDate;
         var endExclusive = toDate.AddDays(1);
-        var orders = await _db.Orders.Where(o => o.CreatedAt >= fromDate && o.CreatedAt < endExclusive)
+        var orders = await _db.Orders.AsNoTracking().Where(o => o.CreatedAt >= fromDate && o.CreatedAt < endExclusive)
             .OrderByDescending(o => o.CreatedAt).ToListAsync();
         static string Cell(string? value)
         {
@@ -358,7 +359,7 @@ public class StoreManagerController : Controller
     [HttpGet]
     public async Task<IActionResult> Vouchers()
     {
-        var items = await _db.Vouchers.OrderByDescending(v => v.CreatedAt).ToListAsync();
+        var items = await _db.Vouchers.AsNoTracking().OrderByDescending(v => v.CreatedAt).ToListAsync();
         return View(items);
     }
 
@@ -407,7 +408,7 @@ public class StoreManagerController : Controller
     [HttpGet]
     public async Task<IActionResult> Reviews()
     {
-        var reviews = await _db.Reviews.Include(r => r.Product).Where(r => !r.IsApproved)
+        var reviews = await _db.Reviews.AsNoTracking().Include(r => r.Product).Where(r => !r.IsApproved)
             .OrderBy(r => r.CreatedAt).ToListAsync();
         return View(reviews);
     }
