@@ -1,4 +1,5 @@
 @model BlogPost
+@inject IDeviceDetectionService Device
 @{
     ViewData["Title"] ??= string.IsNullOrWhiteSpace(Model.MetaTitle) ? Model.Title : Model.MetaTitle.Trim();
     ViewData["MetaDescription"] ??= string.IsNullOrWhiteSpace(Model.MetaDescription) ? Model.Summary : Model.MetaDescription.Trim();
@@ -7,78 +8,590 @@
     var recent = ViewBag.RecentPosts as List<BlogPost> ?? new List<BlogPost>();
 }
 
-<div style="max-width: 900px; margin: 40px auto; padding: 0 24px;">
+<style>
+    /* ========================================================
+       PERFUME LUXE - HAUTE PARFUMERIE EDITORIAL LAYOUT
+       ======================================================== */
+    .blog-detail-wrapper {
+        max-width: 1240px;
+        margin: 28px auto 70px;
+        padding: 0 24px;
+        box-sizing: border-box;
+    }
+    .blog-breadcrumb {
+        font-size: 0.82rem;
+        color: var(--text-muted);
+        margin-bottom: 22px;
+        line-height: 1.6;
+        word-break: break-word;
+    }
+    .blog-breadcrumb a {
+        color: var(--text-secondary);
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+    .blog-breadcrumb a:hover {
+        color: var(--gold-primary);
+    }
+
+    /* 2-Column Grid on Desktop */
+    .blog-main-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 330px;
+        gap: 36px;
+        align-items: start;
+    }
+    .blog-main-grid.single-column {
+        grid-template-columns: 1fr;
+    }
+
+    /* Main Article Column */
+    .blog-content-col {
+        min-width: 0;
+    }
+
+    .blog-header {
+        margin-bottom: 28px;
+        text-align: left;
+    }
+    .blog-category-badge {
+        display: inline-block;
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        color: var(--gold-primary);
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+    .blog-title {
+        font-size: clamp(1.7rem, 3.2vw + 0.4rem, 2.5rem);
+        margin: 8px 0 16px;
+        line-height: 1.32;
+        font-family: var(--font-serif);
+        color: var(--text-primary);
+        word-break: break-word;
+    }
+    .blog-meta-bar {
+        display: flex;
+        gap: 14px;
+        align-items: center;
+        flex-wrap: wrap;
+        font-size: 0.84rem;
+        color: var(--text-muted);
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--border-subtle);
+    }
+
+    /* Featured Image */
+    .blog-featured-image-wrap {
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        margin: 24px 0 32px;
+        border: 1px solid rgba(212, 175, 55, 0.2);
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.5);
+    }
+    .blog-featured-image-wrap img {
+        width: 100%;
+        max-height: 480px;
+        object-fit: cover;
+        display: block;
+    }
+
+    /* Article Body Card */
+    .blog-article-card {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-card);
+        border-radius: var(--radius-md);
+        padding: 38px 42px;
+        font-size: 1.05rem;
+        line-height: 1.92;
+        color: #d1d1d6;
+        margin-bottom: 36px;
+        box-sizing: border-box;
+        overflow-wrap: break-word;
+        word-break: break-word;
+    }
+    .blog-article-card p.lead {
+        font-size: 1.15rem;
+        line-height: 1.85;
+        color: #f0f0f3;
+        font-style: italic;
+        padding-bottom: 16px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        margin-bottom: 28px;
+    }
+    .blog-article-card h2 {
+        font-family: var(--font-serif);
+        color: #ffffff;
+        font-size: clamp(1.35rem, 2.2vw + 0.3rem, 1.6rem);
+        margin-top: 44px;
+        margin-bottom: 18px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid rgba(212, 175, 55, 0.25);
+        line-height: 1.38;
+        scroll-margin-top: 100px;
+    }
+    .blog-article-card h3 {
+        font-family: var(--font-serif);
+        color: var(--gold-primary);
+        font-size: clamp(1.15rem, 1.8vw + 0.2rem, 1.32rem);
+        margin-top: 32px;
+        margin-bottom: 14px;
+        line-height: 1.42;
+        scroll-margin-top: 100px;
+    }
+    .blog-article-card h4 {
+        color: #f5f5f7;
+        font-size: 1.1rem;
+        margin-top: 22px;
+        margin-bottom: 10px;
+    }
+    .blog-article-card a {
+        color: var(--gold-primary);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+        text-decoration-color: rgba(212, 175, 55, 0.45);
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+    .blog-article-card a:hover {
+        color: #ffffff;
+        text-decoration-color: var(--gold-primary);
+    }
+    .blog-article-card ul, .blog-article-card ol {
+        padding-left: 24px;
+        margin: 18px 0;
+    }
+    .blog-article-card li {
+        margin-bottom: 10px;
+        color: #c7c7cc;
+        line-height: 1.78;
+    }
+    .blog-article-card li strong {
+        color: #f5f5f7;
+    }
+    .blog-article-card blockquote {
+        margin: 30px 0;
+        padding: 20px 26px;
+        background: linear-gradient(135deg, rgba(212, 175, 55, 0.08), rgba(20, 20, 24, 0.9));
+        border-left: 3px solid var(--gold-primary);
+        border-radius: 0 8px 8px 0;
+        font-family: var(--font-serif);
+        font-size: 1.18rem;
+        font-style: italic;
+        color: #f5f5f7;
+        line-height: 1.75;
+    }
+
+    /* Comparison Table Styling */
+    .blog-article-card .table-responsive {
+        margin: 32px 0;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border-radius: 8px;
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        background: rgba(14, 14, 18, 0.85);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+    .blog-article-card table {
+        width: 100%;
+        margin-bottom: 0;
+        border-collapse: collapse;
+        font-size: 0.94rem;
+        color: #d1d1d6;
+        min-width: 620px;
+    }
+    .blog-article-card table thead th {
+        background: linear-gradient(135deg, rgba(212, 175, 55, 0.22), rgba(28, 28, 34, 0.98)) !important;
+        color: var(--gold-primary) !important;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        font-size: 0.84rem;
+        padding: 15px 18px;
+        border: 1px solid rgba(212, 175, 55, 0.25);
+        white-space: nowrap;
+        text-align: left;
+    }
+    .blog-article-card table tbody td {
+        padding: 14px 18px;
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        vertical-align: middle;
+        line-height: 1.62;
+        color: #c7c7cc;
+    }
+    .blog-article-card table tbody td strong {
+        color: #f5f5f7;
+    }
+    .blog-article-card table tbody tr:nth-child(even) {
+        background: rgba(255, 255, 255, 0.02);
+    }
+    .blog-article-card table tbody tr:hover {
+        background: rgba(212, 175, 55, 0.06);
+    }
+
+    /* FAQ Section */
+    .blog-article-card .blog-faq-section {
+        margin-top: 48px;
+        padding: 30px !important;
+        background: linear-gradient(135deg, rgba(212, 175, 55, 0.08), rgba(20, 20, 24, 0.95)) !important;
+        border: 1px solid rgba(212, 175, 55, 0.32) !important;
+        border-radius: var(--radius-md) !important;
+    }
+    .blog-article-card .blog-faq-section h3 {
+        color: var(--gold-primary) !important;
+        font-size: 1.35rem;
+        margin-top: 0;
+        margin-bottom: 22px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+        padding-bottom: 12px;
+    }
+    .blog-article-card .blog-faq-section .faq-item {
+        background: rgba(12, 12, 16, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-left: 3px solid var(--gold-primary);
+        border-radius: 6px;
+        padding: 16px 20px;
+        margin-bottom: 16px;
+    }
+    .blog-article-card .blog-faq-section .faq-item h4 {
+        color: #ffffff;
+        font-size: 1.05rem;
+        font-weight: 600;
+        margin: 0 0 8px 0;
+    }
+    .blog-article-card .blog-faq-section .faq-item p {
+        color: #c7c7cc;
+        margin: 0;
+        font-size: 0.95rem;
+        line-height: 1.68;
+    }
+
+    /* Grid Row Cards */
+    .blog-article-card .row {
+        display: flex;
+        flex-wrap: wrap;
+        margin: 0 -10px;
+    }
+    .blog-article-card .col-md-6 {
+        flex: 0 0 50%;
+        max-width: 50%;
+        padding: 0 10px;
+        box-sizing: border-box;
+    }
+    .blog-article-card .bg-light {
+        background: rgba(255, 255, 255, 0.03) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+
+    /* Sticky Sidebar on Desktop */
+    .blog-sidebar {
+        position: sticky;
+        top: 90px;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+    }
+    .sidebar-widget {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-card);
+        border-radius: var(--radius-md);
+        padding: 22px;
+        box-sizing: border-box;
+    }
+    .sidebar-widget-title {
+        font-family: var(--font-serif);
+        font-size: 1.08rem;
+        color: var(--gold-primary);
+        margin: 0 0 16px 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+        padding-bottom: 10px;
+    }
+
+    /* Table of Contents (TOC) */
+    .toc-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .toc-item {
+        margin-bottom: 10px;
+        line-height: 1.45;
+    }
+    .toc-link {
+        color: #a1a1aa;
+        text-decoration: none;
+        font-size: 0.88rem;
+        transition: all 0.2s ease;
+        display: block;
+        padding-left: 10px;
+        border-left: 2px solid transparent;
+    }
+    .toc-link:hover, .toc-link.active {
+        color: var(--gold-primary);
+        border-left-color: var(--gold-primary);
+        padding-left: 14px;
+        font-weight: 600;
+    }
+    .toc-link:focus-visible,
+    .sidebar-promo-btn:focus-visible {
+        outline: 2px solid var(--gold-primary);
+        outline-offset: 3px;
+    }
+
+    /* Discovery Box & Quiz Widget Cards */
+    .sidebar-promo-card {
+        background: linear-gradient(135deg, rgba(212, 175, 55, 0.12), rgba(18, 18, 22, 0.95));
+        border: 1px solid rgba(212, 175, 55, 0.35);
+        border-radius: var(--radius-md);
+        padding: 22px;
+        text-align: center;
+    }
+    .sidebar-promo-card i {
+        font-size: 2rem;
+        color: var(--gold-primary);
+        margin-bottom: 10px;
+    }
+    .sidebar-promo-card h4 {
+        font-family: var(--font-serif);
+        font-size: 1.15rem;
+        color: #ffffff;
+        margin: 0 0 8px 0;
+    }
+    .sidebar-promo-card p {
+        font-size: 0.85rem;
+        color: #c7c7cc;
+        line-height: 1.55;
+        margin: 0 0 16px 0;
+    }
+    .sidebar-promo-btn {
+        display: inline-block;
+        width: 100%;
+        padding: 10px 16px;
+        background: var(--gold-gradient);
+        color: #0b0b0e !important;
+        font-weight: 700;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        border-radius: var(--radius-sm);
+        text-decoration: none !important;
+        box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        box-sizing: border-box;
+    }
+    .sidebar-promo-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(212, 175, 55, 0.45);
+    }
+
+    /* Responsive Breakpoints */
+    @@media (max-width: 1100px) {
+        .blog-main-grid {
+            grid-template-columns: 1fr;
+            gap: 28px;
+        }
+        .blog-sidebar {
+            display: none;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .blog-detail-wrapper {
+            padding: 0 16px;
+            margin: 18px auto 40px;
+        }
+        .blog-article-card {
+            padding: 22px 18px;
+            font-size: 0.98rem;
+            line-height: 1.78;
+        }
+        .blog-article-card .col-md-6 {
+            flex: 0 0 100%;
+            max-width: 100%;
+            margin-bottom: 14px;
+        }
+        .blog-article-card .blog-faq-section {
+            padding: 20px 14px !important;
+        }
+        .blog-article-card .blog-faq-section .faq-item {
+            padding: 14px;
+        }
+    }
+</style>
+
+<div class="blog-detail-wrapper">
     <!-- Breadcrumb -->
-    <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 20px;">
+    <nav aria-label="Breadcrumb" class="blog-breadcrumb">
         <a href="/">Trang Chủ</a> &bull; <a href="/blog">Cẩm Nang</a> &bull; <span style="color: var(--gold-primary);">@Model.Title</span>
-    </div>
+    </nav>
 
-    <!-- Article Header -->
-    <header style="margin-bottom: 30px; text-align: center;">
-        <span style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--gold-primary); font-weight: 700;">
-            @(Model.Category?.Name ?? "Kiến Thức Nước Hoa")
-        </span>
-        <h1 style="font-size: 2.6rem; margin: 12px 0 16px; line-height: 1.25;">@Model.Title</h1>
-        <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; font-size: 0.85rem; color: var(--text-muted);">
-            <span><i class="fa-solid fa-user-pen" style="margin-right: 4px;"></i>@Model.AuthorName</span>
-            <span>&bull;</span>
-            <span><i class="fa-solid fa-calendar-days" style="margin-right: 4px;"></i>@Model.CreatedAt.ToString("dd/MM/yyyy")</span>
-            @if (Model.UpdatedAt.HasValue && Model.UpdatedAt.Value.Date > Model.CreatedAt.Date)
+    <div class="blog-main-grid @(Device.IsMobile() ? "single-column" : "")">
+        <!-- Main Editorial Column -->
+        <main class="blog-content-col">
+            <!-- Article Header -->
+            <header class="blog-header">
+                <span class="blog-category-badge">
+                    @(Model.Category?.Name ?? "Kiến Thức Nước Hoa")
+                </span>
+                <h1 class="blog-title">@Model.Title</h1>
+                <div class="blog-meta-bar">
+                    <span><i class="fa-solid fa-user-pen" style="margin-right: 4px; color: var(--gold-primary);"></i>@Model.AuthorName</span>
+                    <span>&bull;</span>
+                    <span><i class="fa-solid fa-calendar-days" style="margin-right: 4px;"></i>@Model.CreatedAt.ToString("dd/MM/yyyy")</span>
+                    @if (Model.UpdatedAt.HasValue && Model.UpdatedAt.Value.Date > Model.CreatedAt.Date)
+                    {
+                        <span>&bull;</span>
+                        <span>Cập nhật @Model.UpdatedAt.Value.ToString("dd/MM/yyyy")</span>
+                    }
+                    <span>&bull;</span>
+                    <span><i class="fa-solid fa-eye" style="margin-right: 4px;"></i>@Model.ViewCount lượt xem</span>
+                </div>
+            </header>
+
+            <!-- Featured Image -->
+            @if (!string.IsNullOrEmpty(Model.ThumbnailUrl))
             {
-                <span>&bull;</span>
-                <span>Cập nhật @Model.UpdatedAt.Value.ToString("dd/MM/yyyy")</span>
+                <div class="blog-featured-image-wrap">
+                    <img src="@Model.ThumbnailUrl" alt="@Model.Title" width="900" height="480" fetchpriority="high" />
+                </div>
             }
-            <span>&bull;</span>
-            <span><i class="fa-solid fa-eye" style="margin-right: 4px;"></i>@Model.ViewCount lượt xem</span>
-        </div>
-    </header>
 
-    <!-- Featured Image -->
-    @if (!string.IsNullOrEmpty(Model.ThumbnailUrl))
-    {
-        <div style="border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 40px; box-shadow: var(--shadow-luxury);">
-            <img src="@Model.ThumbnailUrl" alt="@Model.Title" width="900" height="480" fetchpriority="high" style="width: 100%; max-height: 480px; object-fit: cover;" />
-        </div>
-    }
+            <!-- Article Content -->
+            <article class="blog-article-card">
+                @Html.Raw(Model.Content)
+            </article>
 
-    <!-- Article Content -->
-    <article style="background: var(--bg-surface); border: 1px solid var(--border-card); border-radius: var(--radius-md); padding: 40px; font-size: 1.05rem; line-height: 1.9; color: var(--text-primary); margin-bottom: 40px;">
-        @Html.Raw(Model.Content)
-    </article>
+            <!-- Editorial Authority Box (E-E-A-T) -->
+            <section style="background: linear-gradient(135deg, rgba(212,175,55,0.08), rgba(20,20,24,0.95)); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 26px; margin-bottom: 45px; display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
+                <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(212,175,55,0.15); border: 1px solid var(--gold-primary); display: flex; align-items: center; justify-content: center; color: var(--gold-primary); font-size: 1.6rem; flex-shrink: 0;">
+                    <i class="fa-solid fa-feather-pointed"></i>
+                </div>
+                <div style="flex: 1; min-width: 250px;">
+                    <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--gold-primary); font-weight: 700;">Biên Tập Bởi Ban Thẩm Hương</div>
+                    <h3 style="font-size: 1.2rem; font-family: var(--font-serif); margin: 4px 0 6px; color: #ffffff; border-bottom: none; padding-bottom: 0;">@Model.AuthorName • PERFUME LUXE Editorial</h3>
+                    <p style="font-size: 0.88rem; color: #a1a1aa; line-height: 1.6; margin: 0;">
+                        Bài viết được nghiên cứu và tổng hợp bởi đội ngũ chuyên gia khứu giác tại PERFUME LUXE, cam kết cung cấp kiến thức khách quan, chuẩn xác về nghệ thuật nước hoa Niche và xu hướng thời trang quốc tế.
+                    </p>
+                </div>
+            </section>
 
-    <!-- Editorial Author & Authority Box (E-E-A-T) -->
-    <section style="background: linear-gradient(135deg, rgba(212,175,55,0.08), rgba(20,20,20,0.95)); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 28px; margin-bottom: 50px; display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
-        <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(212,175,55,0.15); border: 1px solid var(--gold-primary); display: flex; align-items: center; justify-content: center; color: var(--gold-primary); font-size: 1.8rem; flex-shrink: 0;">
-            <i class="fa-solid fa-feather-pointed"></i>
-        </div>
-        <div style="flex: 1; min-width: 260px;">
-            <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--gold-primary); font-weight: 700;">Biên Tập Bởi Ban Thẩm Hương</div>
-            <h2 style="font-size: 1.25rem; font-family: var(--font-serif); margin: 4px 0 8px; color: var(--text-primary);">@Model.AuthorName • PERFUME LUXE Editorial</h2>
-            <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6; margin: 0;">
-                Bài viết được nghiên cứu và tổng hợp bởi đội ngũ chuyên gia khứu giác tại PERFUME LUXE, cam kết cung cấp kiến thức khách quan, chuẩn xác về nghệ thuật nước hoa Niche và xu hướng thời trang quốc tế.
-            </p>
-        </div>
-    </section>
-
-    <!-- Related Articles -->
-    @if (recent.Any())
-    {
-        <div style="border-top: 1px solid var(--border-subtle); padding-top: 40px;">
-            <h2 style="font-size: 1.5rem; margin-bottom: 24px; color: var(--gold-primary);">Bài Viết Khác Có Thể Bạn Quan Tâm</h2>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
-                @foreach (var r in recent)
-                {
-                    <div style="background: var(--bg-surface); border: 1px solid var(--border-card); border-radius: var(--radius-sm); padding: 16px;">
-                        <h3 style="font-size: 1.05rem; margin-bottom: 8px;">
-                            <a href="/blog/@r.Slug" style="color: var(--text-primary); text-decoration: none;">@r.Title</a>
-                        </h3>
-                        <a href="/blog/@r.Slug" style="font-size: 0.75rem; color: var(--gold-primary); text-decoration: none; font-weight: 600;">Đọc tiếp &raquo;</a>
+            <!-- Related Articles -->
+            @if (recent.Any())
+            {
+                <div style="border-top: 1px solid var(--border-subtle); padding-top: 36px;">
+                    <h2 style="font-size: 1.4rem; margin-bottom: 22px; color: var(--gold-primary); border-bottom: none; padding-bottom: 0;">Bài Viết Khác Có Thể Bạn Quan Tâm</h2>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px;">
+                        @foreach (var r in recent)
+                        {
+                            <div style="background: var(--bg-surface); border: 1px solid var(--border-card); border-radius: var(--radius-sm); padding: 18px; transition: border-color 0.2s ease;">
+                                <h3 style="font-size: 1.02rem; margin-bottom: 10px; color: #f5f5f7; font-family: var(--font-serif); line-height: 1.45;">
+                                    <a href="/blog/@r.Slug" style="color: #f5f5f7; text-decoration: none;">@r.Title</a>
+                                </h3>
+                                <a href="/blog/@r.Slug" style="font-size: 0.76rem; color: var(--gold-primary); text-decoration: none; font-weight: 600;">Đọc tiếp &raquo;</a>
+                            </div>
+                        }
                     </div>
-                }
-            </div>
-        </div>
-    }
+                </div>
+            }
+        </main>
+
+        <!-- Right Sticky Sidebar for Desktop / Tablet -->
+        @if (!Device.IsMobile())
+        {
+            <aside class="blog-sidebar">
+                <!-- Table of Contents Widget -->
+                <div class="sidebar-widget" id="tocWidget" style="display: none;">
+                    <h3 class="sidebar-widget-title"><i class="fa-solid fa-list-ul"></i> Mục Lục Bài Viết</h3>
+                    <ul class="toc-list" id="tocList"></ul>
+                </div>
+
+                <!-- Discovery Box Promo -->
+                <div class="sidebar-promo-card">
+                    <i class="fa-solid fa-box-open"></i>
+                    <h4>Discovery Box</h4>
+                    <p>Khám phá 3 – 5 ống chiết Niche 10ml tuyển chọn để tìm ra mùi hương chân ái trước khi đầu tư chai lớn.</p>
+                    <a href="/discovery-box" class="sidebar-promo-btn">Trải Nghiệm Ngay</a>
+                </div>
+
+                <!-- AI Scent Radar Quiz Promo -->
+                <div class="sidebar-promo-card" style="background: linear-gradient(135deg, rgba(212, 175, 55, 0.08), rgba(26, 26, 32, 0.95));">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <h4>Tìm Mùi Chuẩn AI</h4>
+                    <p>Thuật toán khứu giác phân tích sở thích và môi trường sống để tìm ra chữ ký mùi hương của riêng bạn.</p>
+                    <a href="/catalog/quiz" class="sidebar-promo-btn" style="background: transparent; border: 1px solid var(--gold-primary); color: var(--gold-primary) !important;">Trắc Nghiệm 60s</a>
+                </div>
+
+                <!-- Private Boutique Booking -->
+                <div class="sidebar-widget" style="text-align: center;">
+                    <div style="color: var(--gold-primary); font-size: 1.6rem; margin-bottom: 8px;"><i class="fa-solid fa-champagne-glasses"></i></div>
+                    <h4 style="font-family: var(--font-serif); font-size: 1.05rem; color: #ffffff; margin: 0 0 6px 0;">Thử Mùi Riêng Tư VIP</h4>
+                    <p style="font-size: 0.82rem; color: #a1a1aa; line-height: 1.5; margin: 0 0 14px 0;">Không gian trà chiều thượng lưu thưởng hương cùng chuyên gia tại boutique.</p>
+                    <a href="/dat-lich-trai-nghiem" style="font-size: 0.82rem; color: var(--gold-primary); text-decoration: underline; font-weight: 600;">Đặt Lịch Hẹn &raquo;</a>
+                </div>
+            </aside>
+        }
+    </div>
 </div>
+
+<script>
+    // Tự động trích xuất Mục Lục (TOC) từ các thẻ H2 trong bài viết cho màn hình Desktop
+    document.addEventListener('DOMContentLoaded', function () {
+        const article = document.querySelector('.blog-article-card');
+        const tocList = document.getElementById('tocList');
+        const tocWidget = document.getElementById('tocWidget');
+
+        if (!article || !tocList || !tocWidget) return;
+
+        const headings = article.querySelectorAll('h2');
+        if (headings.length < 2) return;
+
+        headings.forEach(function (h2, idx) {
+            const anchorId = 'section-' + (idx + 1);
+            h2.id = anchorId;
+
+            const li = document.createElement('li');
+            li.className = 'toc-item';
+
+            const a = document.createElement('a');
+            a.className = 'toc-link';
+            a.href = '#' + anchorId;
+            // Loại bỏ số thứ tự thừa nếu có
+            a.textContent = h2.textContent.trim();
+
+            li.appendChild(a);
+            tocList.appendChild(li);
+        });
+
+        tocWidget.style.display = 'block';
+
+        // ScrollSpy Highlight TOC on scroll
+        const links = tocList.querySelectorAll('.toc-link');
+        window.addEventListener('scroll', function () {
+            let current = '';
+            headings.forEach(function (h2) {
+                const top = h2.getBoundingClientRect().top;
+                if (top <= 140) {
+                    current = h2.id;
+                }
+            });
+
+            links.forEach(function (link) {
+                if (link.getAttribute('href') === '#' + current) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+        }, { passive: true });
+    });
+</script>
 
 @{
     var articleUrl = ViewData["CanonicalUrl"]?.ToString() ?? $"{Context.Request.Scheme}://{Context.Request.Host}/blog/{Uri.EscapeDataString(Model.Slug)}";

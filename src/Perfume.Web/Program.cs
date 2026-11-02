@@ -89,6 +89,8 @@ catch
 }
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IDeviceDetectionService, DeviceDetectionService>();
 builder.Services.AddResponseCaching();
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IAdminDashboardAnalyticsService, AdminDashboardAnalyticsService>();
@@ -192,7 +194,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseResponseCompression();
 
-// Gan cac HTTP Security Headers bao ve chong XSS, Clickjacking va Sniffing
+// Gan cac HTTP Security Headers bao ve chong XSS, Clickjacking va Sniffing, va Vary header cho Device Detection (RESS)
 app.Use(async (context, next) =>
 {
     context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
@@ -200,6 +202,7 @@ app.Use(async (context, next) =>
     context.Response.Headers.Append("Cross-Origin-Opener-Policy", "same-origin");
     context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
     context.Response.Headers.Append("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+    context.Response.Headers.Append("Vary", "Sec-CH-UA-Mobile, User-Agent");
     if (!context.Response.Headers.ContainsKey("Content-Security-Policy"))
     {
         context.Response.Headers.Append("Content-Security-Policy",
