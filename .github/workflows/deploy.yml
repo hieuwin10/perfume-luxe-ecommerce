@@ -37,7 +37,7 @@ jobs:
       id: asset-version
       shell: bash
       run: |
-        css_version="$(openssl dgst -sha256 -binary src/Perfume.Web/wwwroot/css/luxury-perfume.css | openssl base64 -A | tr '+/' '-_' | tr -d '=')"
+        css_version="$(openssl dgst -sha256 -binary src/Perfume.Web/wwwroot/css/luxury-perfume.min.css | openssl base64 -A | tr '+/' '-_' | tr -d '=')"
         icon_css_version="$(openssl dgst -sha256 -binary src/Perfume.Web/wwwroot/css/font-awesome-subset.css | openssl base64 -A | tr '+/' '-_' | tr -d '=')"
         echo "css_version=$css_version" >> "$GITHUB_OUTPUT"
         echo "icon_css_version=$icon_css_version" >> "$GITHUB_OUTPUT"

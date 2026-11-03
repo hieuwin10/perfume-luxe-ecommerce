@@ -1,11 +1,12 @@
-@model List<Perfume.Domain.Entities.HeroBanner>
+﻿@model List<Perfume.Domain.Entities.HeroBanner>
 @using System
 @using System.Collections.Generic
 @using System.Linq
 @{
     string OptimizeHeroImageUrl(string? imageUrl, int width = 1080)
     {
-        if (string.IsNullOrWhiteSpace(imageUrl)) return string.Empty;
+        if (string.IsNullOrWhiteSpace(imageUrl)) return width <= 768 ? "/images/hero/hero-mobile.webp" : "/images/hero/hero-desktop.webp";
+        if (imageUrl.Contains("photo-1592945403244-b3fbafd7f539")) return width <= 768 ? "/images/hero/hero-mobile.webp" : "/images/hero/hero-desktop.webp";
         if (!Uri.TryCreate(imageUrl, UriKind.Absolute, out var imageUri)
             || !imageUri.Host.Equals("images.unsplash.com", StringComparison.OrdinalIgnoreCase))
         {

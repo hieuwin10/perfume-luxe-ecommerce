@@ -88,8 +88,8 @@
     <link rel="preload" href="~/css/font-awesome-subset.css" asp-append-version="true" as="style" onload="this.onload=null;this.rel='stylesheet'" />
     <noscript><link rel="stylesheet" href="~/css/font-awesome-subset.css" asp-append-version="true" /></noscript>
 
-    <!-- Luxury Theme Stylesheet -->
-    <link rel="stylesheet" href="~/css/luxury-perfume.css" asp-append-version="true" />
+    <!-- Luxury Theme Stylesheet (Minified) -->
+    <link rel="stylesheet" href="~/css/luxury-perfume.min.css" asp-append-version="true" />
 
     @if (requestPath == "/")
     {
@@ -120,6 +120,7 @@
             body { margin: 0; background: var(--bg-main); color: var(--text-primary); font-family: var(--font-body); line-height: 1.6; overflow-x: hidden; }
             h1, h2, h3, h4 { font-family: var(--font-heading); letter-spacing: 0.02em; }
             a { color: inherit; text-decoration: none; }
+            i.fa-solid, i.fa-brands, i.fa-regular { display: inline-block; width: 1.15em; text-align: center; }
             .text-gold-gradient { background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
             .announcement-bar { min-height: 32px; background: var(--bg-surface-elevated); border-bottom: 1px solid var(--border-card); font-size: 0.78rem; padding: 6px 16px; text-align: center; color: var(--text-secondary); display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 8px; }
             .announcement-desktop-only { display: none; }
