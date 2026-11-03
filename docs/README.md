@@ -19,6 +19,7 @@ Hệ thống tài liệu được tổ chức theo chuẩn kiến trúc cấp t�
 | 📊 [**STORE_MANAGER_AND_ADMIN_GUIDE.md**](./STORE_MANAGER_AND_ADMIN_GUIDE.md) | Sổ tay vận hành Dashboard: Phân tích dòng tiền ca, Tốc độ xoay vòng kho, Báo cáo tồn kho, Quản lý Voucher | Store Managers, C-Level, Operations |
 | 🔌 [**API_REFERENCE.md**](./API_REFERENCE.md) | Đặc tả RESTful Web API cho Mobile App/Frontend SPA, Customer API, JWT Bearer Auth | Frontend/Mobile Devs, Integrators |
 | 🚀 [**DEPLOYMENT_AND_DEVOPS.md**](./DEPLOYMENT_AND_DEVOPS.md) | Triển khai Docker, Docker Compose, Quản lý biến môi trường `.env`, Database Migrations & Backup | DevOps, SRE, SysAdmins |
+| 📅 [**PROJECT_ROADMAP_8_WEEKS.md**](./PROJECT_ROADMAP_8_WEEKS.md) | Kế hoạch & Báo cáo tiến độ 8 tuần (2 tuần lý thuyết/thiết kế + 6 tuần code thực chiến hoàn thiện) | Giáo viên hướng dẫn, Ban Giám đốc, Toàn bộ đội ngũ |
 
 ---
 
