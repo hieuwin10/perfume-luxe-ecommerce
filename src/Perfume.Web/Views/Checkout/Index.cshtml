@@ -1,4 +1,4 @@
-@model CheckoutRequestDto
+﻿@model CheckoutRequestDto
 @{
     ViewData["Title"] = "Thanh Toán Đơn Hàng";
     ViewData["Robots"] = "noindex, nofollow";
@@ -214,6 +214,17 @@
                     </div>
                 </div>
 
+                                <div style="background: rgba(212, 175, 55, 0.05); border: 1px solid rgba(212, 175, 55, 0.25); border-radius: var(--radius-md); padding: 14px 16px; margin: 18px 0;">
+                    <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer; font-size: 0.88rem; line-height: 1.5; color: var(--text-secondary); margin: 0;">
+                        <input type="checkbox" id="chkAcceptPrivacy" name="AcceptPrivacyPolicy" value="true" required style="width: 18px; height: 18px; accent-color: var(--gold-primary); margin-top: 2px; cursor: pointer;" />
+                        <span>
+                            Tôi đã đọc, hiểu rõ và tự nguyện đồng ý với 
+                            <a href="/huong-dan-mua-hang" target="_blank" style="color: var(--gold-primary); text-decoration: underline;">Điều khoản mua hàng</a> 
+                            và <a href="/privacy" target="_blank" style="color: var(--gold-primary); text-decoration: underline;">Chính sách bảo vệ dữ liệu cá nhân</a> 
+                            của PERFUME LUXE theo Luật 91/2025/QH15.
+                        </span>
+                    </label>
+                </div>
                 <button type="submit" class="btn-luxe" id="btnPlaceOrder" style="width: 100%; padding: 14px; font-size: 1rem;">
                     <i class="fa-solid fa-check" style="margin-right: 6px;"></i> Xác Nhận Đặt Hàng Ngay
                 </button>
@@ -267,6 +278,14 @@
             checkoutError.hidden = true;
             submit.disabled = true;
             submit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang xác nhận đơn…';
+                        const chkPrivacy = document.getElementById('chkAcceptPrivacy');
+            if (chkPrivacy && !chkPrivacy.checked) {
+                checkoutError.textContent = 'Quý khách vui lòng đánh dấu đồng ý với Điều khoản mua hàng và Chính sách bảo vệ dữ liệu cá nhân trước khi hoàn tất đặt hàng.';
+                checkoutError.hidden = false;
+                submit.disabled = false;
+                submit.innerHTML = '<i class="fa-solid fa-check" style="margin-right: 6px;"></i> Xác Nhận Đặt Hàng Ngay';
+                return;
+            }
             const values = new FormData(checkoutForm);
             
             const isGift = document.getElementById('chkGiftWrapping')?.checked || false;

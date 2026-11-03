@@ -1,4 +1,4 @@
-@{
+﻿@{
     ViewData["Title"] = "AI Fragrance Finder - Trắc Nghiệm Mùi Hương";
     ViewData["MetaDescription"] = "Trải nghiệm động cơ tư vấn nước hoa thông minh chuẩn Haute Parfumerie. Phân tích phong cách, tính cách và hoàn cảnh để khám phá kiệt tác mùi hương dành riêng cho bạn.";
 }
@@ -22,6 +22,11 @@
         </div>
 
         <partial name="Partials/_QuizQuestionsPartial" />
+
+                <div style="margin-top: 24px; padding: 10px 14px; background: rgba(212, 175, 55, 0.04); border-radius: var(--radius-sm); border: 1px solid rgba(212, 175, 55, 0.15); display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); flex-wrap: wrap; gap: 8px;">
+            <div><i class="fa-solid fa-wand-magic-sparkles" style="color: var(--gold-primary); margin-right: 6px;"></i> <strong>Minh bạch Trí tuệ Nhân tạo (Luật 134/2025/QH15):</strong> Kết quả tư vấn được tính toán tự động bởi thuật toán AI Scent Matrix Engine mang tính chất cố vấn phong cách tham khảo.</div>
+            <a href="/privacy" style="color: var(--gold-primary); text-decoration: underline;">Chính sách dữ liệu</a>
+        </div>
 
         <partial name="Partials/_QuizResultsPartial" />
     </div>

@@ -56,8 +56,9 @@ jobs:
     - name: Put website offline (Unlock DLL files)
       run: |
         echo "<html><body><h2>Deploying updates... Please refresh in a moment.</h2></body></html>" > app_offline.htm
-        curl --ftp-create-dirs -T app_offline.htm -u "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" ftp://perfumeluxe.somee.com/www.perfumeluxe.somee.com/app_offline.htm || true
-        sleep 4
+        curl --retry 5 --retry-delay 3 --max-time 30 --ftp-create-dirs -T app_offline.htm -u "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" ftp://perfumeluxe.somee.com/www.perfumeluxe.somee.com/app_offline.htm || true
+        echo "Waiting 10 seconds for IIS application pool to fully unload assemblies..."
+        sleep 10
 
     - name: Sync files via FTP
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
@@ -73,7 +74,7 @@ jobs:
     - name: Bring website back online
       if: always()
       run: |
-        curl -u "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" ftp://perfumeluxe.somee.com/ -Q "DELE /www.perfumeluxe.somee.com/app_offline.htm" || true
+        curl --retry 5 --retry-delay 3 --max-time 30 -u "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" ftp://perfumeluxe.somee.com/ -Q "DELE /www.perfumeluxe.somee.com/app_offline.htm" || true
 
     - name: Verify deployed storefront assets
       shell: bash

@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using Perfume.Domain.Enums;
 
 namespace Perfume.Application.DTOs;
@@ -142,6 +142,7 @@ public class CheckoutRequestDto
     public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.COD;
     public string? VoucherCode { get; set; }
     public bool IsGiftWrapping { get; set; } = false;
+    public bool AcceptPrivacyPolicy { get; set; } = true;
     public string? GiftMessage { get; set; }
     public List<CartItemDto> Items { get; set; } = new();
 }

@@ -1,4 +1,4 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -119,6 +119,10 @@ public class CheckoutController : Controller
         if (model.PaymentMethod != PaymentMethod.COD && model.PaymentMethod != PaymentMethod.BankTransfer)
         {
             model.PaymentMethod = PaymentMethod.COD;
+        }
+        if (!model.AcceptPrivacyPolicy)
+        {
+            ModelState.AddModelError(nameof(model.AcceptPrivacyPolicy), "Quý khách vui lòng xác nhận đồng ý với Điều khoản mua hàng và Chính sách bảo mật dữ liệu cá nhân theo Luật 91/2025/QH15.");
         }
         if (!ModelState.IsValid)
         {
