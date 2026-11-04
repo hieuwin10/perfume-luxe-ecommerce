@@ -188,6 +188,7 @@ public partial class PerfumeCatalogService : IPerfumeCatalogService
             BrandCountry = product.Brand?.Country,
             CategoryName = product.Category?.Name ?? string.Empty,
             FamilyName = product.FragranceFamily?.Name,
+            FamilySlug = product.FragranceFamily?.Slug,
             FamilyColor = product.FragranceFamily?.ColorHex,
             Concentration = product.Concentration,
             Gender = product.Gender,

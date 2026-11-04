@@ -65,13 +65,28 @@ public class BlogService : IBlogService
     public async Task<BlogPost?> GetPostBySlugAsync(string slug)
     {
         var post = await _context.BlogPosts
+            .AsNoTracking()
             .Include(b => b.Category)
             .FirstOrDefaultAsync(b => b.Slug == slug && b.IsPublished && !b.IsDeleted);
 
         if (post != null)
         {
             post.ViewCount += 1;
-            await _context.SaveChangesAsync();
+            if (_context.Database.IsRelational())
+            {
+                await _context.BlogPosts
+                    .Where(b => b.Id == post.Id)
+                    .ExecuteUpdateAsync(s => s.SetProperty(b => b.ViewCount, b => b.ViewCount + 1));
+            }
+            else
+            {
+                var tracked = await _context.BlogPosts.FindAsync(post.Id);
+                if (tracked != null)
+                {
+                    tracked.ViewCount += 1;
+                    await _context.SaveChangesAsync();
+                }
+            }
         }
 
         return post;

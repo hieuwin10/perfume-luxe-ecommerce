@@ -18,7 +18,11 @@ public static class DependencyInjection
             throw new InvalidOperationException("ConnectionStrings:DefaultConnection is required. Configure local secrets or environment variables.");
 
         services.AddDbContext<PerfumeDbContext>(options =>
-            options.UseSqlServer(connectionString, b => b.MigrationsAssembly(typeof(PerfumeDbContext).Assembly.FullName)));
+            options.UseSqlServer(connectionString, b =>
+            {
+                b.MigrationsAssembly(typeof(PerfumeDbContext).Assembly.FullName);
+                b.EnableRetryOnFailure(maxRetryCount: 5, maxRetryDelay: TimeSpan.FromSeconds(10), errorNumbersToAdd: null);
+            }));
         services.AddIdentity<AppUser, AppRole>(options =>
         {
             options.Password.RequireDigit = true;

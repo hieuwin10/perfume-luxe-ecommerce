@@ -126,7 +126,7 @@ public sealed class StoreManagerApiController : ControllerBase
     {
         if (!await ValidateCookieWriteAsync()) return AntiforgeryFailure();
         await using var transaction = _db.Database.IsRelational()
-            ? await _db.Database.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken)
+            ? await _db.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken)
             : null;
         var order = await _db.Orders.Include(o => o.Items).FirstOrDefaultAsync(o => o.Id == id, cancellationToken);
         if (order == null) return NotFound();
@@ -155,8 +155,8 @@ public sealed class StoreManagerApiController : ControllerBase
                         if (variant != null) variant.StockQuantity += item.Quantity;
                     }
                 }
-                foreach (var productId in order.Items.Where(i => i.VariantId.HasValue).Select(i => i.ProductId).Distinct())
-                    await RefreshProductStockAsync(productId, cancellationToken);
+                var productIdsToRefresh = order.Items.Where(i => i.VariantId.HasValue).Select(i => i.ProductId).Distinct().ToList();
+                await RefreshProductsStockAsync(productIdsToRefresh, cancellationToken);
                 if (!string.IsNullOrWhiteSpace(order.VoucherCode))
                 {
                     if (_db.Database.IsRelational())
@@ -239,13 +239,23 @@ public sealed class StoreManagerApiController : ControllerBase
 
     private IActionResult AntiforgeryFailure() => BadRequest(new { message = "Phiên gửi biểu mẫu đã hết hạn. Vui lòng tải lại trang." });
 
-    private async Task RefreshProductStockAsync(int productId, CancellationToken cancellationToken)
+    private Task RefreshProductStockAsync(int productId, CancellationToken cancellationToken) =>
+        RefreshProductsStockAsync(new[] { productId }, cancellationToken);
+
+    private async Task RefreshProductsStockAsync(IEnumerable<int> productIds, CancellationToken cancellationToken)
     {
-        var product = await _db.Products.Include(p => p.Variants)
-            .FirstOrDefaultAsync(p => p.Id == productId, cancellationToken);
-        if (product == null) return;
-        product.IsInStock = product.Variants.Any(v => !v.IsDeleted && v.StockQuantity > 0);
-        product.UpdatedAt = DateTime.UtcNow;
+        var ids = productIds.Distinct().ToList();
+        if (ids.Count == 0) return;
+        var products = await _db.Products.Include(p => p.Variants)
+            .Where(p => ids.Contains(p.Id))
+            .ToListAsync(cancellationToken);
+        if (products.Count == 0) return;
+        var now = DateTime.UtcNow;
+        foreach (var p in products)
+        {
+            p.IsInStock = p.Variants.Any(v => !v.IsDeleted && v.StockQuantity > 0);
+            p.UpdatedAt = now;
+        }
         await _db.SaveChangesAsync(cancellationToken);
     }
 

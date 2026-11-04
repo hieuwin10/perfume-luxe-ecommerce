@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication;
@@ -95,15 +96,7 @@ builder.Services.AddResponseCaching();
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IAdminDashboardAnalyticsService, AdminDashboardAnalyticsService>();
 builder.Services.AddScoped<IAdminFinancialReportService, AdminFinancialReportService>();
-builder.Services.AddDistributedMemoryCache();
 
-builder.Services.AddSession(options =>
-{
-    options.IdleTimeout = TimeSpan.FromHours(2);
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
-    options.Cookie.SameSite = SameSiteMode.Lax;
-});
 
 // Nen du lieu phan hoi bang Brotli va Gzip de tang toc tai trang
 builder.Services.AddResponseCompression(options =>
@@ -186,6 +179,11 @@ using (var scope = app.Services.CreateScope())
 // ==========================================
 app.UseMiddleware<SystemExceptionLoggingMiddleware>();
 
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -202,7 +200,7 @@ app.Use(async (context, next) =>
     context.Response.Headers.Append("Cross-Origin-Opener-Policy", "same-origin");
     context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
     context.Response.Headers.Append("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
-    context.Response.Headers.Append("Vary", "Sec-CH-UA-Mobile, User-Agent");
+    context.Response.Headers.Append("Vary", "Sec-CH-UA-Mobile");
     if (!context.Response.Headers.ContainsKey("Content-Security-Policy"))
     {
         context.Response.Headers.Append("Content-Security-Policy",
@@ -253,7 +251,6 @@ app.Use(async (context, next) =>
 
 app.UseAuthorization();
 app.UseMiddleware<MaintenanceMiddleware>();
-app.UseSession();
 
 // Dinh tuyen URL than thien (SEO Friendly Routes)
 app.MapControllerRoute("productDetail", "nuoc-hoa/{slug}", new { controller = "Catalog", action = "Detail" });

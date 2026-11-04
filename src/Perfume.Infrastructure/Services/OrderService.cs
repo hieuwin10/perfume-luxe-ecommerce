@@ -1,5 +1,6 @@
 using System.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Perfume.Application.DTOs;
 using Perfume.Application.Interfaces;
 using Perfume.Domain.Entities;
@@ -14,11 +15,16 @@ namespace Perfume.Infrastructure.Services;
 public class OrderService : IOrderService
 {
     private readonly PerfumeDbContext _context;
+    private readonly ILogger<OrderService>? _logger;
 
     // ==========================================
     // 1. KHOI TAO SERVICE
     // ==========================================
-    public OrderService(PerfumeDbContext context) => _context = context;
+    public OrderService(PerfumeDbContext context, ILogger<OrderService>? logger = null)
+    {
+        _context = context;
+        _logger = logger;
+    }
 
     // ==========================================
     // 2. XAC THUC MA GIAM GIA (VOUCHER)
@@ -62,10 +68,10 @@ public class OrderService : IOrderService
         if (lines.Count == 0 || lines.Any(i => i.Quantity > 50))
             return (false, "Số lượng mỗi phiên bản không được vượt quá 50.", null);
 
-        // Kiem tra loai database de khoi tao transaction Serializable neu la relational DB
+        // Kiem tra loai database de khoi tao transaction ReadCommitted (tranh Range-Lock / Deadlock tren SQL Server)
         var isRelational = _context.Database.IsRelational();
         await using var transaction = isRelational
-            ? await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable)
+            ? await _context.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted)
             : null;
 
         try
@@ -199,8 +205,9 @@ public class OrderService : IOrderService
             if (transaction != null) await transaction.CommitAsync();
             return (true, null, order);
         }
-        catch
+        catch (Exception ex)
         {
+            _logger?.LogError(ex, "Lỗi xảy ra trong quá trình PlaceOrderAsync cho khách hàng {CustomerEmail}: {Message}", request.CustomerEmail, ex.Message);
             // Rollback giao dich neu xay ra loi de bao toan ton kho
             if (transaction != null) await transaction.RollbackAsync();
             return (false, "Không thể hoàn tất đơn hàng. Tồn kho có thể vừa thay đổi; vui lòng kiểm tra giỏ hàng và thử lại.", null);

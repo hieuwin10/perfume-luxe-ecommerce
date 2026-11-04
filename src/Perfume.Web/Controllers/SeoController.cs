@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
+using Perfume.Infrastructure.Data;
 using System.Globalization;
 using System.Text;
 using System.Xml.Linq;
@@ -14,12 +17,21 @@ public class SeoController : Controller
     private readonly IPerfumeCatalogService _catalogService;
     private readonly IBlogService _blogService;
     private readonly IConfiguration _configuration;
+    private readonly PerfumeDbContext? _db;
+    private readonly IMemoryCache? _cache;
 
-    public SeoController(IPerfumeCatalogService catalogService, IBlogService blogService, IConfiguration? configuration = null)
+    public SeoController(
+        IPerfumeCatalogService catalogService,
+        IBlogService blogService,
+        IConfiguration? configuration = null,
+        PerfumeDbContext? db = null,
+        IMemoryCache? cache = null)
     {
         _catalogService = catalogService;
         _blogService = blogService;
         _configuration = configuration ?? new ConfigurationBuilder().Build();
+        _db = db;
+        _cache = cache;
     }
 
     [HttpGet]
@@ -27,6 +39,12 @@ public class SeoController : Controller
     public async Task<IActionResult> Sitemap(CancellationToken cancellationToken = default)
     {
         var baseUrl = SeoUrlBuilder.GetSiteBaseUrl(Request, _configuration);
+        var cacheKey = $"sitemap_xml_{baseUrl}";
+        if (_cache != null && _cache.TryGetValue(cacheKey, out string? cachedXml) && !string.IsNullOrEmpty(cachedXml))
+        {
+            return Content(cachedXml, "application/xml", Encoding.UTF8);
+        }
+
         var entries = new List<(string Url, DateTime? LastModified)>();
 
         Add("/");
@@ -42,39 +60,71 @@ public class SeoController : Controller
         Add("/privacy");
         Add("/blog");
 
-        const int pageSize = 1000;
-        var productPage = 1;
-        while (true)
+        if (_db != null)
         {
-            var (products, total) = await _catalogService.GetProductsAsync(new ProductFilterParams
-            {
-                Page = productPage,
-                PageSize = pageSize,
-                SortBy = "newest"
-            });
+            var products = await _db.Products
+                .AsNoTracking()
+                .Where(p => !p.IsDeleted)
+                .Select(p => new { p.Slug, LastModified = p.UpdatedAt ?? p.CreatedAt })
+                .ToListAsync(cancellationToken);
 
-            foreach (var product in products)
-                Add($"/nuoc-hoa/{Uri.EscapeDataString(product.Slug)}", product.UpdatedAt ?? product.CreatedAt);
+            foreach (var p in products)
+                Add($"/nuoc-hoa/{Uri.EscapeDataString(p.Slug)}", p.LastModified);
 
-            if (products.Count == 0 || productPage * pageSize >= total) break;
-            productPage++;
-        }
+            var categories = await _db.BlogCategories
+                .AsNoTracking()
+                .Where(c => !c.IsDeleted)
+                .Select(c => c.Slug)
+                .ToListAsync(cancellationToken);
 
-        var categories = await _blogService.GetBlogCategoriesAsync();
-        foreach (var category in categories)
-        {
-            Add($"/blog?category={Uri.EscapeDataString(category.Slug)}");
-        }
+            foreach (var slug in categories)
+                Add($"/blog?category={Uri.EscapeDataString(slug)}");
 
-        var blogPage = 1;
-        while (true)
-        {
-            var (posts, totalPosts) = await _blogService.GetPostsPagedAsync(null, blogPage, pageSize);
+            var posts = await _db.BlogPosts
+                .AsNoTracking()
+                .Where(b => !b.IsDeleted && b.IsPublished)
+                .Select(b => new { b.Slug, LastModified = b.UpdatedAt ?? b.CreatedAt })
+                .ToListAsync(cancellationToken);
+
             foreach (var post in posts)
-                Add($"/blog/{Uri.EscapeDataString(post.Slug)}", post.UpdatedAt ?? post.CreatedAt);
+                Add($"/blog/{Uri.EscapeDataString(post.Slug)}", post.LastModified);
+        }
+        else
+        {
+            const int pageSize = 1000;
+            var productPage = 1;
+            while (true)
+            {
+                var (products, total) = await _catalogService.GetProductsAsync(new ProductFilterParams
+                {
+                    Page = productPage,
+                    PageSize = pageSize,
+                    SortBy = "newest"
+                });
 
-            if (posts.Count == 0 || blogPage * pageSize >= totalPosts) break;
-            blogPage++;
+                foreach (var product in products)
+                    Add($"/nuoc-hoa/{Uri.EscapeDataString(product.Slug)}", product.UpdatedAt ?? product.CreatedAt);
+
+                if (products.Count == 0 || productPage * pageSize >= total) break;
+                productPage++;
+            }
+
+            var categories = await _blogService.GetBlogCategoriesAsync();
+            foreach (var category in categories)
+            {
+                Add($"/blog?category={Uri.EscapeDataString(category.Slug)}");
+            }
+
+            var blogPage = 1;
+            while (true)
+            {
+                var (posts, totalPosts) = await _blogService.GetPostsPagedAsync(null, blogPage, pageSize);
+                foreach (var post in posts)
+                    Add($"/blog/{Uri.EscapeDataString(post.Slug)}", post.UpdatedAt ?? post.CreatedAt);
+
+                if (posts.Count == 0 || blogPage * pageSize >= totalPosts) break;
+                blogPage++;
+            }
         }
 
         var document = new XDocument(
@@ -86,7 +136,9 @@ public class SeoController : Controller
                         ? new XElement(SitemapNamespace + "lastmod", DateTime.SpecifyKind(entry.LastModified.Value, DateTimeKind.Utc).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture))
                         : null))));
 
-        return Content(document.ToString(SaveOptions.DisableFormatting), "application/xml", Encoding.UTF8);
+        var xml = document.ToString(SaveOptions.DisableFormatting);
+        _cache?.Set(cacheKey, xml, TimeSpan.FromHours(1));
+        return Content(xml, "application/xml", Encoding.UTF8);
 
         void Add(string path, DateTime? lastModified = null) => entries.Add(($"{baseUrl}{path}", lastModified));
     }

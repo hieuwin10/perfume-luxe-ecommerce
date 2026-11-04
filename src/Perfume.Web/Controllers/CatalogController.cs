@@ -66,7 +66,7 @@ public class CatalogController : Controller
         if (product == null) return NotFound();
 
         // Lay san pham lien quan trong cung nhom huong hoac thuong hieu
-        var relatedFilter = new ProductFilterParams { FamilySlug = product.FamilyName, PageSize = 4 };
+        var relatedFilter = !string.IsNullOrWhiteSpace(product.FamilySlug) ? new ProductFilterParams { FamilySlug = product.FamilySlug, PageSize = 4 } : new ProductFilterParams { BrandSlug = product.BrandSlug, PageSize = 4 };
         var (relatedItems, _) = await _catalogService.GetProductsAsync(relatedFilter);
         ViewBag.RelatedProducts = relatedItems.Where(p => p.Id != product.Id).Take(4).ToList();
         ViewBag.ApprovedReviews = await _db.Reviews.AsNoTracking().Where(r => r.ProductId == product.Id && r.IsApproved)

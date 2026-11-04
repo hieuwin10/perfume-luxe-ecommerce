@@ -131,7 +131,7 @@ public sealed class CustomerApiController : ControllerBase
     public async Task<IActionResult> RefreshToken(RefreshTokenRequest request, CancellationToken cancellationToken)
     {
         var hash = HashToken(request.RefreshToken);
-        await using var transaction = await _db.Database.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken);
+        await using var transaction = await _db.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken);
         var current = await _db.RefreshTokenRecords.FirstOrDefaultAsync(t => t.TokenHash == hash, cancellationToken);
         if (current == null || current.ExpiresAt <= DateTime.UtcNow || current.RevokedAt.HasValue)
         {

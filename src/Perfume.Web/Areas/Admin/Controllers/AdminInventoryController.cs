@@ -71,44 +71,10 @@ public class AdminInventoryController : Controller
         product.IsNewArrival = model.IsNewArrival;
         product.UpdatedAt = DateTime.UtcNow;
 
-        // Cập nhật lại 3 tầng hương
+        // Cập nhật lại 3 tầng hương (Batch load & save để triệt tiêu N+1 queries)
         _db.ProductFragranceNotes.RemoveRange(product.FragranceNotes);
         product.FragranceNotes.Clear();
-
-        async Task AddNotes(string? raw, NoteLevel level)
-        {
-            if (string.IsNullOrWhiteSpace(raw)) return;
-            var parts = raw.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries);
-            int order = 1;
-            foreach (var noteName in parts)
-            {
-                var cleanName = noteName.Trim();
-                if (string.IsNullOrWhiteSpace(cleanName)) continue;
-                var noteSlug = cleanName.ToLowerInvariant().Replace(" ", "-");
-                var noteEntity = await _db.FragranceNotes.FirstOrDefaultAsync(n => n.Name == cleanName || n.Slug == noteSlug);
-                if (noteEntity == null)
-                {
-                    noteEntity = new FragranceNote
-                    {
-                        Name = cleanName,
-                        Slug = noteSlug,
-                        CreatedAt = DateTime.UtcNow
-                    };
-                    _db.FragranceNotes.Add(noteEntity);
-                    await _db.SaveChangesAsync();
-                }
-                product.FragranceNotes.Add(new ProductFragranceNote
-                {
-                    FragranceNoteId = noteEntity.Id,
-                    NoteLevel = level,
-                    DisplayOrder = order++
-                });
-            }
-        }
-
-        await AddNotes(model.TopNotes, NoteLevel.Top);
-        await AddNotes(model.HeartNotes, NoteLevel.Heart);
-        await AddNotes(model.BaseNotes, NoteLevel.Base);
+        await SyncProductFragranceNotesAsync(product, model.TopNotes, model.HeartNotes, model.BaseNotes);
 
         await _db.SaveChangesAsync();
         TempData["Success"] = $"Đã cập nhật thông tin sản phẩm '{product.Name}' thành công!";
@@ -427,41 +393,8 @@ public class AdminInventoryController : Controller
             CreatedAt = DateTime.UtcNow
         });
 
-        // 3 Tầng hương
-        async Task AddNotes(string? raw, NoteLevel level)
-        {
-            if (string.IsNullOrWhiteSpace(raw)) return;
-            var parts = raw.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries);
-            int order = 1;
-            foreach (var noteName in parts)
-            {
-                var cleanName = noteName.Trim();
-                if (string.IsNullOrWhiteSpace(cleanName)) continue;
-                var noteSlug = cleanName.ToLowerInvariant().Replace(" ", "-");
-                var noteEntity = await _db.FragranceNotes.FirstOrDefaultAsync(n => n.Name == cleanName || n.Slug == noteSlug);
-                if (noteEntity == null)
-                {
-                    noteEntity = new FragranceNote
-                    {
-                        Name = cleanName,
-                        Slug = noteSlug,
-                        CreatedAt = DateTime.UtcNow
-                    };
-                    _db.FragranceNotes.Add(noteEntity);
-                    await _db.SaveChangesAsync();
-                }
-                product.FragranceNotes.Add(new ProductFragranceNote
-                {
-                    FragranceNoteId = noteEntity.Id,
-                    NoteLevel = level,
-                    DisplayOrder = order++
-                });
-            }
-        }
-
-        await AddNotes(model.TopNotes, NoteLevel.Top);
-        await AddNotes(model.HeartNotes, NoteLevel.Heart);
-        await AddNotes(model.BaseNotes, NoteLevel.Base);
+        // 3 Tầng hương (Batch load & save để triệt tiêu N+1 queries)
+        await SyncProductFragranceNotesAsync(product, model.TopNotes, model.HeartNotes, model.BaseNotes);
 
         _db.Products.Add(product);
         await _db.SaveChangesAsync();
@@ -678,5 +611,85 @@ public class AdminInventoryController : Controller
 
         await _db.SaveChangesAsync();
         return RedirectToAction(nameof(Banners));
+    }
+
+    private async Task SyncProductFragranceNotesAsync(Product product, string? topRaw, string? heartRaw, string? baseRaw)
+    {
+        var rawTiers = new (string? Raw, NoteLevel Level)[]
+        {
+            (topRaw, NoteLevel.Top),
+            (heartRaw, NoteLevel.Heart),
+            (baseRaw, NoteLevel.Base)
+        };
+
+        var parsedNotes = new List<(string Name, string Slug, NoteLevel Level, int Order)>();
+        foreach (var (raw, level) in rawTiers)
+        {
+            if (string.IsNullOrWhiteSpace(raw)) continue;
+            var parts = raw.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries);
+            int order = 1;
+            foreach (var part in parts)
+            {
+                var cleanName = part.Trim();
+                if (string.IsNullOrWhiteSpace(cleanName)) continue;
+                var slug = cleanName.ToLowerInvariant().Replace(" ", "-");
+                parsedNotes.Add((cleanName, slug, level, order++));
+            }
+        }
+
+        if (parsedNotes.Count == 0) return;
+
+        var allNames = parsedNotes.Select(n => n.Name).Distinct().ToList();
+        var allSlugs = parsedNotes.Select(n => n.Slug).Distinct().ToList();
+
+        // Nạp tất cả nốt hương đã có trong 1 truy vấn duy nhất
+        var existingNotes = await _db.FragranceNotes
+            .Where(n => allNames.Contains(n.Name) || allSlugs.Contains(n.Slug))
+            .ToListAsync();
+
+        var noteMap = new Dictionary<string, FragranceNote>(StringComparer.OrdinalIgnoreCase);
+        foreach (var note in existingNotes)
+        {
+            noteMap[note.Name] = note;
+            noteMap[note.Slug] = note;
+        }
+
+        var newNotesToAdd = new List<FragranceNote>();
+        var now = DateTime.UtcNow;
+        foreach (var (name, slug, _, _) in parsedNotes)
+        {
+            if (!noteMap.ContainsKey(name) && !noteMap.ContainsKey(slug))
+            {
+                var newNote = new FragranceNote
+                {
+                    Name = name,
+                    Slug = slug,
+                    CreatedAt = now
+                };
+                newNotesToAdd.Add(newNote);
+                noteMap[name] = newNote;
+                noteMap[slug] = newNote;
+            }
+        }
+
+        if (newNotesToAdd.Count > 0)
+        {
+            _db.FragranceNotes.AddRange(newNotesToAdd);
+            await _db.SaveChangesAsync();
+        }
+
+        foreach (var (name, slug, level, order) in parsedNotes)
+        {
+            if (noteMap.TryGetValue(name, out var noteEntity) || noteMap.TryGetValue(slug, out noteEntity))
+            {
+                product.FragranceNotes.Add(new ProductFragranceNote
+                {
+                    ProductId = product.Id,
+                    FragranceNoteId = noteEntity.Id,
+                    NoteLevel = level,
+                    DisplayOrder = order
+                });
+            }
+        }
     }
 }

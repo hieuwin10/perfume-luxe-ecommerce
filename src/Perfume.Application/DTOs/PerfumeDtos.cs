@@ -32,6 +32,7 @@ public class ProductCardDto
     public string? MainImageUrl { get; set; }
     public decimal BasePrice { get; set; }
     public string? FamilyName { get; set; }
+    public string? FamilySlug { get; set; }
     public string? FamilyColor { get; set; }
     public Concentration Concentration { get; set; }
     public GenderTarget Gender { get; set; }
@@ -58,6 +59,7 @@ public class ProductDetailDto
     public string? BrandCountry { get; set; }
     public string CategoryName { get; set; } = string.Empty;
     public string? FamilyName { get; set; }
+    public string? FamilySlug { get; set; }
     public string? FamilyColor { get; set; }
     public Concentration Concentration { get; set; }
     public GenderTarget Gender { get; set; }

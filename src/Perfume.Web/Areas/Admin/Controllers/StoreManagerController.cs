@@ -60,18 +60,29 @@ public class StoreManagerController : Controller
         var endExclusive = toDate.AddDays(1);
 
         var period = _db.Orders.AsNoTracking().Where(o => o.CreatedAt >= fromDate && o.CreatedAt < endExclusive);
-        var totalOrderCount = await period.CountAsync();
         var paid = period.Where(o => o.OrderStatus == OrderStatus.Delivered && o.PaymentStatus == PaymentStatus.Completed);
-        var paidCount = await paid.CountAsync();
-        var revenue = await paid.SumAsync(o => (decimal?)o.TotalAmount) ?? 0m;
+        var periodMetrics = await period
+            .GroupBy(_ => 1)
+            .Select(g => new
+            {
+                TotalOrders = g.Count(),
+                PaidCount = g.Count(o => o.OrderStatus == OrderStatus.Delivered && o.PaymentStatus == PaymentStatus.Completed),
+                Revenue = g.Where(o => o.OrderStatus == OrderStatus.Delivered && o.PaymentStatus == PaymentStatus.Completed).Sum(o => (decimal?)o.TotalAmount) ?? 0m,
+                CancelledCount = g.Count(o => o.OrderStatus == OrderStatus.Cancelled),
+                LostRevenue = g.Where(o => o.OrderStatus == OrderStatus.Cancelled).Sum(o => (decimal?)o.TotalAmount) ?? 0m,
+                TotalDiscount = g.Sum(o => (decimal?)o.DiscountAmount) ?? 0m,
+                VoucherOrders = g.Count(o => !string.IsNullOrEmpty(o.VoucherCode))
+            })
+            .FirstOrDefaultAsync();
 
-        var cancelledOrdersQuery = period.Where(o => o.OrderStatus == OrderStatus.Cancelled);
-        var cancelledCount = await cancelledOrdersQuery.CountAsync();
-        var lostRevenue = await cancelledOrdersQuery.SumAsync(o => (decimal?)o.TotalAmount) ?? 0m;
+        var totalOrderCount = periodMetrics?.TotalOrders ?? 0;
+        var paidCount = periodMetrics?.PaidCount ?? 0;
+        var revenue = periodMetrics?.Revenue ?? 0m;
+        var cancelledCount = periodMetrics?.CancelledCount ?? 0;
+        var lostRevenue = periodMetrics?.LostRevenue ?? 0m;
         var cancellationRate = totalOrderCount > 0 ? Math.Round((double)cancelledCount / totalOrderCount * 100, 1) : 0;
-
-        var totalDiscountGiven = await period.SumAsync(o => (decimal?)o.DiscountAmount) ?? 0m;
-        var voucherOrdersCount = await period.CountAsync(o => !string.IsNullOrEmpty(o.VoucherCode));
+        var totalDiscountGiven = periodMetrics?.TotalDiscount ?? 0m;
+        var voucherOrdersCount = periodMetrics?.VoucherOrders ?? 0;
         var voucherAdoptionRate = totalOrderCount > 0 ? Math.Round((double)voucherOrdersCount / totalOrderCount * 100, 1) : 0;
 
         // Payment Methods & Dòng tiền
