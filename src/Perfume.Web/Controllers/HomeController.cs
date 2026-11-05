@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.OutputCaching;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -32,9 +33,14 @@ public class HomeController : Controller
         _cache = cache ?? new MemoryCache(new MemoryCacheOptions());
     }
 
+    [OutputCache(PolicyName = "HomePageCache")]
     [ResponseCache(Duration = 300, Location = ResponseCacheLocation.Any, NoStore = false)]
     public async Task<IActionResult> Index()
     {
+        if (ControllerContext?.HttpContext?.Response != null && !ControllerContext.HttpContext.Response.HasStarted)
+        {
+            ControllerContext.HttpContext.Response.Headers["Link"] = "</images/hero/hero-mobile.webp>; rel=preload; as=image; type=image/webp; media=\"(max-width: 768px)\", </images/hero/hero-desktop.webp>; rel=preload; as=image; type=image/webp; media=\"(min-width: 769px)\"";
+        }
         var data = await _cache.GetOrCreateAsync("home_composite_cache_v2", async entry =>
         {
             entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30);
