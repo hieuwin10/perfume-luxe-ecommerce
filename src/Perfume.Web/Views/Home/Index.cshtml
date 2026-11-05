@@ -42,6 +42,7 @@
     var rawHeroUrl = heroBanners.FirstOrDefault()?.ImageUrl;
     ViewData["LcpImage"] = OptimizeHeroImageUrl(rawHeroUrl, 1080);
     ViewData["LcpImageMobile"] = OptimizeHeroImageUrl(rawHeroUrl, 640);
+    ViewData["LcpImageMobileDataUri"] = ViewBag.MobileHeroDataUri;
 }
 
 <partial name="Partials/_HeroSliderPartial" model="heroBanners" />

@@ -1,3 +1,4 @@
+using Perfume.Web.Services;
 using Microsoft.AspNetCore.OutputCaching;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
@@ -18,19 +19,22 @@ public class HomeController : Controller
     private readonly IFlashSaleService _flashSaleService;
     private readonly PerfumeDbContext _db;
     private readonly IMemoryCache _cache;
+    private readonly IWebHostEnvironment? _env;
 
     public HomeController(
         IPerfumeCatalogService catalogService,
         IBlogService blogService,
         IFlashSaleService flashSaleService,
         PerfumeDbContext db,
-        IMemoryCache? cache = null)
+        IMemoryCache? cache = null,
+        IWebHostEnvironment? env = null)
     {
         _catalogService = catalogService;
         _blogService = blogService;
         _flashSaleService = flashSaleService;
         _db = db;
         _cache = cache ?? new MemoryCache(new MemoryCacheOptions());
+        _env = env;
     }
 
     [OutputCache(PolicyName = "HomePageCache")]
@@ -39,7 +43,7 @@ public class HomeController : Controller
     {
         if (ControllerContext?.HttpContext?.Response != null && !ControllerContext.HttpContext.Response.HasStarted)
         {
-            ControllerContext.HttpContext.Response.Headers["Link"] = "</images/hero/hero-mobile.webp>; rel=preload; as=image; type=image/webp; media=\"(max-width: 768px)\", </images/hero/hero-desktop.webp>; rel=preload; as=image; type=image/webp; media=\"(min-width: 769px)\"";
+            ControllerContext.HttpContext.Response.Headers["Link"] = "</images/hero/hero-desktop.webp>; rel=preload; as=image; type=image/webp; media=\"(min-width: 769px)\"";
         }
         var data = await _cache.GetOrCreateAsync("home_composite_cache_v2", async entry =>
         {
@@ -73,6 +77,7 @@ public class HomeController : Controller
         ViewBag.Brands = data?.Brands ?? new List<Brand>();
         ViewBag.Families = data?.Families ?? new List<FragranceFamily>();
         ViewBag.RecentBlogs = data?.RecentBlogs ?? new List<BlogPost>();
+        ViewBag.MobileHeroDataUri = HeroImageCache.GetMobileDataUri(_env?.WebRootPath);
 
         return View();
     }

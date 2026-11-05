@@ -43,9 +43,13 @@
                 @if (i == 0)
                 {
                     <picture>
-                        @if (ViewData["LcpImageMobile"] != null)
+                        @if (!string.IsNullOrEmpty(ViewData["LcpImageMobileDataUri"]?.ToString()))
                         {
-                            <source media="(max-width: 768px)" srcset="@ViewData["LcpImageMobile"]" type="image/webp" width="640" height="672" />
+                            <source media="(max-width: 768px)" srcset="@ViewData["LcpImageMobileDataUri"]" type="image/webp" width="540" height="567" />
+                        }
+                        else if (ViewData["LcpImageMobile"] != null)
+                        {
+                            <source media="(max-width: 768px)" srcset="@ViewData["LcpImageMobile"]" type="image/webp" width="540" height="567" />
                         }
                         <img class="hero-slide-image" src="@ViewData["LcpImage"]" alt="Perfume Luxe Collection" width="1440" height="850" fetchpriority="high" loading="eager" decoding="sync" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center;" />
                     </picture>
@@ -140,9 +144,13 @@ else
     <!-- FALLBACK HERO BANNER -->
     <section class="luxe-hero-banner" style="position: relative; min-height: 85vh; overflow: hidden; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at center, rgba(212, 175, 55, 0.12) 0%, rgba(11, 11, 14, 0.95) 70%); padding: 100px 24px; text-align: center; border-bottom: 1px solid var(--border-subtle);">
         <picture>
-            @if (ViewData["LcpImageMobile"] != null)
+            @if (!string.IsNullOrEmpty(ViewData["LcpImageMobileDataUri"]?.ToString()))
             {
-                <source media="(max-width: 768px)" srcset="@ViewData["LcpImageMobile"]" type="image/webp" width="640" height="672" />
+                <source media="(max-width: 768px)" srcset="@ViewData["LcpImageMobileDataUri"]" type="image/webp" width="540" height="567" />
+            }
+            else if (ViewData["LcpImageMobile"] != null)
+            {
+                <source media="(max-width: 768px)" srcset="@ViewData["LcpImageMobile"]" type="image/webp" width="540" height="567" />
             }
             <img src="@ViewData["LcpImage"]" alt="Haute Parfumerie Collection" width="1440" height="850" fetchpriority="high" loading="eager" decoding="sync" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center;" />
         </picture>
