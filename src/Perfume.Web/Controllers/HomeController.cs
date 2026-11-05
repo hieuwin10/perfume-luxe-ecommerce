@@ -37,7 +37,8 @@ public class HomeController : Controller
     {
         var data = await _cache.GetOrCreateAsync("home_composite_cache_v2", async entry =>
         {
-            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(3);
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30);
+            entry.SlidingExpiration = TimeSpan.FromMinutes(10);
 
             var result = new HomeCompositeCache
             {
