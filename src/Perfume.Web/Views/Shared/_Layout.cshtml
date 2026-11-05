@@ -35,8 +35,8 @@
         if (!string.IsNullOrEmpty(lcpMobile) && lcpMobile != lcpDesktop)
         {
             <!-- Ultra-High Priority Responsive Preload for LCP Hero Element -->
-            <link rel="preload" as="image" href="@lcpMobile" media="(max-width: 768px)" fetchpriority="high" />
-            <link rel="preload" as="image" href="@lcpDesktop" media="(min-width: 769px)" fetchpriority="high" />
+            <link rel="preload" as="image" href="@lcpMobile" type="image/webp" media="(max-width: 768px)" fetchpriority="high" />
+            <link rel="preload" as="image" href="@lcpDesktop" type="image/webp" media="(min-width: 769px)" fetchpriority="high" />
         }
         else
         {
@@ -47,10 +47,8 @@
     <!-- Performance Preconnect & DNS-Prefetch -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
-    <link rel="preconnect" href="https://images.unsplash.com" crossorigin="anonymous" />
     <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
     <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
-    <link rel="dns-prefetch" href="https://images.unsplash.com" />
 
     <!-- Google Fonts (display=optional guarantees 0 CLS and instant initial paint) -->
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Plus+Jakarta+Sans:wght@400;600&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'" />
