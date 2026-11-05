@@ -93,13 +93,6 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IDeviceDetectionService, DeviceDetectionService>();
 builder.Services.AddResponseCaching();
-builder.Services.AddOutputCache(options =>
-{
-    options.AddPolicy("HomePageCache", policy =>
-        policy.Expire(TimeSpan.FromMinutes(5))
-              .SetVaryByHeader("Sec-CH-UA-Mobile")
-              .Tag("homepage"));
-});
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IAdminDashboardAnalyticsService, AdminDashboardAnalyticsService>();
 builder.Services.AddScoped<IAdminFinancialReportService, AdminFinancialReportService>();
@@ -236,7 +229,6 @@ app.UseStaticFiles(new StaticFileOptions
 app.UseRouting();
 app.UseResponseCaching();
 app.UseAuthentication();
-app.UseOutputCache();
 
 // Xu ly Bearer token cho REST APIs
 app.Use(async (context, next) =>

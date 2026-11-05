@@ -31,9 +31,8 @@
     @if (ViewData["LcpImage"] != null)
     {
         var lcpDesktop = ViewData["LcpImage"]?.ToString();
-        var lcpMobileDataUri = ViewData["LcpImageMobileDataUri"]?.ToString();
         var lcpMobile = ViewData["LcpImageMobile"]?.ToString();
-        if (string.IsNullOrEmpty(lcpMobileDataUri) && !string.IsNullOrEmpty(lcpMobile) && lcpMobile != lcpDesktop)
+        if (!string.IsNullOrEmpty(lcpMobile) && lcpMobile != lcpDesktop)
         {
             <!-- Ultra-High Priority Responsive Preload for LCP Hero Element -->
             <link rel="preload" as="image" href="@lcpMobile" type="image/webp" media="(max-width: 768px)" fetchpriority="high" />
@@ -41,7 +40,7 @@
         }
         else
         {
-            <link rel="preload" as="image" href="@lcpDesktop" type="image/webp" media="(min-width: 769px)" fetchpriority="high" />
+            <link rel="preload" as="image" href="@lcpDesktop" fetchpriority="high" />
         }
     }
 
