@@ -35,7 +35,7 @@
 <!-- HERO BANNER / SLIDER -->
 @if (Model.Any())
 {
-    <section id="heroSliderSection" style="position: relative; min-height: 85vh; overflow: hidden; border-bottom: 1px solid var(--border-subtle);">
+    <section id="heroSliderSection" class="luxe-hero-banner" style="position: relative; min-height: 85vh; overflow: hidden; border-bottom: 1px solid var(--border-subtle);">
         @for (int i = 0; i < Model.Count; i++)
         {
             var b = Model[i];
@@ -138,7 +138,7 @@
 else
 {
     <!-- FALLBACK HERO BANNER -->
-    <section style="position: relative; min-height: 85vh; overflow: hidden; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at center, rgba(212, 175, 55, 0.12) 0%, rgba(11, 11, 14, 0.95) 70%); padding: 100px 24px; text-align: center; border-bottom: 1px solid var(--border-subtle);">
+    <section class="luxe-hero-banner" style="position: relative; min-height: 85vh; overflow: hidden; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at center, rgba(212, 175, 55, 0.12) 0%, rgba(11, 11, 14, 0.95) 70%); padding: 100px 24px; text-align: center; border-bottom: 1px solid var(--border-subtle);">
         <picture>
             @if (ViewData["LcpImageMobile"] != null)
             {
