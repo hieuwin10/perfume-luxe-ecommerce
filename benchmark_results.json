@@ -1,0 +1,299 @@
+[
+  {
+    "endpoint": "/",
+    "method": "GET",
+    "status_code": 200,
+    "latency_ms": 1082.3,
+    "over_1s": true,
+    "size_bytes": 83517,
+    "error": null
+  },
+  {
+    "endpoint": "/bo-suu-tap",
+    "method": "GET",
+    "status_code": 200,
+    "latency_ms": 377.1,
+    "over_1s": false,
+    "size_bytes": 78719,
+    "error": null
+  },
+  {
+    "endpoint": "/catalog/quiz",
+    "method": "GET",
+    "status_code": 200,
+    "latency_ms": 290.4,
+    "over_1s": false,
+    "size_bytes": 77725,
+    "error": null
+  },
+  {
+    "endpoint": "/discovery-box",
+    "method": "GET",
+    "status_code": 200,
+    "latency_ms": 307.0,
+    "over_1s": false,
+    "size_bytes": 138913,
+    "error": null
+  },
+  {
+    "endpoint": "/so-sanh",
+    "method": "GET",
+    "status_code": 200,
+    "latency_ms": 302.9,
+    "over_1s": false,
+    "size_bytes": 65655,
+    "error": null
+  },
+  {
+    "endpoint": "/blog",
+    "method": "GET",
+    "status_code": 200,
+    "latency_ms": 436.3,
+    "over_1s": false,
+    "size_bytes": 85369,
+    "error": null
+  },
+  {
+    "endpoint": "/nuoc-hoa/chanel-coco-mademoiselle-edp",
+    "method": "GET",
+    "status_code": 200,
+    "latency_ms": 384.7,
+    "over_1s": false,
+    "size_bytes": 70729,
+    "error": null
+  },
+  {
+    "endpoint": "/api/v1/catalog/products",
+    "method": "GET",
+    "status_code": 200,
+    "latency_ms": 310.7,
+    "over_1s": false,
+    "size_bytes": 7619,
+    "error": null
+  },
+  {
+    "endpoint": "/api/v1/catalog/products?page=1&pageSize=12&sortBy=price-asc",
+    "method": "GET",
+    "status_code": 200,
+    "latency_ms": 287.5,
+    "over_1s": false,
+    "size_bytes": 7619,
+    "error": null
+  },
+  {
+    "endpoint": "/api/v1/catalog/products?keyword=Chanel&page=1&pageSize=6",
+    "method": "GET",
+    "status_code": 200,
+    "latency_ms": 296.9,
+    "over_1s": false,
+    "size_bytes": 1889,
+    "error": null
+  },
+  {
+    "endpoint": "/api/v1/catalog/products/chanel-coco-mademoiselle-edp",
+    "method": "GET",
+    "status_code": 200,
+    "latency_ms": 305.0,
+    "over_1s": false,
+    "size_bytes": 1817,
+    "error": null
+  },
+  {
+    "endpoint": "/api/v1/cart",
+    "method": "GET",
+    "status_code": 200,
+    "latency_ms": 279.8,
+    "over_1s": false,
+    "size_bytes": 40,
+    "error": null
+  },
+  {
+    "endpoint": "/api/v1/orders/track?orderCode=LUXE-20261107-TEST",
+    "method": "GET",
+    "status_code": 404,
+    "latency_ms": 297.5,
+    "over_1s": false,
+    "size_bytes": 76,
+    "error": null
+  },
+  {
+    "endpoint": "/swagger/v1/swagger.json",
+    "method": "GET",
+    "status_code": 200,
+    "latency_ms": 272.6,
+    "over_1s": false,
+    "size_bytes": 24891,
+    "error": null
+  },
+  {
+    "endpoint": "/api/v1/vouchers/validate",
+    "method": "POST",
+    "status_code": 200,
+    "latency_ms": 331.5,
+    "over_1s": false,
+    "size_bytes": 124,
+    "error": null
+  },
+  {
+    "endpoint": "/api/v1/auth/login",
+    "method": "POST",
+    "status_code": 400,
+    "latency_ms": 283.6,
+    "over_1s": false,
+    "size_bytes": 86,
+    "error": null
+  },
+  {
+    "endpoint": "/admin/admindashboard",
+    "method": "GET",
+    "status_code": 200,
+    "latency_ms": 532.4,
+    "over_1s": false,
+    "size_bytes": 47266,
+    "error": null
+  },
+  {
+    "endpoint": "/admin/admindashboard/products",
+    "method": "GET",
+    "status_code": 200,
+    "latency_ms": 921.3,
+    "over_1s": false,
+    "size_bytes": 47275,
+    "error": null
+  },
+  {
+    "endpoint": "/admin/admindashboard/inventory",
+    "method": "GET",
+    "status_code": 200,
+    "latency_ms": 536.8,
+    "over_1s": false,
+    "size_bytes": 47276,
+    "error": null
+  },
+  {
+    "endpoint": "/admin/admindashboard/financialreport",
+    "method": "GET",
+    "status_code": 200,
+    "latency_ms": 535.2,
+    "over_1s": false,
+    "size_bytes": 47282,
+    "error": null
+  },
+  {
+    "endpoint": "/admin/admindashboard/financialreport?preset=today",
+    "method": "GET",
+    "status_code": 200,
+    "latency_ms": 548.6,
+    "over_1s": false,
+    "size_bytes": 47295,
+    "error": null
+  },
+  {
+    "endpoint": "/admin/admindashboard/financialreport?preset=year",
+    "method": "GET",
+    "status_code": 200,
+    "latency_ms": 492.6,
+    "over_1s": false,
+    "size_bytes": 47294,
+    "error": null
+  },
+  {
+    "endpoint": "/admin/admindashboard/settings",
+    "method": "GET",
+    "status_code": 200,
+    "latency_ms": 517.3,
+    "over_1s": false,
+    "size_bytes": 47275,
+    "error": null
+  },
+  {
+    "endpoint": "/admin/admindashboard/blogs",
+    "method": "GET",
+    "status_code": 200,
+    "latency_ms": 549.1,
+    "over_1s": false,
+    "size_bytes": 47272,
+    "error": null
+  },
+  {
+    "endpoint": "/admin/databaseconsole",
+    "method": "GET",
+    "status_code": 200,
+    "latency_ms": 539.2,
+    "over_1s": false,
+    "size_bytes": 47267,
+    "error": null
+  },
+  {
+    "endpoint": "/admin/admindashboard/systemhealth",
+    "method": "GET",
+    "status_code": 200,
+    "latency_ms": 549.6,
+    "over_1s": false,
+    "size_bytes": 47279,
+    "error": null
+  },
+  {
+    "endpoint": "/api/v1/store-manager/dashboard",
+    "method": "GET",
+    "status_code": 401,
+    "latency_ms": 259.8,
+    "over_1s": false,
+    "size_bytes": 0,
+    "error": null
+  },
+  {
+    "endpoint": "/api/v1/loyalty/status",
+    "method": "GET",
+    "status_code": 401,
+    "latency_ms": 258.9,
+    "over_1s": false,
+    "size_bytes": 0,
+    "error": null
+  },
+  {
+    "endpoint": "SQL: SELECT COUNT(*) FROM Products",
+    "method": "POST",
+    "status_code": 200,
+    "latency_ms": 529.9,
+    "over_1s": false,
+    "size_bytes": 47280,
+    "error": null
+  },
+  {
+    "endpoint": "SQL: SELECT TOP 10 * FROM Products WITH (NOLOCK)",
+    "method": "POST",
+    "status_code": 200,
+    "latency_ms": 544.5,
+    "over_1s": false,
+    "size_bytes": 47280,
+    "error": null
+  },
+  {
+    "endpoint": "SQL: SELECT TOP 10 * FROM Orders JOIN OrderItems",
+    "method": "POST",
+    "status_code": 200,
+    "latency_ms": 583.7,
+    "over_1s": false,
+    "size_bytes": 47280,
+    "error": null
+  },
+  {
+    "endpoint": "SQL: SELECT Inventory Valuation Aggregation",
+    "method": "POST",
+    "status_code": 200,
+    "latency_ms": 528.0,
+    "over_1s": false,
+    "size_bytes": 47280,
+    "error": null
+  },
+  {
+    "endpoint": "SQL: Complex Multi-Join: Product + Brand + Category + Family",
+    "method": "POST",
+    "status_code": 200,
+    "latency_ms": 539.1,
+    "over_1s": false,
+    "size_bytes": 47280,
+    "error": null
+  }
+]

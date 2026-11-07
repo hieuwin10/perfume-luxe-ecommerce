@@ -83,6 +83,16 @@
         text-decoration: none;
         transition: all 0.2s ease;
     }
+    @@media (max-width: 480px) {
+        .kpi-grid-container {
+            grid-template-columns: 1fr !important;
+            gap: 12px !important;
+        }
+        .chart-container-card {
+            overflow-x: auto;
+            padding: 14px;
+        }
+    }
 </style>
 
 <div style="max-width: 1440px; margin: 0 auto; padding-bottom: 60px;">
@@ -123,7 +133,7 @@
     </div>
 
     <!-- 1. KPI THỐNG KÊ TÀI CHÍNH & VẬN HÀNH (5 THẺ LỚN) -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 18px; margin-bottom: 30px;">
+    <div class="kpi-grid-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 18px; margin-bottom: 30px;">
         <!-- Tổng Doanh Thu -->
         <div class="kpi-metric-card">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">

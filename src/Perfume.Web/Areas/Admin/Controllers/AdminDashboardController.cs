@@ -23,6 +23,7 @@ public sealed class AdminDashboardController : Controller
     private readonly ISystemSettingService _settingService;
     private readonly IBlogService _blogService;
     private readonly IConfiguration _configuration;
+    private readonly Microsoft.Extensions.Caching.Memory.IMemoryCache? _cache;
 
     public AdminDashboardController(
         PerfumeDbContext db,
@@ -31,7 +32,8 @@ public sealed class AdminDashboardController : Controller
         IFlashSaleService flashSaleService,
         ISystemSettingService settingService,
         IBlogService blogService,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        Microsoft.Extensions.Caching.Memory.IMemoryCache? cache = null)
     {
         _db = db;
         _dbConsole = dbConsole;
@@ -40,22 +42,23 @@ public sealed class AdminDashboardController : Controller
         _settingService = settingService;
         _blogService = blogService;
         _configuration = configuration;
+        _cache = cache;
     }
 
     [Authorize(Roles = "Admin,StoreManager")]
-    public Task<IActionResult> Index() => Forward(new AdminAnalyticsController(new AdminDashboardAnalyticsService(_db, _dbConsole), new AdminFinancialReportService(_db))).Index();
+    public Task<IActionResult> Index() => Forward(new AdminAnalyticsController(new AdminDashboardAnalyticsService(_db, _dbConsole, _cache), new AdminFinancialReportService(_db))).Index();
 
     [Authorize(Roles = "Admin")]
     public Task<IActionResult> FinancialReport(DateTime? fromDate, DateTime? toDate, string? preset = "30days") =>
-        Forward(new AdminAnalyticsController(new AdminDashboardAnalyticsService(_db, _dbConsole), new AdminFinancialReportService(_db))).FinancialReport(fromDate, toDate, preset);
+        Forward(new AdminAnalyticsController(new AdminDashboardAnalyticsService(_db, _dbConsole, _cache), new AdminFinancialReportService(_db))).FinancialReport(fromDate, toDate, preset);
 
     [Authorize(Roles = "Admin")]
     public Task<IActionResult> ExportFinancialOrdersCsv(DateTime? fromDate, DateTime? toDate) =>
-        Forward(new AdminAnalyticsController(new AdminDashboardAnalyticsService(_db, _dbConsole), new AdminFinancialReportService(_db))).ExportFinancialOrdersCsv(fromDate, toDate);
+        Forward(new AdminAnalyticsController(new AdminDashboardAnalyticsService(_db, _dbConsole, _cache), new AdminFinancialReportService(_db))).ExportFinancialOrdersCsv(fromDate, toDate);
 
     [Authorize(Roles = "Admin")]
     public Task<IActionResult> ExportInventoryValuationCsv() =>
-        Forward(new AdminAnalyticsController(new AdminDashboardAnalyticsService(_db, _dbConsole), new AdminFinancialReportService(_db))).ExportInventoryValuationCsv();
+        Forward(new AdminAnalyticsController(new AdminDashboardAnalyticsService(_db, _dbConsole, _cache), new AdminFinancialReportService(_db))).ExportInventoryValuationCsv();
 
     public Task<IActionResult> Inventory(string? filter = "all", string? search = null) =>
         Forward(new AdminInventoryController(_db, _userManager, _flashSaleService)).Inventory(filter, search);

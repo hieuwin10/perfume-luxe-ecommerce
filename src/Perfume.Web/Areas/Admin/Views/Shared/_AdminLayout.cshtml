@@ -136,7 +136,7 @@
             </a>
 
             <!-- Logout -->
-            <form method="post" action="/account/logout" style="margin: 0;">
+            <form method="post" action="/account/logout" onsubmit="return confirm('Bạn có chắc chắn muốn đăng xuất khỏi trang quản trị?');" style="margin: 0;">
                 @Html.AntiForgeryToken()
                 <button type="submit" class="icon-btn" title="Đăng Xuất" style="width: 34px; height: 34px; color: #f87171;">
                     <i class="fa-solid fa-right-from-bracket"></i>

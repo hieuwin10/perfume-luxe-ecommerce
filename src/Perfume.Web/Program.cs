@@ -96,6 +96,7 @@ builder.Services.AddResponseCaching();
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IAdminDashboardAnalyticsService, AdminDashboardAnalyticsService>();
 builder.Services.AddScoped<IAdminFinancialReportService, AdminFinancialReportService>();
+builder.Services.AddHostedService<BackgroundCacheWarmerService>();
 
 
 // Nen du lieu phan hoi bang Brotli va Gzip de tang toc tai trang
@@ -177,8 +178,6 @@ using (var scope = app.Services.CreateScope())
 // ==========================================
 // 5. PIPELINE MIDDLEWARE VA ROUTING
 // ==========================================
-app.UseMiddleware<SystemExceptionLoggingMiddleware>();
-
 app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
     ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
@@ -189,6 +188,7 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
+app.UseMiddleware<SystemExceptionLoggingMiddleware>();
 app.UseHttpsRedirection();
 app.UseResponseCompression();
 
@@ -205,8 +205,8 @@ app.Use(async (context, next) =>
     {
         context.Response.Headers.Append("Content-Security-Policy",
             "default-src 'self'; " +
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://cdnjs.cloudflare.com; " +
-            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; " +
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; " +
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; " +
             "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:; " +
             "img-src 'self' https: data: blob:; " +
             "connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com https://images.unsplash.com https://*.google-analytics.com; " +

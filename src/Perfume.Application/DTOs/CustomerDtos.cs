@@ -81,8 +81,8 @@ public sealed class RefreshTokenRequest
 
 public sealed class CartAddItemRequest
 {
-    [Required]
     public string ProductSlug { get; set; } = string.Empty;
+    public string? Slug { get; set; }
     public int? VariantId { get; set; }
     [Range(1, 50)]
     public int Quantity { get; set; } = 1;

@@ -32,6 +32,69 @@ public class AdminInventoryController : Controller
         this._flashSaleService = _flashSaleService;
     }
 
+    [HttpGet("{id:int?}")]
+    [HttpGet("/Admin/EditProduct/{id:int?}")]
+    public async Task<IActionResult> EditProduct(int id)
+    {
+        var product = await _db.Products
+            .Include(p => p.Images)
+            .Include(p => p.Variants)
+            .Include(p => p.FragranceNotes).ThenInclude(fn => fn.FragranceNote)
+            .FirstOrDefaultAsync(p => p.Id == id);
+        if (product == null) return NotFound();
+
+        var model = new EditProductDto
+        {
+            Id = product.Id,
+            Name = product.Name,
+            Slug = product.Slug,
+            Sku = product.Sku,
+            BrandId = product.BrandId,
+            CategoryId = product.CategoryId,
+            FragranceFamilyId = product.FragranceFamilyId,
+            Gender = product.Gender,
+            Concentration = product.Concentration,
+            BasePrice = product.BasePrice,
+            MainImageUrl = product.MainImageUrl,
+            ShortDescription = product.ShortDescription,
+            FullDescription = product.FullDescription,
+            Longevity = product.Longevity,
+            Sillage = product.Sillage,
+            SeasonRecommendation = product.SeasonRecommendation,
+            ReleaseYear = product.ReleaseYear,
+            IsInStock = product.IsInStock,
+            IsFeatured = product.IsFeatured,
+            IsBestSeller = product.IsBestSeller,
+            IsNewArrival = product.IsNewArrival,
+            TopNotes = string.Join(", ", product.FragranceNotes.Where(n => n.NoteLevel == NoteLevel.Top).Select(n => n.FragranceNote?.Name ?? "").Where(s => !string.IsNullOrEmpty(s))),
+            HeartNotes = string.Join(", ", product.FragranceNotes.Where(n => n.NoteLevel == NoteLevel.Heart).Select(n => n.FragranceNote?.Name ?? "").Where(s => !string.IsNullOrEmpty(s))),
+            BaseNotes = string.Join(", ", product.FragranceNotes.Where(n => n.NoteLevel == NoteLevel.Base).Select(n => n.FragranceNote?.Name ?? "").Where(s => !string.IsNullOrEmpty(s))),
+            Images = product.Images.OrderBy(i => i.DisplayOrder).Select(i => new ProductImageDto
+            {
+                Id = i.Id,
+                ImageUrl = i.ImageUrl,
+                AltText = i.AltText,
+                IsMain = i.IsMain,
+                DisplayOrder = i.DisplayOrder
+            }).ToList(),
+            Variants = product.Variants.OrderBy(v => v.VolumeMl).Select(v => new ProductVariantDto
+            {
+                Id = v.Id,
+                VolumeMl = v.VolumeMl,
+                VolumeLabel = v.VolumeLabel,
+                VariantSku = v.VariantSku,
+                OriginalPrice = v.OriginalPrice,
+                SalePrice = v.SalePrice,
+                StockQuantity = v.StockQuantity,
+                IsDefault = v.IsDefault
+            }).ToList()
+        };
+
+        ViewBag.Brands = await _db.Brands.OrderBy(b => b.Name).ToListAsync();
+        ViewBag.Categories = await _db.Categories.OrderBy(c => c.Name).ToListAsync();
+        ViewBag.FragranceFamilies = await _db.FragranceFamilies.OrderBy(f => f.Name).ToListAsync();
+        return View("~/Areas/Admin/Views/AdminDashboard/EditProduct.cshtml", model);
+    }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -318,6 +381,15 @@ public class AdminInventoryController : Controller
         return RedirectToAction(nameof(Inventory));
     }
 
+
+    [HttpGet]
+    public async Task<IActionResult> CreateProduct()
+    {
+        ViewBag.Brands = await _db.Brands.OrderBy(b => b.Name).ToListAsync();
+        ViewBag.Categories = await _db.Categories.OrderBy(c => c.Name).ToListAsync();
+        ViewBag.FragranceFamilies = await _db.FragranceFamilies.OrderBy(f => f.Name).ToListAsync();
+        return View("~/Areas/Admin/Views/AdminDashboard/CreateProduct.cshtml", new CreateProductDto());
+    }
 
     [HttpPost]
     [ValidateAntiForgeryToken]

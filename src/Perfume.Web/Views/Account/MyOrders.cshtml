@@ -23,17 +23,22 @@
 const statusNames = { Pending:'Chờ xác nhận', Confirmed:'Đã xác nhận', Shipping:'Đang giao', Delivered:'Đã giao', Cancelled:'Đã hủy' };
 const payNames = { Pending:'Chờ thu COD', Completed:'Đã thanh toán', Failed:'Thanh toán lỗi', Refunded:'Đã hoàn tiền' };
 const moneyOrder = value => new Intl.NumberFormat('vi-VN',{style:'currency',currency:'VND'}).format(value||0);
-(async function loadOrders(){
+async function loadOrders(){
     const message=document.getElementById('ordersMessage'), list=document.getElementById('ordersList');
     try {
         const orders=await CustomerApi.get('/api/v1/customer/orders');
-        if(!orders.length){message.innerHTML='<strong>Bạn chưa có đơn hàng.</strong><p style="margin:8px 0 0">Những đơn bạn đặt sẽ xuất hiện tại đây.</p>';return;}
+        if(!orders || !orders.length){message.innerHTML='<strong>Bạn chưa có đơn hàng.</strong><p style="margin:8px 0 0">Những đơn bạn đặt sẽ xuất hiện tại đây.</p>';return;}
         message.hidden=true;
         list.innerHTML=orders.map(order=>`<article class="customer-order-card">
-            <div><strong>${CustomerApi.escapeHtml(order.orderCode)}</strong><p>${new Date(order.createdAt).toLocaleString('vi-VN')} · ${order.items.length} sản phẩm · ${payNames[order.paymentStatus]||CustomerApi.escapeHtml(order.paymentStatus)}</p><span class="customer-order-status">${statusNames[order.orderStatus]||CustomerApi.escapeHtml(order.orderStatus)}</span></div>
+            <div><strong>${CustomerApi.escapeHtml(order.orderCode)}</strong><p>${new Date(order.createdAt).toLocaleString('vi-VN')} · ${order.items ? order.items.length : 0} sản phẩm · ${payNames[order.paymentStatus]||CustomerApi.escapeHtml(order.paymentStatus)}</p><span class="customer-order-status">${statusNames[order.orderStatus]||CustomerApi.escapeHtml(order.orderStatus)}</span></div>
             <div style="text-align:right"><strong style="color:var(--gold-primary);font-size:1.05rem">${moneyOrder(order.totalAmount)}</strong><p><a href="/account/orderdetails/${order.id}" style="color:var(--gold-primary)">Xem chi tiết <i class="fa-solid fa-arrow-right"></i></a></p></div>
         </article>`).join('');
     } catch(error){message.textContent=error.message||'Chưa tải được đơn hàng. Vui lòng thử lại.';}
-})();
+}
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadOrders);
+} else {
+    loadOrders();
+}
 </script>
 }

@@ -10,7 +10,7 @@
 </main>
 @section Scripts {
 <script>
-(async function(){
+async function loadOrderDetail(){
     const root=document.getElementById('orderDetailRoot'), message=document.getElementById('orderDetailMessage'), content=document.getElementById('orderDetailContent');
     const id=Number(root.dataset.orderId), status={Pending:'Chờ xác nhận',Confirmed:'Đã xác nhận',Shipping:'Đang giao',Delivered:'Đã giao',Cancelled:'Đã hủy'}, payment={Pending:'Chờ thu COD',Completed:'Đã thanh toán',Failed:'Thanh toán lỗi',Refunded:'Đã hoàn tiền'};
     const money=value=>new Intl.NumberFormat('vi-VN',{style:'currency',currency:'VND'}).format(value||0), safe=CustomerApi.escapeHtml;
@@ -23,7 +23,12 @@
             <aside style="display:grid;gap:18px"><section class="luxury-card" style="padding:22px"><h2 style="font-size:1.05rem">Giao hàng</h2><strong>${safe(order.customerName)}</strong><p>${safe(order.customerPhone)}<br>${safe(order.customerEmail)}</p><p style="color:var(--text-secondary)">${safe(order.shippingAddress)}${order.city?`, ${safe(order.city)}`:''}</p>${order.trackingNumber?`<p>Mã vận đơn: <strong>${safe(order.trackingNumber)}</strong></p>`:''}</section>
             <section class="luxury-card" style="padding:22px"><h2 style="font-size:1.05rem">Thanh toán</h2><p>Tạm tính <strong style="float:right">${money(order.subTotal)}</strong></p><p>Ưu đãi <strong style="float:right;color:#e63946">−${money(order.discountAmount)}</strong></p><p>Vận chuyển <strong style="float:right">${money(order.shippingFee)}</strong></p><hr style="border-color:var(--border-card)"><p><strong>Tổng cộng</strong><strong style="float:right;color:var(--gold-primary)">${money(order.totalAmount)}</strong></p></section></aside></div>`;
     } catch(error){message.textContent=error.message||'Không tìm thấy đơn hàng này.';}
-})();
+}
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadOrderDetail);
+} else {
+    loadOrderDetail();
+}
 </script>
 <style>@@media(max-width:720px){#orderDetailContent>div{grid-template-columns:1fr!important}}</style>
 }

@@ -11,6 +11,8 @@ namespace Perfume.Web.Areas.Admin.Controllers;
 
 [Area("Admin")]
 [Authorize(Roles = "Admin")]
+[Route("Admin/[controller]/[action]")]
+[Route("Admin/AdminDashboard/DatabaseConsole")]
 public class DatabaseConsoleController : Controller
 {
     private readonly IDatabaseConsoleService _dbConsole;
@@ -21,6 +23,9 @@ public class DatabaseConsoleController : Controller
     public DatabaseConsoleController(IDatabaseConsoleService dbConsole, IWebHostEnvironment env, PerfumeDbContext db, ILogger<DatabaseConsoleController> logger)
     { _dbConsole = dbConsole; _env = env; _db = db; _logger = logger; }
 
+    [HttpGet]
+    [HttpGet("/Admin/DatabaseConsole")]
+    [HttpGet("/Admin/AdminDashboard/DatabaseConsole")]
     public async Task<IActionResult> Index(string? table, int page = 1, int pageSize = 15, string? sortBy = null, bool asc = true)
     {
         List<TableInfo> tables;

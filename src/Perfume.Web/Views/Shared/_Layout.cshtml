@@ -223,7 +223,7 @@
     <div class="toast-container-luxe" id="toastContainer"></div>
 
     <!-- Scripts (Non-render-blocking) -->
-    <script src="~/js/customer-api.js" asp-append-version="true" defer></script>
+    <script src="~/js/customer-api.js" asp-append-version="true"></script>
     <script>
         // 1. Theme Management (Dark / Light + Cốc Cốc / Chrome system auto-detection)
         (function() {
@@ -284,8 +284,8 @@
         async function refreshCartState() {
             try {
                 const res = await CustomerApi.get('/api/v1/cart');
-                const cart = res.data;
-                const totalCount = cart?.totalItems ?? 0;
+                const cart = res && res.data ? res.data : res;
+                const totalCount = cart?.totalCount ?? cart?.totalItems ?? (cart?.items ? cart.items.length : 0);
 
                 const badge = document.getElementById('headerCartCount');
                 if (badge) badge.textContent = totalCount;
@@ -298,7 +298,7 @@
 
                 const subtotalEl = document.getElementById('cartDrawerSubtotal');
                 if (subtotalEl) {
-                    subtotalEl.textContent = CustomerApi.formatVnd(cart?.finalTotal ?? 0);
+                    subtotalEl.textContent = CustomerApi.formatVnd(cart?.subTotal ?? cart?.finalTotal ?? 0);
                 }
 
                 const itemsContainer = document.getElementById('cartDrawerItems');
@@ -318,8 +318,8 @@
                         <img src="${CustomerApi.escapeHtml(item.productImageUrl || '/images/placeholder-perfume.jpg')}" alt="${CustomerApi.escapeHtml(item.productName)}" style="width: 60px; height: 60px; object-fit: contain; background: var(--bg-surface-elevated); border-radius: var(--radius-sm); padding: 4px;" />
                         <div style="flex-grow: 1;">
                             <div style="font-weight: 600; font-size: 0.88rem; color: var(--text-primary); margin-bottom: 2px;">${CustomerApi.escapeHtml(item.productName)}</div>
-                            <div style="font-size: 0.75rem; color: var(--gold-primary); margin-bottom: 4px;">${CustomerApi.escapeHtml(item.variantName || 'Fullbox')} &bull; x${item.quantity}</div>
-                            <div style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary);">${CustomerApi.formatVnd(item.subTotal)}</div>
+                            <div style="font-size: 0.75rem; color: var(--gold-primary); margin-bottom: 4px;">${CustomerApi.escapeHtml(item.variantLabel || item.variantName || 'Fullbox')} &bull; x${item.quantity}</div>
+                            <div style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary);">${CustomerApi.formatVnd(item.totalPrice ?? item.subTotal ?? (item.unitPrice * item.quantity))}</div>
                         </div>
                         <button type="button" onclick="removeCartItem(${item.productId}, ${item.variantId ?? 'null'})" class="icon-btn" style="width: 28px; height: 28px; color: #ef4444;" aria-label="Xóa"><i class="fa-solid fa-trash-can" style="font-size: 0.75rem;"></i></button>
                     </div>
@@ -332,6 +332,7 @@
         async function addToCart(slug, variantId, qty = 1) {
             try {
                 await CustomerApi.post('/api/v1/cart/items', {
+                    productSlug: slug,
                     slug: slug,
                     variantId: variantId,
                     quantity: qty

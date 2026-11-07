@@ -313,7 +313,7 @@ public sealed class CustomerApiController : ControllerBase
         if (rating is < 1 or > 5 || comment.Length is < 5 or > 2000)
             return BadRequest(new { message = "Đánh giá cần có từ 1 đến 5 sao và nội dung từ 5 đến 2.000 ký tự." });
         var purchased = await _db.Orders.AnyAsync(o => o.UserId == user.Id && o.OrderStatus == OrderStatus.Delivered && o.Items.Any(i => i.ProductId == productId), cancellationToken);
-        if (!purchased) return Forbid();
+        if (!purchased) return StatusCode(403, new { message = "Quý khách cần mua và nhận hàng thành công sản phẩm này trước khi có thể gửi đánh giá." });
         if (await _db.Reviews.AnyAsync(r => r.ProductId == productId && r.UserId == user.Id, cancellationToken))
             return Conflict(new { message = "Bạn đã gửi đánh giá cho sản phẩm này." });
 

@@ -135,16 +135,55 @@ public sealed class AdminDashboardAnalyticsService(
             })
             .ToListAsync();
 
+        int totalProducts = 0, totalUsers = 0, totalBrands = 0, totalCategories = 0, totalBlogPosts = 0, totalReviews = 0, totalVouchers = 0;
+        try
+        {
+            var conn = _db.Database.GetDbConnection();
+            if (conn.State != System.Data.ConnectionState.Open) await conn.OpenAsync();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = @"
+                SELECT 
+                    (SELECT COUNT(1) FROM Products WHERE IsDeleted = 0) AS TotalProducts,
+                    (SELECT COUNT(1) FROM AspNetUsers) AS TotalUsers,
+                    (SELECT COUNT(1) FROM Brands WHERE IsDeleted = 0) AS TotalBrands,
+                    (SELECT COUNT(1) FROM Categories WHERE IsDeleted = 0) AS TotalCategories,
+                    (SELECT COUNT(1) FROM BlogPosts WHERE IsDeleted = 0) AS TotalBlogPosts,
+                    (SELECT COUNT(1) FROM Reviews WHERE IsDeleted = 0) AS TotalReviews,
+                    (SELECT COUNT(1) FROM Vouchers WHERE IsDeleted = 0) AS TotalVouchers";
+            using var reader = await cmd.ExecuteReaderAsync();
+            if (await reader.ReadAsync())
+            {
+                totalProducts = reader.GetInt32(0);
+                totalUsers = reader.GetInt32(1);
+                totalBrands = reader.GetInt32(2);
+                totalCategories = reader.GetInt32(3);
+                totalBlogPosts = reader.GetInt32(4);
+                totalReviews = reader.GetInt32(5);
+                totalVouchers = reader.GetInt32(6);
+            }
+        }
+        catch
+        {
+            // Fallback sang LINQ an toan cho moi truong InMemory test
+            totalProducts = await _db.Products.CountAsync(p => !p.IsDeleted);
+            totalUsers = await _db.Users.CountAsync();
+            totalBrands = await _db.Brands.CountAsync(b => !b.IsDeleted);
+            totalCategories = await _db.Categories.CountAsync(c => !c.IsDeleted);
+            totalBlogPosts = await _db.BlogPosts.CountAsync(b => !b.IsDeleted);
+            totalReviews = await _db.Reviews.CountAsync(r => !r.IsDeleted);
+            totalVouchers = await _db.Vouchers.CountAsync(v => !v.IsDeleted);
+        }
+
         var vm = new AdminDashboardViewModel
         {
-            TotalProducts = await _db.Products.CountAsync(p => !p.IsDeleted),
+            TotalProducts = totalProducts,
             TotalOrders = totalOrders,
-            TotalUsers = await _db.Users.CountAsync(),
-            TotalBrands = await _db.Brands.CountAsync(b => !b.IsDeleted),
-            TotalCategories = await _db.Categories.CountAsync(c => !c.IsDeleted),
-            TotalBlogPosts = await _db.BlogPosts.CountAsync(b => !b.IsDeleted),
-            TotalReviews = await _db.Reviews.CountAsync(r => !r.IsDeleted),
-            TotalVouchers = await _db.Vouchers.CountAsync(v => !v.IsDeleted),
+            TotalUsers = totalUsers,
+            TotalBrands = totalBrands,
+            TotalCategories = totalCategories,
+            TotalBlogPosts = totalBlogPosts,
+            TotalReviews = totalReviews,
+            TotalVouchers = totalVouchers,
 
             TotalRevenue = totalRevenue,
             RevenueThisMonth = revenueThisMonth,
@@ -168,7 +207,7 @@ public sealed class AdminDashboardAnalyticsService(
             Tables = await _dbConsole.GetAllTablesAsync(),
         };
 
-        _cache?.Set(CacheKey, vm, TimeSpan.FromSeconds(45));
+        _cache?.Set(CacheKey, vm, TimeSpan.FromSeconds(180));
         return vm;
     }
 }

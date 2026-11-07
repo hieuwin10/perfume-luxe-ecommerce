@@ -461,7 +461,16 @@ public class AdminSystemController : Controller
             if (canConnect)
             {
                 var conn = _db.Database.GetDbConnection();
-                vm.SqlVersion = $"{conn.Database} ({conn.ServerVersion ?? "Microsoft SQL Server"})";
+                string serverVersion = "Microsoft SQL Server";
+                try
+                {
+                    if (conn.State == System.Data.ConnectionState.Open)
+                    {
+                        serverVersion = conn.ServerVersion ?? serverVersion;
+                    }
+                }
+                catch { }
+                vm.SqlVersion = $"{conn.Database} ({serverVersion})";
             }
         }
         catch (Exception)
@@ -585,6 +594,14 @@ public class AdminSystemController : Controller
     }
 
 
+    [HttpGet]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Settings()
+    {
+        var settings = await _settingService.GetSettingsAsync();
+        return View("~/Areas/Admin/Views/AdminDashboard/Settings.cshtml", settings);
+    }
+
     [HttpPost]
     [Authorize(Roles = "Admin")]
     [ValidateAntiForgeryToken]
@@ -626,6 +643,14 @@ public class AdminSystemController : Controller
     }
 
 
+    [HttpGet]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> CreateBlog()
+    {
+        ViewBag.Categories = await _blogService.GetBlogCategoriesAsync();
+        return View("~/Areas/Admin/Views/AdminDashboard/CreateBlog.cshtml", new BlogPost());
+    }
+
     [HttpPost]
     [Authorize(Roles = "Admin")]
     [ValidateAntiForgeryToken]
@@ -665,6 +690,16 @@ public class AdminSystemController : Controller
         return View("~/Areas/Admin/Views/AdminDashboard/Users.cshtml", usersWithRoles);
     }
 
+
+    [HttpGet]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> EditBlog(int id)
+    {
+        var post = await _blogService.GetPostByIdAsync(id);
+        if (post == null) return NotFound();
+        ViewBag.Categories = await _blogService.GetBlogCategoriesAsync();
+        return View("~/Areas/Admin/Views/AdminDashboard/CreateBlog.cshtml", post);
+    }
 
     [HttpPost]
     [Authorize(Roles = "Admin")]

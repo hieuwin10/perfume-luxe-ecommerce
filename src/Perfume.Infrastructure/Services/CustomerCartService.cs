@@ -43,6 +43,11 @@ public sealed class CustomerCartService : ICustomerCartService
     // ------------------------------------------------------------------------
     public async Task<CartStateDto> AddAsync(string? userId, string? guestToken, CartAddItemRequest request, CancellationToken cancellationToken = default)
     {
+        if (string.IsNullOrWhiteSpace(request.ProductSlug) && !string.IsNullOrWhiteSpace(request.Slug))
+        {
+            request.ProductSlug = request.Slug;
+        }
+
         if (request.Quantity is < 1 or > 50) throw new InvalidOperationException("Số lượng phải từ 1 đến 50.");
 
         // Tim san pham con dang kinh doanh

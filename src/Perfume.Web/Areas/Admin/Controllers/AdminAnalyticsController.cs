@@ -66,7 +66,6 @@ public class AdminAnalyticsController : Controller
     [HttpGet("/Admin")]
     [HttpGet("/Admin/Index")]
     [HttpGet("/Admin/AdminDashboard")]
-    [HttpGet("/Admin/AdminDashboard/Index")]
     [HttpGet]
     [Authorize(Roles = "Admin,StoreManager")]
     public async Task<IActionResult> Index()
