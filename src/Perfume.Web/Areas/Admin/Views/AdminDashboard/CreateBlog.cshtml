@@ -34,6 +34,12 @@
         border-color: var(--gold-primary);
         box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
     }
+    .blog-editor-toolbar { display:flex; flex-wrap:wrap; gap:6px; padding:8px; background:var(--bg-surface-elevated); border:1px solid var(--border-card); border-bottom:0; border-radius:var(--radius-sm) var(--radius-sm) 0 0; }
+    .blog-editor-toolbar button { min-width:38px; min-height:36px; padding:6px 10px; border:1px solid var(--border-card); border-radius:5px; background:var(--bg-surface); color:var(--text-primary); cursor:pointer; }
+    .blog-editor-toolbar button:hover, .blog-editor-toolbar button:focus-visible { border-color:var(--gold-primary); color:var(--gold-primary); }
+    .blog-editor-canvas { min-height:320px; overflow:auto; border:1px solid var(--border-card); border-radius:0 0 var(--radius-sm) var(--radius-sm); background:rgba(255,255,255,0.03); padding:16px; color:var(--text-primary); outline:none; }
+    .blog-editor-canvas:focus { border-color:var(--gold-primary); box-shadow:0 0 10px rgba(212,175,55,.2); }
+    .blog-editor-canvas:empty::before { content:attr(data-placeholder); color:var(--text-muted); }
 </style>
 
 <div style="max-width: 1100px; margin: 0 auto;">
@@ -86,8 +92,19 @@
                     </div>
 
                     <div class="form-group-luxe" style="margin-bottom: 0;">
-                        <label class="form-label-luxe">Nội Dung Bài Viết (Hỗ trợ mã HTML) <span style="color: #ef4444;">*</span></label>
-                        <textarea name="Content" rows="14" required class="form-input-luxe" style="resize: vertical; font-family: monospace; font-size: 0.88rem; line-height: 1.6;" placeholder="<p>Nhập nội dung bài viết...</p>">@Model?.Content</textarea>
+                        <label class="form-label-luxe" for="blogContentEditor">Nội Dung Bài Viết <span style="color: #ef4444;">*</span></label>
+                        <div class="blog-editor-toolbar" role="toolbar" aria-label="Định dạng nội dung bài viết">
+                            <button type="button" data-command="bold" aria-label="In đậm" title="In đậm"><strong>B</strong></button>
+                            <button type="button" data-command="italic" aria-label="In nghiêng" title="In nghiêng"><em>I</em></button>
+                            <button type="button" data-command="formatBlock" data-value="h2" aria-label="Tiêu đề cấp 2" title="Tiêu đề cấp 2">H2</button>
+                            <button type="button" data-command="formatBlock" data-value="h3" aria-label="Tiêu đề cấp 3" title="Tiêu đề cấp 3">H3</button>
+                            <button type="button" data-command="insertUnorderedList" aria-label="Danh sách dấu đầu dòng" title="Danh sách dấu đầu dòng"><i class="fa-solid fa-list-ul"></i></button>
+                            <button type="button" data-command="insertOrderedList" aria-label="Danh sách đánh số" title="Danh sách đánh số"><i class="fa-solid fa-list-ol"></i></button>
+                            <button type="button" data-command="createLink" aria-label="Chèn liên kết" title="Chèn liên kết"><i class="fa-solid fa-link"></i></button>
+                            <button type="button" data-command="removeFormat" aria-label="Xóa định dạng" title="Xóa định dạng"><i class="fa-solid fa-eraser"></i></button>
+                        </div>
+                        <div id="blogContentEditor" class="blog-editor-canvas" contenteditable="true" role="textbox" aria-label="Nội dung bài viết" aria-multiline="true" data-placeholder="Soạn nội dung bài viết tại đây..."></div>
+                        <textarea id="blogContentValue" name="Content" hidden>@Model?.Content</textarea>
                     </div>
                 </div>
 
@@ -158,3 +175,76 @@
         </div>
     </form>
 </div>
+<script>
+(() => {
+    const form = document.querySelector('form[action*="blog"]');
+    const editor = document.getElementById('blogContentEditor');
+    const value = document.getElementById('blogContentValue');
+    const toolbar = document.querySelector('.blog-editor-toolbar');
+    if (!form || !editor || !value || !toolbar) return;
+
+    const allowedTags = new Set(['P', 'BR', 'H2', 'H3', 'STRONG', 'B', 'EM', 'I', 'U', 'UL', 'OL', 'LI', 'BLOCKQUOTE', 'A']);
+    const sanitizeContent = html => {
+        const parsed = new DOMParser().parseFromString(html, 'text/html');
+        const cleanNode = node => {
+            if (node.nodeType === Node.TEXT_NODE) return document.createTextNode(node.nodeValue || '');
+            if (node.nodeType !== Node.ELEMENT_NODE) return document.createDocumentFragment();
+            if (!allowedTags.has(node.tagName)) {
+                const fragment = document.createDocumentFragment();
+                [...node.childNodes].forEach(child => fragment.append(cleanNode(child)));
+                return fragment;
+            }
+            const clean = document.createElement(node.tagName.toLowerCase());
+            if (node.tagName === 'A') {
+                const href = node.getAttribute('href');
+                if (href) {
+                    try {
+                        const url = new URL(href, window.location.origin);
+                        if (['http:', 'https:'].includes(url.protocol)) clean.setAttribute('href', url.href);
+                    } catch { }
+                }
+            }
+            [...node.childNodes].forEach(child => clean.append(cleanNode(child)));
+            return clean;
+        };
+        const container = document.createElement('div');
+        [...parsed.body.childNodes].forEach(node => container.append(cleanNode(node)));
+        return container.innerHTML;
+    };
+    const syncContent = () => { value.value = sanitizeContent(editor.innerHTML.trim()); };
+    editor.innerHTML = sanitizeContent(value.value);
+    toolbar.addEventListener('mousedown', event => {
+        if (event.target.closest('button')) event.preventDefault();
+    });
+    toolbar.addEventListener('click', event => {
+        const button = event.target.closest('button[data-command]');
+        if (!button) return;
+        editor.focus();
+        const command = button.dataset.command;
+        if (command === 'createLink') {
+            const url = window.prompt('Nhập địa chỉ liên kết (https://...)');
+            if (!url) return;
+            try {
+                const parsed = new URL(url, window.location.origin);
+                if (!['http:', 'https:'].includes(parsed.protocol)) return;
+                document.execCommand(command, false, parsed.href);
+            } catch { return; }
+        } else {
+            document.execCommand(command, false, button.dataset.value || null);
+        }
+        syncContent();
+    });
+    editor.addEventListener('input', syncContent);
+    form.addEventListener('submit', event => {
+        syncContent();
+        if (!editor.innerText.trim()) {
+            event.preventDefault();
+            editor.focus();
+            editor.setAttribute('aria-invalid', 'true');
+        } else {
+            editor.removeAttribute('aria-invalid');
+        }
+    });
+    syncContent();
+})();
+</script>

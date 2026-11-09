@@ -1,4 +1,4 @@
-﻿@using Perfume.Application.DTOs
+@using Perfume.Application.DTOs
 @{
     ViewData["Title"] = "Nước Hoa Niche & Haute Parfumerie Chính Hãng";
     var activeFlashSale = ViewBag.ActiveFlashSale as FlashSaleDto;
@@ -268,13 +268,13 @@
     else
     {
         <div style="text-align: center; padding: 60px 20px; background: var(--bg-surface); border-radius: var(--radius-md); border: 1px dashed var(--border-card);">
-            <i class="fa-solid fa-database" style="font-size: 2.5rem; color: var(--gold-primary); margin-bottom: 16px;"></i>
-            <h3 style="font-size: 1.4rem; margin-bottom: 8px;">Cơ Sở Dữ Liệu Chưa Được Nạp Sản Phẩm Mẫu</h3>
+            <i class="fa-solid fa-gem" style="font-size: 2.5rem; color: var(--gold-primary); margin-bottom: 16px;"></i>
+            <h3 style="font-size: 1.4rem; margin-bottom: 8px;">Tuyệt Phẩm Mùi Hương Đang Được Cập Nhật</h3>
             <p style="color: var(--text-secondary); max-width: 550px; margin: 0 auto 24px; font-size: 0.9rem;">
-                Bạn có thể nhấn vào <strong>Quản Lý CSDL (Admin)</strong> để kiểm tra các bảng và thực hiện <strong>1-Click Nạp Dữ Liệu Mẫu</strong> từ file <code>scripts/seed_perfume_data.sql</code> ngay lập tức!
+                Các kiệt tác nước hoa mới nhất đang được chúng tôi tuyển chọn và chuẩn bị ra mắt. Khám phá toàn bộ danh mục ngay hôm nay.
             </p>
-            <a href="/admin/databaseconsole" class="btn-luxe">
-                <i class="fa-solid fa-terminal" style="margin-right: 6px;"></i> Mở Console Nạp Data
+            <a href="/bo-suu-tap" class="btn-luxe">
+                <i class="fa-solid fa-compass" style="margin-right: 6px;"></i> Khám Phá Bộ Sưu Tập
             </a>
         </div>
     }

@@ -21,7 +21,7 @@
             <a href="/discovery-box" class="mobile-nav-item" onclick="closeMobileNav()" style="color: var(--gold-primary);"><i class="fa-solid fa-gift"></i> Hộp Quà Discovery Box</a>
             <a href="/so-sanh" class="mobile-nav-item" onclick="closeMobileNav()"><i class="fa-solid fa-scale-balanced"></i> So Sánh Mùi Hương</a>
             <a href="/dat-lich-trai-nghiem" class="mobile-nav-item" onclick="closeMobileNav()"><i class="fa-solid fa-crown"></i> Thử Mùi VIP Concierge</a>
-            <a href="/tra-cuu-don-hang" class="mobile-nav-item" onclick="closeMobileNav()"><i class="fa-solid fa-truck-fast"></i> Tra Cứu Đơn Hàng</a>
+            <a href="/tra-cuu-don-hang" rel="nofollow" class="mobile-nav-item" onclick="closeMobileNav()"><i class="fa-solid fa-truck-fast"></i> Tra Cứu Đơn Hàng</a>
             <a href="/blog" class="mobile-nav-item" onclick="closeMobileNav()"><i class="fa-solid fa-newspaper"></i> Tạp Chí Mùi Hương</a>
             <a href="/ve-chung-toi" class="mobile-nav-item" onclick="closeMobileNav()"><i class="fa-solid fa-circle-info"></i> Về Chúng Tôi</a>
 
@@ -36,14 +36,14 @@
                 </div>
                 @if (User.IsInRole("Admin"))
                 {
-                    <a href="/admin/admindashboard" class="mobile-nav-item" style="color: #f87171;"><i class="fa-solid fa-gauge-high"></i> Admin Dashboard</a>
+                    <a href="/admin/admindashboard" rel="nofollow" class="mobile-nav-item" style="color: #f87171;"><i class="fa-solid fa-gauge-high"></i> Admin Dashboard</a>
                 }
                 else if (User.IsInRole("StoreManager"))
                 {
-                    <a href="/admin/storemanager" class="mobile-nav-item" style="color: var(--gold-primary);"><i class="fa-solid fa-chart-line"></i> Quản Lý Cửa Hàng</a>
+                    <a href="/admin/storemanager" rel="nofollow" class="mobile-nav-item" style="color: var(--gold-primary);"><i class="fa-solid fa-chart-line"></i> Quản Lý Cửa Hàng</a>
                 }
-                <a href="/account/profile" class="mobile-nav-item"><i class="fa-solid fa-user"></i> Tài Khoản Của Tôi</a>
-                <a href="/account/myorders" class="mobile-nav-item"><i class="fa-solid fa-box"></i> Đơn Hàng Của Tôi</a>
+                <a href="/account/profile" rel="nofollow" class="mobile-nav-item"><i class="fa-solid fa-user"></i> Tài Khoản Của Tôi</a>
+                <a href="/account/myorders" rel="nofollow" class="mobile-nav-item"><i class="fa-solid fa-box"></i> Đơn Hàng Của Tôi</a>
                 <form method="post" action="/account/logout" style="margin: 4px 0 0;">
                     @Html.AntiForgeryToken()
                     <button type="submit" class="mobile-nav-item" style="width: 100%; border: none; background: none; cursor: pointer; color: #f87171; text-align: left;">
@@ -53,7 +53,7 @@
             }
             else
             {
-                <a href="/account/login" class="mobile-nav-item" style="color: var(--gold-primary); font-weight: 600;"><i class="fa-solid fa-right-to-bracket"></i> Đăng Nhập / Đăng Ký</a>
+                <a href="/account/login" rel="nofollow" class="mobile-nav-item" style="color: var(--gold-primary); font-weight: 600;"><i class="fa-solid fa-right-to-bracket"></i> Đăng Nhập / Đăng Ký</a>
             }
         </div>
         <div class="mobile-nav-footer">

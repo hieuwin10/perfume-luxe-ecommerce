@@ -196,17 +196,10 @@
                 </div>
             </div>
 
-            <!-- Live API Verification Control -->
-            <div style="border-top: 1px dashed var(--border-card); padding-top: 16px;">
-                <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
-                    <button type="button" id="btnVerifyLoyaltyApi" onclick="verifyLoyaltyStatusApi()" class="btn-luxe-outline" style="font-size: 0.8rem; padding: 8px 14px;">
-                        <i class="fa-solid fa-satellite-dish" style="margin-right: 6px;"></i>Kiểm Tra Trực Tuyến API Hạng VIP (<code>GET /api/v1/loyalty/status</code>)
-                    </button>
-                    <a href="/checkout" style="font-size: 0.8rem; color: var(--gold-primary); text-decoration: underline;">
-                        Áp dụng ưu đãi -@loyalty.DiscountPercent.ToString("0")% tại Thanh Toán &rarr;
-                    </a>
-                </div>
-                <div id="loyaltyApiLiveResult" style="display: none; margin-top: 12px; padding: 12px; border-radius: 8px; background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(212,175,55,0.4); font-family: monospace; font-size: 0.78rem; color: #e2e8f0; white-space: pre-wrap; word-break: break-word;"></div>
+            <div style="border-top: 1px dashed var(--border-card); padding-top: 16px; text-align: right;">
+                <a href="/checkout" style="font-size: 0.85rem; color: var(--gold-primary); text-decoration: underline;">
+                    Áp dụng ưu đãi -@loyalty.DiscountPercent.ToString("0")% tại Thanh Toán &rarr;
+                </a>
             </div>
         </div>
     </div>
@@ -335,37 +328,4 @@
 </div>
 
 @section Scripts {
-    <script>
-        async function verifyLoyaltyStatusApi() {
-            const btn = document.getElementById('btnVerifyLoyaltyApi');
-            const out = document.getElementById('loyaltyApiLiveResult');
-            if (!out) return;
-
-            out.style.display = 'block';
-            out.style.borderColor = 'rgba(212,175,55,0.4)';
-            out.textContent = 'Đang kết nối GET /api/v1/loyalty/status ...';
-            if (btn) btn.disabled = true;
-
-            try {
-                const resp = await fetch('/api/v1/loyalty/status', {
-                    method: 'GET',
-                    headers: { 'Accept': 'application/json' },
-                    credentials: 'same-origin'
-                });
-                const payload = await resp.json();
-                if (!resp.ok) {
-                    out.style.borderColor = '#f87171';
-                    out.textContent = `HTTP ${resp.status}: ` + JSON.stringify(payload, null, 2);
-                    return;
-                }
-                out.style.borderColor = '#52B788';
-                out.textContent = `✓ Đồng bộ trực tuyến thành công (HTTP ${resp.status}):\n` + JSON.stringify(payload, null, 2);
-            } catch (err) {
-                out.style.borderColor = '#f87171';
-                out.textContent = 'Lỗi kết nối API: ' + (err?.message || err);
-            } finally {
-                if (btn) btn.disabled = false;
-            }
-        }
-    </script>
 }

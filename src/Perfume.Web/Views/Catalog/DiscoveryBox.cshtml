@@ -187,12 +187,12 @@
 
             <partial name="Partials/_DiscoveryBoxStepFragrancePartial" model="Model" />
 
-            <!-- BƯỚC 3: THIỆP ÉP KIM VÀNG CÁ NHÂN HÓA (GreetingMessage & GreetingFont) -->
+            <!-- BƯỚC 3: THIỆP ÉP KIM VÀNG CÁ NHÂN HÓA -->
             <section class="discovery-step-card" id="step-3-greeting-card" style="margin-bottom: 0;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
                     <h2 style="font-size: 1.25rem; font-weight: 700; margin: 0; color: var(--text-primary);">
                         <span style="display: inline-flex; width: 28px; height: 28px; border-radius: 50%; background: var(--gold-primary); color: #000; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 800; margin-right: 8px;">3</span>
-                        Bước 3: Thiệp Ép Kim Vàng Cá Nhân Hóa (<code style="color: var(--gold-primary);">GreetingMessage</code> &amp; <code style="color: var(--gold-primary);">GreetingFont</code>)
+                        Bước 3: Thiệp Ép Kim Vàng Cá Nhân Hóa (Thông Điệp &amp; Phông Chữ Nghệ Thuật)
                     </h2>
                     <span style="font-size: 0.78rem; color: var(--text-muted);">Miễn phí chế tác thiệp ép kim 24K</span>
                 </div>
@@ -211,7 +211,7 @@
 
                         <div>
                             <label style="display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px;">
-                                Chọn kiểu chữ nghệ thuật (<code style="color: var(--gold-primary);">GreetingFont</code>):
+                                Chọn kiểu chữ nghệ thuật:
                             </label>
                             <div style="display: flex; gap: 8px; flex-wrap: wrap;" id="fontSelectorGroup">
                                 <button type="button" class="font-choice-btn active" data-font="Playfair Display" style="font-family: 'Playfair Display', serif;" onclick="selectGreetingFont('Playfair Display')">
@@ -229,7 +229,7 @@
                         <div>
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                                 <label for="greetingMessageInput" style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary);">
-                                    Thông điệp ép kim vàng (<code style="color: var(--gold-primary);">GreetingMessage</code>):
+                                    Thông điệp ép kim vàng:
                                 </label>
                                 <span id="greetingCharCount" style="font-size: 0.78rem; color: var(--gold-primary); font-weight: 700;">0/250</span>
                             </div>
@@ -292,6 +292,8 @@
         });
         document.getElementById('selectedBoxStyleLabel').textContent = `Đang chọn: ${name} (${formatVnd(price)})`;
         document.getElementById('traySubtitle').textContent = `Vỏ hộp: ${name} • Chọn 3–5 ống chiết`;
+        const boxCodeEl = document.getElementById('summaryBoxCode');
+        if (boxCodeEl) boxCodeEl.textContent = name;
         updateSlotsUI();
     }
 
@@ -484,7 +486,7 @@
             orderBtn.disabled = false;
             orderBtn.style.opacity = '1';
             orderBtn.style.cursor = 'pointer';
-            orderBtn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles" style="margin-right: 8px;"></i> Xác Thực API & Thêm Hộp Quà Vào Giỏ (${formatVnd(pricing.finalTotal)})`;
+            orderBtn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles" style="margin-right: 8px;"></i> Thêm Hộp Quà Vào Giỏ Hàng (${formatVnd(pricing.finalTotal)})`;
         } else {
             orderBtn.disabled = true;
             orderBtn.style.opacity = '0.5';
@@ -514,7 +516,7 @@
 
         try {
             orderBtn.disabled = true;
-            orderBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="margin-right: 8px;"></i> Đang xác thực cấu hình qua API...';
+            orderBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="margin-right: 8px;"></i> Đang thêm vào giỏ hàng...';
 
             const response = await fetch('/api/v1/discovery-box/validate-and-add', {
                 method: 'POST',
@@ -530,7 +532,7 @@
                     apiResultBox.style.background = 'rgba(239, 68, 68, 0.14)';
                     apiResultBox.style.border = '1px solid #ef4444';
                     apiResultBox.style.color = '#f87171';
-                    apiResultBox.innerHTML = `<strong><i class="fa-solid fa-circle-exclamation"></i> Lỗi xác thực:</strong> ${data.message || 'Cấu hình Discovery Box không hợp lệ.'}`;
+                    apiResultBox.innerHTML = `<strong><i class="fa-solid fa-circle-exclamation"></i> Thông báo:</strong> ${data.message || 'Cấu hình Discovery Box không hợp lệ.'}`;
                 }
                 updateSlotsUI();
                 return;
@@ -568,10 +570,10 @@
                         <i class="fa-solid fa-circle-check"></i> ${data.message}
                     </div>
                     <div style="font-size: 0.78rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 4px;">
-                        <div><strong>Vỏ hộp:</strong> ${currentBoxStyle.name} (<code>${data.boxStyle}</code>)</div>
+                        <div><strong>Vỏ hộp:</strong> ${currentBoxStyle.name}</div>
                         <div><strong>Ống chiết (${data.vialCount}):</strong> ${vialsListHtml}</div>
                         <div><strong>Thiệp ép kim (${currentGreetingFont}):</strong> ${greetingMessage ? `“${greetingMessage}”` : 'Mặc định hoàng gia'}</div>
-                        <div><strong>Tổng thanh toán API:</strong> <span style="color: var(--gold-primary); font-weight: 700;">${formatVnd(data.totalPrice)}</span> (Tiết kiệm: ${formatVnd(data.discountAmount)})</div>
+                        <div><strong>Tổng thanh toán:</strong> <span style="color: var(--gold-primary); font-weight: 700;">${formatVnd(data.totalPrice)}</span> (Tiết kiệm: ${formatVnd(data.discountAmount)})</div>
                     </div>
                 `;
             }
@@ -591,7 +593,7 @@
                 }
             }
             if (typeof showToast === 'function') {
-                showToast('Đã xác thực & thêm Hộp Quà Discovery Box vào giỏ hàng!', 'success');
+                showToast('Đã thêm Hộp Quà Discovery Box vào giỏ hàng!', 'success');
             }
         } catch (err) {
             if (apiResultBox) {
@@ -599,7 +601,7 @@
                 apiResultBox.style.background = 'rgba(239, 68, 68, 0.14)';
                 apiResultBox.style.border = '1px solid #ef4444';
                 apiResultBox.style.color = '#f87171';
-                apiResultBox.textContent = err.message || 'Không thể kết nối máy chủ xác thực Discovery Box.';
+                apiResultBox.textContent = err.message || 'Không thể kết nối máy chủ. Vui lòng thử lại sau.';
             }
         } finally {
             updateSlotsUI();

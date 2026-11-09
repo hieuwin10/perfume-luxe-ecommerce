@@ -302,30 +302,34 @@
                 }
 
                 const itemsContainer = document.getElementById('cartDrawerItems');
-                if (!itemsContainer) return;
-
-                if (!cart || !cart.items || cart.items.length === 0) {
-                    itemsContainer.innerHTML = `
-                        <div style="text-align: center; padding: 40px 0; color: var(--text-muted);">
-                            <i class="fa-solid fa-bag-shopping" style="font-size: 3rem; margin-bottom: 12px; opacity: 0.3;"></i>
-                            <p>Giỏ hàng đang trống.</p>
-                        </div>`;
-                    return;
+                if (itemsContainer) {
+                    if (!cart || !cart.items || cart.items.length === 0) {
+                        itemsContainer.innerHTML = `
+                            <div style="text-align: center; padding: 40px 0; color: var(--text-muted);">
+                                <i class="fa-solid fa-bag-shopping" style="font-size: 3rem; margin-bottom: 12px; opacity: 0.3;"></i>
+                                <p>Giỏ hàng đang trống.</p>
+                            </div>`;
+                    } else {
+                        itemsContainer.innerHTML = cart.items.map(item => `
+                            <div class="cart-item-row" style="display: flex; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--border-card);">
+                                <img src="${CustomerApi.escapeHtml(item.productImageUrl || '/images/placeholder-perfume.jpg')}" alt="${CustomerApi.escapeHtml(item.productName)}" style="width: 60px; height: 60px; object-fit: contain; background: var(--bg-surface-elevated); border-radius: var(--radius-sm); padding: 4px;" />
+                                <div style="flex-grow: 1;">
+                                    <div style="font-weight: 600; font-size: 0.88rem; color: var(--text-primary); margin-bottom: 2px;">${CustomerApi.escapeHtml(item.productName)}</div>
+                                    <div style="font-size: 0.75rem; color: var(--gold-primary); margin-bottom: 4px;">${CustomerApi.escapeHtml(item.variantLabel || item.variantName || 'Fullbox')} &bull; x${item.quantity}</div>
+                                    <div style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary);">${CustomerApi.formatVnd(item.totalPrice ?? item.subTotal ?? (item.unitPrice * item.quantity))}</div>
+                                </div>
+                                <button type="button" onclick="removeCartItem(${item.productId}, ${item.variantId ?? 'null'})" class="icon-btn" style="width: 28px; height: 28px; color: #ef4444;" aria-label="Xóa"><i class="fa-solid fa-trash-can" style="font-size: 0.75rem;"></i></button>
+                            </div>
+                        `).join('');
+                    }
                 }
 
-                itemsContainer.innerHTML = cart.items.map(item => `
-                    <div class="cart-item-row" style="display: flex; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--border-card);">
-                        <img src="${CustomerApi.escapeHtml(item.productImageUrl || '/images/placeholder-perfume.jpg')}" alt="${CustomerApi.escapeHtml(item.productName)}" style="width: 60px; height: 60px; object-fit: contain; background: var(--bg-surface-elevated); border-radius: var(--radius-sm); padding: 4px;" />
-                        <div style="flex-grow: 1;">
-                            <div style="font-weight: 600; font-size: 0.88rem; color: var(--text-primary); margin-bottom: 2px;">${CustomerApi.escapeHtml(item.productName)}</div>
-                            <div style="font-size: 0.75rem; color: var(--gold-primary); margin-bottom: 4px;">${CustomerApi.escapeHtml(item.variantLabel || item.variantName || 'Fullbox')} &bull; x${item.quantity}</div>
-                            <div style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary);">${CustomerApi.formatVnd(item.totalPrice ?? item.subTotal ?? (item.unitPrice * item.quantity))}</div>
-                        </div>
-                        <button type="button" onclick="removeCartItem(${item.productId}, ${item.variantId ?? 'null'})" class="icon-btn" style="width: 28px; height: 28px; color: #ef4444;" aria-label="Xóa"><i class="fa-solid fa-trash-can" style="font-size: 0.75rem;"></i></button>
-                    </div>
-                `).join('');
+                // Phát sự kiện toàn cục để các trang như /cart tự động đồng bộ mượt mà không cần F5 reload
+                window.dispatchEvent(new CustomEvent('cart:updated', { detail: cart }));
+                return cart;
             } catch (err) {
                 console.warn('Could not refresh cart state:', err);
+                return null;
             }
         }
 
@@ -348,8 +352,13 @@
         async function removeCartItem(productId, variantId) {
             try {
                 await CustomerApi.delete(`/api/v1/cart/items/${productId}?variantId=${variantId ?? ''}`);
-                await refreshCartState();
+                const updatedCart = await refreshCartState();
                 showToast('Đã xóa sản phẩm khỏi giỏ hàng.', 'info');
+                if (window.location.pathname.toLowerCase().startsWith('/checkout')) {
+                    if (!updatedCart || !updatedCart.items || updatedCart.items.length === 0) {
+                        window.location.assign('/cart');
+                    }
+                }
             } catch (err) {
                 showToast(err.message || 'Chưa xóa được sản phẩm.', 'error');
             }

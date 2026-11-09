@@ -36,17 +36,17 @@
                     <li><a href="/discovery-box" class="nav-link" style="color: var(--gold-primary);"><i class="fa-solid fa-gift" style="margin-right: 4px;"></i> Discovery Box</a></li>
                     <li><a href="/so-sanh" class="nav-link"><i class="fa-solid fa-scale-balanced" style="margin-right: 4px;"></i> So Sánh</a></li>
                     <li><a href="/dat-lich-trai-nghiem" class="nav-link"><i class="fa-solid fa-crown" style="margin-right: 4px; color: var(--gold-primary);"></i> Thử Mùi VIP</a></li>
-                    <li><a href="/tra-cuu-don-hang" class="nav-link" style="color: var(--gold-primary);"><i class="fa-solid fa-truck-fast" style="margin-right: 4px;"></i> Tra Cứu Đơn</a></li>
+                    <li><a href="/tra-cuu-don-hang" rel="nofollow" class="nav-link" style="color: var(--gold-primary);"><i class="fa-solid fa-truck-fast" style="margin-right: 4px;"></i> Tra Cứu Đơn</a></li>
 
                     @if (SignInManager.IsSignedIn(User))
                     {
                         @if (User.IsInRole("Admin"))
                         {
-                            <li><a href="/admin/admindashboard" class="nav-link" style="background: rgba(212,175,55,0.12); padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border-subtle); color: var(--gold-primary); font-size: 0.82rem;"><i class="fa-solid fa-gauge-high" style="margin-right: 4px;"></i> Quản trị</a></li>
+                            <li><a href="/admin/admindashboard" rel="nofollow" class="nav-link" style="background: rgba(212,175,55,0.12); padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border-subtle); color: var(--gold-primary); font-size: 0.82rem;"><i class="fa-solid fa-gauge-high" style="margin-right: 4px;"></i> Quản trị</a></li>
                         }
                         else if (User.IsInRole("StoreManager"))
                         {
-                            <li><a href="/admin/storemanager" class="nav-link" style="background: rgba(212,175,55,0.12); padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border-subtle); color: var(--gold-primary); font-size: 0.82rem;"><i class="fa-solid fa-chart-line" style="margin-right: 4px;"></i> Quản lý cửa hàng</a></li>
+                            <li><a href="/admin/storemanager" rel="nofollow" class="nav-link" style="background: rgba(212,175,55,0.12); padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border-subtle); color: var(--gold-primary); font-size: 0.82rem;"><i class="fa-solid fa-chart-line" style="margin-right: 4px;"></i> Quản lý cửa hàng</a></li>
                         }
                     }
                 </ul>
@@ -80,19 +80,19 @@
                                 else if (User.IsInRole("StoreManager")) { <span class="role-badge-manager">Cửa hàng trưởng</span> }
                                 else { <span class="role-badge-customer">Khách hàng</span> }
                             </div>
-                            <a href="/account/profile" class="dropdown-item-luxe">
+                            <a href="/account/profile" rel="nofollow" class="dropdown-item-luxe">
                                 <i class="fa-solid fa-user-circle"></i> Tài Khoản Của Tôi
                             </a>
-                            <a href="/account/myorders" class="dropdown-item-luxe"><i class="fa-solid fa-box"></i> Đơn hàng của tôi</a>
-                            <a href="/tra-cuu-don-hang" class="dropdown-item-luxe"><i class="fa-solid fa-truck-fast"></i> Tra Cứu Đơn Hàng</a>
+                            <a href="/account/myorders" rel="nofollow" class="dropdown-item-luxe"><i class="fa-solid fa-box"></i> Đơn hàng của tôi</a>
+                            <a href="/tra-cuu-don-hang" rel="nofollow" class="dropdown-item-luxe"><i class="fa-solid fa-truck-fast"></i> Tra Cứu Đơn Hàng</a>
                             @if (User.IsInRole("Admin"))
                             {
-                                <a href="/admin/admindashboard" class="dropdown-item-luxe"><i class="fa-solid fa-gauge-high"></i> Admin Dashboard</a>
-                                <a href="/admin/databaseconsole" class="dropdown-item-luxe"><i class="fa-solid fa-database"></i> Database Console</a>
+                                <a href="/admin/admindashboard" rel="nofollow" class="dropdown-item-luxe"><i class="fa-solid fa-gauge-high"></i> Admin Dashboard</a>
+                                <a href="/admin/databaseconsole" rel="nofollow" class="dropdown-item-luxe"><i class="fa-solid fa-database"></i> Database Console</a>
                             }
                             else if (User.IsInRole("StoreManager"))
                             {
-                                <a href="/admin/storemanager" class="dropdown-item-luxe"><i class="fa-solid fa-chart-line"></i> Thống kê cửa hàng</a>
+                                <a href="/admin/storemanager" rel="nofollow" class="dropdown-item-luxe"><i class="fa-solid fa-chart-line"></i> Thống kê cửa hàng</a>
                             }
                             <div style="border-top: 1px solid var(--border-card); margin: 4px 0;"></div>
                             <form method="post" action="/account/logout" id="customerLogoutForm" style="margin: 0;">
@@ -106,7 +106,7 @@
                 }
                 else
                 {
-                    <a href="/account/login" class="icon-btn" title="Đăng nhập" aria-label="Đăng nhập tài khoản" style="width: 38px; height: 38px;">
+                    <a href="/account/login" rel="nofollow" class="icon-btn" title="Đăng nhập" aria-label="Đăng nhập tài khoản" style="width: 38px; height: 38px;">
                         <i class="fa-solid fa-user"></i>
                     </a>
                 }
