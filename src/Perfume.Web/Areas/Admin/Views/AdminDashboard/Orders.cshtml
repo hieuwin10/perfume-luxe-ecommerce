@@ -9,7 +9,7 @@
 }
 
 <div style="max-width: 1400px; margin: 0 auto;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
         <div>
             <h1 style="font-size: 1.6rem; font-weight: 800; margin: 0 0 6px; color: var(--text-primary);">
                 <i class="fa-solid fa-boxes-stacked text-gold-gradient" style="margin-right: 8px;"></i> Quản Lý Đơn Hàng
@@ -23,7 +23,7 @@
 
     <!-- Advanced Filter Bar -->
     <div class="luxury-card" style="padding: 18px; margin-bottom: 20px;">
-        <form method="get" action="/admin/admindashboard/orders" style="display: grid; grid-template-columns: 2fr 1.2fr 1.2fr 1.2fr 1.2fr auto; gap: 12px; align-items: end; margin: 0;">
+        <form method="get" action="/admin/admindashboard/orders" class="admin-filter-bar">
             <div>
                 <label style="display: block; font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; font-weight: 600;">Tìm kiếm</label>
                 <input type="text" name="search" value="@ViewBag.Search" placeholder="Mã đơn, Tên, Số điện thoại..."
@@ -76,8 +76,8 @@
 
     @if (TempData["Success"] != null) { <div class="luxury-card" style="padding:12px;margin-bottom:12px">@TempData["Success"]</div> }
     @if (TempData["Error"] != null) { <div class="luxury-card" style="padding:12px;margin-bottom:12px;color:#f87171">@TempData["Error"]</div> }
-    <div class="luxury-card" style="padding: 0; overflow: auto;">
-        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem;">
+    <div class="luxury-card" style="padding: 0; overflow-x: auto; width: 100%;">
+        <table style="width: 100%; min-width: 760px; border-collapse: collapse; text-align: left; font-size: 0.88rem;">
             <thead>
                 <tr style="background: var(--bg-surface-elevated); border-bottom: 1px solid var(--border-card); color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">
                     <th style="padding: 14px 20px;">Mã Đơn</th>

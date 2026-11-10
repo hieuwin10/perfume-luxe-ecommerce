@@ -252,7 +252,7 @@
     </div>
 
     <!-- 3. TOP SẢN PHẨM BÁN CHẠY & NHÓM HƯƠNG & PHƯƠNG THỨC THANH TOÁN -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 22px; margin-bottom: 30px;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 22px; margin-bottom: 30px;">
         <!-- Top Sản Phẩm Bán Chạy -->
         <div class="luxury-card" style="padding: 24px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
@@ -330,7 +330,7 @@
 
     <!-- 4. DANH SÁCH ĐƠN HÀNG GẦN ĐÂY CẦN XỬ LÝ -->
     <div class="luxury-card" style="padding: 0; overflow: hidden; margin-bottom: 30px;">
-        <div style="padding: 20px 24px; border-bottom: 1px solid var(--border-card); display: flex; justify-content: space-between; align-items: center;">
+        <div style="padding: 20px 24px; border-bottom: 1px solid var(--border-card); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
             <div>
                 <h3 style="font-size: 1.2rem; margin: 0 0 4px; color: var(--text-primary); font-family: var(--font-serif);">
                     <i class="fa-solid fa-boxes-stacked text-gold-gradient" style="margin-right: 8px;"></i> Đơn Hàng Mới Nhất Cần Xử Lý
@@ -341,8 +341,8 @@
                 Xem Toàn Bộ Đơn Hàng &rarr;
             </a>
         </div>
-        <div style="overflow-x: auto;">
-            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem;">
+        <div style="overflow-x: auto; width: 100%;">
+            <table style="width: 100%; min-width: 650px; border-collapse: collapse; text-align: left; font-size: 0.88rem;">
                 <thead>
                     <tr style="background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border-card); color: var(--text-muted); font-size: 0.78rem; text-transform: uppercase;">
                         <th style="padding: 14px 20px;">Mã Đơn</th>
@@ -407,7 +407,7 @@
     </div>
 
     <!-- 5. QUẢN TRỊ DATABASE & NGƯỜI DÙNG ĐĂNG KÝ MỚI -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 24px;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 24px;">
         <!-- Database Tables Quick Access -->
         <div class="luxury-card" style="padding: 24px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">

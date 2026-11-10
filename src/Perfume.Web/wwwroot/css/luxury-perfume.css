@@ -1296,4 +1296,53 @@ a {
     }
 }
 
+/* --------------------------------------------------------------------------
+   ADMIN CONSOLE RESPONSIVE UTILITIES
+   -------------------------------------------------------------------------- */
+.admin-main-container {
+    padding: 24px;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-x: clip;
+}
+
+.admin-filter-bar {
+    display: grid;
+    grid-template-columns: 2fr 1.2fr 1.2fr 1.2fr 1.2fr auto;
+    gap: 12px;
+    align-items: end;
+    margin: 0;
+}
+
+.admin-two-col-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+@media (max-width: 992px) {
+    .admin-filter-bar {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-main-container {
+        padding: 14px 10px;
+    }
+
+    .admin-two-col-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+}
+
+@media (max-width: 576px) {
+    .admin-filter-bar {
+        grid-template-columns: 1fr;
+    }
+}
+
+
 

@@ -1,12 +1,18 @@
 @using Microsoft.AspNetCore.Identity
 @inject SignInManager<Perfume.Infrastructure.Identity.AppUser> SignInManager
 @inject UserManager<Perfume.Infrastructure.Identity.AppUser> UserManager
+@{
+    var rawTitle = ViewData["Title"]?.ToString()?.Trim() ?? "Admin Console";
+    var adminDocTitle = rawTitle.EndsWith("PERFUME LUXE", StringComparison.OrdinalIgnoreCase)
+        ? rawTitle
+        : $"{rawTitle} | PERFUME LUXE";
+}
 <!DOCTYPE html>
 <html lang="vi" data-theme="dark">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@(ViewData["Title"] ?? "Admin Console") | PERFUME LUXE</title>
+    <title>@adminDocTitle</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <link rel="stylesheet" href="~/css/luxury-perfume.css" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
@@ -145,7 +151,7 @@
         </div>
     </header>
 
-    <main style="padding: 24px;">
+    <main class="admin-main-container">
         @RenderBody()
     </main>
 
