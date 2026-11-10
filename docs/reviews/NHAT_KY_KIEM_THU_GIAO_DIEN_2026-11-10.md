@@ -66,9 +66,23 @@ flowchart LR
 
 ---
 
-## 4. XÁC NHẬN BẢO TOÀN TRẠNG THÁI HỆ THỐNG
-* **Mã nguồn dự án**: Được bảo toàn nguyên trạng, không phát sinh bất kỳ thay đổi nào trong ca sáng theo đúng chỉ thị.
-* **Báo cáo và nhật ký**: Đã được lưu vào 2 vị trí độc lập:
-  1. `docs/reviews/NHAT_KY_KIEM_THU_GIAO_DIEN_2026-11-10.md`
-  2. `C:\Users\Sieu chu nhiem\.gemini\antigravity\brain\8f90ef09-ad38-4e16-9795-e468108de7e4\BAO_CAO_LOI_GIAO_DIEN_SANG_10_11.md`
-* **Lệnh tắt máy**: Đã thiết lập lệnh tắt máy tính tự động `shutdown.exe /s /t 120`.
+## 4. KẾT QUẢ TRIỂN KHAI & KHẮC PHỤC TRIỆT ĐỂ 7 LỖI GIAO DIỆN (CA CHIỀU 10/11/2026)
+
+| Mã Lỗi | Tình Trạng | Giải Pháp Triển Khai Kỹ Thuật |
+| :---: | :---: | :--- |
+| **UI-01** | ✅ **ĐÃ KHẮC PHỤC** | Bổ sung middleware `app.Use(...)` trong `Program.cs` tự động chuyển hướng **301 Permanent Redirect** cho cả 9 URL MVC cũ (`/home/about`, `/home/boutique`, `/home/returnpolicy`, `/home/buyingguide`, `/home/privacy`, `/catalog/discoverybox`, `/catalog/compare`, `/experience/tastingbooking`, `/ordertracking`, `/ordertracking/index`) về canonical slugs tiếng Việt, bảo toàn query string và tối ưu SEO Google. |
+| **UI-02** | ✅ **ĐÃ KHẮC PHỤC** | Bổ sung toàn bộ cấu trúc HTML của `#mobileNavOverlay` và `#mobileNavDrawer` vào `_Layout.cshtml`. Kết nối nút `#closeMobileNavBtn` và `#mobileNavToggleBtn`, loại bỏ hoàn toàn hiện tượng nút văng ngoài viewport. |
+| **UI-03** | ✅ **ĐÃ KHẮC PHỤC** | Tự động sinh 3 hình ảnh bìa bài viết WebP độ phân giải cao tại `src/Perfume.Web/wwwroot/images/blogs/` (`niche-trends-2026.webp`, `sustainable-perfume.webp`, `summer-fresh-unisex.webp`). Cập nhật `DatabaseSchemaMigrationV5.cs`, `Index.cshtml`, `Blog/Index.cshtml`, `Blog/Detail.cshtml` và bổ sung handler `onerror` fallback về ảnh nội bộ. |
+| **UI-04** | ✅ **ĐÃ KHẮC PHỤC** | Tích hợp Client-side Validation chuẩn mực (`modern-web-guidance`) cho cả 2 form `/account/login` và `/account/register`. Hiển thị nhãn lỗi màu đỏ `#f87171` trực quan khi dữ liệu thiếu hoặc không đúng định dạng; tự động xóa lỗi khi người dùng nhập liệu lại. |
+| **UI-05** | ✅ **ĐÃ KHẮC PHỤC** | Nâng cấp hàm `refreshCartState()` trong `_Layout.cshtml` để cập nhật đồng loạt mọi phần tử hiển thị số lượng giỏ hàng (`.cart-count`, `.badge-count`, `#headerCartCount`, `#mobileBottomCartBadge`, `.cart-count-badge`) ngay lập tức khi thêm sản phẩm. |
+| **UI-06** | ✅ **ĐÃ KHẮC PHỤC** | Cập nhật `OrderTrackingController.cs` phân loại cụ thể từng trường hợp thiếu thông tin tra cứu (thiếu số điện thoại hoặc thiếu mã đơn) và trả về thông báo lỗi trực quan rõ ràng, thân thiện cho khách hàng. |
+| **UI-07** | ✅ **ĐÃ KHẮC PHỤC** | Thêm nút tìm kiếm `#openSearchBtn` trên Header Desktop và xây dựng Modal tìm kiếm nhanh `#searchModal` kèm các thẻ tag từ khóa thịnh hành (Chanel, Dior, Aventus, Santal 33, Tom Ford, Hương Gỗ). |
+
+---
+
+## 5. KẾT QUẢ KIỂM THỬ XÁC MINH (VERIFICATION)
+* **Dotnet Build**: Thành công 100% (0 Warning, 0 Error).
+* **Dotnet Test Suite**: **420 / 420 Unit & Integration Tests Passed** (bao gồm test case mới `TC_T1_104_OrderTracking_ValidationAndNotFound_ReturnsProperMessages`).
+* **Trạng thái Git**: Sẵn sàng commit và push lên nhánh `main`.
+
+

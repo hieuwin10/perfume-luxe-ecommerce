@@ -226,6 +226,35 @@ app.UseStaticFiles(new StaticFileOptions
     }
 });
 
+// Chuyen huong 301 Permanent Redirect cac duong dan MVC cu ve Canonical SEO Slugs tieng Viet
+app.Use(async (context, next) =>
+{
+    var path = context.Request.Path.Value?.TrimEnd('/') ?? string.Empty;
+    var redirectMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+    {
+        { "/home/about", "/ve-chung-toi" },
+        { "/home/boutique", "/boutique" },
+        { "/home/returnpolicy", "/chinh-sach-doi-tra" },
+        { "/home/buyingguide", "/huong-dan-mua-hang" },
+        { "/home/privacy", "/privacy" },
+        { "/catalog/discoverybox", "/discovery-box" },
+        { "/catalog/compare", "/so-sanh" },
+        { "/experience/tastingbooking", "/dat-lich-trai-nghiem" },
+        { "/ordertracking", "/tra-cuu-don-hang" },
+        { "/ordertracking/index", "/tra-cuu-don-hang" }
+    };
+
+    if (redirectMap.TryGetValue(path, out var newUrl))
+    {
+        var queryString = context.Request.QueryString.HasValue ? context.Request.QueryString.Value : string.Empty;
+        context.Response.StatusCode = StatusCodes.Status301MovedPermanently;
+        context.Response.Headers.Location = newUrl + queryString;
+        return;
+    }
+
+    await next();
+});
+
 app.UseRouting();
 app.UseResponseCaching();
 app.UseAuthentication();

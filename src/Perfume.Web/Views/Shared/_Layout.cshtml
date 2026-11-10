@@ -187,6 +187,74 @@
         </div>
     </div>
 
+    <!-- Mobile Navigation Drawer & Overlay -->
+    <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
+    <div class="mobile-nav-drawer" id="mobileNavDrawer" aria-label="Menu di động" role="dialog" aria-modal="true">
+        <div class="mobile-nav-header">
+            <div class="brand-logo">
+                <span class="brand-title text-gold-gradient" style="font-size: 1.35rem;">PERFUME LUXE</span>
+                <span class="brand-sub">Haute Parfumerie</span>
+            </div>
+            <button type="button" class="icon-btn" id="closeMobileNavBtn" aria-label="Đóng menu" style="width: 38px; height: 38px;">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="mobile-nav-body">
+            <a href="/" class="mobile-nav-item"><i class="fa-solid fa-house"></i> Trang Chủ</a>
+            <a href="/bo-suu-tap" class="mobile-nav-item"><i class="fa-solid fa-gem"></i> Bộ Sưu Tập</a>
+            <a href="/catalog/quiz" class="mobile-nav-item" style="color: var(--gold-primary); font-weight: 700;"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Trắc Nghiệm Tìm Mùi</a>
+            <a href="/discovery-box" class="mobile-nav-item"><i class="fa-solid fa-gift"></i> Discovery Box</a>
+            <a href="/so-sanh" class="mobile-nav-item"><i class="fa-solid fa-scale-balanced"></i> So Sánh Mùi Hương</a>
+            <a href="/dat-lich-trai-nghiem" class="mobile-nav-item"><i class="fa-solid fa-crown"></i> Thử Mùi VIP Concierge</a>
+            <a href="/tra-cuu-don-hang" class="mobile-nav-item"><i class="fa-solid fa-truck-fast"></i> Tra Cứu Đơn Hàng</a>
+            <a href="/blog" class="mobile-nav-item"><i class="fa-solid fa-book-open"></i> Tạp Chí Mùi Hương</a>
+            
+            <div class="mobile-nav-divider"></div>
+            
+            <a href="/ve-chung-toi" class="mobile-nav-item"><i class="fa-solid fa-circle-info"></i> Về Chúng Tôi</a>
+            <a href="/boutique" class="mobile-nav-item"><i class="fa-solid fa-store"></i> Flagship Boutique</a>
+            <a href="/chinh-sach-doi-tra" class="mobile-nav-item"><i class="fa-solid fa-shield-halved"></i> Chính Sách Đổi Trả</a>
+            <a href="/huong-dan-mua-hang" class="mobile-nav-item"><i class="fa-solid fa-circle-question"></i> Hướng Dẫn Mua Hàng</a>
+        </div>
+        <div class="mobile-nav-footer">
+            <div style="font-size: 0.8rem; color: var(--text-muted); text-align: center;">
+                Hotline CSKH: <strong style="color: var(--gold-primary);">1900 8888</strong> (8:30 - 21:30)
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Search Modal & Overlay -->
+    <div class="search-modal-overlay" id="searchModalOverlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); z-index: 3000; align-items: flex-start; justify-content: center; padding-top: 80px;">
+        <div class="search-modal-card luxury-card" id="searchModal" style="width: 100%; max-width: 600px; margin: 0 20px; padding: 24px; border: 1px solid var(--border-subtle); background: var(--bg-surface); border-radius: var(--radius-md); box-shadow: 0 10px 40px rgba(0,0,0,0.7); position: relative;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-magnifying-glass" style="color: var(--gold-primary);"></i> Tìm Kiếm Nước Hoa
+                </div>
+                <button type="button" class="icon-btn" id="closeSearchModalBtn" aria-label="Đóng tìm kiếm" style="width: 32px; height: 32px;">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <form action="/bo-suu-tap" method="get" id="globalSearchForm">
+                <div style="position: relative; margin-bottom: 16px;">
+                    <input type="search" name="keyword" id="globalSearchInput" placeholder="Tìm theo tên nước hoa, thương hiệu, nốt hương..." 
+                           style="width: 100%; box-sizing: border-box; padding: 14px 44px 14px 16px; background: var(--bg-input, rgba(255,255,255,0.06)); border: 1px solid var(--border-card); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.95rem; outline: none; transition: border-color 0.2s;" />
+                    <button type="submit" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--gold-primary); cursor: pointer; font-size: 1.1rem;">
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </form>
+            <div style="font-size: 0.78rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.05em; margin-bottom: 8px;">Từ Khóa Thịnh Hành</div>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                <a href="/bo-suu-tap?keyword=Chanel" class="btn-tag" style="background: var(--bg-surface-elevated); border: 1px solid var(--border-card); padding: 5px 12px; border-radius: 99px; font-size: 0.8rem; color: var(--text-secondary);">Chanel</a>
+                <a href="/bo-suu-tap?keyword=Dior" class="btn-tag" style="background: var(--bg-surface-elevated); border: 1px solid var(--border-card); padding: 5px 12px; border-radius: 99px; font-size: 0.8rem; color: var(--text-secondary);">Dior</a>
+                <a href="/bo-suu-tap?keyword=Aventus" class="btn-tag" style="background: var(--bg-surface-elevated); border: 1px solid var(--border-card); padding: 5px 12px; border-radius: 99px; font-size: 0.8rem; color: var(--text-secondary);">Creed Aventus</a>
+                <a href="/bo-suu-tap?keyword=Santal+33" class="btn-tag" style="background: var(--bg-surface-elevated); border: 1px solid var(--border-card); padding: 5px 12px; border-radius: 99px; font-size: 0.8rem; color: var(--text-secondary);">Santal 33</a>
+                <a href="/bo-suu-tap?keyword=Tom+Ford" class="btn-tag" style="background: var(--bg-surface-elevated); border: 1px solid var(--border-card); padding: 5px 12px; border-radius: 99px; font-size: 0.8rem; color: var(--text-secondary);">Tom Ford</a>
+                <a href="/bo-suu-tap?keyword=Gỗ" class="btn-tag" style="background: var(--bg-surface-elevated); border: 1px solid var(--border-card); padding: 5px 12px; border-radius: 99px; font-size: 0.8rem; color: var(--gold-primary);">Hương Gỗ</a>
+            </div>
+        </div>
+    </div>
+
     <!-- Main Content -->
     <main role="main">
         @RenderBody()
@@ -287,14 +355,13 @@
                 const cart = res && res.data ? res.data : res;
                 const totalCount = cart?.totalCount ?? cart?.totalItems ?? (cart?.items ? cart.items.length : 0);
 
-                const badge = document.getElementById('headerCartCount');
-                if (badge) badge.textContent = totalCount;
-
-                const mobileBadge = document.getElementById('mobileBottomCartBadge');
-                if (mobileBadge) {
-                    mobileBadge.textContent = totalCount;
-                    mobileBadge.style.display = totalCount > 0 ? 'flex' : 'none';
-                }
+                const badges = document.querySelectorAll('.cart-count, .badge-count, #headerCartCount, #mobileBottomCartBadge, .cart-count-badge');
+                badges.forEach(b => {
+                    b.textContent = totalCount;
+                    if (b.id === 'mobileBottomCartBadge') {
+                        b.style.display = totalCount > 0 ? 'flex' : 'none';
+                    }
+                });
 
                 const subtotalEl = document.getElementById('cartDrawerSubtotal');
                 if (subtotalEl) {
@@ -422,10 +489,40 @@
         if (closeMobileNavBtn) closeMobileNavBtn.addEventListener('click', closeMobileNav);
         if (mobileNavOverlay) mobileNavOverlay.addEventListener('click', closeMobileNav);
 
+        // Quick Search Modal Handlers
+        const openSearchBtn = document.getElementById('openSearchBtn');
+        const searchModalOverlay = document.getElementById('searchModalOverlay');
+        const closeSearchModalBtn = document.getElementById('closeSearchModalBtn');
+        const globalSearchInput = document.getElementById('globalSearchInput');
+
+        function openSearch() {
+            if (searchModalOverlay) {
+                searchModalOverlay.style.display = 'flex';
+                setTimeout(() => globalSearchInput?.focus(), 100);
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeSearch() {
+            if (searchModalOverlay) {
+                searchModalOverlay.style.display = 'none';
+                document.body.style.overflow = '';
+            }
+        }
+
+        if (openSearchBtn) openSearchBtn.addEventListener('click', openSearch);
+        if (closeSearchModalBtn) closeSearchModalBtn.addEventListener('click', closeSearch);
+        if (searchModalOverlay) {
+            searchModalOverlay.addEventListener('click', (e) => {
+                if (e.target === searchModalOverlay) closeSearch();
+            });
+        }
+
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 closeMobileNav();
                 closeCart();
+                closeSearch();
             }
         });
 

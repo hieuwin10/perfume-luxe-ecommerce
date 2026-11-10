@@ -458,8 +458,12 @@
             <!-- Featured Image -->
             @if (!string.IsNullOrEmpty(Model.ThumbnailUrl))
             {
+                var thumb = Model.ThumbnailUrl?.Contains("photo-1592945403244") == true ? "/images/blogs/niche-trends-2026.webp"
+                    : Model.ThumbnailUrl?.Contains("photo-1615397349754") == true ? "/images/blogs/sustainable-perfume.webp"
+                    : Model.ThumbnailUrl?.Contains("photo-1523293182086") == true ? "/images/blogs/summer-fresh-unisex.webp"
+                    : Model.ThumbnailUrl;
                 <div class="blog-featured-image-wrap">
-                    <img src="@Model.ThumbnailUrl" alt="@Model.Title" width="900" height="480" fetchpriority="high" />
+                    <img src="@thumb" onerror="if (!this.dataset.errored) { this.dataset.errored='true'; this.src='/images/hero/hero-desktop.webp'; }" alt="@Model.Title" width="900" height="480" fetchpriority="high" />
                 </div>
             }
 

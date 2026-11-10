@@ -17,6 +17,7 @@ public class ExperienceController : Controller
     [HttpGet]
     [Route("dat-lich-trai-nghiem")]
     [Route("private-tasting")]
+    [Route("experience/tastingbooking")]
     public async Task<IActionResult> TastingBooking()
     {
         ViewBag.Families = await _db.FragranceFamilies

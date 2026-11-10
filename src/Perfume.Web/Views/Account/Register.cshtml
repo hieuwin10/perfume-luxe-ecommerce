@@ -28,10 +28,11 @@
                     <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; letter-spacing: 0.05em; text-transform: uppercase;">Họ Và Tên</label>
                     <div style="position: relative;">
                         <i class="fa-solid fa-user" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.9rem;"></i>
-                        <input type="text" name="fullName" placeholder="Nguyễn Văn A" required
+                        <input type="text" name="fullName" id="regFullName" placeholder="Nguyễn Văn A" required
                                style="width: 100%; padding: 13px 14px 13px 40px; background: var(--bg-input, rgba(255,255,255,0.06)); border: 1px solid var(--border-card); border-radius: 10px; color: var(--text-primary); font-size: 0.95rem; outline: none; box-sizing: border-box; transition: border-color 0.2s;"
                                onfocus="this.style.borderColor='var(--gold-primary)'" onblur="this.style.borderColor='var(--border-card)'" />
                     </div>
+                    <span class="field-validation-error text-danger" id="nameValError" style="display: none; color: #f87171; font-size: 0.8rem; margin-top: 6px;">Vui lòng nhập họ và tên của bạn.</span>
                 </div>
 
                 <!-- Email -->
@@ -39,10 +40,11 @@
                     <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; letter-spacing: 0.05em; text-transform: uppercase;">Email</label>
                     <div style="position: relative;">
                         <i class="fa-solid fa-envelope" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.9rem;"></i>
-                        <input type="email" name="email" placeholder="example@email.com" required
+                        <input type="email" name="email" id="regEmail" placeholder="example@email.com" required
                                style="width: 100%; padding: 13px 14px 13px 40px; background: var(--bg-input, rgba(255,255,255,0.06)); border: 1px solid var(--border-card); border-radius: 10px; color: var(--text-primary); font-size: 0.95rem; outline: none; box-sizing: border-box; transition: border-color 0.2s;"
                                onfocus="this.style.borderColor='var(--gold-primary)'" onblur="this.style.borderColor='var(--border-card)'" />
                     </div>
+                    <span class="field-validation-error text-danger" id="emailValError" style="display: none; color: #f87171; font-size: 0.8rem; margin-top: 6px;">Vui lòng nhập địa chỉ email hợp lệ.</span>
                 </div>
 
                 <!-- Password -->
@@ -57,6 +59,7 @@
                             <i id="eyeReg1" class="fa-solid fa-eye-slash"></i>
                         </button>
                     </div>
+                    <span class="field-validation-error text-danger" id="passValError" style="display: none; color: #f87171; font-size: 0.8rem; margin-top: 6px;">Mật khẩu tối thiểu 10 ký tự, bao gồm chữ hoa, thường, số và ký tự đặc biệt.</span>
                 </div>
 
                 <!-- Confirm Password -->
@@ -71,6 +74,7 @@
                             <i id="eyeReg2" class="fa-solid fa-eye-slash"></i>
                         </button>
                     </div>
+                    <span class="field-validation-error text-danger" id="confirmValError" style="display: none; color: #f87171; font-size: 0.8rem; margin-top: 6px;">Mật khẩu xác nhận không khớp với mật khẩu đã nhập.</span>
                 </div>
 
                 <button type="submit" class="btn-luxe" style="width: 100%; padding: 14px; font-size: 1rem; font-weight: 700; letter-spacing: 0.05em;">
@@ -124,11 +128,69 @@
         }
     }
 
+    const regFullName = document.getElementById('regFullName');
+    const regEmail = document.getElementById('regEmail');
+    const regPassword = document.getElementById('regPassword');
+    const regConfirmPassword = document.getElementById('regConfirmPassword');
+
+    const nameValError = document.getElementById('nameValError');
+    const emailValError = document.getElementById('emailValError');
+    const passValError = document.getElementById('passValError');
+    const confirmValError = document.getElementById('confirmValError');
+
+    regFullName?.addEventListener('input', () => {
+        nameValError.style.display = 'none';
+        regFullName.style.borderColor = 'var(--border-card)';
+    });
+    regEmail?.addEventListener('input', () => {
+        emailValError.style.display = 'none';
+        regEmail.style.borderColor = 'var(--border-card)';
+    });
+    regPassword?.addEventListener('input', () => {
+        passValError.style.display = 'none';
+        regPassword.style.borderColor = 'var(--border-card)';
+    });
+    regConfirmPassword?.addEventListener('input', () => {
+        confirmValError.style.display = 'none';
+        regConfirmPassword.style.borderColor = 'var(--border-card)';
+    });
+
     document.getElementById('customerRegisterForm')?.addEventListener('submit', async event => {
         event.preventDefault();
         const form = event.currentTarget;
         const button = form.querySelector('button[type="submit"]');
         const error = document.getElementById('registerError');
+
+        let isValid = true;
+        if (!regFullName.value.trim()) {
+            nameValError.style.display = 'block';
+            regFullName.style.borderColor = '#f87171';
+            isValid = false;
+        }
+
+        const emailVal = regEmail.value.trim();
+        if (!emailVal || !emailVal.includes('@@') || !emailVal.includes('.')) {
+            emailValError.style.display = 'block';
+            regEmail.style.borderColor = '#f87171';
+            isValid = false;
+        }
+
+        const passVal = regPassword.value;
+        if (!passVal || passVal.length < 10) {
+            passValError.style.display = 'block';
+            regPassword.style.borderColor = '#f87171';
+            isValid = false;
+        }
+
+        const confirmVal = regConfirmPassword.value;
+        if (!confirmVal || confirmVal !== passVal) {
+            confirmValError.style.display = 'block';
+            regConfirmPassword.style.borderColor = '#f87171';
+            isValid = false;
+        }
+
+        if (!isValid) return;
+
         const fields = new FormData(form);
         error.hidden = true;
         button.disabled = true;
@@ -139,7 +201,7 @@
             });
             window.location.assign(result.redirectUrl || '/account/profile');
         } catch (failure) {
-            error.textContent = failure.message || 'Chưa tạo được tài khoản.';
+            error.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> ${failure.message || 'Chưa tạo được tài khoản.'}`;
             error.hidden = false;
         } finally { button.disabled = false; }
     });

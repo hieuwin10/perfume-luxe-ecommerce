@@ -150,6 +150,7 @@ public class CatalogController : Controller
     [HttpGet]
     [Route("discovery-box")]
     [Route("hop-kham-pha")]
+    [Route("catalog/discoverybox")]
     public async Task<IActionResult> DiscoveryBox()
     {
         var availablePerfumes = await _db.Products

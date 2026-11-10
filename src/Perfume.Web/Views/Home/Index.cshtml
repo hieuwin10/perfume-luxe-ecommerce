@@ -39,6 +39,17 @@
         return optimizedUri.Uri.ToString();
     }
 
+    string GetBlogThumbnail(BlogPost b)
+    {
+        if (b.Slug == "xu-huong-nuoc-hoa-niche-2026" || (b.ThumbnailUrl != null && b.ThumbnailUrl.Contains("photo-1592945403244")))
+            return "/images/blogs/niche-trends-2026.webp";
+        if (b.Slug == "nuoc-hoa-ben-vung-2026" || (b.ThumbnailUrl != null && b.ThumbnailUrl.Contains("photo-1615397349754")))
+            return "/images/blogs/sustainable-perfume.webp";
+        if (b.Slug == "nuoc-hoa-unisex-cho-mua-he-2026" || (b.ThumbnailUrl != null && b.ThumbnailUrl.Contains("photo-1523293182086")))
+            return "/images/blogs/summer-fresh-unisex.webp";
+        return b.ThumbnailUrl ?? "/images/blogs/niche-trends-2026.webp";
+    }
+
     var rawHeroUrl = heroBanners.FirstOrDefault()?.ImageUrl;
     ViewData["LcpImage"] = OptimizeHeroImageUrl(rawHeroUrl, 1080);
     ViewData["LcpImageMobile"] = OptimizeHeroImageUrl(rawHeroUrl, 640);
@@ -328,7 +339,7 @@
             {
                 <div style="background: var(--bg-surface); border: 1px solid var(--border-card); border-radius: var(--radius-md); overflow: hidden; display: flex; flex-direction: column;">
                     <a href="/blog/@b.Slug" style="display: block; width: 100%; height: 220px; overflow: hidden;" aria-label="Xem chi tiết bài viết: @b.Title">
-                        <img src="@(b.ThumbnailUrl ?? "https://images.unsplash.com/photo-1547887537-6158d64c35b3?auto=format&fit=crop&w=600&q=75")" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease;" alt="@b.Title" loading="lazy" decoding="async" width="400" height="220" />
+                        <img src="@GetBlogThumbnail(b)" onerror="if (!this.dataset.errored) { this.dataset.errored='true'; this.src='/images/hero/hero-desktop.webp'; }" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease;" alt="@b.Title" loading="lazy" decoding="async" width="400" height="220" />
                     </a>
                     <div style="padding: 24px; display: flex; flex-direction: column; flex-grow: 1;">
                         <span style="font-size: 0.75rem; color: var(--gold-primary); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;">@(b.Category?.Name ?? "Kiến Thức")</span>

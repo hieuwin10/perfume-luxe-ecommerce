@@ -73,6 +73,7 @@ public class HomeController : Controller
 
     [HttpGet]
     [Route("ve-chung-toi")]
+    [Route("home/about")]
     public IActionResult About()
     {
         return View();
@@ -80,6 +81,7 @@ public class HomeController : Controller
 
     [HttpGet]
     [Route("boutique")]
+    [Route("home/boutique")]
     public IActionResult Boutique()
     {
         return View();
@@ -87,6 +89,7 @@ public class HomeController : Controller
 
     [HttpGet]
     [Route("chinh-sach-doi-tra")]
+    [Route("home/returnpolicy")]
     public IActionResult ReturnPolicy()
     {
         return View();
@@ -94,6 +97,7 @@ public class HomeController : Controller
 
     [HttpGet]
     [Route("huong-dan-mua-hang")]
+    [Route("home/buyingguide")]
     public IActionResult BuyingGuide()
     {
         return View();
@@ -101,6 +105,7 @@ public class HomeController : Controller
 
     [HttpGet]
     [Route("privacy")]
+    [Route("home/privacy")]
     public IActionResult Privacy()
     {
         return View();

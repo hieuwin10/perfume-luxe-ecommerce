@@ -28,6 +28,8 @@ public class OrderTrackingController : Controller
     [HttpGet]
     [Route("tra-cuu-don-hang")]
     [Route("order-tracking")]
+    [Route("OrderTracking")]
+    [Route("OrderTracking/Index")]
     public async Task<IActionResult> Index(string? orderCode, string? phone)
     {
         var model = new OrderTrackingViewModel
@@ -64,14 +66,24 @@ public class OrderTrackingController : Controller
                 else
                 {
                     model.HasSearched = true;
-                    model.ErrorMessage = "Số điện thoại nhận hàng không khớp với mã đơn hàng đã nhập.";
+                    model.ErrorMessage = "Số điện thoại nhận hàng không khớp với mã đơn hàng đã nhập. Quý khách vui lòng kiểm tra lại.";
                 }
             }
             else
             {
                 model.HasSearched = true;
-                model.ErrorMessage = "Không tìm thấy đơn hàng với mã \"" + model.OrderCode + "\". Vui lòng kiểm tra lại tin nhắn hoặc email đặt hàng.";
+                model.ErrorMessage = $"Không tìm thấy đơn hàng với mã \"{model.OrderCode}\". Vui lòng kiểm tra lại tin nhắn hoặc email đặt hàng.";
             }
+        }
+        else if (!string.IsNullOrWhiteSpace(model.OrderCode) && string.IsNullOrWhiteSpace(model.Phone))
+        {
+            model.HasSearched = true;
+            model.ErrorMessage = "Vui lòng nhập thêm Số điện thoại nhận hàng để bảo mật và xác thực đơn hàng.";
+        }
+        else if (string.IsNullOrWhiteSpace(model.OrderCode) && !string.IsNullOrWhiteSpace(model.Phone))
+        {
+            model.HasSearched = true;
+            model.ErrorMessage = "Vui lòng nhập Mã đơn hàng cần tra cứu (ví dụ: LUXE-20261011-9A3F).";
         }
 
         return View(model);

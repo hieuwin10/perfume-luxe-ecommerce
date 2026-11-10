@@ -61,7 +61,7 @@ BEGIN
     <a href=""/bo-suu-tap"" class=""btn-luxe"" style=""display: inline-block; padding: 10px 24px;"">Xem Bộ Sưu Tập Niche 2026</a>
 </div>
 </div>',
-        'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=800&q=80',
+        '/images/blogs/niche-trends-2026.webp',
         N'Chuyên Gia Mùi Hương PERFUME LUXE',
         520,
         1,
@@ -93,7 +93,7 @@ BEGIN
 <h2>Sự Chuyển Mình Của Các Thương Hiệu Xa Xỉ</h2>
 <p>Tại Perfume Luxe, chúng tôi chọn lọc kỹ lưỡng những thương hiệu cam kết trung hòa carbon và bảo vệ sinh thái rừng già. Sự tinh tế nằm ở chỗ mùi hương vẫn giữ trọn vẹn độ sâu thẳm, vương vấn đến 12 giờ mà hoàn toàn không ảnh hưởng đến môi trường.</p>
 </div>',
-        'https://images.unsplash.com/photo-1615397349754-cfa2066a298e?auto=format&fit=crop&w=800&q=80',
+        '/images/blogs/sustainable-perfume.webp',
         N'Chuyên Gia Mùi Hương PERFUME LUXE',
         380,
         1,
@@ -126,7 +126,7 @@ BEGIN
     <a href=""/bo-suu-tap"" class=""btn-luxe"">Khám Phá Bộ Sưu Tập Mùa Hè</a>
 </div>
 </div>',
-        'https://images.unsplash.com/photo-1523293182086-7651a899d37f?auto=format&fit=crop&w=800&q=80',
+        '/images/blogs/summer-fresh-unisex.webp',
         N'Chuyên Gia Mùi Hương PERFUME LUXE',
         490,
         1,
@@ -396,6 +396,10 @@ BEGIN
         0
     );
 END;
+
+UPDATE BlogPosts SET ThumbnailUrl = '/images/blogs/niche-trends-2026.webp' WHERE Slug = 'xu-huong-nuoc-hoa-niche-2026' OR ThumbnailUrl LIKE '%photo-1592945403244%';
+UPDATE BlogPosts SET ThumbnailUrl = '/images/blogs/sustainable-perfume.webp' WHERE Slug = 'nuoc-hoa-ben-vung-2026' OR ThumbnailUrl LIKE '%photo-1615397349754%';
+UPDATE BlogPosts SET ThumbnailUrl = '/images/blogs/summer-fresh-unisex.webp' WHERE Slug = 'nuoc-hoa-unisex-cho-mua-he-2026' OR ThumbnailUrl LIKE '%photo-1523293182086%';
 
 INSERT INTO dbo.__PerfumeSchemaVersions(Version) VALUES (@version);";
 }

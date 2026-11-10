@@ -201,4 +201,32 @@ public sealed class StorefrontPagesAndSeoTests : TestFixtures
         });
         Assert.IsType<OkObjectResult>(backInStockRes);
     }
+
+    [Fact]
+    public async Task TC_T1_104_OrderTracking_ValidationAndNotFound_ReturnsProperMessages()
+    {
+        using var db = CreateDb();
+        var controller = new OrderTrackingController(db);
+
+        // 1. Missing phone
+        var viewMissingPhone = await controller.Index("LUXE-20261011-9A3F", null) as ViewResult;
+        Assert.NotNull(viewMissingPhone);
+        var modelMissingPhone = Assert.IsType<OrderTrackingViewModel>(viewMissingPhone.Model);
+        Assert.True(modelMissingPhone.HasSearched);
+        Assert.Contains("Số điện thoại", modelMissingPhone.ErrorMessage);
+
+        // 2. Missing code
+        var viewMissingCode = await controller.Index(null, "0901234567") as ViewResult;
+        Assert.NotNull(viewMissingCode);
+        var modelMissingCode = Assert.IsType<OrderTrackingViewModel>(viewMissingCode.Model);
+        Assert.True(modelMissingCode.HasSearched);
+        Assert.Contains("Mã đơn hàng", modelMissingCode.ErrorMessage);
+
+        // 3. Non-existent order
+        var viewNotFound = await controller.Index("ORD-9999999", "0901234567") as ViewResult;
+        Assert.NotNull(viewNotFound);
+        var modelNotFound = Assert.IsType<OrderTrackingViewModel>(viewNotFound.Model);
+        Assert.True(modelNotFound.HasSearched);
+        Assert.Contains("Không tìm thấy đơn hàng", modelNotFound.ErrorMessage);
+    }
 }
