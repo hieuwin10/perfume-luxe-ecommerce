@@ -6,6 +6,15 @@
     var adminDocTitle = rawTitle.EndsWith("PERFUME LUXE", StringComparison.OrdinalIgnoreCase)
         ? rawTitle
         : $"{rawTitle} | PERFUME LUXE";
+
+    var currentPath = (Context.Request.Path.Value ?? "").TrimEnd('/').ToLowerInvariant();
+    string IsActive(string path, bool exact = false)
+    {
+        var target = path.TrimEnd('/').ToLowerInvariant();
+        if (string.IsNullOrEmpty(currentPath) && string.IsNullOrEmpty(target)) return "active";
+        if (exact) return currentPath == target ? "active" : "";
+        return (currentPath == target || currentPath.StartsWith(target + "/")) ? "active" : "";
+    }
 }
 <!DOCTYPE html>
 <html lang="vi" data-theme="dark">
@@ -18,152 +27,234 @@
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body class="dark-theme">
-    <!-- Admin Console Navigation -->
-    <header style="background: #111116; border-bottom: 1px solid rgba(212, 175, 55, 0.2); padding: 10px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1000; flex-wrap: wrap; gap: 12px;">
-        <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
-            <button type="button" class="admin-nav-toggle-btn" id="adminNavToggleBtn" aria-label="Mở menu quản trị">
-                <i class="fa-solid fa-bars"></i> Menu Quản Trị
-            </button>
+    <div class="admin-shell" id="adminShell">
+        <!-- Backdrop for mobile drawer -->
+        <div class="admin-sidebar-backdrop" id="adminSidebarBackdrop"></div>
 
-            <a href="@(User.IsInRole("Admin") ? "/admin/admindashboard" : "/admin/storemanager")" style="display: flex; align-items: center; gap: 10px; text-decoration: none;">
-                <div style="width: 34px; height: 34px; border-radius: 6px; background: var(--gold-gradient); display: flex; align-items: center; justify-content: center; color: #000; font-weight: 800; font-size: 1.1rem;">
-                    <i class="fa-solid fa-crown"></i>
-                </div>
-                <div>
-                    <span style="font-weight: 700; letter-spacing: 0.05em; font-size: 1.05rem; color: #FFF;">PERFUME LUXE ADMIN</span>
-                    <span style="font-size: 0.7rem; color: var(--gold-primary); display: block; line-height: 1;">Enterprise Management Suite</span>
-                </div>
-            </a>
+        <!-- Left Vertical Sidebar (Option B) -->
+        <aside class="admin-sidebar" id="adminSidebar">
+            <!-- Brand Header -->
+            <div class="admin-sidebar-header">
+                <a href="@(User.IsInRole("Admin") ? "/admin/admindashboard" : "/admin/storemanager")" class="admin-brand-link">
+                    <div class="admin-brand-logo-icon">
+                        <i class="fa-solid fa-crown"></i>
+                    </div>
+                    <div class="admin-brand-text">
+                        <span class="admin-brand-title">PERFUME LUXE</span>
+                        <span class="admin-brand-subtitle">Enterprise Suite</span>
+                    </div>
+                </a>
+                <button type="button" class="icon-btn d-desktop-none" id="closeSidebarDrawerBtn" style="width: 32px; height: 32px; color: var(--text-muted);" aria-label="Đóng menu">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
 
-            <nav class="admin-header-nav" id="adminHeaderNav">
+            <!-- Scrollable Nav Groups -->
+            <nav class="admin-sidebar-nav">
+                <!-- Group 1: VẬN HÀNH & KINH DOANH -->
+                <div class="admin-nav-group-title">Vận Hành &amp; Kinh Doanh</div>
                 @if (User.IsInRole("Admin"))
                 {
-                    <a href="/admin/admindashboard" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
-                        <i class="fa-solid fa-gauge-high" style="margin-right: 4px;"></i> Tổng Quan
+                    <a href="/admin/admindashboard" class="admin-nav-link @IsActive("/admin/admindashboard", exact: true)">
+                        <i class="fa-solid fa-gauge-high"></i>
+                        <span>Tổng Quan</span>
                     </a>
                 }
-                <a href="/admin/storemanager" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
-                    <i class="fa-solid fa-chart-line" style="margin-right: 4px;"></i> Thống Kê
+                <a href="/admin/storemanager" class="admin-nav-link @IsActive("/admin/storemanager", exact: true)">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>Thống Kê Vận Hành</span>
                 </a>
-                <a href="/admin/admindashboard/financialreport" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; color: var(--gold-primary);">
-                    <i class="fa-solid fa-coins" style="margin-right: 4px;"></i> Tài Chính P&amp;L
+                <a href="/admin/admindashboard/financialreport" class="admin-nav-link @IsActive("/admin/admindashboard/financialreport")">
+                    <i class="fa-solid fa-coins"></i>
+                    <span>Tài Chính P&amp;L</span>
+                    <span class="admin-nav-badge admin-nav-badge-gold">PRO</span>
                 </a>
-                <a href="/admin/admindashboard/products" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
-                    <i class="fa-solid fa-bottle-droplet" style="margin-right: 4px;"></i> Sản Phẩm
+                <a href="/admin/admindashboard/orders" class="admin-nav-link @IsActive("/admin/admindashboard/orders")">
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                    <span>Quản Lý Đơn Hàng</span>
                 </a>
-                <a href="/admin/catalogmanager/brands" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
-                    <i class="fa-solid fa-copyright" style="margin-right: 4px;"></i> Thương Hiệu
+                <a href="/admin/admindashboard/tastings" class="admin-nav-link @IsActive("/admin/admindashboard/tastings")">
+                    <i class="fa-solid fa-calendar-check"></i>
+                    <span>Lịch Hẹn VIP Tasting</span>
                 </a>
-                <a href="/admin/catalogmanager/fragrancefamilies" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
-                    <i class="fa-solid fa-palette" style="margin-right: 4px;"></i> Nhóm Hương
+
+                <!-- Group 2: DANH MỤC & KHO HÀNG -->
+                <div class="admin-nav-group-title">Danh Mục &amp; Kho Hàng</div>
+                <a href="/admin/admindashboard/products" class="admin-nav-link @IsActive("/admin/admindashboard/products")">
+                    <i class="fa-solid fa-bottle-droplet"></i>
+                    <span>Sản Phẩm Nước Hoa</span>
                 </a>
-                <a href="/admin/catalogmanager/fragrancenotes" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
-                    <i class="fa-solid fa-leaf" style="margin-right: 4px;"></i> Nốt Hương
+                <a href="/admin/admindashboard/inventory" class="admin-nav-link @IsActive("/admin/admindashboard/inventory")">
+                    <i class="fa-solid fa-warehouse"></i>
+                    <span>Quản Lý Tồn Kho</span>
                 </a>
-                <a href="/admin/admindashboard/inventory" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
-                    <i class="fa-solid fa-warehouse" style="margin-right: 4px;"></i> Tồn Kho
+                <a href="/admin/catalogmanager/brands" class="admin-nav-link @IsActive("/admin/catalogmanager/brands")">
+                    <i class="fa-solid fa-copyright"></i>
+                    <span>Thương Hiệu (Brands)</span>
                 </a>
-                <a href="/admin/admindashboard/banners" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
-                    <i class="fa-solid fa-images" style="margin-right: 4px;"></i> Banners
+                <a href="/admin/catalogmanager/fragrancefamilies" class="admin-nav-link @IsActive("/admin/catalogmanager/fragrancefamilies")">
+                    <i class="fa-solid fa-palette"></i>
+                    <span>Nhóm Hương Fragrance</span>
                 </a>
-                <a href="/admin/admindashboard/orders" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
-                    <i class="fa-solid fa-boxes-stacked" style="margin-right: 4px;"></i> Đơn Hàng
+                <a href="/admin/catalogmanager/fragrancenotes" class="admin-nav-link @IsActive("/admin/catalogmanager/fragrancenotes")">
+                    <i class="fa-solid fa-leaf"></i>
+                    <span>Nốt Hương Tinh Dầu</span>
                 </a>
-                <a href="/admin/admindashboard/flashsales" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; color: #f59e0b;">
-                    <i class="fa-solid fa-bolt" style="margin-right: 4px;"></i> Flash Sale
+
+                <!-- Group 3: MARKETING & CHĂM SÓC KHÁCH -->
+                <div class="admin-nav-group-title">Marketing &amp; Khách Hàng</div>
+                <a href="/admin/admindashboard/flashsales" class="admin-nav-link @IsActive("/admin/admindashboard/flashsales")">
+                    <i class="fa-solid fa-bolt" style="color: #f59e0b;"></i>
+                    <span>Chiến Dịch Flash Sale</span>
                 </a>
-                <a href="/admin/admindashboard/tastings" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
-                    <i class="fa-solid fa-crown" style="margin-right: 4px; color: var(--gold-primary);"></i> Lịch Hẹn VIP
+                <a href="/admin/storemanager/vouchers" class="admin-nav-link @IsActive("/admin/storemanager/vouchers")">
+                    <i class="fa-solid fa-ticket"></i>
+                    <span>Voucher &amp; Mã Giảm Giá</span>
+                </a>
+                <a href="/admin/admindashboard/banners" class="admin-nav-link @IsActive("/admin/admindashboard/banners")">
+                    <i class="fa-solid fa-images"></i>
+                    <span>Hero Banners Trang Chủ</span>
+                </a>
+                <a href="/admin/storemanager/reviews" class="admin-nav-link @IsActive("/admin/storemanager/reviews")">
+                    <i class="fa-solid fa-star" style="color: #fbbf24;"></i>
+                    <span>Kiểm Duyệt Đánh Giá</span>
+                </a>
+                <a href="/admin/admindashboard/blogs" class="admin-nav-link @IsActive("/admin/admindashboard/blogs")">
+                    <i class="fa-solid fa-feather-pointed"></i>
+                    <span>Tạp Chí &amp; Bài Viết</span>
                 </a>
                 @if (User.IsInRole("Admin"))
                 {
-                    <a href="/admin/admindashboard/users" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
-                        <i class="fa-solid fa-users-gear" style="margin-right: 4px;"></i> Phân Quyền
+                    <a href="/admin/admindashboard/users" class="admin-nav-link @IsActive("/admin/admindashboard/users")">
+                        <i class="fa-solid fa-users-gear"></i>
+                        <span>Phân Quyền RBAC</span>
                     </a>
                 }
-                <a href="/admin/storemanager/vouchers" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
-                    <i class="fa-solid fa-ticket" style="margin-right: 4px;"></i> Voucher
-                </a>
-                <a href="/admin/storemanager/reviews" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
-                    <i class="fa-solid fa-star" style="margin-right: 4px;"></i> Đánh Giá
-                </a>
-                <a href="/admin/admindashboard/blogs" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
-                    <i class="fa-solid fa-feather-pointed" style="margin-right: 4px; color: var(--gold-primary);"></i> Tạp Chí / Blog
-                </a>
+
+                <!-- Group 4: HỆ THỐNG & KỸ THUẬT -->
                 @if (User.IsInRole("Admin"))
                 {
-                    <a href="/admin/admindashboard/systemhealth" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; color: #10b981; font-weight: 600;">
-                        <i class="fa-solid fa-heart-pulse" style="margin-right: 4px;"></i> Sức Khỏe HT
+                    <div class="admin-nav-group-title">Hệ Thống &amp; Kỹ Thuật</div>
+                    <a href="/admin/admindashboard/systemhealth" class="admin-nav-link @IsActive("/admin/admindashboard/systemhealth")">
+                        <i class="fa-solid fa-heart-pulse" style="color: #10b981;"></i>
+                        <span>Sức Khỏe Nền Tảng</span>
                     </a>
-                    <a href="/admin/admindashboard/errorlogs" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; color: #ef4444; font-weight: 600;">
-                        <i class="fa-solid fa-triangle-exclamation" style="margin-right: 4px;"></i> Error Logs
+                    <a href="/admin/admindashboard/errorlogs" class="admin-nav-link @IsActive("/admin/admindashboard/errorlogs")">
+                        <i class="fa-solid fa-triangle-exclamation" style="color: #ef4444;"></i>
+                        <span>Nhật Ký Lỗi (500)</span>
                     </a>
-                    <a href="/admin/admindashboard/auditlogs" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
-                        <i class="fa-solid fa-clipboard-check" style="margin-right: 4px;"></i> Audit Logs
+                    <a href="/admin/admindashboard/auditlogs" class="admin-nav-link @IsActive("/admin/admindashboard/auditlogs")">
+                        <i class="fa-solid fa-clipboard-check"></i>
+                        <span>Audit Logs Bảo Mật</span>
                     </a>
-                    <a href="/admin/admindashboard/databasebackup" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
-                        <i class="fa-solid fa-cloud-arrow-up" style="margin-right: 4px;"></i> Sao Lưu DB
+                    <a href="/admin/admindashboard/databasebackup" class="admin-nav-link @IsActive("/admin/admindashboard/databasebackup")">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                        <span>Sao Lưu CSDL</span>
                     </a>
-                    <a href="/admin/admindashboard/erd" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; color: var(--gold-primary);">
-                        <i class="fa-solid fa-diagram-project" style="margin-right: 4px;"></i> Sơ Đồ ERD
+                    <a href="/admin/admindashboard/erd" class="admin-nav-link @IsActive("/admin/admindashboard/erd")">
+                        <i class="fa-solid fa-diagram-project"></i>
+                        <span>Sơ Đồ ERD Database</span>
                     </a>
-                    <a href="/admin/admindashboard/settings" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
-                        <i class="fa-solid fa-gear" style="margin-right: 4px;"></i> Cài Đặt
+                    <a href="/admin/admindashboard/settings" class="admin-nav-link @IsActive("/admin/admindashboard/settings")">
+                        <i class="fa-solid fa-gear"></i>
+                        <span>Cài Đặt Cửa Hàng</span>
                     </a>
-                    <a href="/admin/databaseconsole" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.25);">
-                        <i class="fa-solid fa-database" style="margin-right: 4px;"></i> DB Console
+                    <a href="/admin/databaseconsole" class="admin-nav-link @IsActive("/admin/databaseconsole")">
+                        <i class="fa-solid fa-database"></i>
+                        <span>AWS DB Console</span>
                     </a>
                 }
-                <a href="/swagger" target="_blank" rel="noopener noreferrer" class="nav-link" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; background: rgba(42,157,143,0.12); border: 1px solid rgba(42,157,143,0.35); color: #2dd4bf; font-weight: 600;">
-                    <i class="fa-solid fa-code" style="margin-right: 4px;"></i> API Swagger
+                <div class="admin-nav-group-title">Nhà Phát Triển</div>
+                <a href="/swagger" target="_blank" rel="noopener noreferrer" class="admin-nav-link">
+                    <i class="fa-solid fa-code" style="color: #2dd4bf;"></i>
+                    <span>Swagger API Docs</span>
+                    <span class="admin-nav-badge admin-nav-badge-teal">API</span>
                 </a>
             </nav>
-        </div>
 
-        <div style="display: flex; align-items: center; gap: 14px;">
+            <!-- Sidebar User Profile Footer -->
             @if (SignInManager.IsSignedIn(User))
             {
                 var currentUser = await UserManager.GetUserAsync(User);
-                <div style="display: flex; align-items: center; gap: 8px; font-size: 0.82rem;">
-                    <span style="color: var(--text-secondary);">@currentUser?.FullName</span>
-                    @if (User.IsInRole("Admin")) { <span class="role-badge-admin">Admin</span> }
-                    else if (User.IsInRole("StoreManager")) { <span class="role-badge-manager">Cửa Hàng Trưởng</span> }
+                <div class="admin-sidebar-footer">
+                    <div style="display: flex; align-items: center; gap: 10px; overflow: hidden;">
+                        <div style="width: 32px; height: 32px; min-width: 32px; border-radius: 50%; background: var(--gold-gradient); color: #000; font-weight: 800; font-size: 0.82rem; display: flex; align-items: center; justify-content: center;">
+                            @(currentUser?.FullName?.Substring(0, 1).ToUpper() ?? "A")
+                        </div>
+                        <div class="admin-user-info-text" style="overflow: hidden; white-space: nowrap;">
+                            <div style="font-weight: 700; font-size: 0.82rem; color: var(--text-primary); text-overflow: ellipsis; overflow: hidden;">@currentUser?.FullName</div>
+                            <div style="font-size: 0.7rem; color: var(--gold-primary);">
+                                @(User.IsInRole("Admin") ? "Quản Trị Viên" : "Cửa Hàng Trưởng")
+                            </div>
+                        </div>
+                    </div>
+
+                    <form method="post" action="/account/logout" onsubmit="return confirm('Bạn có chắc chắn muốn đăng xuất khỏi trang quản trị?');" style="margin: 0;">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="icon-btn" title="Đăng Xuất" style="width: 30px; height: 30px; color: #f87171;" aria-label="Đăng xuất">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                        </button>
+                    </form>
                 </div>
             }
+        </aside>
 
-            <!-- Dark / Light theme toggle -->
-            <button type="button" class="icon-btn" id="themeToggleBtnAdmin" style="width: 34px; height: 34px;" title="Chuyển theme">
-                <i class="fa-solid fa-moon" id="themeIconAdmin"></i>
-            </button>
+        <!-- Main Content Area -->
+        <div class="admin-main-wrap">
+            <!-- Slim Topbar (Height 64px) -->
+            <header class="admin-topbar">
+                <div class="admin-topbar-left">
+                    <button type="button" class="admin-collapse-toggle-btn" id="adminSidebarToggleBtn" title="Thu gọn / Mở rộng Sidebar" aria-label="Menu Sidebar">
+                        <i class="fa-solid fa-bars-staggered"></i>
+                    </button>
 
-            <!-- Storefront Link -->
-            <a href="/" class="btn-luxe-outline" style="padding: 6px 12px; font-size: 0.78rem;">
-                <i class="fa-solid fa-store" style="margin-right: 4px;"></i> Cửa Hàng
-            </a>
+                    <div style="display: flex; align-items: center; gap: 8px; font-size: 0.88rem;">
+                        <span style="color: var(--text-muted);">Admin</span>
+                        <span style="color: var(--text-muted); font-size: 0.75rem;">/</span>
+                        <span style="font-weight: 700; color: var(--text-primary);">@(ViewData["Title"] ?? "Console")</span>
+                    </div>
+                </div>
 
-            <!-- Logout -->
-            <form method="post" action="/account/logout" onsubmit="return confirm('Bạn có chắc chắn muốn đăng xuất khỏi trang quản trị?');" style="margin: 0;">
-                @Html.AntiForgeryToken()
-                <button type="submit" class="icon-btn" title="Đăng Xuất" style="width: 34px; height: 34px; color: #f87171;">
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                </button>
-            </form>
+                <div class="admin-topbar-right">
+                    <!-- Storefront Button -->
+                    <a href="/" target="_blank" rel="noopener noreferrer" class="btn-luxe-outline" style="padding: 7px 14px; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-store text-gold-gradient"></i>
+                        <span>Xem Cửa Hàng</span>
+                    </a>
+
+                    <!-- Theme toggle -->
+                    <button type="button" class="icon-btn" id="themeToggleBtnAdmin" style="width: 36px; height: 36px;" title="Chuyển Dark / Light Theme" aria-label="Đổi theme">
+                        <i class="fa-solid fa-moon" id="themeIconAdmin"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Render Body -->
+            <main class="admin-main-container">
+                @RenderBody()
+            </main>
         </div>
-    </header>
+    </div>
 
-    <main class="admin-main-container">
-        @RenderBody()
-    </main>
-
+    <!-- Scripts -->
     <script>
         (function() {
-            const saved = localStorage.getItem('perfume_luxe_theme') || 'dark';
-            document.documentElement.setAttribute('data-theme', saved);
-            document.body.className = saved === 'dark' ? 'dark-theme' : 'light-theme';
+            // Theme setup
+            const savedTheme = localStorage.getItem('perfume_luxe_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            document.body.className = savedTheme === 'dark' ? 'dark-theme' : 'light-theme';
             const icon = document.getElementById('themeIconAdmin');
-            if (icon) icon.className = saved === 'dark' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+            if (icon) icon.className = savedTheme === 'dark' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+
+            // Desktop sidebar collapse setup
+            const adminShell = document.getElementById('adminShell');
+            const savedCollapse = localStorage.getItem('perfume_admin_sidebar_collapsed');
+            if (savedCollapse === 'true' && window.innerWidth > 1024) {
+                adminShell?.classList.add('sidebar-collapsed');
+            }
         })();
 
+        // Theme Toggle Event
         document.getElementById('themeToggleBtnAdmin')?.addEventListener('click', function() {
             const cur = document.documentElement.getAttribute('data-theme') || 'dark';
             const next = cur === 'dark' ? 'light' : 'dark';
@@ -174,14 +265,40 @@
             if (icon) icon.className = next === 'dark' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
         });
 
-        // Admin mobile navigation toggle
-        const adminNavToggleBtn = document.getElementById('adminNavToggleBtn');
-        const adminHeaderNav = document.getElementById('adminHeaderNav');
-        if (adminNavToggleBtn && adminHeaderNav) {
-            adminNavToggleBtn.addEventListener('click', () => {
-                adminHeaderNav.classList.toggle('active');
-            });
+        // Sidebar Toggle for Desktop (collapse/expand) and Mobile (drawer open)
+        const sidebarToggleBtn = document.getElementById('adminSidebarToggleBtn');
+        const adminShell = document.getElementById('adminShell');
+        const adminSidebar = document.getElementById('adminSidebar');
+        const sidebarBackdrop = document.getElementById('adminSidebarBackdrop');
+        const closeSidebarDrawerBtn = document.getElementById('closeSidebarDrawerBtn');
+
+        function toggleSidebar() {
+            if (window.innerWidth > 1024) {
+                // Desktop: toggle mini-sidebar
+                const isCollapsed = adminShell.classList.toggle('sidebar-collapsed');
+                localStorage.setItem('perfume_admin_sidebar_collapsed', isCollapsed ? 'true' : 'false');
+            } else {
+                // Mobile/Tablet: toggle off-canvas drawer
+                const isOpen = adminSidebar.classList.toggle('show-drawer');
+                sidebarBackdrop.classList.toggle('show-backdrop', isOpen);
+            }
         }
+
+        function closeMobileDrawer() {
+            adminSidebar.classList.remove('show-drawer');
+            sidebarBackdrop.classList.remove('show-backdrop');
+        }
+
+        sidebarToggleBtn?.addEventListener('click', toggleSidebar);
+        sidebarBackdrop?.addEventListener('click', closeMobileDrawer);
+        closeSidebarDrawerBtn?.addEventListener('click', closeMobileDrawer);
+
+        // Auto close mobile drawer on resize to desktop
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 1024) {
+                closeMobileDrawer();
+            }
+        });
     </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
