@@ -56,11 +56,34 @@ jobs:
     - name: Put website offline (Unlock DLL files)
       run: |
         echo "<html><body><h2>Deploying updates... Please refresh in a moment.</h2></body></html>" > app_offline.htm
+        cp app_offline.htm ./publish/app_offline.htm
         curl --retry 5 --retry-delay 3 --max-time 30 --ftp-create-dirs -T app_offline.htm -u "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" ftp://perfumeluxe.somee.com/www.perfumeluxe.somee.com/app_offline.htm || true
-        echo "Waiting 10 seconds for IIS application pool to fully unload assemblies..."
-        sleep 10
+        # Send a request to trigger IIS ASP.NET Core Module to detect app_offline.htm and unload assemblies
+        curl -s -m 5 https://perfumeluxe.somee.com/ || true
+        echo "Waiting 20 seconds for IIS application pool to fully unload assemblies..."
+        sleep 20
 
-    - name: Sync files via FTP
+    - name: Sync files via FTP (Attempt 1)
+      id: ftp-sync-1
+      continue-on-error: true
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      with:
+        server: perfumeluxe.somee.com
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        server-dir: /www.perfumeluxe.somee.com/
+        local-dir: ./publish/
+        state-name: .ftp-deploy-sync-state-v2.json
+        dangerous-clean-slate: false
+
+    - name: Retry FTP sync if files were locked
+      if: steps.ftp-sync-1.outcome == 'failure'
+      run: |
+        echo "::warning::First FTP sync attempt failed (likely DLL file lock on Somee IIS). Waiting 15 seconds before retry..."
+        sleep 15
+
+    - name: Sync files via FTP (Attempt 2 - Retry)
+      if: steps.ftp-sync-1.outcome == 'failure'
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
       with:
         server: perfumeluxe.somee.com
