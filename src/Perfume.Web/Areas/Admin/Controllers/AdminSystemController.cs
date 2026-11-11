@@ -691,6 +691,7 @@ public class AdminSystemController : Controller
     }
 
 
+    [HttpGet("{id:int?}")]
     [HttpGet]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> EditBlog(int id)

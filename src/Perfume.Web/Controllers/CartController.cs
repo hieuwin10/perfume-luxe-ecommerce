@@ -26,11 +26,16 @@ public class CartController : Controller
     // ==========================================
     // Trang hien thi chi tiet gio hang
     [HttpGet]
+    [Route("cart")]
+    [Route("gio-hang")]
+    [Route("Cart/Index")]
     public async Task<IActionResult> Index(CancellationToken cancellationToken) =>
         View(await _carts.GetAsync(CurrentUserId(), Request.Cookies[GuestCartCookie], cancellationToken));
 
     // API tra ve trang thai gio hang phuc vu header badge va mini cart
     [HttpGet]
+    [Route("cart/getcartstate")]
+    [Route("api/cart/state")]
     public async Task<IActionResult> GetCartState(CancellationToken cancellationToken)
     {
         var cart = await _carts.GetAsync(CurrentUserId(), Request.Cookies[GuestCartCookie], cancellationToken);
@@ -42,6 +47,8 @@ public class CartController : Controller
     // ==========================================
     // Xu ly yeu cau them san pham va phien ban vao gio
     [HttpPost, ValidateAntiForgeryToken]
+    [Route("cart/addtocart")]
+    [Route("api/cart/add")]
     public async Task<IActionResult> AddToCart([FromBody] AddToCartRequest request, CancellationToken cancellationToken)
     {
         try

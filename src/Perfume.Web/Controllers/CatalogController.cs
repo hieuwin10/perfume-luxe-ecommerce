@@ -32,6 +32,9 @@ public class CatalogController : Controller
     // ==========================================
     // Hien thi danh sach nuoc hoa theo bo loc: thuong hieu, nhom huong, nong do, gia ca
     [HttpGet]
+    [Route("bo-suu-tap")]
+    [Route("catalog")]
+    [Route("catalog/index")]
     public async Task<IActionResult> Index([FromQuery] ProductFilterParams filter)
     {
         var (items, totalCount) = await _catalogService.GetProductsAsync(filter);
@@ -58,6 +61,9 @@ public class CatalogController : Controller
     // ==========================================
     // Hien thi thap mui huong 3 tang, phien ban dung tich va san pham lien quan
     [HttpGet]
+    [Route("nuoc-hoa/{slug}")]
+    [Route("catalog/product/{slug}")]
+    [Route("catalog/detail/{slug}")]
     public async Task<IActionResult> Detail(string slug)
     {
         if (string.IsNullOrWhiteSpace(slug)) return NotFound();
@@ -83,6 +89,9 @@ public class CatalogController : Controller
     // ==========================================
     // Hien thi giao dien trac nghiem kham pha phong cach mui huong
     [HttpGet]
+    [Route("trac-nghiem-mui-huong")]
+    [Route("scent-quiz")]
+    [Route("catalog/quiz")]
     public IActionResult Quiz()
     {
         return View();
@@ -90,6 +99,8 @@ public class CatalogController : Controller
 
     // Nhan ket qua tra loi quiz va tra ve de xuat mui huong phu hop
     [HttpPost]
+    [Route("Catalog/QuizSubmit")]
+    [Route("api/quiz/submit")]
     public async Task<IActionResult> QuizSubmit([FromBody] QuizAnswerRequest request)
     {
         var result = await _catalogService.GetQuizRecommendationsAsync(request);

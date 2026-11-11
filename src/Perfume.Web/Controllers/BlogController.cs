@@ -16,6 +16,9 @@ public class BlogController : Controller
     }
 
     [HttpGet]
+    [Route("blog")]
+    [Route("tap-chi")]
+    [Route("Blog/Index")]
     public async Task<IActionResult> Index(string? category, int page = 1)
     {
         if (page < 1) page = 1;
@@ -67,6 +70,9 @@ public class BlogController : Controller
     }
 
     [HttpGet]
+    [Route("blog/{slug}")]
+    [Route("tap-chi/{slug}")]
+    [Route("Blog/Detail/{slug}")]
     public async Task<IActionResult> Detail(string slug)
     {
         if (string.IsNullOrWhiteSpace(slug)) return NotFound();

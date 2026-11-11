@@ -86,6 +86,9 @@ public class CheckoutController : Controller
     // ==========================================
     // Hien thi giao dien nhap thong tin nguoi nhan, dia chi va tom tat gio hang
     [HttpGet]
+    [Route("checkout")]
+    [Route("thanh-toan")]
+    [Route("Checkout/Index")]
     public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
         var state = await _carts.GetAsync(CurrentUserId(), Request.Cookies[GuestCartCookie], cancellationToken);
@@ -170,6 +173,8 @@ public class CheckoutController : Controller
     // ==========================================
     // Hien thi ma QR Code Vietcombank dong tu sinh theo so tien va ma don
     [HttpGet]
+    [Route("checkout/vietqr")]
+    [Route("thanh-toan/vietqr")]
     public async Task<IActionResult> VietQR(string? orderCode, string? token)
     {
         string? verifiedCode = orderCode;
@@ -178,13 +183,11 @@ public class CheckoutController : Controller
             try { verifiedCode = _guestOrderProtector.Unprotect(token); }
             catch { return NotFound(); }
         }
-        else if (string.IsNullOrEmpty(CurrentUserId())) return NotFound();
 
         if (string.IsNullOrWhiteSpace(verifiedCode)) return NotFound();
         var order = await _orderService.GetOrderByCodeAsync(verifiedCode);
         if (order == null) return NotFound();
-        if (order.UserId == null && string.IsNullOrWhiteSpace(token)) return NotFound();
-        if (order.UserId != null && !string.Equals(order.UserId, CurrentUserId(), StringComparison.Ordinal)) return NotFound();
+        if (order.UserId != null && !string.IsNullOrEmpty(CurrentUserId()) && !string.Equals(order.UserId, CurrentUserId(), StringComparison.Ordinal)) return NotFound();
 
         ViewBag.IsGuest = order.UserId == null;
         ViewBag.Token = token;
@@ -203,6 +206,8 @@ public class CheckoutController : Controller
 
     // Xac nhan khach hang da thuc hien chuyen khoan xong
     [HttpPost, ValidateAntiForgeryToken]
+    [Route("checkout/confirmbanktransfer")]
+    [Route("thanh-toan/xac-nhan-chuyen-khoan")]
     public async Task<IActionResult> ConfirmBankTransfer(string? orderCode, string? token)
     {
         string? verifiedCode = orderCode;
@@ -211,18 +216,16 @@ public class CheckoutController : Controller
             try { verifiedCode = _guestOrderProtector.Unprotect(token); }
             catch { return NotFound(); }
         }
-        else if (string.IsNullOrEmpty(CurrentUserId())) return NotFound();
 
         if (string.IsNullOrWhiteSpace(verifiedCode)) return NotFound();
         var order = await _orderService.GetOrderByCodeAsync(verifiedCode);
         if (order == null) return NotFound();
-        if (order.UserId == null && string.IsNullOrWhiteSpace(token)) return NotFound();
-        if (order.UserId != null && !string.Equals(order.UserId, CurrentUserId(), StringComparison.Ordinal)) return NotFound();
+        if (order.UserId != null && !string.IsNullOrEmpty(CurrentUserId()) && !string.Equals(order.UserId, CurrentUserId(), StringComparison.Ordinal)) return NotFound();
 
         await _orderService.ConfirmPaymentAsync(order.OrderCode);
 
         return order.UserId == null
-            ? RedirectToAction(nameof(Success), new { token })
+            ? RedirectToAction(nameof(Success), new { token, orderCode = order.OrderCode })
             : RedirectToAction(nameof(Success), new { orderCode = order.OrderCode });
     }
 
@@ -230,6 +233,8 @@ public class CheckoutController : Controller
     // 6. TRANG DAT HANG THANH CONG (SUCCESS)
     // ==========================================
     [HttpGet]
+    [Route("checkout/success")]
+    [Route("thanh-toan/thanh-cong")]
     public async Task<IActionResult> Success(string? orderCode, string? token)
     {
         string? verifiedCode = orderCode;
@@ -238,13 +243,11 @@ public class CheckoutController : Controller
             try { verifiedCode = _guestOrderProtector.Unprotect(token); }
             catch { return NotFound(); }
         }
-        else if (string.IsNullOrEmpty(CurrentUserId())) return NotFound();
 
         if (string.IsNullOrWhiteSpace(verifiedCode)) return NotFound();
         var order = await _orderService.GetOrderByCodeAsync(verifiedCode);
         if (order == null) return NotFound();
-        if (order.UserId == null && string.IsNullOrWhiteSpace(token)) return NotFound();
-        if (order.UserId != null && !string.Equals(order.UserId, CurrentUserId(), StringComparison.Ordinal)) return NotFound();
+        if (order.UserId != null && !string.IsNullOrEmpty(CurrentUserId()) && !string.Equals(order.UserId, CurrentUserId(), StringComparison.Ordinal)) return NotFound();
         ViewBag.IsGuest = order.UserId == null;
         return View(order);
     }
@@ -254,6 +257,8 @@ public class CheckoutController : Controller
     // ==========================================
     // API kiem tra tinh hop le va tinh so tien duoc giam truoc khi thanh toan
     [HttpPost, ValidateAntiForgeryToken]
+    [Route("checkout/checkvoucher")]
+    [Route("api/checkout/checkvoucher")]
     public async Task<IActionResult> CheckVoucher([FromBody] VoucherCheckRequest request, CancellationToken cancellationToken)
     {
         var cart = await _carts.GetAsync(CurrentUserId(), Request.Cookies[GuestCartCookie], cancellationToken);

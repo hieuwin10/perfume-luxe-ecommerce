@@ -230,18 +230,52 @@ app.UseStaticFiles(new StaticFileOptions
 app.Use(async (context, next) =>
 {
     var path = context.Request.Path.Value?.TrimEnd('/') ?? string.Empty;
+
+    // Xu ly dynamic 301 cho chi tiet san pham cu
+    if (path.StartsWith("/catalog/product/", StringComparison.OrdinalIgnoreCase))
+    {
+        var slug = path.Substring("/catalog/product/".Length);
+        var queryString = context.Request.QueryString.HasValue ? context.Request.QueryString.Value : string.Empty;
+        context.Response.StatusCode = StatusCodes.Status301MovedPermanently;
+        context.Response.Headers.Location = "/nuoc-hoa/" + slug + queryString;
+        return;
+    }
+    if (path.StartsWith("/catalog/detail/", StringComparison.OrdinalIgnoreCase))
+    {
+        var slug = path.Substring("/catalog/detail/".Length);
+        var queryString = context.Request.QueryString.HasValue ? context.Request.QueryString.Value : string.Empty;
+        context.Response.StatusCode = StatusCodes.Status301MovedPermanently;
+        context.Response.Headers.Location = "/nuoc-hoa/" + slug + queryString;
+        return;
+    }
+
     var redirectMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
     {
+        { "/home", "/" },
+        { "/home/index", "/" },
         { "/home/about", "/ve-chung-toi" },
         { "/home/boutique", "/boutique" },
         { "/home/returnpolicy", "/chinh-sach-doi-tra" },
         { "/home/buyingguide", "/huong-dan-mua-hang" },
         { "/home/privacy", "/privacy" },
+        { "/chinh-sach-bao-mat", "/privacy" },
+        { "/catalog", "/bo-suu-tap" },
+        { "/catalog/index", "/bo-suu-tap" },
         { "/catalog/discoverybox", "/discovery-box" },
+        { "/hop-kham-pha", "/discovery-box" },
         { "/catalog/compare", "/so-sanh" },
+        { "/experience", "/dat-lich-trai-nghiem" },
         { "/experience/tastingbooking", "/dat-lich-trai-nghiem" },
+        { "/private-tasting", "/dat-lich-trai-nghiem" },
         { "/ordertracking", "/tra-cuu-don-hang" },
-        { "/ordertracking/index", "/tra-cuu-don-hang" }
+        { "/ordertracking/index", "/tra-cuu-don-hang" },
+        { "/order-tracking", "/tra-cuu-don-hang" },
+        { "/tra-cuu", "/tra-cuu-don-hang" },
+        { "/cart/index", "/cart" },
+        { "/gio-hang", "/cart" },
+        { "/checkout/index", "/checkout" },
+        { "/thanh-toan", "/checkout" },
+        { "/tap-chi", "/blog" }
     };
 
     if (redirectMap.TryGetValue(path, out var newUrl))
