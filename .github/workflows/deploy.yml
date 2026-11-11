@@ -56,7 +56,6 @@ jobs:
     - name: Put website offline (Unlock DLL files)
       run: |
         echo "<html><body><h2>Deploying updates... Please refresh in a moment.</h2></body></html>" > app_offline.htm
-        cp app_offline.htm ./publish/app_offline.htm
         curl --retry 5 --retry-delay 3 --max-time 30 --ftp-create-dirs -T app_offline.htm -u "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" ftp://perfumeluxe.somee.com/www.perfumeluxe.somee.com/app_offline.htm || true
         # Send a request to trigger IIS ASP.NET Core Module to detect app_offline.htm and unload assemblies
         curl -s -m 5 https://perfumeluxe.somee.com/ || true
