@@ -18,6 +18,12 @@ public class CatalogManagerController : Controller
         _db = db;
     }
 
+    [HttpGet]
+    public IActionResult Index()
+    {
+        return RedirectToAction(nameof(Brands));
+    }
+
     // ─── BRANDS ───────────────────────────────────────────────────────────────
     [HttpGet]
     public async Task<IActionResult> Brands()

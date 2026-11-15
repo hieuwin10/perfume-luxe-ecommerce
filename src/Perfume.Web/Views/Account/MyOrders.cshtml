@@ -2,14 +2,14 @@
 @{
     ViewData["Title"] = "Đơn hàng của tôi";
 }
-<main class="customer-page customer-orders-page" style="max-width:1100px;margin:42px auto;padding:0 20px">
+<div class="customer-page customer-orders-page" style="max-width:1100px;margin:42px auto;padding:0 20px">
     <div style="display:flex;justify-content:space-between;align-items:end;gap:18px;flex-wrap:wrap;margin-bottom:24px">
         <div><p class="eyebrow">Tài khoản khách hàng</p><h1 style="margin:4px 0">Đơn hàng của tôi</h1><p style="color:var(--text-secondary);margin:6px 0 0">Theo dõi tình trạng giao hàng và thông tin thanh toán.</p></div>
         <a href="/bo-suu-tap" class="btn-luxe-outline">Tiếp tục mua sắm</a>
     </div>
     <div id="ordersMessage" role="status" style="padding:18px;border:1px solid var(--border-card);border-radius:12px;color:var(--text-secondary)">Đang tải đơn hàng…</div>
     <div id="ordersList" style="display:grid;gap:14px"></div>
-</main>
+</div>
 @section Styles {
 <style>
 .customer-order-card{padding:20px 22px;border:1px solid var(--border-card);border-radius:14px;background:var(--bg-surface);display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center}

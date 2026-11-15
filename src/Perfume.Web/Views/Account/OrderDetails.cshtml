@@ -2,12 +2,12 @@
 @{
     ViewData["Title"] = "Chi tiết đơn hàng";
 }
-<main style="max-width:1000px;margin:42px auto;padding:0 20px" id="orderDetailRoot" data-order-id="@Model.Id">
+<div style="max-width:1000px;margin:42px auto;padding:0 20px" id="orderDetailRoot" data-order-id="@Model.Id">
     <a href="/account/myorders" style="color:var(--gold-primary)"><i class="fa-solid fa-arrow-left"></i> Quay lại đơn hàng</a>
     <div style="margin:20px 0 24px"><p class="eyebrow">Tài khoản khách hàng</p><h1 style="margin:4px 0">Chi tiết đơn hàng</h1></div>
     <div id="orderDetailMessage" role="status" class="luxury-card" style="padding:22px;color:var(--text-secondary)">Đang tải đơn hàng…</div>
     <div id="orderDetailContent" hidden></div>
-</main>
+</div>
 @section Scripts {
 <script>
 async function loadOrderDetail(){

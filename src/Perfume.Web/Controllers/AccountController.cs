@@ -30,7 +30,14 @@ public class AccountController : Controller
     [HttpGet]
     public IActionResult Login(string? returnUrl = null)
     {
-        if (User.Identity?.IsAuthenticated == true) return RedirectToAction("Index", "Home");
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl) && returnUrl.StartsWith("/Admin", StringComparison.OrdinalIgnoreCase))
+            {
+                return RedirectToAction(nameof(AccessDenied));
+            }
+            return RedirectToAction("Index", "Home");
+        }
         ViewBag.ReturnUrl = returnUrl;
         return View();
     }

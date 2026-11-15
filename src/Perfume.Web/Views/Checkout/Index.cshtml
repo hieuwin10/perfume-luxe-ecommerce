@@ -219,8 +219,8 @@
                         <input type="checkbox" id="chkAcceptPrivacy" name="AcceptPrivacyPolicy" value="true" required style="width: 18px; height: 18px; accent-color: var(--gold-primary); margin-top: 2px; cursor: pointer;" />
                         <span>
                             Tôi đã đọc, hiểu rõ và tự nguyện đồng ý với 
-                            <a href="/huong-dan-mua-hang" target="_blank" style="color: var(--gold-primary); text-decoration: underline;">Điều khoản mua hàng</a> 
-                            và <a href="/privacy" target="_blank" style="color: var(--gold-primary); text-decoration: underline;">Chính sách bảo vệ dữ liệu cá nhân</a> 
+                            <a href="/huong-dan-mua-hang" target="_blank" rel="noopener noreferrer" style="color: var(--gold-primary); text-decoration: underline;">Điều khoản mua hàng</a> 
+                            và <a href="/privacy" target="_blank" rel="noopener noreferrer" style="color: var(--gold-primary); text-decoration: underline;">Chính sách bảo vệ dữ liệu cá nhân</a> 
                             của PERFUME LUXE theo Luật 91/2025/QH15.
                         </span>
                     </label>
@@ -290,7 +290,7 @@
             
             const isGift = document.getElementById('chkGiftWrapping')?.checked || false;
             const giftMsg = document.getElementById('txtGiftMessage')?.value || '';
-            const paymentMethod = document.getElementById('radioVietQR')?.checked ? 1 : 0; // 0=COD, 1=BankTransfer
+            const paymentMethod = document.getElementById('radioVietQR')?.checked ? 4 : 1; // 1=COD, 4=BankTransfer (PerfumeEnums.cs)
 
             try {
                 const result = await CustomerApi.post('/api/v1/orders', {

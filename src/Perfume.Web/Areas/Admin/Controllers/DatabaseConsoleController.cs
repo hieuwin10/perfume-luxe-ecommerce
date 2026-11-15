@@ -12,7 +12,6 @@ namespace Perfume.Web.Areas.Admin.Controllers;
 [Area("Admin")]
 [Authorize(Roles = "Admin")]
 [Route("Admin/[controller]/[action]")]
-[Route("Admin/AdminDashboard/DatabaseConsole")]
 public class DatabaseConsoleController : Controller
 {
     private readonly IDatabaseConsoleService _dbConsole;

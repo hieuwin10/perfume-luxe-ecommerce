@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Perfume.Infrastructure;
 using Perfume.Infrastructure.Data;
 using Perfume.Infrastructure.Identity;
+using Perfume.Domain.Entities;
 using Perfume.Web.Middlewares;
 using Perfume.Web.Security;
 using Perfume.Web.Services;
@@ -131,6 +132,41 @@ using (var scope = app.Services.CreateScope())
 
         // Chay migration Schema Upgrader V1 - V6
         await DatabaseSchemaUpgrader.ApplyAsync(db, builder.Configuration, logger, databaseCreated);
+
+        // Seed Vouchers LUXE2026 va WELCOME neu chua ton tai (DEF-04)
+        if (!await db.Vouchers.AnyAsync(v => v.Code == "LUXE2026"))
+        {
+            db.Vouchers.Add(new Voucher
+            {
+                Code = "LUXE2026",
+                Description = "Ưu đãi 10% đặc quyền thành viên Haute Parfumerie Club",
+                DiscountPercent = 10,
+                MinOrderAmount = 0,
+                MaxDiscountAmount = 500_000,
+                UsageLimit = 10_000,
+                UsedCount = 0,
+                ValidFrom = DateTime.UtcNow.AddDays(-30),
+                ValidTo = DateTime.UtcNow.AddYears(2),
+                IsActive = true
+            });
+        }
+        if (!await db.Vouchers.AnyAsync(v => v.Code == "WELCOME"))
+        {
+            db.Vouchers.Add(new Voucher
+            {
+                Code = "WELCOME",
+                Description = "Ưu đãi chào đón khách hàng mới giảm ngay 100.000₫",
+                DiscountAmount = 100_000,
+                MinOrderAmount = 500_000,
+                MaxDiscountAmount = 100_000,
+                UsageLimit = 10_000,
+                UsedCount = 0,
+                ValidFrom = DateTime.UtcNow.AddDays(-30),
+                ValidTo = DateTime.UtcNow.AddYears(2),
+                IsActive = true
+            });
+        }
+        await db.SaveChangesAsync();
 
         // Tao cac Role he thong neu chua ton tai
         var roleManager = services.GetRequiredService<RoleManager<AppRole>>();

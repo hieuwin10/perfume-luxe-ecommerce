@@ -23,9 +23,24 @@
         const type = response.headers.get('content-type') || '';
         const payload = type.includes('application/json') ? await response.json() : await response.text();
         if (!response.ok) {
-            const message = payload && typeof payload === 'object'
-                ? payload.message || payload.detail || payload.title
-                : payload;
+            let message = '';
+            if (payload && typeof payload === 'object') {
+                if (payload.errors && typeof payload.errors === 'object') {
+                    const errorList = Object.values(payload.errors).flat();
+                    if (errorList.length > 0) message = errorList.join(' ');
+                }
+                if (!message) {
+                    message = payload.message || payload.detail;
+                    if (!message && payload.title && payload.title !== 'One or more validation errors occurred.') {
+                        message = payload.title;
+                    }
+                }
+            } else if (typeof payload === 'string' && payload.trim()) {
+                message = payload;
+            }
+            if (!message) {
+                message = 'Dữ liệu nhập vào chưa hợp lệ. Vui lòng kiểm tra lại.';
+            }
             throw new Error(message || `Yêu cầu thất bại (${response.status}).`);
         }
         return payload;

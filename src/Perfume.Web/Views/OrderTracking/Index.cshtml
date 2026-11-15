@@ -3,7 +3,7 @@
     ViewData["Title"] = "Tra Cứu Đơn Hàng - PERFUME LUXE";
 }
 
-<main style="max-width: 960px; margin: 40px auto 80px; padding: 0 20px;">
+<div class="order-tracking-container" style="max-width: 960px; margin: 40px auto 80px; padding: 0 20px;">
     <!-- HEADER -->
     <div style="text-align: center; margin-bottom: 36px;">
         <span style="font-size: 0.8rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold-primary); font-weight: 700; display: inline-block; margin-bottom: 8px;">
@@ -57,7 +57,14 @@
     {
         <div class="luxury-card" style="padding: 30px; text-align: center; border-left: 4px solid #f87171; margin-bottom: 32px;">
             <i class="fa-solid fa-circle-exclamation" style="font-size: 2.2rem; color: #f87171; margin-bottom: 12px; display: block;"></i>
-            <h3 style="margin: 0 0 8px; font-size: 1.15rem; color: var(--text-primary);">Không Tìm Thấy Thông Tin Đơn Hàng</h3>
+            @if (string.IsNullOrWhiteSpace(Model.Phone))
+            {
+                <h3 style="margin: 0 0 8px; font-size: 1.15rem; color: var(--text-primary);">Vui Lòng Nhập Thêm Số Điện Thoại Để Xác Thực</h3>
+            }
+            else
+            {
+                <h3 style="margin: 0 0 8px; font-size: 1.15rem; color: var(--text-primary);">Không Tìm Thấy Thông Tin Đơn Hàng</h3>
+            }
             <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0 0 16px;">@Model.ErrorMessage</p>
             <div style="font-size: 0.85rem; color: var(--text-secondary);">
                 Cần hỗ trợ tra cứu? Liên hệ tổng đài CSKH Haute Parfumerie: <strong style="color: var(--gold-primary);">1900 8888</strong> (8:30 - 21:30)
@@ -299,7 +306,7 @@
             </div>
         </div>
     }
-</main>
+</div>
 
 @section Scripts {
 }
