@@ -122,20 +122,10 @@ public class OrderService : IOrderService
                         : product.Variants.FirstOrDefault(v => v.IsDefault) ?? product.Variants.FirstOrDefault();
                     if (variant == null) return (false, "Phiên bản sản phẩm không hợp lệ.", null);
 
-                    // Tru ton kho nguyen tu (atomic deduction)
-                    if (isRelational)
-                    {
-                        var reserved = await _context.ProductVariants
-                            .Where(v => v.Id == variant.Id && v.StockQuantity >= line.Quantity)
-                            .ExecuteUpdateAsync(s => s.SetProperty(v => v.StockQuantity, v => v.StockQuantity - line.Quantity));
-                        if (reserved != 1) return (false, $"Không đủ tồn kho cho {product.Name} - {variant.VolumeLabel}.", null);
-                    }
-                    else
-                    {
-                        if (variant.StockQuantity < line.Quantity)
-                            return (false, $"Không đủ tồn kho cho {product.Name} - {variant.VolumeLabel}.", null);
-                        variant.StockQuantity -= line.Quantity;
-                    }
+                    // Tru ton kho cua phien ban
+                    if (variant.StockQuantity < line.Quantity)
+                        return (false, $"Không đủ tồn kho cho {product.Name} - {variant.VolumeLabel}.", null);
+                    variant.StockQuantity -= line.Quantity;
 
                     unitPrice = variant.SalePrice > 0 ? variant.SalePrice : variant.OriginalPrice;
                     if (unitPrice <= 0) unitPrice = product.BasePrice;
@@ -171,19 +161,9 @@ public class OrderService : IOrderService
                 if (voucher == null) return (false, "Mã ưu đãi không hợp lệ, đã hết lượt hoặc không đủ điều kiện.", null);
 
                 // Tang so luong da su dung cua voucher
-                if (isRelational)
-                {
-                    var used = await _context.Vouchers
-                        .Where(v => v.Id == voucher.Id && v.UsedCount < v.UsageLimit && v.IsActive && v.ValidFrom <= now && v.ValidTo >= now)
-                        .ExecuteUpdateAsync(s => s.SetProperty(v => v.UsedCount, v => v.UsedCount + 1));
-                    if (used != 1) return (false, "Mã ưu đãi vừa hết lượt sử dụng. Vui lòng thử mã khác.", null);
-                }
-                else
-                {
-                    if (voucher.UsedCount >= voucher.UsageLimit || !voucher.IsActive || voucher.ValidFrom > now || voucher.ValidTo < now)
-                        return (false, "Mã ưu đãi vừa hết lượt sử dụng. Vui lòng thử mã khác.", null);
-                    voucher.UsedCount += 1;
-                }
+                if (voucher.UsedCount >= voucher.UsageLimit || !voucher.IsActive || voucher.ValidFrom > now || voucher.ValidTo < now)
+                    return (false, "Mã ưu đãi vừa hết lượt sử dụng. Vui lòng thử mã khác.", null);
+                voucher.UsedCount += 1;
 
                 var discount = voucher.DiscountPercent.HasValue
                     ? order.SubTotal * voucher.DiscountPercent.Value / 100m
@@ -210,7 +190,7 @@ public class OrderService : IOrderService
             _logger?.LogError(ex, "Lỗi xảy ra trong quá trình PlaceOrderAsync cho khách hàng {CustomerEmail}: {Message}", request.CustomerEmail, ex.Message);
             // Rollback giao dich neu xay ra loi de bao toan ton kho
             if (transaction != null) await transaction.RollbackAsync();
-            return (false, "Không thể hoàn tất đơn hàng. Tồn kho có thể vừa thay đổi; vui lòng kiểm tra giỏ hàng và thử lại.", null);
+            return (false, "Không thể hoàn tất đơn hàng: " + ex.Message, null);
         }
     }
 
