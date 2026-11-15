@@ -32,7 +32,7 @@ Dự án **Perfume Luxe** là nền tảng thương mại điện tử chuyên n
 
 ## 2. Cấu Trúc Bộ Báo Cáo Chuyên Biệt
 
-Toàn bộ kết quả thẩm định được phân rã chi tiết thành 4 chuyên đề độc lập trong thư mục `reports/ui-func-audit/`:
+Toàn bộ kết quả thẩm định được phân rã chi tiết thành 5 chuyên đề độc lập trong thư mục `reports/ui-func-audit/`:
 
 1. **[01-test-coverage-catalog.md](file:///d:/Sao%20l%C6%B0u/dotnet/perfume-luxe-ecommerce/reports/ui-func-audit/01-test-coverage-catalog.md)**:  
    *Danh mục toàn bộ chức năng, URL, kịch bản tương tác và trạng thái Pass/Fail của 3 phân hệ (Storefront Khách hàng, Luồng Thương Mại Commerce, và Hệ thống Quản trị & Xác thực Admin).*
@@ -42,6 +42,8 @@ Toàn bộ kết quả thẩm định được phân rã chi tiết thành 4 chu
    *Hồ sơ chi tiết từng lỗi (từ DEF-01 đến DEF-10) bao gồm: Mã lỗi, URL, Tiền điều kiện, Các bước tái hiện từng bước, Kết quả thực tế, Kết quả mong đợi và Phân tích tác động nghiệp vụ.*
 4. **[04-remediation-and-code-fixes.md](file:///d:/Sao%20l%C6%B0u/dotnet/perfume-luxe-ecommerce/reports/ui-func-audit/04-remediation-and-code-fixes.md)**:  
    *Phương án khắc phục cụ thể, phân tích nguyên nhân gốc rễ (Root Cause Analysis) và mã nguồn bản vá trực tiếp (Code Diff) cho từng file trong dự án ASP.NET Core MVC.*
+5. **[05-post-fix-verification-report.md](file:///d:/Sao%20l%C6%B0u/dotnet/perfume-luxe-ecommerce/reports/ui-func-audit/05-post-fix-verification-report.md)**:  
+   *Báo cáo nghiệm thu cấp C-Suite sau kiểm tra hồi quy: Đánh giá kết quả khắc phục của 10 lỗi trên web live và quyết nghị trạng thái sẵn sàng Go-Live.*
 
 ---
 
