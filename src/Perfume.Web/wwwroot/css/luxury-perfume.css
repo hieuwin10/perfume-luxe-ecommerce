@@ -64,22 +64,26 @@
    LIGHT THEME (Phong cách Ngọc trai & Vàng đồng thanh lịch Pháp)
    -------------------------------------------------------------------------- */
 [data-theme="light"], body.light-theme {
+    --gold-primary: #997A15;
+    --gold-light: #B8860B;
+    --gold-dark: #6B5208;
+    --gold-gradient: linear-gradient(135deg, #B8860B 0%, #997A15 50%, #6B5208 100%);
     --bg-main: #FAF8F5;
     --bg-surface: #FFFFFF;
     --bg-surface-elevated: #F3EFEA;
-    --bg-glass: rgba(255, 255, 255, 0.9);
+    --bg-glass: rgba(255, 255, 255, 0.95);
     
-    --text-primary: #18181B;
-    --text-secondary: #52525B;
-    --text-muted: #8E8E98;
+    --text-primary: #111114;
+    --text-secondary: #383842;
+    --text-muted: #666675;
     
-    --border-subtle: rgba(212, 175, 55, 0.25);
-    --border-focus: #D4AF37;
-    --border-card: rgba(0, 0, 0, 0.06);
+    --border-subtle: rgba(153, 122, 21, 0.25);
+    --border-focus: #997A15;
+    --border-card: rgba(0, 0, 0, 0.1);
 
-    --shadow-subtle: 0 4px 20px rgba(0, 0, 0, 0.04);
-    --shadow-luxury: 0 12px 35px rgba(184, 134, 11, 0.08), 0 2px 10px rgba(0, 0, 0, 0.03);
-    --glow-gold: 0 0 20px rgba(212, 175, 55, 0.2);
+    --shadow-subtle: 0 4px 20px rgba(0, 0, 0, 0.05);
+    --shadow-luxury: 0 12px 35px rgba(153, 122, 21, 0.1), 0 2px 10px rgba(0, 0, 0, 0.04);
+    --glow-gold: 0 0 20px rgba(153, 122, 21, 0.2);
 }
 
 /* --------------------------------------------------------------------------
