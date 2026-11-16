@@ -127,6 +127,8 @@ public class CartItemDto
     public int StockQuantity { get; set; }
     public bool IsAvailable { get; set; } = true;
     public decimal TotalPrice => UnitPrice * Quantity;
+    public bool IsCustomBox { get; set; } = false;
+    public string? CustomBoxConfigJson { get; set; }
 }
 
 public class CheckoutRequestDto

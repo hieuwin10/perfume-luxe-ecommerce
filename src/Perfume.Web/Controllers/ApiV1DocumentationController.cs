@@ -221,7 +221,9 @@ public sealed class LoyaltyStatusApiResponse
 public sealed class DiscoveryBoxApiRequest
 {
     public string BoxStyle { get; set; } = "ClassicWood";
+    public string? RecipientName { get; set; }
     public string? GreetingMessage { get; set; }
+    public string GreetingFont { get; set; } = "Playfair Display";
     public List<DiscoveryVialApiSelectionDto> Vials { get; set; } = new();
 }
 

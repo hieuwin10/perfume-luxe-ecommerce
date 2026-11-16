@@ -61,8 +61,19 @@ public class OrderService : IOrderService
         // Nhom cac mat hang trung lap de tong hop so luong can mua
         var lines = request.Items
             .Where(i => i.Quantity > 0)
-            .GroupBy(i => new { i.ProductId, i.VariantId })
-            .Select(g => new { g.Key.ProductId, g.Key.VariantId, Quantity = g.Sum(i => i.Quantity) })
+            .GroupBy(i => new { i.ProductId, i.VariantId, i.IsCustomBox, i.CustomBoxConfigJson, i.UnitPrice, i.ProductName, i.VariantLabel, i.ProductImageUrl })
+            .Select(g => new
+            {
+                g.Key.ProductId,
+                g.Key.VariantId,
+                g.Key.IsCustomBox,
+                g.Key.CustomBoxConfigJson,
+                g.Key.UnitPrice,
+                g.Key.ProductName,
+                g.Key.VariantLabel,
+                g.Key.ProductImageUrl,
+                Quantity = g.Sum(i => i.Quantity)
+            })
             .ToList();
 
         if (lines.Count == 0 || lines.Any(i => i.Quantity > 50))
@@ -109,6 +120,23 @@ public class OrderService : IOrderService
                 // Duyet qua tung dong san pham, kiem tra ton kho va tru so luong
                 foreach (var line in lines)
                 {
+                    if (line.IsCustomBox)
+                    {
+                        order.Items.Add(new OrderItem
+                        {
+                            ProductId = line.ProductId,
+                            VariantId = null,
+                            ProductName = !string.IsNullOrWhiteSpace(line.ProductName) ? line.ProductName : "Hộp Quà Discovery Box",
+                            VariantLabel = !string.IsNullOrWhiteSpace(line.VariantLabel) ? line.VariantLabel : "Bespoke Discovery Tray",
+                            ProductImageUrl = line.ProductImageUrl ?? "/images/hero/hero-desktop.webp",
+                            UnitPrice = line.UnitPrice > 0 ? line.UnitPrice : 650_000m,
+                            Quantity = line.Quantity,
+                            IsCustomBox = true,
+                            CustomBoxConfigJson = line.CustomBoxConfigJson
+                        });
+                        continue;
+                    }
+
                     if (!productsDict.TryGetValue(line.ProductId, out var product) || !product.IsInStock)
                         return (false, "Một sản phẩm trong giỏ đã ngừng bán.", null);
 

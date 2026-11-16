@@ -8,13 +8,16 @@ using Perfume.Application.Interfaces;
 using Perfume.Domain.Entities;
 using Perfume.Domain.Enums;
 using Perfume.Infrastructure.Data;
+using Perfume.Infrastructure.Services;
 
 namespace Perfume.Web.Controllers;
 
 [ApiController]
 public sealed class ApiV1DiscoveryBoxController : ControllerBase
 {
+    private const string GuestCartCookie = "plx_guest_cart";
     private readonly PerfumeDbContext _db;
+    private readonly IDiscoveryBoxService _discoveryBoxService;
     private static readonly HashSet<string> AllowedBoxStyles = new(StringComparer.OrdinalIgnoreCase)
     {
         "ClassicWood",
@@ -22,7 +25,29 @@ public sealed class ApiV1DiscoveryBoxController : ControllerBase
         "ArtisanLeather"
     };
 
-    public ApiV1DiscoveryBoxController(PerfumeDbContext db) => _db = db;
+    public ApiV1DiscoveryBoxController(PerfumeDbContext db, IDiscoveryBoxService? discoveryBoxService = null)
+    {
+        _db = db;
+        _discoveryBoxService = discoveryBoxService ?? new DiscoveryBoxService(db);
+    }
+
+    private string? EnsureGuestToken()
+    {
+        if (HttpContext == null) return null;
+        var token = Request?.Cookies[GuestCartCookie];
+        if (!string.IsNullOrWhiteSpace(token) && token.Length <= 128) return token;
+        token = Microsoft.AspNetCore.WebUtilities.WebEncoders.Base64UrlEncode(System.Security.Cryptography.RandomNumberGenerator.GetBytes(32));
+        Response?.Cookies.Append(GuestCartCookie, token, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = Request?.IsHttps ?? false,
+            SameSite = SameSiteMode.Lax,
+            IsEssential = true,
+            Path = "/",
+            MaxAge = TimeSpan.FromDays(30)
+        });
+        return token;
+    }
 
     // ─── 3. POST /api/v1/discovery-box/validate-and-add ───────────────────────
     [HttpPost("api/v1/discovery-box/validate-and-add")]
@@ -109,6 +134,85 @@ public sealed class ApiV1DiscoveryBoxController : ControllerBase
         var totalPrice = subTotal - discountAmount;
 
         var normalizedBoxStyle = AllowedBoxStyles.First(s => s.Equals(style, StringComparison.OrdinalIgnoreCase));
+
+        if (HttpContext != null)
+        {
+            try
+            {
+                var guestToken = EnsureGuestToken();
+                var userId = User?.FindFirstValue(ClaimTypes.NameIdentifier);
+                var ownerKey = !string.IsNullOrWhiteSpace(userId)
+                    ? "user:" + userId
+                    : (!string.IsNullOrWhiteSpace(guestToken)
+                        ? "guest:" + Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(guestToken))).ToLowerInvariant()
+                        : null);
+
+                if (ownerKey != null)
+                {
+                    var cart = await _db.ShoppingCarts
+                        .Include(c => c.Items)
+                        .FirstOrDefaultAsync(c => c.OwnerKey == ownerKey, cancellationToken);
+
+                    if (cart == null)
+                    {
+                        cart = new ShoppingCart
+                        {
+                            OwnerKey = ownerKey,
+                            UserId = string.IsNullOrWhiteSpace(userId) ? null : userId,
+                            ExpiresAt = DateTime.UtcNow.AddDays(30)
+                        };
+                        _db.ShoppingCarts.Add(cart);
+                        await _db.SaveChangesAsync(cancellationToken);
+                    }
+                    else
+                    {
+                        cart.ExpiresAt = DateTime.UtcNow.AddDays(30);
+                    }
+
+                    var configJson = JsonSerializer.Serialize(new
+                    {
+                        boxStyleCode = normalizedBoxStyle,
+                        boxStyleName = normalizedBoxStyle switch
+                        {
+                            "RoyalVelvet" => "Hộp Nhung Đen Huyền Bí",
+                            "ArtisanLeather" => "Túi Da Thủ Công Viền Vàng",
+                            _ => "Hộp Gỗ Sơn Mài Hoàng Gia"
+                        },
+                        boxPrice = boxFee,
+                        vialsTotalPrice = vialsTotal,
+                        subTotal = subTotal,
+                        discountAmount = discountAmount,
+                        totalBoxUnitPrice = totalPrice,
+                        recipientName = request.RecipientName,
+                        greetingMessage = request.GreetingMessage,
+                        greetingFont = string.IsNullOrWhiteSpace(request.GreetingFont) ? "Playfair Display" : request.GreetingFont,
+                        vials = request.Vials.Select((v, idx) => new
+                        {
+                            slot = idx + 1,
+                            productId = v.ProductId,
+                            volumeMl = (v.VialSize ?? "2ml").Trim().ToLowerInvariant() == "5ml" ? 5 : 2,
+                            price = (v.VialSize ?? "2ml").Trim().ToLowerInvariant() == "5ml" ? 350_000m : 180_000m
+                        })
+                    });
+
+                    var firstProductId = request.Vials[0].ProductId;
+                    var cartItem = new ShoppingCartItem
+                    {
+                        ShoppingCartId = cart.Id,
+                        ProductId = firstProductId,
+                        VariantId = null,
+                        Quantity = 1,
+                        IsCustomBox = true,
+                        CustomBoxConfigJson = configJson,
+                        CustomUnitPrice = totalPrice
+                    };
+
+                    cart.Items.Add(cartItem);
+                    await _db.SaveChangesAsync(cancellationToken);
+                }
+            }
+            catch { }
+        }
 
         return Ok(new DiscoveryBoxApiResponse
         {

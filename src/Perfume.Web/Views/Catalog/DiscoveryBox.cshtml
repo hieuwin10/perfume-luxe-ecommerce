@@ -33,8 +33,8 @@
         }
         .box-style-option.active {
             border: 2px solid var(--gold-primary);
-            background: linear-gradient(145deg, rgba(212, 175, 55, 0.12), rgba(20, 20, 26, 0.9));
-            box-shadow: 0 8px 24px rgba(212, 175, 55, 0.15);
+            background: linear-gradient(145deg, rgba(212, 175, 55, 0.16), var(--bg-surface-elevated));
+            box-shadow: 0 8px 24px rgba(212, 175, 55, 0.2);
         }
         .vial-size-pill {
             padding: 4px 10px;
@@ -578,19 +578,12 @@
                 `;
             }
 
-            // Also add representative item into server cart so CartDrawer / Cart page has the item
-            const firstPerfume = selectedPerfumes[0];
-            if (window.CustomerApi && firstPerfume && firstPerfume.slug) {
-                try {
-                    await CustomerApi.post('/api/v1/cart/items', {
-                        productSlug: firstPerfume.slug,
-                        variantId: null,
-                        quantity: 1
-                    });
-                    if (typeof openCart === 'function') openCart();
-                } catch (_) {
-                    // Ignore if variant stock check differs
-                }
+            // Refresh cart drawer & header badge from server
+            if (typeof refreshCartState === 'function') {
+                await refreshCartState();
+            }
+            if (typeof openCart === 'function') {
+                openCart();
             }
             if (typeof showToast === 'function') {
                 showToast('Đã thêm Hộp Quà Discovery Box vào giỏ hàng!', 'success');

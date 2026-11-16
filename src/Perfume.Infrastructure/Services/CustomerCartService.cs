@@ -161,6 +161,20 @@ public sealed class CustomerCartService : ICustomerCartService
 
         foreach (var guestLine in guest.Items)
         {
+            if (guestLine.IsCustomBox)
+            {
+                account.Items.Add(new ShoppingCartItem
+                {
+                    ProductId = guestLine.ProductId,
+                    VariantId = null,
+                    Quantity = guestLine.Quantity,
+                    IsCustomBox = true,
+                    CustomBoxConfigJson = guestLine.CustomBoxConfigJson,
+                    CustomUnitPrice = guestLine.CustomUnitPrice
+                });
+                continue;
+            }
+
             if (!productsDict.TryGetValue(guestLine.ProductId, out var product)) continue;
 
             var variant = guestLine.VariantId.HasValue
@@ -262,6 +276,67 @@ public sealed class CustomerCartService : ICustomerCartService
 
         foreach (var line in cart.Items)
         {
+            if (line.IsCustomBox)
+            {
+                var unitPrice = line.CustomUnitPrice.HasValue && line.CustomUnitPrice.Value > 0
+                    ? line.CustomUnitPrice.Value
+                    : 650_000m;
+
+                var boxName = "Hộp Quà Discovery Box";
+                var boxStyleLabel = "Bespoke Discovery Tray (3–5 ống chiết)";
+                var boxImage = "/images/hero/hero-desktop.webp";
+
+                if (!string.IsNullOrWhiteSpace(line.CustomBoxConfigJson))
+                {
+                    try
+                    {
+                        using var doc = System.Text.Json.JsonDocument.Parse(line.CustomBoxConfigJson);
+                        var root = doc.RootElement;
+                        var parts = new List<string>();
+                        if (root.TryGetProperty("boxStyleName", out var styleProp) && !string.IsNullOrWhiteSpace(styleProp.GetString()))
+                        {
+                            parts.Add(styleProp.GetString()!);
+                        }
+                        else if (root.TryGetProperty("boxStyleCode", out var codeProp) && !string.IsNullOrWhiteSpace(codeProp.GetString()))
+                        {
+                            parts.Add(codeProp.GetString() switch
+                            {
+                                "RoyalVelvet" => "Hộp Nhung Đen Huyền Bí",
+                                "ArtisanLeather" => "Túi Da Thủ Công Viền Vàng",
+                                _ => "Hộp Gỗ Sơn Mài Hoàng Gia"
+                            });
+                        }
+                        if (root.TryGetProperty("vials", out var vialsProp) && vialsProp.ValueKind == System.Text.Json.JsonValueKind.Array)
+                        {
+                            var count = vialsProp.GetArrayLength();
+                            parts.Add($"{count} ống chiết");
+                        }
+                        if (parts.Count > 0)
+                        {
+                            boxStyleLabel = string.Join(" • ", parts);
+                        }
+                    }
+                    catch { }
+                }
+
+                state.Items.Add(new CartItemDto
+                {
+                    ProductId = line.ProductId,
+                    VariantId = null,
+                    ProductName = boxName,
+                    ProductSlug = "discovery-box",
+                    ProductImageUrl = boxImage,
+                    VariantLabel = boxStyleLabel,
+                    UnitPrice = unitPrice,
+                    Quantity = line.Quantity,
+                    StockQuantity = 50,
+                    IsAvailable = true,
+                    IsCustomBox = true,
+                    CustomBoxConfigJson = line.CustomBoxConfigJson
+                });
+                continue;
+            }
+
             if (!productsDict.TryGetValue(line.ProductId, out var product)) continue;
 
             var variant = line.VariantId.HasValue ? product.Variants.FirstOrDefault(v => v.Id == line.VariantId.Value) : null;
