@@ -30,23 +30,23 @@
                 <ul class="nav-links">
                     <li><a href="/" class="nav-link">Trang Chủ</a></li>
                     <li><a href="/bo-suu-tap" class="nav-link">Bộ Sưu Tập</a></li>
-                    <li><a href="/catalog/quiz" class="nav-link" style="color: var(--gold-primary);"><i class="fa-solid fa-wand-magic-sparkles" style="margin-right: 4px;"></i> Trắc Nghiệm Mùi</a></li>
-                    <li><a href="/blog" class="nav-link">Tạp Chí Mùi Hương</a></li>
+                    <li><a href="/catalog/quiz" class="nav-link text-gold-nav"><i class="fa-solid fa-wand-magic-sparkles"></i> Trắc Nghiệm Mùi</a></li>
+                    <li><a href="/blog" class="nav-link">Tạp Chí</a></li>
                     <li><a href="/ve-chung-toi" class="nav-link">Về Chúng Tôi</a></li>
-                    <li><a href="/discovery-box" class="nav-link" style="color: var(--gold-primary);"><i class="fa-solid fa-gift" style="margin-right: 4px;"></i> Discovery Box</a></li>
-                    <li><a href="/so-sanh" class="nav-link"><i class="fa-solid fa-scale-balanced" style="margin-right: 4px;"></i> So Sánh</a></li>
-                    <li><a href="/dat-lich-trai-nghiem" class="nav-link"><i class="fa-solid fa-crown" style="margin-right: 4px; color: var(--gold-primary);"></i> Thử Mùi VIP</a></li>
-                    <li><a href="/tra-cuu-don-hang" rel="nofollow" class="nav-link" style="color: var(--gold-primary);"><i class="fa-solid fa-truck-fast" style="margin-right: 4px;"></i> Tra Cứu Đơn</a></li>
+                    <li><a href="/discovery-box" class="nav-link text-gold-nav"><i class="fa-solid fa-gift"></i> Discovery Box</a></li>
+                    <li><a href="/so-sanh" class="nav-link"><i class="fa-solid fa-scale-balanced"></i> So Sánh</a></li>
+                    <li><a href="/dat-lich-trai-nghiem" class="nav-link text-gold-nav"><i class="fa-solid fa-crown"></i> Thử Mùi VIP</a></li>
+                    <li><a href="/tra-cuu-don-hang" rel="nofollow" class="nav-link text-gold-nav"><i class="fa-solid fa-truck-fast"></i> Tra Cứu Đơn</a></li>
 
                     @if (SignInManager.IsSignedIn(User))
                     {
                         @if (User.IsInRole("Admin"))
                         {
-                            <li><a href="/admin/admindashboard" rel="nofollow" class="nav-link" style="background: rgba(212,175,55,0.12); padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border-subtle); color: var(--gold-primary); font-size: 0.82rem;"><i class="fa-solid fa-gauge-high" style="margin-right: 4px;"></i> Quản trị</a></li>
+                            <li><a href="/admin/admindashboard" rel="nofollow" class="nav-link admin-pill-link"><i class="fa-solid fa-gauge-high"></i> Quản trị</a></li>
                         }
                         else if (User.IsInRole("StoreManager"))
                         {
-                            <li><a href="/admin/storemanager" rel="nofollow" class="nav-link" style="background: rgba(212,175,55,0.12); padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border-subtle); color: var(--gold-primary); font-size: 0.82rem;"><i class="fa-solid fa-chart-line" style="margin-right: 4px;"></i> Quản lý cửa hàng</a></li>
+                            <li><a href="/admin/storemanager" rel="nofollow" class="nav-link admin-pill-link"><i class="fa-solid fa-chart-line"></i> Quản lý</a></li>
                         }
                     }
                 </ul>
@@ -59,8 +59,8 @@
                 </button>
 
                 <!-- Theme Toggle Button (Dark / Light) -->
-                <button type="button" class="icon-btn" id="themeToggleBtn" title="Chuyển đổi Sáng / Tối" aria-label="Toggle Theme">
-                    <i class="fa-solid fa-moon" id="themeIcon"></i>
+                <button type="button" class="icon-btn theme-toggle-btn" id="themeToggleBtn" title="Chuyển sang giao diện Sáng" aria-label="Chuyển đổi Sáng / Tối">
+                    <i class="fa-solid fa-sun" id="themeIcon"></i>
                 </button>
 
                 <!-- Mini Cart Trigger -->

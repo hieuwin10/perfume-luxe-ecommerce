@@ -180,47 +180,66 @@ a {
 }
 
 .header-inner {
-    max-width: 1360px;
+    max-width: 1480px;
     margin: 0 auto;
-    padding: 16px 24px;
+    padding: 12px 24px;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 16px;
 }
 
 .brand-logo {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+    flex-shrink: 0;
 }
 
 .brand-title {
-    font-size: 1.85rem;
+    font-size: 1.65rem;
     font-family: var(--font-heading);
     letter-spacing: 0.12em;
     font-weight: 700;
+    white-space: nowrap;
 }
 
 .brand-sub {
-    font-size: 0.65rem;
+    font-size: 0.62rem;
     letter-spacing: 0.25em;
     text-transform: uppercase;
     color: var(--gold-primary);
+    white-space: nowrap;
 }
 
 .nav-links {
     display: flex;
     align-items: center;
-    gap: 28px;
+    gap: clamp(8px, 1.1vw, 20px);
     list-style: none;
+    margin: 0;
+    padding: 0;
+    flex-wrap: nowrap;
 }
 
 .nav-link {
-    font-size: 0.9rem;
+    font-size: clamp(0.78rem, 0.85vw, 0.88rem);
     font-weight: 500;
     color: var(--text-secondary);
     position: relative;
-    padding: 6px 0;
+    padding: 6px 2px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+    text-decoration: none;
+    line-height: 1.2;
+    transition: color 0.2s ease;
+}
+
+.nav-link i {
+    font-size: 0.82rem;
+    flex-shrink: 0;
 }
 
 .nav-link:hover, .nav-link.active {
@@ -242,10 +261,39 @@ a {
     width: 100%;
 }
 
+.text-gold-nav {
+    color: var(--gold-primary) !important;
+}
+
+.admin-pill-link {
+    background: rgba(212, 175, 55, 0.15) !important;
+    padding: 4px 10px !important;
+    border-radius: 20px !important;
+    border: 1px solid var(--gold-primary) !important;
+    color: var(--gold-primary) !important;
+    font-size: 0.78rem !important;
+    font-weight: 600;
+    display: inline-flex !important;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+    line-height: 1.2;
+}
+
+.admin-pill-link:hover {
+    background: rgba(212, 175, 55, 0.28) !important;
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+}
+
+.admin-pill-link::after {
+    display: none !important;
+}
+
 .header-actions {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 12px;
+    flex-shrink: 0;
 }
 
 .icon-btn {
@@ -1086,8 +1134,8 @@ a {
    MEDIA QUERIES (BREAKPOINTS)
    -------------------------------------------------------------------------- */
 
-/* Tablet & Mobile Landscape (<= 1024px) */
-@media (max-width: 1024px) {
+/* Tablet & Mobile Landscape (<= 1180px) */
+@media (max-width: 1180px) {
     .nav-links {
         display: none !important;
     }
