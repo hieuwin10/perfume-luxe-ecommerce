@@ -68,130 +68,133 @@ public class OrderService : IOrderService
         if (lines.Count == 0 || lines.Any(i => i.Quantity > 50))
             return (false, "Số lượng mỗi phiên bản không được vượt quá 50.", null);
 
-        // Kiem tra loai database de khoi tao transaction ReadCommitted (tranh Range-Lock / Deadlock tren SQL Server)
-        var isRelational = _context.Database.IsRelational();
-        await using var transaction = isRelational
-            ? await _context.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted)
-            : null;
-
-        try
+        var strategy = _context.Database.CreateExecutionStrategy();
+        return await strategy.ExecuteAsync<(bool Success, string? Error, Order? Order)>(async () =>
         {
-            var now = DateTime.UtcNow;
-            // Khoi tao thuc the Don Hang
-            var order = new Order
+            var isRelational = _context.Database.IsRelational();
+            await using var transaction = isRelational
+                ? await _context.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted)
+                : null;
+
+            try
             {
-                OrderCode = $"LUXE-{now:yyyyMMdd}-{Guid.NewGuid():N}"[..21].ToUpperInvariant(),
-                UserId = userId,
-                CustomerName = request.CustomerName.Trim(),
-                CustomerPhone = request.CustomerPhone.Trim(),
-                CustomerEmail = request.CustomerEmail.Trim(),
-                ShippingAddress = request.ShippingAddress.Trim(),
-                City = request.City?.Trim(),
-                OrderNotes = request.OrderNotes?.Trim(),
-                PaymentMethod = request.PaymentMethod,
-                PaymentStatus = PaymentStatus.Pending,
-                OrderStatus = OrderStatus.Pending,
-                IsGiftWrapping = request.IsGiftWrapping,
-                GiftWrappingFee = request.IsGiftWrapping ? 50_000 : 0,
-                GiftMessage = request.GiftMessage?.Trim(),
-                CreatedAt = now
-            };
-
-            // Doc truoc toan bo san pham va phien ban lien quan trong 1 truy van duy nhat de triet tieu N+1 query
-            var productIds = lines.Select(l => l.ProductId).Distinct().ToList();
-            var productsDict = await _context.Products
-                .Include(p => p.Variants)
-                .Where(p => productIds.Contains(p.Id))
-                .ToDictionaryAsync(p => p.Id);
-
-            // Duyet qua tung dong san pham, kiem tra ton kho va tru so luong
-            foreach (var line in lines)
-            {
-                if (!productsDict.TryGetValue(line.ProductId, out var product) || !product.IsInStock)
-                    return (false, "Một sản phẩm trong giỏ đã ngừng bán.", null);
-
-                ProductVariant? variant = null;
-                decimal unitPrice;
-                string variantLabel;
-
-                if (product.Variants.Count > 0)
+                var now = DateTime.UtcNow;
+                // Khoi tao thuc the Don Hang
+                var order = new Order
                 {
-                    // Xac dinh dung phien ban variant can mua
-                    variant = line.VariantId.HasValue
-                        ? product.Variants.FirstOrDefault(v => v.Id == line.VariantId.Value)
-                        : product.Variants.FirstOrDefault(v => v.IsDefault) ?? product.Variants.FirstOrDefault();
-                    if (variant == null) return (false, "Phiên bản sản phẩm không hợp lệ.", null);
+                    OrderCode = $"LUXE-{now:yyyyMMdd}-{Guid.NewGuid():N}"[..21].ToUpperInvariant(),
+                    UserId = userId,
+                    CustomerName = request.CustomerName.Trim(),
+                    CustomerPhone = request.CustomerPhone.Trim(),
+                    CustomerEmail = request.CustomerEmail.Trim(),
+                    ShippingAddress = request.ShippingAddress.Trim(),
+                    City = request.City?.Trim(),
+                    OrderNotes = request.OrderNotes?.Trim(),
+                    PaymentMethod = request.PaymentMethod,
+                    PaymentStatus = PaymentStatus.Pending,
+                    OrderStatus = OrderStatus.Pending,
+                    IsGiftWrapping = request.IsGiftWrapping,
+                    GiftWrappingFee = request.IsGiftWrapping ? 50_000 : 0,
+                    GiftMessage = request.GiftMessage?.Trim(),
+                    CreatedAt = now
+                };
 
-                    // Tru ton kho cua phien ban
-                    if (variant.StockQuantity < line.Quantity)
-                        return (false, $"Không đủ tồn kho cho {product.Name} - {variant.VolumeLabel}.", null);
-                    variant.StockQuantity -= line.Quantity;
+                // Doc truoc toan bo san pham va phien ban lien quan trong 1 truy van duy nhat de triet tieu N+1 query
+                var productIds = lines.Select(l => l.ProductId).Distinct().ToList();
+                var productsDict = await _context.Products
+                    .Include(p => p.Variants)
+                    .Where(p => productIds.Contains(p.Id))
+                    .ToDictionaryAsync(p => p.Id);
 
-                    unitPrice = variant.SalePrice > 0 ? variant.SalePrice : variant.OriginalPrice;
-                    if (unitPrice <= 0) unitPrice = product.BasePrice;
-                    variantLabel = variant.VolumeLabel;
+                // Duyet qua tung dong san pham, kiem tra ton kho va tru so luong
+                foreach (var line in lines)
+                {
+                    if (!productsDict.TryGetValue(line.ProductId, out var product) || !product.IsInStock)
+                        return (false, "Một sản phẩm trong giỏ đã ngừng bán.", null);
+
+                    ProductVariant? variant = null;
+                    decimal unitPrice;
+                    string variantLabel;
+
+                    if (product.Variants.Count > 0)
+                    {
+                        // Xac dinh dung phien ban variant can mua
+                        variant = line.VariantId.HasValue
+                            ? product.Variants.FirstOrDefault(v => v.Id == line.VariantId.Value)
+                            : product.Variants.FirstOrDefault(v => v.IsDefault) ?? product.Variants.FirstOrDefault();
+                        if (variant == null) return (false, "Phiên bản sản phẩm không hợp lệ.", null);
+
+                        // Tru ton kho cua phien ban
+                        if (variant.StockQuantity < line.Quantity)
+                            return (false, $"Không đủ tồn kho cho {product.Name} - {variant.VolumeLabel}.", null);
+                        variant.StockQuantity -= line.Quantity;
+
+                        unitPrice = variant.SalePrice > 0 ? variant.SalePrice : variant.OriginalPrice;
+                        if (unitPrice <= 0) unitPrice = product.BasePrice;
+                        variantLabel = variant.VolumeLabel;
+                    }
+                    else
+                    {
+                        if (!product.IsInStock) return (false, $"Sản phẩm {product.Name} đã hết hàng.", null);
+                        unitPrice = product.BasePrice;
+                        variantLabel = "Fullbox";
+                    }
+
+                    // Them chi tiet don hang vao danh sach Items
+                    order.Items.Add(new OrderItem
+                    {
+                        ProductId = product.Id,
+                        VariantId = variant?.Id,
+                        ProductName = product.Name,
+                        VariantLabel = variantLabel,
+                        ProductImageUrl = product.MainImageUrl,
+                        UnitPrice = unitPrice,
+                        Quantity = line.Quantity
+                    });
                 }
-                else
+
+                // Tinh tong gia tri tam tinh (SubTotal)
+                order.SubTotal = order.Items.Sum(i => i.UnitPrice * i.Quantity);
+
+                // Xu ly ap dung ma giam gia Voucher neu co
+                if (!string.IsNullOrWhiteSpace(request.VoucherCode))
                 {
-                    if (!product.IsInStock) return (false, $"Sản phẩm {product.Name} đã hết hàng.", null);
-                    unitPrice = product.BasePrice;
-                    variantLabel = "Fullbox";
+                    var voucher = await ValidateVoucherAsync(request.VoucherCode, order.SubTotal);
+                    if (voucher == null) return (false, "Mã ưu đãi không hợp lệ, đã hết lượt hoặc không đủ điều kiện.", null);
+
+                    // Tang so luong da su dung cua voucher
+                    if (voucher.UsedCount >= voucher.UsageLimit || !voucher.IsActive || voucher.ValidFrom > now || voucher.ValidTo < now)
+                        return (false, "Mã ưu đãi vừa hết lượt sử dụng. Vui lòng thử mã khác.", null);
+                    voucher.UsedCount += 1;
+
+                    var discount = voucher.DiscountPercent.HasValue
+                        ? order.SubTotal * voucher.DiscountPercent.Value / 100m
+                        : voucher.DiscountAmount ?? 0m;
+                    if (voucher.MaxDiscountAmount.HasValue) discount = Math.Min(discount, voucher.MaxDiscountAmount.Value);
+                    order.DiscountAmount = Math.Min(order.SubTotal, discount);
+                    order.VoucherCode = voucher.Code;
                 }
 
-                // Them chi tiet don hang vao danh sach Items
-                order.Items.Add(new OrderItem
-                {
-                    ProductId = product.Id,
-                    VariantId = variant?.Id,
-                    ProductName = product.Name,
-                    VariantLabel = variantLabel,
-                    ProductImageUrl = product.MainImageUrl,
-                    UnitPrice = unitPrice,
-                    Quantity = line.Quantity
-                });
+                // Mien phi ship cho don tu 2 trieu VND, nguoc lai phi ship 35.000 VND
+                order.ShippingFee = order.SubTotal >= 2_000_000 ? 0 : 35_000;
+                order.TotalAmount = Math.Max(0, order.SubTotal - order.DiscountAmount + order.ShippingFee + order.GiftWrappingFee);
+
+                // Luu don hang vao co so du lieu
+                _context.Orders.Add(order);
+                await _context.SaveChangesAsync();
+
+                // Commit transaction neu moi thao tac deu thanh cong
+                if (transaction != null) await transaction.CommitAsync();
+                return (true, null, order);
             }
-
-            // Tinh tong gia tri tam tinh (SubTotal)
-            order.SubTotal = order.Items.Sum(i => i.UnitPrice * i.Quantity);
-
-            // Xu ly ap dung ma giam gia Voucher neu co
-            if (!string.IsNullOrWhiteSpace(request.VoucherCode))
+            catch (Exception ex)
             {
-                var voucher = await ValidateVoucherAsync(request.VoucherCode, order.SubTotal);
-                if (voucher == null) return (false, "Mã ưu đãi không hợp lệ, đã hết lượt hoặc không đủ điều kiện.", null);
-
-                // Tang so luong da su dung cua voucher
-                if (voucher.UsedCount >= voucher.UsageLimit || !voucher.IsActive || voucher.ValidFrom > now || voucher.ValidTo < now)
-                    return (false, "Mã ưu đãi vừa hết lượt sử dụng. Vui lòng thử mã khác.", null);
-                voucher.UsedCount += 1;
-
-                var discount = voucher.DiscountPercent.HasValue
-                    ? order.SubTotal * voucher.DiscountPercent.Value / 100m
-                    : voucher.DiscountAmount ?? 0m;
-                if (voucher.MaxDiscountAmount.HasValue) discount = Math.Min(discount, voucher.MaxDiscountAmount.Value);
-                order.DiscountAmount = Math.Min(order.SubTotal, discount);
-                order.VoucherCode = voucher.Code;
+                _logger?.LogError(ex, "Lỗi xảy ra trong quá trình PlaceOrderAsync cho khách hàng {CustomerEmail}: {Message}", request.CustomerEmail, ex.Message);
+                // Rollback giao dich neu xay ra loi de bao toan ton kho
+                if (transaction != null) await transaction.RollbackAsync();
+                return (false, "Không thể hoàn tất đơn hàng: " + ex.Message, null);
             }
-
-            // Mien phi ship cho don tu 2 trieu VND, nguoc lai phi ship 35.000 VND
-            order.ShippingFee = order.SubTotal >= 2_000_000 ? 0 : 35_000;
-            order.TotalAmount = Math.Max(0, order.SubTotal - order.DiscountAmount + order.ShippingFee + order.GiftWrappingFee);
-
-            // Luu don hang vao co so du lieu
-            _context.Orders.Add(order);
-            await _context.SaveChangesAsync();
-
-            // Commit transaction neu moi thao tac deu thanh cong
-            if (transaction != null) await transaction.CommitAsync();
-            return (true, null, order);
-        }
-        catch (Exception ex)
-        {
-            _logger?.LogError(ex, "Lỗi xảy ra trong quá trình PlaceOrderAsync cho khách hàng {CustomerEmail}: {Message}", request.CustomerEmail, ex.Message);
-            // Rollback giao dich neu xay ra loi de bao toan ton kho
-            if (transaction != null) await transaction.RollbackAsync();
-            return (false, "Không thể hoàn tất đơn hàng: " + ex.Message, null);
-        }
+        });
     }
 
     // ==========================================
